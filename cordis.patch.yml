@@ -1,3 +1,4 @@
+# 批量主图挂进当前 profile。客户端从包的 ./client 入口加载。
 - insert:
-    - id: psd-batch-studio
+    - id: dsh-psd-batch-studio
       name: dsh-psd-batch-studio

@@ -1,76 +1,51 @@
 {
   "name": "dsh-psd-batch-studio",
-  "version": "0.2.4",
-  "description": "DeepSeek Harness plugin for batch-producing e-commerce main images from PSD templates: product slots, SKU cut-out fitting, canvas fine-tune, and agent tools.",
+  "version": "1.1.1",
+  "description": "DeepSeek Harness 批量主图：打开 PSD 模板，把 SKU 抠图放进占位层，在画布上微调后导出。",
   "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "client.js",
+    "cordis.patch.yml",
+    "INSTALL.md",
+    "README.batch-hero.md",
+    "改动说明-1.1.1.md",
+    "install.sh"
+  ],
   "license": "SEE LICENSE IN LICENSE",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/vinkwork/dsh-psd-batch-studio.git"
-  },
-  "homepage": "https://github.com/vinkwork/dsh-psd-batch-studio",
-  "bugs": {
-    "url": "https://github.com/vinkwork/dsh-psd-batch-studio/issues"
-  },
   "keywords": [
     "dsh",
     "dsh-plugin",
-    "deepseek-harness",
-    "psd",
-    "psd-template",
-    "batch-image",
-    "ecommerce",
-    "canvas"
+    "deepseek-harness"
   ],
-  "exports": {
-    ".": "./index.js",
-    "./client": "./client.js",
-    "./locale/*.json": "./locale/*.json",
-    "./icon": "./icon.svg"
-  },
-  "files": [
-    "index.js",
-    "server.js",
-    "client.js",
-    "cordis.patch.yml",
-    "locale/*.json",
-    "icon.svg",
-    "LICENSE",
-    "THIRD_PARTY_LICENSES.md",
-    "README.md",
-    "LICENSING.md",
-    "LICENSE-APACHE",
-    "README.en.md"
-  ],
-  "scripts": {
-    "build": "node scripts/build.mjs",
-    "prepack": "npm run build"
-  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
     },
     "client": {
       "platform": "web",
-      "immediately": true,
       "inject": [
+        "@deepseek-ai/dsh-client-ui-slots",
         "@deepseek-ai/dsh-client-locale"
-      ]
-    },
-    "engines": {
-      "dsh": ">=0.2.1-rc.5"
+      ],
+      "immediately": true
     }
   },
+  "dshTarget": "0.2.0-rc.2",
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
   "engines": {
-    "node": ">=20"
+    "node": ">=18"
   },
-  "dependencies": {
-    "@napi-rs/canvas": "^1.1.0"
-  },
-  "devDependencies": {
-    "ag-psd": "^25.0.0",
-    "esbuild": "^0.25.0",
-    "fflate": "^0.8.3"
-  },
-  "author": "VinkWork team at Genca (上海缙嘉科技有限公司) <https://vinkclaw.com>"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vinkwork/dsh-psd-batch-studio.git"
+  }
 }
