@@ -255,32 +255,32 @@ var require_trees = __commonJS({
       const max_length = desc.stat_desc.max_length;
       let h;
       let n, m;
-      let bits;
+      let bits2;
       let xbits;
       let f;
       let overflow = 0;
-      for (bits = 0; bits <= MAX_BITS; bits++) {
-        s.bl_count[bits] = 0;
+      for (bits2 = 0; bits2 <= MAX_BITS; bits2++) {
+        s.bl_count[bits2] = 0;
       }
       tree[s.heap[s.heap_max] * 2 + 1] = 0;
       for (h = s.heap_max + 1; h < HEAP_SIZE; h++) {
         n = s.heap[h];
-        bits = tree[tree[n * 2 + 1] * 2 + 1] + 1;
-        if (bits > max_length) {
-          bits = max_length;
+        bits2 = tree[tree[n * 2 + 1] * 2 + 1] + 1;
+        if (bits2 > max_length) {
+          bits2 = max_length;
           overflow++;
         }
-        tree[n * 2 + 1] = bits;
+        tree[n * 2 + 1] = bits2;
         if (n > max_code) {
           continue;
         }
-        s.bl_count[bits]++;
+        s.bl_count[bits2]++;
         xbits = 0;
         if (n >= base) {
           xbits = extra[n - base];
         }
         f = tree[n * 2];
-        s.opt_len += f * (bits + xbits);
+        s.opt_len += f * (bits2 + xbits);
         if (has_stree) {
           s.static_len += f * (stree[n * 2 + 1] + xbits);
         }
@@ -289,25 +289,25 @@ var require_trees = __commonJS({
         return;
       }
       do {
-        bits = max_length - 1;
-        while (s.bl_count[bits] === 0) {
-          bits--;
+        bits2 = max_length - 1;
+        while (s.bl_count[bits2] === 0) {
+          bits2--;
         }
-        s.bl_count[bits]--;
-        s.bl_count[bits + 1] += 2;
+        s.bl_count[bits2]--;
+        s.bl_count[bits2 + 1] += 2;
         s.bl_count[max_length]--;
         overflow -= 2;
       } while (overflow > 0);
-      for (bits = max_length; bits !== 0; bits--) {
-        n = s.bl_count[bits];
+      for (bits2 = max_length; bits2 !== 0; bits2--) {
+        n = s.bl_count[bits2];
         while (n !== 0) {
           m = s.heap[--h];
           if (m > max_code) {
             continue;
           }
-          if (tree[m * 2 + 1] !== bits) {
-            s.opt_len += (bits - tree[m * 2 + 1]) * tree[m * 2];
-            tree[m * 2 + 1] = bits;
+          if (tree[m * 2 + 1] !== bits2) {
+            s.opt_len += (bits2 - tree[m * 2 + 1]) * tree[m * 2];
+            tree[m * 2 + 1] = bits2;
           }
           n--;
         }
@@ -316,11 +316,11 @@ var require_trees = __commonJS({
     var gen_codes = (tree, max_code, bl_count) => {
       const next_code = new Array(MAX_BITS + 1);
       let code = 0;
-      let bits;
+      let bits2;
       let n;
-      for (bits = 1; bits <= MAX_BITS; bits++) {
-        code = code + bl_count[bits - 1] << 1;
-        next_code[bits] = code;
+      for (bits2 = 1; bits2 <= MAX_BITS; bits2++) {
+        code = code + bl_count[bits2 - 1] << 1;
+        next_code[bits2] = code;
       }
       for (n = 0; n <= max_code; n++) {
         let len = tree[n * 2 + 1];
@@ -332,7 +332,7 @@ var require_trees = __commonJS({
     };
     var tr_static_init = () => {
       let n;
-      let bits;
+      let bits2;
       let length;
       let code;
       let dist;
@@ -359,8 +359,8 @@ var require_trees = __commonJS({
           _dist_code[256 + dist++] = code;
         }
       }
-      for (bits = 0; bits <= MAX_BITS; bits++) {
-        bl_count[bits] = 0;
+      for (bits2 = 0; bits2 <= MAX_BITS; bits2++) {
+        bl_count[bits2] = 0;
       }
       n = 0;
       while (n <= 143) {
@@ -2159,10 +2159,10 @@ var require_strings = __commonJS({
       }
       return result;
     };
-    module.exports.buf2string = (buf, max) => {
-      const len = max || buf.length;
+    module.exports.buf2string = (buf, max2) => {
+      const len = max2 || buf.length;
       if (typeof TextDecoder === "function" && TextDecoder.prototype.decode) {
-        return new TextDecoder().decode(buf.subarray(0, max));
+        return new TextDecoder().decode(buf.subarray(0, max2));
       }
       let i, out;
       const utf16buf = new Array(len * 2);
@@ -2197,22 +2197,22 @@ var require_strings = __commonJS({
       }
       return buf2binstring(utf16buf, out);
     };
-    module.exports.utf8border = (buf, max) => {
-      max = max || buf.length;
-      if (max > buf.length) {
-        max = buf.length;
+    module.exports.utf8border = (buf, max2) => {
+      max2 = max2 || buf.length;
+      if (max2 > buf.length) {
+        max2 = buf.length;
       }
-      let pos = max - 1;
+      let pos = max2 - 1;
       while (pos >= 0 && (buf[pos] & 192) === 128) {
         pos--;
       }
       if (pos < 0) {
-        return max;
+        return max2;
       }
       if (pos === 0) {
-        return max;
+        return max2;
       }
-      return pos + _utf8len[buf[pos]] > max ? pos : max;
+      return pos + _utf8len[buf[pos]] > max2 ? pos : max2;
     };
   }
 });
@@ -2421,7 +2421,7 @@ var require_inffast = __commonJS({
       let wnext;
       let s_window;
       let hold;
-      let bits;
+      let bits2;
       let lcode;
       let dcode;
       let lmask;
@@ -2447,25 +2447,25 @@ var require_inffast = __commonJS({
       wnext = state.wnext;
       s_window = state.window;
       hold = state.hold;
-      bits = state.bits;
+      bits2 = state.bits;
       lcode = state.lencode;
       dcode = state.distcode;
       lmask = (1 << state.lenbits) - 1;
       dmask = (1 << state.distbits) - 1;
       top:
         do {
-          if (bits < 15) {
-            hold += input[_in++] << bits;
-            bits += 8;
-            hold += input[_in++] << bits;
-            bits += 8;
+          if (bits2 < 15) {
+            hold += input[_in++] << bits2;
+            bits2 += 8;
+            hold += input[_in++] << bits2;
+            bits2 += 8;
           }
           here = lcode[hold & lmask];
           dolen:
             for (; ; ) {
               op = here >>> 24;
               hold >>>= op;
-              bits -= op;
+              bits2 -= op;
               op = here >>> 16 & 255;
               if (op === 0) {
                 output[_out++] = here & 65535;
@@ -2473,36 +2473,36 @@ var require_inffast = __commonJS({
                 len = here & 65535;
                 op &= 15;
                 if (op) {
-                  if (bits < op) {
-                    hold += input[_in++] << bits;
-                    bits += 8;
+                  if (bits2 < op) {
+                    hold += input[_in++] << bits2;
+                    bits2 += 8;
                   }
                   len += hold & (1 << op) - 1;
                   hold >>>= op;
-                  bits -= op;
+                  bits2 -= op;
                 }
-                if (bits < 15) {
-                  hold += input[_in++] << bits;
-                  bits += 8;
-                  hold += input[_in++] << bits;
-                  bits += 8;
+                if (bits2 < 15) {
+                  hold += input[_in++] << bits2;
+                  bits2 += 8;
+                  hold += input[_in++] << bits2;
+                  bits2 += 8;
                 }
                 here = dcode[hold & dmask];
                 dodist:
                   for (; ; ) {
                     op = here >>> 24;
                     hold >>>= op;
-                    bits -= op;
+                    bits2 -= op;
                     op = here >>> 16 & 255;
                     if (op & 16) {
                       dist = here & 65535;
                       op &= 15;
-                      if (bits < op) {
-                        hold += input[_in++] << bits;
-                        bits += 8;
-                        if (bits < op) {
-                          hold += input[_in++] << bits;
-                          bits += 8;
+                      if (bits2 < op) {
+                        hold += input[_in++] << bits2;
+                        bits2 += 8;
+                        if (bits2 < op) {
+                          hold += input[_in++] << bits2;
+                          bits2 += 8;
                         }
                       }
                       dist += hold & (1 << op) - 1;
@@ -2512,7 +2512,7 @@ var require_inffast = __commonJS({
                         break top;
                       }
                       hold >>>= op;
-                      bits -= op;
+                      bits2 -= op;
                       op = _out - beg;
                       if (dist > op) {
                         op = dist - op;
@@ -2616,16 +2616,16 @@ var require_inffast = __commonJS({
               break;
             }
         } while (_in < last && _out < end);
-      len = bits >> 3;
+      len = bits2 >> 3;
       _in -= len;
-      bits -= len << 3;
-      hold &= (1 << bits) - 1;
+      bits2 -= len << 3;
+      hold &= (1 << bits2) - 1;
       strm.next_in = _in;
       strm.next_out = _out;
       strm.avail_in = _in < last ? 5 + (last - _in) : 5 - (_in - last);
       strm.avail_out = _out < end ? 257 + (end - _out) : 257 - (_out - end);
       state.hold = hold;
-      state.bits = bits;
+      state.bits = bits2;
       return;
     };
   }
@@ -2780,10 +2780,10 @@ var require_inftrees = __commonJS({
       64
     ]);
     var inflate_table = (type, lens, lens_index, codes, table, table_index, work, opts) => {
-      const bits = opts.bits;
+      const bits2 = opts.bits;
       let len = 0;
       let sym = 0;
-      let min = 0, max = 0;
+      let min = 0, max2 = 0;
       let root = 0;
       let curr = 0;
       let drop = 0;
@@ -2807,22 +2807,22 @@ var require_inftrees = __commonJS({
       for (sym = 0; sym < codes; sym++) {
         count[lens[lens_index + sym]]++;
       }
-      root = bits;
-      for (max = MAXBITS; max >= 1; max--) {
-        if (count[max] !== 0) {
+      root = bits2;
+      for (max2 = MAXBITS; max2 >= 1; max2--) {
+        if (count[max2] !== 0) {
           break;
         }
       }
-      if (root > max) {
-        root = max;
+      if (root > max2) {
+        root = max2;
       }
-      if (max === 0) {
+      if (max2 === 0) {
         table[table_index++] = 1 << 24 | 64 << 16 | 0;
         table[table_index++] = 1 << 24 | 64 << 16 | 0;
         opts.bits = 1;
         return 0;
       }
-      for (min = 1; min < max; min++) {
+      for (min = 1; min < max2; min++) {
         if (count[min] !== 0) {
           break;
         }
@@ -2838,7 +2838,7 @@ var require_inftrees = __commonJS({
           return -1;
         }
       }
-      if (left > 0 && (type === CODES || max !== 1)) {
+      if (left > 0 && (type === CODES || max2 !== 1)) {
         return -1;
       }
       offs[1] = 0;
@@ -2905,7 +2905,7 @@ var require_inftrees = __commonJS({
         }
         sym++;
         if (--count[len] === 0) {
-          if (len === max) {
+          if (len === max2) {
             break;
           }
           len = lens[lens_index + work[sym]];
@@ -2917,7 +2917,7 @@ var require_inftrees = __commonJS({
           next += min;
           curr = len - drop;
           left = 1 << curr;
-          while (curr + drop < max) {
+          while (curr + drop < max2) {
             left -= count[curr + drop];
             if (left <= 0) {
               break;
@@ -3209,7 +3209,7 @@ var require_inflate = __commonJS({
       let put;
       let have, left;
       let hold;
-      let bits;
+      let bits2;
       let _in, _out;
       let copy;
       let from;
@@ -3240,7 +3240,7 @@ var require_inflate = __commonJS({
       input = strm.input;
       have = strm.avail_in;
       hold = state.hold;
-      bits = state.bits;
+      bits2 = state.bits;
       _in = have;
       _out = left;
       ret = Z_OK;
@@ -3252,13 +3252,13 @@ var require_inflate = __commonJS({
                 state.mode = TYPEDO;
                 break;
               }
-              while (bits < 16) {
+              while (bits2 < 16) {
                 if (have === 0) {
                   break inf_leave;
                 }
                 have--;
-                hold += input[next++] << bits;
-                bits += 8;
+                hold += input[next++] << bits2;
+                bits2 += 8;
               }
               if (state.wrap & 2 && hold === 35615) {
                 if (state.wbits === 0) {
@@ -3269,7 +3269,7 @@ var require_inflate = __commonJS({
                 hbuf[1] = hold >>> 8 & 255;
                 state.check = crc32(state.check, hbuf, 2, 0);
                 hold = 0;
-                bits = 0;
+                bits2 = 0;
                 state.mode = FLAGS;
                 break;
               }
@@ -3288,7 +3288,7 @@ var require_inflate = __commonJS({
                 break;
               }
               hold >>>= 4;
-              bits -= 4;
+              bits2 -= 4;
               len = (hold & 15) + 8;
               if (state.wbits === 0) {
                 state.wbits = len;
@@ -3303,16 +3303,16 @@ var require_inflate = __commonJS({
               strm.adler = state.check = 1;
               state.mode = hold & 512 ? DICTID : TYPE;
               hold = 0;
-              bits = 0;
+              bits2 = 0;
               break;
             case FLAGS:
-              while (bits < 16) {
+              while (bits2 < 16) {
                 if (have === 0) {
                   break inf_leave;
                 }
                 have--;
-                hold += input[next++] << bits;
-                bits += 8;
+                hold += input[next++] << bits2;
+                bits2 += 8;
               }
               state.flags = hold;
               if ((state.flags & 255) !== Z_DEFLATED) {
@@ -3334,17 +3334,17 @@ var require_inflate = __commonJS({
                 state.check = crc32(state.check, hbuf, 2, 0);
               }
               hold = 0;
-              bits = 0;
+              bits2 = 0;
               state.mode = TIME;
             /* falls through */
             case TIME:
-              while (bits < 32) {
+              while (bits2 < 32) {
                 if (have === 0) {
                   break inf_leave;
                 }
                 have--;
-                hold += input[next++] << bits;
-                bits += 8;
+                hold += input[next++] << bits2;
+                bits2 += 8;
               }
               if (state.head) {
                 state.head.time = hold;
@@ -3357,17 +3357,17 @@ var require_inflate = __commonJS({
                 state.check = crc32(state.check, hbuf, 4, 0);
               }
               hold = 0;
-              bits = 0;
+              bits2 = 0;
               state.mode = OS;
             /* falls through */
             case OS:
-              while (bits < 16) {
+              while (bits2 < 16) {
                 if (have === 0) {
                   break inf_leave;
                 }
                 have--;
-                hold += input[next++] << bits;
-                bits += 8;
+                hold += input[next++] << bits2;
+                bits2 += 8;
               }
               if (state.head) {
                 state.head.xflags = hold & 255;
@@ -3379,18 +3379,18 @@ var require_inflate = __commonJS({
                 state.check = crc32(state.check, hbuf, 2, 0);
               }
               hold = 0;
-              bits = 0;
+              bits2 = 0;
               state.mode = EXLEN;
             /* falls through */
             case EXLEN:
               if (state.flags & 1024) {
-                while (bits < 16) {
+                while (bits2 < 16) {
                   if (have === 0) {
                     break inf_leave;
                   }
                   have--;
-                  hold += input[next++] << bits;
-                  bits += 8;
+                  hold += input[next++] << bits2;
+                  bits2 += 8;
                 }
                 state.length = hold;
                 if (state.head) {
@@ -3402,7 +3402,7 @@ var require_inflate = __commonJS({
                   state.check = crc32(state.check, hbuf, 2, 0);
                 }
                 hold = 0;
-                bits = 0;
+                bits2 = 0;
               } else if (state.head) {
                 state.head.extra = null;
               }
@@ -3498,13 +3498,13 @@ var require_inflate = __commonJS({
             /* falls through */
             case HCRC:
               if (state.flags & 512) {
-                while (bits < 16) {
+                while (bits2 < 16) {
                   if (have === 0) {
                     break inf_leave;
                   }
                   have--;
-                  hold += input[next++] << bits;
-                  bits += 8;
+                  hold += input[next++] << bits2;
+                  bits2 += 8;
                 }
                 if (state.wrap & 4 && hold !== (state.check & 65535)) {
                   strm.msg = "header crc mismatch";
@@ -3512,7 +3512,7 @@ var require_inflate = __commonJS({
                   break;
                 }
                 hold = 0;
-                bits = 0;
+                bits2 = 0;
               }
               if (state.head) {
                 state.head.hcrc = state.flags >> 9 & 1;
@@ -3522,17 +3522,17 @@ var require_inflate = __commonJS({
               state.mode = TYPE;
               break;
             case DICTID:
-              while (bits < 32) {
+              while (bits2 < 32) {
                 if (have === 0) {
                   break inf_leave;
                 }
                 have--;
-                hold += input[next++] << bits;
-                bits += 8;
+                hold += input[next++] << bits2;
+                bits2 += 8;
               }
               strm.adler = state.check = zswap32(hold);
               hold = 0;
-              bits = 0;
+              bits2 = 0;
               state.mode = DICT;
             /* falls through */
             case DICT:
@@ -3542,7 +3542,7 @@ var require_inflate = __commonJS({
                 strm.next_in = next;
                 strm.avail_in = have;
                 state.hold = hold;
-                state.bits = bits;
+                state.bits = bits2;
                 return Z_NEED_DICT;
               }
               strm.adler = state.check = 1;
@@ -3555,22 +3555,22 @@ var require_inflate = __commonJS({
             /* falls through */
             case TYPEDO:
               if (state.last) {
-                hold >>>= bits & 7;
-                bits -= bits & 7;
+                hold >>>= bits2 & 7;
+                bits2 -= bits2 & 7;
                 state.mode = CHECK;
                 break;
               }
-              while (bits < 3) {
+              while (bits2 < 3) {
                 if (have === 0) {
                   break inf_leave;
                 }
                 have--;
-                hold += input[next++] << bits;
-                bits += 8;
+                hold += input[next++] << bits2;
+                bits2 += 8;
               }
               state.last = hold & 1;
               hold >>>= 1;
-              bits -= 1;
+              bits2 -= 1;
               switch (hold & 3) {
                 case 0:
                   state.mode = STORED;
@@ -3580,7 +3580,7 @@ var require_inflate = __commonJS({
                   state.mode = LEN_;
                   if (flush === Z_TREES) {
                     hold >>>= 2;
-                    bits -= 2;
+                    bits2 -= 2;
                     break inf_leave;
                   }
                   break;
@@ -3592,18 +3592,18 @@ var require_inflate = __commonJS({
                   state.mode = BAD;
               }
               hold >>>= 2;
-              bits -= 2;
+              bits2 -= 2;
               break;
             case STORED:
-              hold >>>= bits & 7;
-              bits -= bits & 7;
-              while (bits < 32) {
+              hold >>>= bits2 & 7;
+              bits2 -= bits2 & 7;
+              while (bits2 < 32) {
                 if (have === 0) {
                   break inf_leave;
                 }
                 have--;
-                hold += input[next++] << bits;
-                bits += 8;
+                hold += input[next++] << bits2;
+                bits2 += 8;
               }
               if ((hold & 65535) !== (hold >>> 16 ^ 65535)) {
                 strm.msg = "invalid stored block lengths";
@@ -3612,7 +3612,7 @@ var require_inflate = __commonJS({
               }
               state.length = hold & 65535;
               hold = 0;
-              bits = 0;
+              bits2 = 0;
               state.mode = COPY_;
               if (flush === Z_TREES) {
                 break inf_leave;
@@ -3644,23 +3644,23 @@ var require_inflate = __commonJS({
               state.mode = TYPE;
               break;
             case TABLE:
-              while (bits < 14) {
+              while (bits2 < 14) {
                 if (have === 0) {
                   break inf_leave;
                 }
                 have--;
-                hold += input[next++] << bits;
-                bits += 8;
+                hold += input[next++] << bits2;
+                bits2 += 8;
               }
               state.nlen = (hold & 31) + 257;
               hold >>>= 5;
-              bits -= 5;
+              bits2 -= 5;
               state.ndist = (hold & 31) + 1;
               hold >>>= 5;
-              bits -= 5;
+              bits2 -= 5;
               state.ncode = (hold & 15) + 4;
               hold >>>= 4;
-              bits -= 4;
+              bits2 -= 4;
               if (state.nlen > 286 || state.ndist > 30) {
                 strm.msg = "too many length or distance symbols";
                 state.mode = BAD;
@@ -3671,17 +3671,17 @@ var require_inflate = __commonJS({
             /* falls through */
             case LENLENS:
               while (state.have < state.ncode) {
-                while (bits < 3) {
+                while (bits2 < 3) {
                   if (have === 0) {
                     break inf_leave;
                   }
                   have--;
-                  hold += input[next++] << bits;
-                  bits += 8;
+                  hold += input[next++] << bits2;
+                  bits2 += 8;
                 }
                 state.lens[order[state.have++]] = hold & 7;
                 hold >>>= 3;
-                bits -= 3;
+                bits2 -= 3;
               }
               while (state.have < 19) {
                 state.lens[order[state.have++]] = 0;
@@ -3706,33 +3706,33 @@ var require_inflate = __commonJS({
                   here_bits = here >>> 24;
                   here_op = here >>> 16 & 255;
                   here_val = here & 65535;
-                  if (here_bits <= bits) {
+                  if (here_bits <= bits2) {
                     break;
                   }
                   if (have === 0) {
                     break inf_leave;
                   }
                   have--;
-                  hold += input[next++] << bits;
-                  bits += 8;
+                  hold += input[next++] << bits2;
+                  bits2 += 8;
                 }
                 if (here_val < 16) {
                   hold >>>= here_bits;
-                  bits -= here_bits;
+                  bits2 -= here_bits;
                   state.lens[state.have++] = here_val;
                 } else {
                   if (here_val === 16) {
                     n = here_bits + 2;
-                    while (bits < n) {
+                    while (bits2 < n) {
                       if (have === 0) {
                         break inf_leave;
                       }
                       have--;
-                      hold += input[next++] << bits;
-                      bits += 8;
+                      hold += input[next++] << bits2;
+                      bits2 += 8;
                     }
                     hold >>>= here_bits;
-                    bits -= here_bits;
+                    bits2 -= here_bits;
                     if (state.have === 0) {
                       strm.msg = "invalid bit length repeat";
                       state.mode = BAD;
@@ -3741,39 +3741,39 @@ var require_inflate = __commonJS({
                     len = state.lens[state.have - 1];
                     copy = 3 + (hold & 3);
                     hold >>>= 2;
-                    bits -= 2;
+                    bits2 -= 2;
                   } else if (here_val === 17) {
                     n = here_bits + 3;
-                    while (bits < n) {
+                    while (bits2 < n) {
                       if (have === 0) {
                         break inf_leave;
                       }
                       have--;
-                      hold += input[next++] << bits;
-                      bits += 8;
+                      hold += input[next++] << bits2;
+                      bits2 += 8;
                     }
                     hold >>>= here_bits;
-                    bits -= here_bits;
+                    bits2 -= here_bits;
                     len = 0;
                     copy = 3 + (hold & 7);
                     hold >>>= 3;
-                    bits -= 3;
+                    bits2 -= 3;
                   } else {
                     n = here_bits + 7;
-                    while (bits < n) {
+                    while (bits2 < n) {
                       if (have === 0) {
                         break inf_leave;
                       }
                       have--;
-                      hold += input[next++] << bits;
-                      bits += 8;
+                      hold += input[next++] << bits2;
+                      bits2 += 8;
                     }
                     hold >>>= here_bits;
-                    bits -= here_bits;
+                    bits2 -= here_bits;
                     len = 0;
                     copy = 11 + (hold & 127);
                     hold >>>= 7;
-                    bits -= 7;
+                    bits2 -= 7;
                   }
                   if (state.have + copy > state.nlen + state.ndist) {
                     strm.msg = "invalid bit length repeat";
@@ -3827,7 +3827,7 @@ var require_inflate = __commonJS({
                 strm.next_in = next;
                 strm.avail_in = have;
                 state.hold = hold;
-                state.bits = bits;
+                state.bits = bits2;
                 inflate_fast(strm, _out);
                 put = strm.next_out;
                 output = strm.output;
@@ -3836,7 +3836,7 @@ var require_inflate = __commonJS({
                 input = strm.input;
                 have = strm.avail_in;
                 hold = state.hold;
-                bits = state.bits;
+                bits2 = state.bits;
                 if (state.mode === TYPE) {
                   state.back = -1;
                 }
@@ -3848,15 +3848,15 @@ var require_inflate = __commonJS({
                 here_bits = here >>> 24;
                 here_op = here >>> 16 & 255;
                 here_val = here & 65535;
-                if (here_bits <= bits) {
+                if (here_bits <= bits2) {
                   break;
                 }
                 if (have === 0) {
                   break inf_leave;
                 }
                 have--;
-                hold += input[next++] << bits;
-                bits += 8;
+                hold += input[next++] << bits2;
+                bits2 += 8;
               }
               if (here_op && (here_op & 240) === 0) {
                 last_bits = here_bits;
@@ -3867,22 +3867,22 @@ var require_inflate = __commonJS({
                   here_bits = here >>> 24;
                   here_op = here >>> 16 & 255;
                   here_val = here & 65535;
-                  if (last_bits + here_bits <= bits) {
+                  if (last_bits + here_bits <= bits2) {
                     break;
                   }
                   if (have === 0) {
                     break inf_leave;
                   }
                   have--;
-                  hold += input[next++] << bits;
-                  bits += 8;
+                  hold += input[next++] << bits2;
+                  bits2 += 8;
                 }
                 hold >>>= last_bits;
-                bits -= last_bits;
+                bits2 -= last_bits;
                 state.back += last_bits;
               }
               hold >>>= here_bits;
-              bits -= here_bits;
+              bits2 -= here_bits;
               state.back += here_bits;
               state.length = here_val;
               if (here_op === 0) {
@@ -3905,17 +3905,17 @@ var require_inflate = __commonJS({
             case LENEXT:
               if (state.extra) {
                 n = state.extra;
-                while (bits < n) {
+                while (bits2 < n) {
                   if (have === 0) {
                     break inf_leave;
                   }
                   have--;
-                  hold += input[next++] << bits;
-                  bits += 8;
+                  hold += input[next++] << bits2;
+                  bits2 += 8;
                 }
                 state.length += hold & (1 << state.extra) - 1;
                 hold >>>= state.extra;
-                bits -= state.extra;
+                bits2 -= state.extra;
                 state.back += state.extra;
               }
               state.was = state.length;
@@ -3927,15 +3927,15 @@ var require_inflate = __commonJS({
                 here_bits = here >>> 24;
                 here_op = here >>> 16 & 255;
                 here_val = here & 65535;
-                if (here_bits <= bits) {
+                if (here_bits <= bits2) {
                   break;
                 }
                 if (have === 0) {
                   break inf_leave;
                 }
                 have--;
-                hold += input[next++] << bits;
-                bits += 8;
+                hold += input[next++] << bits2;
+                bits2 += 8;
               }
               if ((here_op & 240) === 0) {
                 last_bits = here_bits;
@@ -3946,22 +3946,22 @@ var require_inflate = __commonJS({
                   here_bits = here >>> 24;
                   here_op = here >>> 16 & 255;
                   here_val = here & 65535;
-                  if (last_bits + here_bits <= bits) {
+                  if (last_bits + here_bits <= bits2) {
                     break;
                   }
                   if (have === 0) {
                     break inf_leave;
                   }
                   have--;
-                  hold += input[next++] << bits;
-                  bits += 8;
+                  hold += input[next++] << bits2;
+                  bits2 += 8;
                 }
                 hold >>>= last_bits;
-                bits -= last_bits;
+                bits2 -= last_bits;
                 state.back += last_bits;
               }
               hold >>>= here_bits;
-              bits -= here_bits;
+              bits2 -= here_bits;
               state.back += here_bits;
               if (here_op & 64) {
                 strm.msg = "invalid distance code";
@@ -3975,17 +3975,17 @@ var require_inflate = __commonJS({
             case DISTEXT:
               if (state.extra) {
                 n = state.extra;
-                while (bits < n) {
+                while (bits2 < n) {
                   if (have === 0) {
                     break inf_leave;
                   }
                   have--;
-                  hold += input[next++] << bits;
-                  bits += 8;
+                  hold += input[next++] << bits2;
+                  bits2 += 8;
                 }
                 state.offset += hold & (1 << state.extra) - 1;
                 hold >>>= state.extra;
-                bits -= state.extra;
+                bits2 -= state.extra;
                 state.back += state.extra;
               }
               if (state.offset > state.dmax) {
@@ -4046,13 +4046,13 @@ var require_inflate = __commonJS({
               break;
             case CHECK:
               if (state.wrap) {
-                while (bits < 32) {
+                while (bits2 < 32) {
                   if (have === 0) {
                     break inf_leave;
                   }
                   have--;
-                  hold |= input[next++] << bits;
-                  bits += 8;
+                  hold |= input[next++] << bits2;
+                  bits2 += 8;
                 }
                 _out -= left;
                 strm.total_out += _out;
@@ -4068,19 +4068,19 @@ var require_inflate = __commonJS({
                   break;
                 }
                 hold = 0;
-                bits = 0;
+                bits2 = 0;
               }
               state.mode = LENGTH;
             /* falls through */
             case LENGTH:
               if (state.wrap && state.flags) {
-                while (bits < 32) {
+                while (bits2 < 32) {
                   if (have === 0) {
                     break inf_leave;
                   }
                   have--;
-                  hold += input[next++] << bits;
-                  bits += 8;
+                  hold += input[next++] << bits2;
+                  bits2 += 8;
                 }
                 if (state.wrap & 4 && hold !== (state.total & 4294967295)) {
                   strm.msg = "incorrect length check";
@@ -4088,7 +4088,7 @@ var require_inflate = __commonJS({
                   break;
                 }
                 hold = 0;
-                bits = 0;
+                bits2 = 0;
               }
               state.mode = DONE;
             /* falls through */
@@ -4111,7 +4111,7 @@ var require_inflate = __commonJS({
       strm.next_in = next;
       strm.avail_in = have;
       state.hold = hold;
-      state.bits = bits;
+      state.bits = bits2;
       if (state.wsize || _out !== strm.avail_out && state.mode < BAD && (state.mode < CHECK || flush !== Z_FINISH)) {
         if (updatewindow(strm, strm.output, strm.next_out, _out - strm.avail_out)) {
           state.mode = MEM;
@@ -4575,8 +4575,8 @@ var require_helpers = __commonJS({
       }
     }
     exports.offsetForChannel = offsetForChannel;
-    function clamp(value, min, max) {
-      return value < min ? min : value > max ? max : value;
+    function clamp(value, min, max2) {
+      return value < min ? min : value > max2 ? max2 : value;
     }
     exports.clamp = clamp;
     function hasAlpha(data) {
@@ -5848,8 +5848,8 @@ var require_descriptor = __commonJS({
           var sig = (0, psdReader_1.readSignature)(reader);
           (0, psdReader_1.readInt32LE)(reader);
           var charsCount = (0, psdReader_1.readInt32LE)(reader);
-          var path2 = (0, psdReader_1.readUnicodeStringWithLengthLE)(reader, charsCount);
-          return { sig, path: path2 };
+          var path4 = (0, psdReader_1.readUnicodeStringWithLengthLE)(reader, charsCount);
+          return { sig, path: path4 };
         }
         default:
           throw new Error("Invalid TySh descriptor OSType: ".concat(type2, " at ").concat(reader.offset.toString(16)));
@@ -6119,7 +6119,7 @@ var require_descriptor = __commonJS({
       if (fx.overprint !== void 0)
         stroke.overprint = fx.overprint;
       if (fx["Clr "])
-        stroke.color = parseColor(fx["Clr "]);
+        stroke.color = parseColor2(fx["Clr "]);
       if (fx.Grad)
         stroke.gradient = parseGradientContent(fx);
       if (fx.Ptrn)
@@ -6424,13 +6424,13 @@ var require_descriptor = __commonJS({
             result.reverse = !!val;
             break;
           case "Clr ":
-            result.color = parseColor(val);
+            result.color = parseColor2(val);
             break;
           case "hglC":
-            result.highlightColor = parseColor(val);
+            result.highlightColor = parseColor2(val);
             break;
           case "sdwC":
-            result.shadowColor = parseColor(val);
+            result.shadowColor = parseColor2(val);
             break;
           case "Styl":
             result.position = exports.FStl.decode(val);
@@ -6709,7 +6709,7 @@ var require_descriptor = __commonJS({
           smoothness: grad.Intr / 4096,
           colorStops: grad.Clrs.map(function(s) {
             return {
-              color: parseColor(s["Clr "]),
+              color: parseColor2(s["Clr "]),
               location: s.Lctn / samples_1,
               midpoint: s.Mdpn / 100
             };
@@ -6824,7 +6824,7 @@ var require_descriptor = __commonJS({
       } else if ("Ptrn" in descriptor) {
         return __assign({ type: "pattern" }, parsePatternContent(descriptor));
       } else if ("Clr " in descriptor) {
-        return { type: "color", color: parseColor(descriptor["Clr "]) };
+        return { type: "color", color: parseColor2(descriptor["Clr "]) };
       } else {
         throw new Error("Invalid vector content");
       }
@@ -6877,7 +6877,7 @@ var require_descriptor = __commonJS({
       }
     }
     exports.serializeVectorContent = serializeVectorContent;
-    function parseColor(color) {
+    function parseColor2(color) {
       if ("H   " in color) {
         return { h: parsePercentOrAngle(color["H   "]), s: color.Strt, b: color.Brgh };
       } else if ("Rd  " in color) {
@@ -6894,7 +6894,7 @@ var require_descriptor = __commonJS({
         throw new Error("Unsupported color descriptor");
       }
     }
-    exports.parseColor = parseColor;
+    exports.parseColor = parseColor2;
     function serializeColor(color) {
       if (!color) {
         return { _name: "", _classID: "RGBC", "Rd  ": 0, "Grn ": 0, "Bl  ": 0 };
@@ -7342,7 +7342,7 @@ var require_imageResources = __commonJS({
     var LOG_MOCK_HANDLERS = false;
     var RESOLUTION_UNITS = [void 0, "PPI", "PPCM"];
     var MEASUREMENT_UNITS = [void 0, "Inches", "Centimeters", "Points", "Picas", "Columns"];
-    var hex = "0123456789abcdef";
+    var hex2 = "0123456789abcdef";
     function charToNibble(code) {
       return code <= 57 ? code - 48 : code - 87;
     }
@@ -7377,8 +7377,8 @@ var require_imageResources = __commonJS({
       var captionDigest = "";
       for (var i = 0; i < 16; i++) {
         var byte = (0, psdReader_1.readUint8)(reader);
-        captionDigest += hex[byte >> 4];
-        captionDigest += hex[byte & 15];
+        captionDigest += hex2[byte >> 4];
+        captionDigest += hex2[byte & 15];
       }
       target.captionDigest = captionDigest;
     }, function(writer, target) {
@@ -8054,12 +8054,12 @@ var require_imageResources = __commonJS({
         }
       },
       function(writer, target) {
-        var list = target.urlsList;
-        (0, psdWriter_1.writeUint32)(writer, list.length);
-        for (var i = 0; i < list.length; i++) {
+        var list2 = target.urlsList;
+        (0, psdWriter_1.writeUint32)(writer, list2.length);
+        for (var i = 0; i < list2.length; i++) {
           (0, psdWriter_1.writeSignature)(writer, "slic");
-          (0, psdWriter_1.writeUint32)(writer, list[i].id);
-          (0, psdWriter_1.writeUnicodeString)(writer, list[i].url);
+          (0, psdWriter_1.writeUint32)(writer, list2[i].id);
+          (0, psdWriter_1.writeUnicodeString)(writer, list2[i].url);
         }
       }
     );
@@ -8214,8 +8214,8 @@ var require_imageResources = __commonJS({
         slices.forEach(function(s) {
           var slice2 = __assign(__assign({ sliceID: s.id, groupID: s.groupId, origin: descriptor_1.ESliceOrigin.encode(s.origin), Type: descriptor_1.ESliceType.encode(s.type), bounds: boundsToBounds(s.bounds) }, s.name ? { "Nm  ": s.name } : {}), { url: s.url, null: s.target, Msge: s.message, altTag: s.altTag, cellTextIsHTML: s.cellTextIsHTML, cellText: s.cellText, horzAlign: descriptor_1.ESliceHorzAlign.encode(s.horizontalAlignment), vertAlign: descriptor_1.ESliceVertAlign.encode(s.verticalAlignment), bgColorType: descriptor_1.ESliceBGColorType.encode(s.backgroundColorType) });
           if (s.backgroundColorType === "color") {
-            var _a3 = s.backgroundColor, r2 = _a3.r, g2 = _a3.g, b2 = _a3.b, a2 = _a3.a;
-            slice2.bgColor = { "Rd  ": r2, "Grn ": g2, "Bl  ": b2, alpha: a2 };
+            var _a3 = s.backgroundColor, r2 = _a3.r, g2 = _a3.g, b3 = _a3.b, a2 = _a3.a;
+            slice2.bgColor = { "Rd  ": r2, "Grn ": g2, "Bl  ": b3, alpha: a2 };
           }
           slice2.topOutset = s.topOutset || 0;
           slice2.leftOutset = s.leftOutset || 0;
@@ -9457,7 +9457,7 @@ var require_psdReader = __commonJS({
       }
     }
     exports.readDataRLE = readDataRLE;
-    function readSection(reader, round, func, skipEmpty, eightBytes) {
+    function readSection(reader, round3, func, skipEmpty, eightBytes) {
       if (skipEmpty === void 0) {
         skipEmpty = true;
       }
@@ -9485,7 +9485,7 @@ var require_psdReader = __commonJS({
           warnOrThrow(reader, "Unread section data");
         }
       }
-      while (end % round)
+      while (end % round3)
         end++;
       reader.offset = end;
       return result;
@@ -11077,7 +11077,7 @@ var require_additionalInfo = __commonJS({
     function readVectorMask(reader, vectorMask, width, height, size) {
       var end = reader.offset + size;
       var paths = vectorMask.paths;
-      var path2 = void 0;
+      var path4 = void 0;
       while (end - reader.offset >= 26) {
         var selector = (0, psdReader_1.readUint16)(reader);
         switch (selector) {
@@ -11088,14 +11088,14 @@ var require_additionalInfo = __commonJS({
             var boolOp = (0, psdReader_1.readInt16)(reader);
             var flags = (0, psdReader_1.readUint16)(reader);
             (0, psdReader_1.skipBytes)(reader, 18);
-            path2 = {
+            path4 = {
               open: selector === 3,
               knots: [],
               fillRule: flags === 2 ? "non-zero" : "even-odd"
             };
             if (boolOp !== -1)
-              path2.operation = exports.booleanOperations[boolOp];
-            paths.push(path2);
+              path4.operation = exports.booleanOperations[boolOp];
+            paths.push(path4);
             break;
           }
           case 1:
@@ -11105,7 +11105,7 @@ var require_additionalInfo = __commonJS({
           case 4:
           // Open subpath Bezier knot, linked
           case 5:
-            path2.knots.push({ linked: selector === 1 || selector === 4, points: readBezierKnot(reader, width, height) });
+            path4.knots.push({ linked: selector === 1 || selector === 4, points: readBezierKnot(reader, width, height) });
             break;
           case 6:
             (0, psdReader_1.skipBytes)(reader, 24);
@@ -11167,15 +11167,15 @@ var require_additionalInfo = __commonJS({
         (0, psdWriter_1.writeZeros)(writer, 22);
       }
       for (var _i = 0, _b2 = vectorMask.paths; _i < _b2.length; _i++) {
-        var path2 = _b2[_i];
-        (0, psdWriter_1.writeUint16)(writer, path2.open ? 3 : 0);
-        (0, psdWriter_1.writeUint16)(writer, path2.knots.length);
-        (0, psdWriter_1.writeUint16)(writer, path2.operation ? exports.booleanOperations.indexOf(path2.operation) : -1);
-        (0, psdWriter_1.writeUint16)(writer, path2.fillRule === "non-zero" ? 2 : 1);
+        var path4 = _b2[_i];
+        (0, psdWriter_1.writeUint16)(writer, path4.open ? 3 : 0);
+        (0, psdWriter_1.writeUint16)(writer, path4.knots.length);
+        (0, psdWriter_1.writeUint16)(writer, path4.operation ? exports.booleanOperations.indexOf(path4.operation) : -1);
+        (0, psdWriter_1.writeUint16)(writer, path4.fillRule === "non-zero" ? 2 : 1);
         (0, psdWriter_1.writeZeros)(writer, 18);
-        var linkedKnot = path2.open ? 4 : 1;
-        var unlinkedKnot = path2.open ? 5 : 2;
-        for (var _c = 0, _d = path2.knots; _c < _d.length; _c++) {
+        var linkedKnot = path4.open ? 4 : 1;
+        var unlinkedKnot = path4.open ? 5 : 2;
+        for (var _c = 0, _d = path4.knots; _c < _d.length; _c++) {
           var _e = _d[_c], linked = _e.linked, points = _e.points;
           (0, psdWriter_1.writeUint16)(writer, linked ? linkedKnot : unlinkedKnot);
           writeBezierKnot(writer, points, width, height);
@@ -12826,12 +12826,12 @@ var require_additionalInfo = __commonJS({
                       _name: "",
                       _classID: "PaCm",
                       shapeOperation: "shapeOperation.".concat(c.shapeOperation),
-                      SbpL: c.paths.map(function(path2) {
+                      SbpL: c.paths.map(function(path4) {
                         return {
                           _name: "",
                           _classID: "Sbpl",
-                          Clsp: path2.closed,
-                          "Pts ": path2.points.map(function(pt) {
+                          Clsp: path4.closed,
+                          "Pts ": path4.points.map(function(pt) {
                             return {
                               _name: "",
                               _classID: "Pthp",
@@ -14558,20 +14558,20 @@ var require_psdWriter = __commonJS({
       if (layers === void 0) {
         layers = [];
       }
-      var max = 0;
+      var max2 = 0;
       for (var _i = 0, layers_1 = layers; _i < layers_1.length; _i++) {
         var layer = layers_1[_i];
         if (layer.canvas || layer.imageData) {
           var _a2 = getLayerDimentions(layer), width = _a2.width, height = _a2.height;
-          max = Math.max(max, 2 * height + 2 * width * height);
+          max2 = Math.max(max2, 2 * height + 2 * width * height);
         }
         if (layer.children) {
-          max = Math.max(max, getLargestLayerSize(layer.children));
+          max2 = Math.max(max2, getLargestLayerSize(layer.children));
         }
       }
-      return max;
+      return max2;
     }
-    function writeSection(writer, round, func, writeTotalLength, large) {
+    function writeSection(writer, round3, func, writeTotalLength, large) {
       if (writeTotalLength === void 0) {
         writeTotalLength = false;
       }
@@ -14585,7 +14585,7 @@ var require_psdWriter = __commonJS({
       func();
       var length = writer.offset - offset - 4;
       var len = length;
-      while (len % round !== 0) {
+      while (len % round3 !== 0) {
         writeUint8(writer, 0);
         len++;
       }
@@ -15643,9 +15643,9 @@ var require_dist = __commonJS({
 
 // src/server.js
 var import_ag_psd2 = __toESM(require_dist(), 1);
-import fs from "node:fs/promises";
-import path from "node:path";
-import { createCanvas as createCanvas2, loadImage } from "@napi-rs/canvas";
+import fs3 from "node:fs/promises";
+import path3 from "node:path";
+import { createCanvas as createCanvas2, loadImage as loadImage2, GlobalFonts } from "@napi-rs/canvas";
 
 // node_modules/fflate/esm/index.mjs
 import { createRequire } from "module";
@@ -15815,7 +15815,25 @@ for (i = 0; i < 32; ++i)
   fdt[i] = 5;
 var i;
 var flm = /* @__PURE__ */ hMap(flt, 9, 0);
+var flrm = /* @__PURE__ */ hMap(flt, 9, 1);
 var fdm = /* @__PURE__ */ hMap(fdt, 5, 0);
+var fdrm = /* @__PURE__ */ hMap(fdt, 5, 1);
+var max = function(a) {
+  var m = a[0];
+  for (var i = 1; i < a.length; ++i) {
+    if (a[i] > m)
+      m = a[i];
+  }
+  return m;
+};
+var bits = function(d, p, m) {
+  var o = p / 8 | 0;
+  return (d[o] | d[o + 1] << 8) >> (p & 7) & m;
+};
+var bits16 = function(d, p) {
+  var o = p / 8 | 0;
+  return (d[o] | d[o + 1] << 8 | d[o + 2] << 16) >> (p & 7);
+};
 var shft = function(p) {
   return (p + 7) / 8 | 0;
 };
@@ -15852,6 +15870,147 @@ var err = function(ind, msg, nt) {
   if (!nt)
     throw e;
   return e;
+};
+var inflt = function(dat, st, buf, dict) {
+  var sl = dat.length, dl = dict ? dict.length : 0;
+  if (!sl || st.f && !st.l)
+    return buf || new u8(0);
+  var noBuf = !buf;
+  var resize = noBuf || st.i != 2;
+  var noSt = st.i;
+  if (noBuf)
+    buf = new u8(sl * 3);
+  var cbuf = function(l2) {
+    var bl = buf.length;
+    if (l2 > bl) {
+      var nbuf = new u8(Math.max(bl * 2, l2));
+      nbuf.set(buf);
+      buf = nbuf;
+    }
+  };
+  var final = st.f || 0, pos = st.p || 0, bt = st.b || 0, lm = st.l, dm = st.d, lbt = st.m, dbt = st.n;
+  var tbts = sl * 8;
+  do {
+    if (!lm) {
+      final = bits(dat, pos, 1);
+      var type = bits(dat, pos + 1, 3);
+      pos += 3;
+      if (!type) {
+        var s = shft(pos) + 4, l = dat[s - 4] | dat[s - 3] << 8, t = s + l;
+        if (t > sl) {
+          if (noSt)
+            err(0);
+          break;
+        }
+        if (resize)
+          cbuf(bt + l);
+        buf.set(dat.subarray(s, t), bt);
+        st.b = bt += l, st.p = pos = t * 8, st.f = final;
+        continue;
+      } else if (type == 1)
+        lm = flrm, dm = fdrm, lbt = 9, dbt = 5;
+      else if (type == 2) {
+        var hLit = bits(dat, pos, 31) + 257, hcLen = bits(dat, pos + 10, 15) + 4;
+        var tl = hLit + bits(dat, pos + 5, 31) + 1;
+        pos += 14;
+        var ldt = new u8(tl);
+        var clt = new u8(19);
+        for (var i = 0; i < hcLen; ++i) {
+          clt[clim[i]] = bits(dat, pos + i * 3, 7);
+        }
+        pos += hcLen * 3;
+        var clb = max(clt), clbmsk = (1 << clb) - 1;
+        var clm = hMap(clt, clb, 1);
+        for (var i = 0; i < tl; ) {
+          var r = clm[bits(dat, pos, clbmsk)];
+          pos += r & 15;
+          var s = r >> 4;
+          if (s < 16) {
+            ldt[i++] = s;
+          } else {
+            var c = 0, n = 0;
+            if (s == 16)
+              n = 3 + bits(dat, pos, 3), pos += 2, c = ldt[i - 1];
+            else if (s == 17)
+              n = 3 + bits(dat, pos, 7), pos += 3;
+            else if (s == 18)
+              n = 11 + bits(dat, pos, 127), pos += 7;
+            while (n--)
+              ldt[i++] = c;
+          }
+        }
+        var lt = ldt.subarray(0, hLit), dt = ldt.subarray(hLit);
+        lbt = max(lt);
+        dbt = max(dt);
+        lm = hMap(lt, lbt, 1);
+        dm = hMap(dt, dbt, 1);
+      } else
+        err(1);
+      if (pos > tbts) {
+        if (noSt)
+          err(0);
+        break;
+      }
+    }
+    if (resize)
+      cbuf(bt + 131072);
+    var lms = (1 << lbt) - 1, dms = (1 << dbt) - 1;
+    var lpos = pos;
+    for (; ; lpos = pos) {
+      var c = lm[bits16(dat, pos) & lms], sym = c >> 4;
+      pos += c & 15;
+      if (pos > tbts) {
+        if (noSt)
+          err(0);
+        break;
+      }
+      if (!c)
+        err(2);
+      if (sym < 256)
+        buf[bt++] = sym;
+      else if (sym == 256) {
+        lpos = pos, lm = null;
+        break;
+      } else {
+        var add = sym - 254;
+        if (sym > 264) {
+          var i = sym - 257, b = fleb[i];
+          add = bits(dat, pos, (1 << b) - 1) + fl[i];
+          pos += b;
+        }
+        var d = dm[bits16(dat, pos) & dms], dsym = d >> 4;
+        if (!d)
+          err(3);
+        pos += d & 15;
+        var dt = fd[dsym];
+        if (dsym > 3) {
+          var b = fdeb[dsym];
+          dt += bits16(dat, pos) & (1 << b) - 1, pos += b;
+        }
+        if (pos > tbts) {
+          if (noSt)
+            err(0);
+          break;
+        }
+        if (resize)
+          cbuf(bt + 131072);
+        var end = bt + add;
+        if (bt < dt) {
+          var shift = dl - dt, dend = Math.min(dt, end);
+          if (shift + bt < 0)
+            err(3);
+          for (; bt < dend; ++bt)
+            buf[bt] = dict[shift + bt];
+        }
+        for (; bt < end; ++bt)
+          buf[bt] = buf[bt - dt];
+      }
+    }
+    st.l = lm, st.p = lpos, st.b = bt, st.f = final;
+    if (lm)
+      final = 1, st.m = lbt, st.d = dm, st.n = dbt;
+  } while (!final);
+  return bt != buf.length && noBuf ? slc(buf, 0, bt) : buf.subarray(0, bt);
 };
 var wbits = function(d, p, v) {
   v <<= p & 7;
@@ -16200,12 +16359,24 @@ var mrg = function(a, b) {
     o[k] = b[k];
   return o;
 };
+var b2 = function(d, b) {
+  return d[b] | d[b + 1] << 8;
+};
+var b4 = function(d, b) {
+  return (d[b] | d[b + 1] << 8 | d[b + 2] << 16 | d[b + 3] << 24) >>> 0;
+};
+var b8 = function(d, b) {
+  return b4(d, b) + b4(d, b + 4) * 4294967296;
+};
 var wbytes = function(d, b, v) {
   for (; v; ++b)
     d[b] = v, v >>>= 8;
 };
 function deflateSync(data, opts) {
   return dopt(data, opts || {}, 0, 0);
+}
+function inflateSync(data, opts) {
+  return inflt(data, { i: 2 }, opts && opts.out, opts && opts.dictionary);
 }
 var fltn = function(d, p, t, o) {
   for (var k in d) {
@@ -16228,6 +16399,22 @@ try {
   tds = 1;
 } catch (e) {
 }
+var dutf8 = function(d) {
+  for (var r = "", i = 0; ; ) {
+    var c = d[i++];
+    var eb = (c > 127) + (c > 223) + (c > 239);
+    if (i + eb > d.length)
+      return { s: r, r: slc(d, i - 1) };
+    if (!eb)
+      r += String.fromCharCode(c);
+    else if (eb == 3) {
+      c = ((c & 15) << 18 | (d[i++] & 63) << 12 | (d[i++] & 63) << 6 | d[i++] & 63) - 65536, r += String.fromCharCode(55296 | c >> 10, 56320 | c & 1023);
+    } else if (eb & 1)
+      r += String.fromCharCode((c & 31) << 6 | d[i++] & 63);
+    else
+      r += String.fromCharCode((c & 15) << 12 | (d[i++] & 63) << 6 | d[i++] & 63);
+  }
+};
 function strToU8(str, latin1) {
   if (latin1) {
     var ar_1 = new u8(str.length);
@@ -16261,6 +16448,48 @@ function strToU8(str, latin1) {
   }
   return slc(ar, 0, ai);
 }
+function strFromU8(dat, latin1) {
+  if (latin1) {
+    var r = "";
+    for (var i = 0; i < dat.length; i += 16384)
+      r += String.fromCharCode.apply(null, dat.subarray(i, i + 16384));
+    return r;
+  } else if (td) {
+    return td.decode(dat);
+  } else {
+    var _a2 = dutf8(dat), s = _a2.s, r = _a2.r;
+    if (r.length)
+      err(8);
+    return s;
+  }
+}
+var slzh = function(d, b) {
+  return b + 30 + b2(d, b + 26) + b2(d, b + 28);
+};
+var zh = function(d, b, z) {
+  var fnl = b2(d, b + 28), efl = b2(d, b + 30), fn = strFromU8(d.subarray(b + 46, b + 46 + fnl), !(b2(d, b + 8) & 2048)), es = b + 46 + fnl;
+  var _a2 = z64hs(d, es, efl, z, b4(d, b + 20), b4(d, b + 24), b4(d, b + 42)), sc = _a2[0], su = _a2[1], off = _a2[2];
+  return [b2(d, b + 10), sc, su, fn, es + efl + b2(d, b + 32), off];
+};
+var z64hs = function(d, b, l, z, sc, su, off) {
+  var nsc = sc == 4294967295, nsu = su == 4294967295, noff = off == 4294967295, e = b + l;
+  var nf = nsc + nsu + noff;
+  if (z && nf) {
+    for (; b + 4 < e; b += 4 + b2(d, b + 2)) {
+      if (b2(d, b) == 1) {
+        return [
+          nsc ? b8(d, b + 4 + 8 * nsu) : sc,
+          nsu ? b8(d, b + 4) : su,
+          noff ? b8(d, b + 4 + 8 * (nsu + nsc)) : off,
+          1
+        ];
+      }
+    }
+    if (z < 2)
+      err(13);
+  }
+  return [sc, su, off, 0];
+};
 var exfl = function(ex) {
   var le = 0;
   if (ex) {
@@ -16362,6 +16591,47 @@ function zipSync(data, opts) {
   wzf(out, o, files.length, cdl, oe);
   return out;
 }
+function unzipSync(data, opts) {
+  var files = {};
+  var e = data.length - 22;
+  for (; b4(data, e) != 101010256; --e) {
+    if (!e || data.length - e > 65558)
+      err(13);
+  }
+  ;
+  var c = b2(data, e + 8);
+  if (!c)
+    return {};
+  var o = b4(data, e + 16);
+  var z = b4(data, e - 20) == 117853008;
+  if (z) {
+    var ze = b4(data, e - 12);
+    z = b4(data, ze) == 101075792;
+    if (z) {
+      c = b4(data, ze + 32);
+      o = b4(data, ze + 48);
+    }
+  }
+  var fltr = opts && opts.filter;
+  for (var i = 0; i < c; ++i) {
+    var _a2 = zh(data, o, z), c_2 = _a2[0], sc = _a2[1], su = _a2[2], fn = _a2[3], no = _a2[4], off = _a2[5], b = slzh(data, off);
+    o = no;
+    if (!fltr || fltr({
+      name: fn,
+      size: sc,
+      originalSize: su,
+      compression: c_2
+    })) {
+      if (!c_2)
+        files[fn] = slc(data, b, b + sc);
+      else if (c_2 == 8)
+        files[fn] = inflateSync(data.subarray(b, b + sc), { out: new u8(su) });
+      else
+        err(14, "unknown compression type " + c_2);
+    }
+  }
+  return files;
+}
 
 // src/core/canvas.js
 var factory = null;
@@ -16385,68 +16655,8 @@ function createCanvas(width, height) {
 
 // src/core/psd.js
 var import_ag_psd = __toESM(require_dist(), 1);
-var makeCanvas = createCanvas;
-var BLEND_MODES = {
-  normal: "source-over",
-  multiply: "multiply",
-  screen: "screen",
-  overlay: "overlay",
-  darken: "darken",
-  lighten: "lighten",
-  "color dodge": "color-dodge",
-  "color burn": "color-burn",
-  "hard light": "hard-light",
-  "soft light": "soft-light",
-  difference: "difference",
-  exclusion: "exclusion",
-  hue: "hue",
-  saturation: "saturation",
-  color: "color",
-  luminosity: "luminosity",
-  "linear dodge": "lighter",
-  "linear burn": "multiply",
-  "vivid light": "hard-light",
-  "linear light": "hard-light",
-  "pin light": "lighten",
-  "hard mix": "hard-light",
-  "subtract": "difference",
-  "divide": "screen",
-  "pass through": "source-over"
-};
-var SLOT_NAME_HINT = /商品|产品|主图|sku|product|替换|瓶|管|盒|罐|主体|puff|粉扑/i;
-var SLOT_NAME_NOISE = /文字|txt|logo|icon|价格|price|券|包邮|top|时间|time|背景|background|台|光|气球|亮片|彩带|形状|矩形|椭圆|阴影|shadow/i;
-async function parseTemplate(file, onStage = () => {
-}) {
-  onStage("\u8BFB\u53D6\u6587\u4EF6\u2026");
-  const buffer = await file.arrayBuffer();
-  onStage("\u89E3\u6790\u56FE\u5C42\u2026");
-  await new Promise((resolve) => setTimeout(resolve, 30));
-  const psd = (0, import_ag_psd.readPsd)(buffer, {
-    skipThumbnail: true,
-    skipLinkedFilesData: true,
-    skipCompositeImageData: true,
-    logLevel: "error"
-  });
-  onStage("\u6574\u7406\u56FE\u5C42\u6811\u2026");
-  const { entries, leaves } = buildTree(psd);
-  if (leaves.length === 0) throw new Error("\u8FD9\u4E2A\u6587\u4EF6\u91CC\u6CA1\u6709\u53EF\u7528\u7684\u50CF\u7D20\u56FE\u5C42");
-  psd.children = [];
-  psd.imageData = void 0;
-  psd.canvas = void 0;
-  const hidden = /* @__PURE__ */ new Set();
-  for (const entry of entries) if (entry.psdHidden) hidden.add(entry.id);
-  return {
-    name: file.name,
-    fileName: file.name,
-    width: psd.width,
-    height: psd.height,
-    entries,
-    leaves,
-    hidden,
-    slots: /* @__PURE__ */ new Set(),
-    size: file.size
-  };
-}
+
+// src/core/text.js
 var FONT_FAMILY_MAP = [
   [/^PingFangSC/i, "PingFang SC"],
   [/^PingFang/i, "PingFang SC"],
@@ -16467,11 +16677,50 @@ var FONT_FAMILY_MAP = [
   [/^Roboto/i, "Roboto"]
 ];
 function fontFamilyOf(name) {
-  const raw = String(name || "");
+  const raw = String(name || "").replace(/^#/, "").trim();
+  if (!raw) return null;
   for (const [pattern, family] of FONT_FAMILY_MAP) {
     if (pattern.test(raw)) return family;
   }
-  return raw.split(/[-_ ]/)[0] || raw || null;
+  return raw;
+}
+function readFontPostScriptName(buffer) {
+  try {
+    const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer;
+    const view = new DataView(bytes.buffer, bytes.byteOffset || 0, bytes.byteLength);
+    const tagAt = (offset) => String.fromCharCode(view.getUint8(offset), view.getUint8(offset + 1), view.getUint8(offset + 2), view.getUint8(offset + 3));
+    const fontStart = tagAt(0) === "ttcf" ? view.getUint32(12) : 0;
+    const tables = view.getUint16(fontStart + 4);
+    let nameOffset = 0;
+    for (let index = 0; index < tables; index += 1) {
+      const record = fontStart + 12 + index * 16;
+      if (tagAt(record) === "name") {
+        nameOffset = view.getUint32(record + 8);
+        break;
+      }
+    }
+    if (!nameOffset) return null;
+    const count = view.getUint16(nameOffset + 2);
+    const stringsStart = nameOffset + view.getUint16(nameOffset + 4);
+    for (let index = 0; index < count; index += 1) {
+      const record = nameOffset + 6 + index * 12;
+      if (view.getUint16(record + 6) !== 6) continue;
+      const platformId = view.getUint16(record);
+      const length = view.getUint16(record + 8);
+      const start = stringsStart + view.getUint16(record + 10);
+      let value = "";
+      if (platformId === 3 || platformId === 0) {
+        for (let cursor = 0; cursor + 1 < length; cursor += 2) value += String.fromCharCode(view.getUint16(start + cursor));
+      } else {
+        for (let cursor = 0; cursor < length; cursor += 1) value += String.fromCharCode(view.getUint8(start + cursor));
+      }
+      value = value.trim();
+      if (value) return value;
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }
 function fontWeightOf(name, fauxBold) {
   const raw = String(name || "").toLowerCase();
@@ -16502,6 +16751,16 @@ function fillColorOf(fill) {
     ];
   }
   return [0, 0, 0];
+}
+function parseColor(input) {
+  if (Array.isArray(input)) return [input[0] | 0, input[1] | 0, input[2] | 0];
+  const hex2 = String(input || "").replace(/^#/, "");
+  const value = parseInt(hex2, 16);
+  if (!Number.isFinite(value)) return null;
+  return [value >> 16 & 255, value >> 8 & 255, value & 255];
+}
+function cssColor(color) {
+  return `rgb(${color[0]},${color[1]},${color[2]})`;
 }
 function describeTextStyle(raw) {
   const style = raw || {};
@@ -16536,6 +16795,8 @@ function mergeTextStyle(base, raw, baseStyle) {
 }
 function describeTextLayer(text) {
   const style = Array.isArray(text.style) ? text.style[0] : text.style || {};
+  const paragraph = Array.isArray(text.paragraphStyle) ? text.paragraphStyle[0] || {} : text.paragraphStyle || {};
+  const justification = String(paragraph.justification || "");
   const base = describeTextStyle(style);
   const value = String(text.text || "").replace(/\r$/, "").replace(/\r/g, "\n");
   const runs = [];
@@ -16556,22 +16817,482 @@ function describeTextLayer(text) {
       }
       while (runs.length && runs[runs.length - 1].len <= 0) runs.pop();
     }
-    total = runs.reduce((sum, run) => sum + run.len, 0);
   }
   if (!runs.length && value.length) runs.push({ len: value.length, ...base });
-  return { value, runs };
+  const leading = style.autoLeading === false && style.leading > 0 ? Math.round(style.leading * 100) / 100 : 0;
+  const matrix = Array.isArray(text.transform) ? text.transform.map(Number) : [];
+  const sx = Math.hypot(matrix[0] || 0, matrix[1] || 0);
+  const sy = Math.hypot(matrix[2] || 0, matrix[3] || 0);
+  const scale = sx > 0 && sy > 0 ? (sx + sy) / 2 : 0;
+  return {
+    value,
+    runs,
+    align: /center/i.test(justification) ? "center" : /right/i.test(justification) ? "right" : "left",
+    leading,
+    ...scale > 0 ? { scale } : {},
+    // Baseline origin of the first line in canvas px (matrix translation), and
+    // whether the layer is rotated/skewed enough that it can't be used directly.
+    ...matrix.length >= 6 && Number.isFinite(matrix[4]) && Number.isFinite(matrix[5]) ? {
+      origin: { x: matrix[4], y: matrix[5] },
+      rotated: Math.abs(matrix[1] || 0) > 0.01 * (sx || 1) || Math.abs(matrix[2] || 0) > 0.01 * (sy || 1),
+      angle: Math.atan2(matrix[1] || 0, matrix[0] || 1)
+    } : {}
+  };
+}
+function pxPerPtOf(base, rasterHeight) {
+  if (base.scale > 0) return base.scale;
+  const lines = Math.max(1, String(base.value || "\u5B57").split("\n").length);
+  const maxPt = (base.runs || []).reduce((max2, run) => Math.max(max2, run.size || 0), 0) || 24;
+  return rasterHeight > 0 ? rasterHeight / (lines * maxPt * 1.2) : 1;
+}
+function sameStyle(a, b) {
+  return a.family === b.family && a.weight === b.weight && a.size === b.size && a.tracking === b.tracking && a.color[0] === b.color[0] && a.color[1] === b.color[1] && a.color[2] === b.color[2];
+}
+function compressRuns(chars) {
+  const runs = [];
+  for (const { len: _len, ...style } of chars) {
+    const last = runs[runs.length - 1];
+    if (last && sameStyle(last, style)) last.len += 1;
+    else runs.push({ ...style, len: 1 });
+  }
+  return runs;
+}
+function remapRuns(runs, oldText, newText) {
+  const chars = [];
+  for (const run of runs || []) {
+    for (let index = 0; index < run.len; index += 1) chars.push(run);
+  }
+  while (chars.length < oldText.length && chars.length) chars.push(chars[chars.length - 1]);
+  if (!chars.length) return [];
+  let head = 0;
+  while (head < oldText.length && head < newText.length && oldText[head] === newText[head]) head += 1;
+  let tail = 0;
+  while (tail < oldText.length - head && tail < newText.length - head && oldText[oldText.length - 1 - tail] === newText[newText.length - 1 - tail]) {
+    tail += 1;
+  }
+  const inserted = newText.length - head - tail;
+  const inherit = chars[head - 1] || chars[head] || chars[0];
+  const out = chars.slice(0, head);
+  for (let index = 0; index < inserted; index += 1) out.push(inherit);
+  out.push(...chars.slice(oldText.length - tail));
+  while (out.length < newText.length) out.push(inherit);
+  return compressRuns(out.slice(0, newText.length));
+}
+function charStyles(runs, value) {
+  const out = [];
+  const source = runs && runs.length ? runs : [];
+  for (const run of source) {
+    for (let index = 0; index < run.len && out.length < value.length; index += 1) out.push(run);
+  }
+  while (out.length < value.length && source.length) out.push(source[source.length - 1]);
+  return out;
+}
+var ALIGNS = /* @__PURE__ */ new Set(["left", "center", "right"]);
+function sizeOf(row, pxPerPt) {
+  if (row.sizePx != null && Number(row.sizePx) > 0 && pxPerPt > 0) {
+    return Math.round(Number(row.sizePx) / pxPerPt * 100) / 100;
+  }
+  if (row.size != null && Number(row.size) > 0) return Number(row.size);
+  return null;
+}
+function mergeTextOverride(base, override = {}, pxPerPt = 0) {
+  const value = override.value != null ? String(override.value) : base.value;
+  const layout = ["align", "leading", "dx", "dy", "fitWidth", "minPx", "maxPx", "decimalScale"].some(
+    (key) => override[key] != null
+  );
+  if (value === base.value && !override.runs && override.font == null && override.weight == null && override.size == null && override.sizePx == null && override.color == null && override.tracking == null && !layout) {
+    return null;
+  }
+  let runs = (value === base.value ? base.runs : remapRuns(base.runs, base.value, value)).map(
+    (run) => ({ ...run })
+  );
+  if (!runs.length && value.length) {
+    const only = base.runs[0];
+    runs = [{ len: value.length, ...only || { family: null, weight: 400, size: 24, color: [0, 0, 0], tracking: 0 } }];
+  }
+  if (Array.isArray(override.runs) && override.runs.length) {
+    const chars = charStyles(runs, value).map(({ len: _len, ...style }) => style);
+    let offset = 0;
+    for (const row of override.runs) {
+      const len = Math.max(0, Math.round(Number(row.len) || 0));
+      if (!len || offset >= chars.length) continue;
+      const patch2 = {};
+      if (row.family != null) patch2.family = String(row.family);
+      if (row.weight != null) patch2.weight = Number(row.weight);
+      const size2 = sizeOf(row, pxPerPt);
+      if (size2 != null) patch2.size = size2;
+      if (row.tracking != null) patch2.tracking = Number(row.tracking);
+      if (row.color != null) {
+        const parsed = parseColor(row.color);
+        if (parsed) patch2.color = parsed;
+      }
+      const end = Math.min(chars.length, offset + len);
+      for (let index = offset; index < end; index += 1) chars[index] = { ...chars[index], ...patch2 };
+      offset = end;
+    }
+    if (chars.length) runs = compressRuns(chars);
+  }
+  const patch = {};
+  if (override.font != null) patch.family = String(override.font);
+  if (override.weight != null) patch.weight = Number(override.weight);
+  const size = sizeOf(override, pxPerPt);
+  if (size != null) patch.size = size;
+  if (override.tracking != null) patch.tracking = Number(override.tracking);
+  if (override.color != null) {
+    const parsed = parseColor(override.color);
+    if (parsed) patch.color = parsed;
+  }
+  if (Object.keys(patch).length) {
+    runs = runs.map((run) => ({ ...run, ...patch }));
+  }
+  const decimalScale = Number(override.decimalScale);
+  if (decimalScale > 0 && decimalScale < 1 && value.includes(".")) {
+    const dot = value.indexOf(".");
+    const chars = charStyles(runs, value).map(({ len: _len, ...style }) => ({ ...style }));
+    for (let index = dot; index < chars.length; index += 1) {
+      if (chars[index].size) chars[index].size = Math.round(chars[index].size * decimalScale * 100) / 100;
+    }
+    if (chars.length) runs = compressRuns(chars);
+  }
+  return {
+    value,
+    runs,
+    align: ALIGNS.has(override.align) ? override.align : base.align,
+    leading: Number(override.leading) > 0 ? Number(override.leading) : base.leading || 0,
+    dx: Number(override.dx) || 0,
+    dy: Number(override.dy) || 0,
+    fitWidth: Number(override.fitWidth) > 0 ? Number(override.fitWidth) : 0,
+    minPx: Number(override.minPx) > 0 ? Number(override.minPx) : 0,
+    maxPx: Number(override.maxPx) > 0 ? Number(override.maxPx) : 0
+  };
+}
+function segmentsOf(chars, pxPerPt) {
+  const out = [];
+  for (const style of chars) {
+    const px = Math.max(1, style.size * pxPerPt);
+    const last = out[out.length - 1];
+    if (last && last.family === style.family && last.weight === style.weight && Math.abs(last.px - px) < 0.01 && last.tracking === style.tracking && last.color[0] === style.color[0] && last.color[1] === style.color[1] && last.color[2] === style.color[2]) {
+      last.text += style.ch;
+      continue;
+    }
+    out.push({
+      text: style.ch,
+      family: style.family,
+      weight: style.weight,
+      px,
+      tracking: style.tracking || 0,
+      color: style.color
+    });
+  }
+  return out;
+}
+function fontString(segment) {
+  return `${segment.weight} ${segment.px}px "${segment.family || "sans-serif"}", "PingFang SC", "Microsoft YaHei", sans-serif`;
+}
+function applyTracking(ctx, segment) {
+  try {
+    ctx.letterSpacing = `${(segment.tracking / 1e3 * segment.px).toFixed(2)}px`;
+  } catch {
+  }
+}
+function drawSegments(ctx, segments, x, baseline) {
+  let cursor = x;
+  for (const segment of segments) {
+    ctx.font = fontString(segment);
+    ctx.fillStyle = cssColor(segment.color);
+    applyTracking(ctx, segment);
+    ctx.fillText(segment.text, cursor, baseline);
+    const trackPx = segment.tracking / 1e3 * segment.px;
+    cursor += ctx.measureText(segment.text).width + Math.max(0, segment.text.length) * trackPx;
+  }
+}
+function measureSegments(ctx, segments) {
+  let width = 0;
+  for (const segment of segments) {
+    ctx.font = fontString(segment);
+    const trackPx = segment.tracking / 1e3 * segment.px;
+    width += ctx.measureText(segment.text).width + Math.max(0, segment.text.length) * trackPx;
+  }
+  return width;
+}
+function synthesizeTextLeaf(leaf, base, override, hasFont) {
+  const raster = leaf.__raster || {
+    left: leaf.left,
+    top: leaf.top,
+    width: leaf.width,
+    height: leaf.height
+  };
+  const pxPerPt = pxPerPtOf(base, raster.height);
+  const effective = mergeTextOverride(base, override, pxPerPt);
+  if (!effective) {
+    restoreTextLeaf(leaf);
+    return [];
+  }
+  const warnings = [];
+  const seen = /* @__PURE__ */ new Set();
+  for (const run of effective.runs) {
+    if (!run.family || seen.has(run.family)) continue;
+    seen.add(run.family);
+    if (hasFont && !hasFont(run.family)) {
+      warnings.push(`\u5B57\u4F53 ${run.family} \u672A\u6CE8\u518C\uFF0C\u8BE5\u6BB5\u5C06\u7528\u56DE\u9000\u5B57\u4F53\u6E32\u67D3`);
+    }
+  }
+  const lines = effective.value.split("\n");
+  const chars = charStyles(effective.runs, effective.value);
+  const perLine = [];
+  let cursor = 0;
+  for (const line of lines) {
+    const slice = [];
+    for (let index = 0; index < line.length; index += 1) {
+      slice.push({ ch: line[index], ...chars[cursor] });
+      cursor += 1;
+    }
+    perLine.push(segmentsOf(slice, pxPerPt));
+  }
+  if (effective.maxPx > 0) {
+    for (const segments of perLine) {
+      for (const segment of segments) if (segment.px > effective.maxPx) segment.px = effective.maxPx;
+    }
+  }
+  const scratch = createCanvas(4, 4).getContext("2d");
+  let widths = perLine.map((segments) => measureSegments(scratch, segments));
+  let maxW = Math.max(1, ...widths);
+  if (effective.fitWidth > 0 && maxW > effective.fitWidth) {
+    const minPx = effective.minPx > 0 ? effective.minPx : 1;
+    let scale = effective.fitWidth / maxW;
+    const smallest = Math.min(...perLine.flatMap((segments) => segments.map((segment) => segment.px)));
+    if (smallest * scale < minPx) scale = minPx / smallest;
+    for (const segments of perLine) {
+      for (const segment of segments) segment.px = Math.max(minPx, segment.px * scale);
+    }
+    widths = perLine.map((segments) => measureSegments(scratch, segments));
+    maxW = Math.max(1, ...widths);
+  }
+  const fixedLeading = effective.leading > 0 ? effective.leading * pxPerPt : 0;
+  const lineHeights = perLine.map((segments) => {
+    const size = Math.max(1, ...segments.map((segment) => segment.px));
+    return fixedLeading >= size ? fixedLeading : size * 1.2;
+  });
+  const totalH = lineHeights.reduce((sum, height) => sum + height, 0);
+  const maxPx = Math.max(1, ...perLine.flatMap((segments) => segments.map((segment) => segment.px)));
+  const pad = Math.ceil(maxPx * 0.25) + 2;
+  let canvas = createCanvas(Math.max(1, Math.ceil(maxW) + pad * 2), Math.max(1, Math.ceil(totalH) + pad * 2));
+  const ctx = canvas.getContext("2d");
+  ctx.textBaseline = "alphabetic";
+  ctx.textAlign = "left";
+  let top = pad;
+  for (let index = 0; index < perLine.length; index += 1) {
+    const segments = perLine[index];
+    const lineHeight = lineHeights[index];
+    const baseline = top + lineHeight * 0.82;
+    let x = pad;
+    if (effective.align === "center") x = pad + (maxW - widths[index]) / 2;
+    else if (effective.align === "right") x = pad + (maxW - widths[index]);
+    drawSegments(ctx, segments, x, baseline);
+    top += lineHeight;
+  }
+  if (base.rotated && Number.isFinite(base.angle) && Math.abs(base.angle) > 2e-3) {
+    const cos = Math.abs(Math.cos(base.angle));
+    const sin = Math.abs(Math.sin(base.angle));
+    const rw = Math.max(1, Math.ceil(canvas.width * cos + canvas.height * sin));
+    const rh = Math.max(1, Math.ceil(canvas.width * sin + canvas.height * cos));
+    const turned = createCanvas(rw, rh);
+    const tctx = turned.getContext("2d");
+    tctx.translate(rw / 2, rh / 2);
+    tctx.rotate(base.angle);
+    tctx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+    canvas = turned;
+  }
+  let left = raster.left + raster.width / 2 - canvas.width / 2;
+  if (effective.align === "left") left = raster.left - pad;
+  else if (effective.align === "right") left = raster.left + raster.width - canvas.width + pad;
+  let topEdge = raster.top + raster.height / 2 - canvas.height / 2;
+  const origin = base.origin;
+  if (origin && !base.rotated) {
+    const baseLines = Math.max(1, String(base.value || "").split("\n").length);
+    const baseSize = Math.max(1, ...(base.runs || []).map((run) => (run.size || 0) * pxPerPt));
+    const baseLeading = base.leading > 0 && base.leading * pxPerPt >= baseSize ? base.leading * pxPerPt : baseSize * 1.2;
+    const lastBaseline = origin.y + (baseLines - 1) * baseLeading;
+    if (lastBaseline >= raster.top - 5 && lastBaseline <= raster.top + raster.height + 40) {
+      topEdge = origin.y - (pad + lineHeights[0] * 0.82);
+    }
+    const rasterRight = raster.left + raster.width;
+    const rasterMid = raster.left + raster.width / 2;
+    if (effective.align === "center" && Math.abs(origin.x - rasterMid) <= 40) left = origin.x - pad - maxW / 2;
+    else if (effective.align === "right" && Math.abs(origin.x - rasterRight) <= 40) left = origin.x - pad - maxW;
+    else if (effective.align === "left" && origin.x <= raster.left + 3 && origin.x >= raster.left - 160) left = origin.x - pad;
+  }
+  leaf.canvas = canvas;
+  leaf.left = Math.round(left + effective.dx);
+  leaf.top = Math.round(topEdge + effective.dy);
+  leaf.width = canvas.width;
+  leaf.height = canvas.height;
+  return warnings;
+}
+function restoreTextLeaf(leaf) {
+  if (!leaf.__raster) return;
+  leaf.canvas = leaf.__raster.canvas;
+  leaf.left = leaf.__raster.left;
+  leaf.top = leaf.__raster.top;
+  leaf.width = leaf.__raster.width;
+  leaf.height = leaf.__raster.height;
+}
+function applyTextOverrides(doc, overrides, hasFont) {
+  const warnings = [];
+  const results = [];
+  const list2 = Array.isArray(overrides) ? overrides : [];
+  for (const override of list2) {
+    const target = String(override.layer ?? "");
+    const matches = doc.entries.filter(
+      (item) => item.id === target || item.leafId === target || item.fullName === target || item.name === target
+    );
+    const textMatches = matches.filter((item) => item.text && item.leafId);
+    const entry = textMatches.length === 1 ? textMatches[0] : matches.length === 1 ? matches[0] : null;
+    if (!entry) {
+      const detail = matches.length > 1 ? `\u540C\u540D ${matches.length} \u5C42\uFF0C\u8BF7\u7528\u5B8C\u6574\u8DEF\u5F84` : `\u6587\u5B57\u5C42\u4E0D\u5B58\u5728\uFF1A${target}`;
+      warnings.push(detail);
+      results.push({ layer: target, ok: false, error: detail });
+      continue;
+    }
+    if (!entry.text || !entry.leafId) {
+      const detail = `${entry.fullName || entry.name}\uFF1A\u6CA1\u6709\u6805\u683C\u50CF\u7D20\u6216\u6587\u5B57\u6570\u636E\uFF0C\u8DF3\u8FC7`;
+      warnings.push(detail);
+      results.push({ layer: target, ok: false, error: detail });
+      continue;
+    }
+    const leaf = doc.leaves.find((item) => item.id === entry.leafId);
+    if (!leaf) {
+      const detail = `${entry.name}\uFF1A\u627E\u4E0D\u5230\u5BF9\u5E94\u56FE\u5C42\uFF0C\u8DF3\u8FC7`;
+      warnings.push(detail);
+      results.push({ layer: target, ok: false, error: detail });
+      continue;
+    }
+    if (!leaf.__raster) {
+      leaf.__raster = {
+        canvas: leaf.canvas,
+        left: leaf.left,
+        top: leaf.top,
+        width: leaf.width,
+        height: leaf.height
+      };
+    } else {
+      restoreTextLeaf(leaf);
+    }
+    try {
+      const local = synthesizeTextLeaf(leaf, entry.text, override, hasFont);
+      warnings.push(...local);
+      results.push({ layer: target, ok: true, name: entry.name, fullName: entry.fullName, warnings: local });
+    } catch (error) {
+      restoreTextLeaf(leaf);
+      const detail = `${entry.name}\uFF1A\u91CD\u7ED8\u5931\u8D25\uFF08${error?.message || error}\uFF09\uFF0C\u4FDD\u7559\u539F\u50CF\u7D20`;
+      warnings.push(detail);
+      results.push({ layer: target, ok: false, error: detail });
+    }
+  }
+  warnings.results = results;
+  return warnings;
+}
+function cloneDoc(doc) {
+  return {
+    ...doc,
+    slots: new Set(doc.slots),
+    hidden: new Set(doc.hidden),
+    entries: doc.entries.map((entry) => ({ ...entry })),
+    leaves: doc.leaves.map((leaf) => ({ ...leaf }))
+  };
+}
+function mergeOverrideLists(globalList, skuList) {
+  const globalOverrides = Array.isArray(globalList) ? globalList : [];
+  const skuOverrides = Array.isArray(skuList) ? skuList : [];
+  if (!globalOverrides.length && !skuOverrides.length) return null;
+  if (!skuOverrides.length) return globalOverrides;
+  if (!globalOverrides.length) return skuOverrides;
+  const byTarget = /* @__PURE__ */ new Map();
+  for (const override of globalOverrides) byTarget.set(String(override.layer), override);
+  for (const override of skuOverrides) byTarget.set(String(override.layer), override);
+  return [...byTarget.values()];
+}
+
+// src/core/psd.js
+var makeCanvas = createCanvas;
+var BLEND_MODES = {
+  normal: "source-over",
+  multiply: "multiply",
+  screen: "screen",
+  overlay: "overlay",
+  darken: "darken",
+  lighten: "lighten",
+  "color dodge": "color-dodge",
+  "color burn": "color-burn",
+  "hard light": "hard-light",
+  "soft light": "soft-light",
+  difference: "difference",
+  exclusion: "exclusion",
+  hue: "hue",
+  saturation: "saturation",
+  color: "color",
+  luminosity: "luminosity",
+  "linear dodge": "lighter",
+  "linear burn": "multiply",
+  "vivid light": "hard-light",
+  "linear light": "hard-light",
+  "pin light": "lighten",
+  "hard mix": "hard-light",
+  "subtract": "difference",
+  "divide": "screen",
+  "pass through": "source-over"
+};
+var SLOT_NAME_HINT = /商品|产品|主图|sku|product|替换|瓶|管|盒|罐|主体|puff|粉扑/i;
+var SLOT_NAME_NOISE = /文字|txt|logo|icon|价格|price|券|包邮|top|时间|time|背景|background|台|光|气球|亮片|彩带|形状|矩形|椭圆|阴影|shadow/i;
+var SLOT_NAME_PREFERRED = /^(product_slot|sku_slot|商品位|产品位)$/i;
+var ANCHOR_NAME = /^(gift_slot\d*_?(img|title|name)?|icon_slot|anchor_)/i;
+async function parseTemplate(file, onStage = () => {
+}) {
+  onStage("\u8BFB\u53D6\u6587\u4EF6\u2026");
+  const buffer = await file.arrayBuffer();
+  onStage("\u89E3\u6790\u56FE\u5C42\u2026");
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  const psd = (0, import_ag_psd.readPsd)(buffer, {
+    skipThumbnail: true,
+    skipLinkedFilesData: true,
+    skipCompositeImageData: true,
+    logLevel: "error"
+  });
+  onStage("\u6574\u7406\u56FE\u5C42\u6811\u2026");
+  const { entries, leaves } = buildTree(psd);
+  if (leaves.length === 0) throw new Error("\u8FD9\u4E2A\u6587\u4EF6\u91CC\u6CA1\u6709\u53EF\u7528\u7684\u50CF\u7D20\u56FE\u5C42");
+  psd.children = [];
+  psd.imageData = void 0;
+  psd.canvas = void 0;
+  const hidden = /* @__PURE__ */ new Set();
+  for (const entry of entries) if (entry.psdHidden) hidden.add(entry.id);
+  return {
+    name: file.name,
+    fileName: file.name,
+    width: psd.width,
+    height: psd.height,
+    entries,
+    leaves,
+    hidden,
+    slots: /* @__PURE__ */ new Set(),
+    size: file.size,
+    // Images placed by psd_edit; drawn through the same layer compositor.
+    elements: []
+  };
 }
 function buildTree(psd) {
   const entries = [];
   const leaves = [];
   let leafIndex = 0;
-  const walk = (nodes, depth, ancestorIds, inheritedOpacity, parentId) => {
+  const walk = (nodes, depth, ancestorIds, ancestorNames, inheritedOpacity, parentId) => {
     for (const node of nodes || []) {
       const isGroup = Array.isArray(node.children) && node.children.length > 0;
       const id = `e${entries.length}`;
+      const name = node.name || (isGroup ? "\u7EC4" : "\u56FE\u5C42");
       const entry = {
         id,
-        name: node.name || (isGroup ? "\u7EC4" : "\u56FE\u5C42"),
+        name,
+        fullName: [...ancestorNames, name].join("/"),
         depth,
         kind: isGroup ? "group" : node.text ? "text" : "layer",
         psdHidden: !!node.hidden,
@@ -16581,7 +17302,7 @@ function buildTree(psd) {
       if (!isGroup && node.text) entry.text = describeTextLayer(node.text);
       entries.push(entry);
       if (isGroup) {
-        walk(node.children, depth + 1, entry.path, inheritedOpacity * (node.opacity ?? 1), id);
+        walk(node.children, depth + 1, entry.path, [...ancestorNames, name], inheritedOpacity * (node.opacity ?? 1), id);
         continue;
       }
       if (!node.canvas) {
@@ -16598,6 +17319,7 @@ function buildTree(psd) {
         id: `l${leafIndex++}`,
         entryId: id,
         name: entry.name,
+        fullName: entry.fullName,
         left: node.left ?? 0,
         top: node.top ?? 0,
         width,
@@ -16621,8 +17343,36 @@ function buildTree(psd) {
       entry.hasPixels = true;
     }
   };
-  walk(psd.children || [], 0, [], 1, null);
+  walk(psd.children || [], 0, [], [], 1, null);
   return { entries, leaves };
+}
+function findEntries(doc, spec) {
+  const wanted = String(spec || "");
+  if (!wanted) return [];
+  const byId = doc.entries.filter((entry) => entry.id === wanted || entry.leafId === wanted);
+  if (byId.length) return byId;
+  const byFull = doc.entries.filter((entry) => entry.fullName === wanted);
+  if (byFull.length) return byFull;
+  return doc.entries.filter((entry) => entry.name === wanted);
+}
+function findLeaves(doc, spec) {
+  const wanted = String(spec || "");
+  if (!wanted) return [];
+  const byId = doc.leaves.filter((leaf) => leaf.id === wanted || leaf.entryId === wanted);
+  if (byId.length) return byId;
+  const byFull = doc.leaves.filter((leaf) => leaf.fullName === wanted);
+  if (byFull.length) return byFull;
+  return doc.leaves.filter((leaf) => leaf.name === wanted);
+}
+function layerBounds(doc, spec) {
+  const leaf = findLeaves(doc, spec)[0];
+  if (leaf) return { x: leaf.left, y: leaf.top, w: leaf.width, h: leaf.height, name: leaf.name, leafId: leaf.id };
+  const entry = findEntries(doc, spec)[0];
+  if (entry?.bounds) {
+    const [x0, y0, x1, y1] = entry.bounds;
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0, name: entry.name, entryId: entry.id };
+  }
+  return null;
 }
 function isEntryVisible(doc, entryId) {
   const entry = doc.entries.find((item) => item.id === entryId);
@@ -16632,7 +17382,17 @@ function isEntryVisible(doc, entryId) {
 function isLeafVisible(doc, leaf) {
   return !leaf.path.some((id) => doc.hidden.has(id));
 }
+function preferredSlotLeaves(doc) {
+  return doc.leaves.filter(
+    (leaf) => isLeafVisible(doc, leaf) && !leaf.isText && SLOT_NAME_PREFERRED.test(String(leaf.name || "").trim())
+  );
+}
+function anchorLeaves(doc) {
+  return doc.leaves.filter((leaf) => ANCHOR_NAME.test(String(leaf.name || "").trim()));
+}
 function suggestSlots(doc) {
+  const named = preferredSlotLeaves(doc);
+  if (named.length) return named.map((leaf) => leaf.id);
   const { width: docW, height: docH } = doc;
   const docArea = docW * docH;
   const scored = [];
@@ -16677,7 +17437,7 @@ function effectList(effects, name) {
   if (!value) return [];
   return (Array.isArray(value) ? value : [value]).filter((item) => item && item.enabled);
 }
-function cssColor(color, alpha = 1) {
+function cssColor2(color, alpha = 1) {
   if (!color) return `rgba(0,0,0,${alpha})`;
   const r = Math.round(color.r ?? 0);
   const g = Math.round(color.g ?? 0);
@@ -16712,7 +17472,7 @@ function paintGradient(ctx, width, height, effect) {
     );
   }
   for (const stop of stops) {
-    fill.addColorStop(Math.max(0, Math.min(1, stop.location)), cssColor(stop.color, 1));
+    fill.addColorStop(Math.max(0, Math.min(1, stop.location)), cssColor2(stop.color, 1));
   }
   ctx.save();
   ctx.globalCompositeOperation = "source-atop";
@@ -16783,7 +17543,7 @@ function composeLeaf(leaf, previous) {
     ctx.save();
     ctx.globalCompositeOperation = "source-atop";
     ctx.globalAlpha = solid.opacity ?? 1;
-    ctx.fillStyle = cssColor(solid.color, 1);
+    ctx.fillStyle = cssColor2(solid.color, 1);
     ctx.fillRect(0, 0, leaf.width, leaf.height);
     ctx.restore();
   }
@@ -16799,7 +17559,7 @@ function composeLeaf(leaf, previous) {
   const out = makeCanvas(leaf.width + pad * 2, leaf.height + pad * 2);
   const outCtx = out.getContext("2d");
   for (const shadow of shadows) {
-    const color = cssColor(shadow.color, shadow.opacity ?? 1);
+    const color = cssColor2(shadow.color, shadow.opacity ?? 1);
     const isGlow = shadow === effectList(leaf.effects, "outerGlow")[0];
     const distance = isGlow ? 0 : effectValue(shadow.distance);
     const angle = (shadow.angle ?? 120) * Math.PI / 180;
@@ -16814,7 +17574,7 @@ function composeLeaf(leaf, previous) {
   }
   if (stroke) {
     const width = effectValue(stroke.size);
-    const tinted = silhouette(base, cssColor(stroke.color, 1));
+    const tinted = silhouette(base, cssColor2(stroke.color, 1));
     const steps = 24;
     outCtx.save();
     outCtx.globalAlpha = stroke.opacity ?? 1;
@@ -16887,8 +17647,40 @@ function isStackedCopy(base, other, doc) {
   return true;
 }
 var SLOT_SIBLING_OVERLAP = 0.25;
+function elementLeaves(doc) {
+  return (doc.elements || []).filter((element) => element.canvas).map((element, index) => ({
+    id: `x${index}`,
+    entryId: null,
+    name: element.name || `\u5143\u7D20 ${index + 1}`,
+    left: Math.round(element.left || 0),
+    top: Math.round(element.top || 0),
+    width: element.canvas.width,
+    height: element.canvas.height,
+    canvas: element.canvas,
+    mask: null,
+    opacity: element.opacity == null ? 1 : element.opacity,
+    blendMode: element.blend || "normal",
+    clipping: false,
+    effects: null,
+    path: [],
+    isElement: true,
+    aboveSlots: element.aboveSlots !== false
+  }));
+}
+function stackWithElements(doc, leaves) {
+  const elements = elementLeaves(doc);
+  if (!elements.length) return leaves;
+  const above = elements.filter((element) => element.aboveSlots);
+  const below = elements.filter((element) => !element.aboveSlots);
+  let at = leaves.findIndex((leaf) => doc.slots.has(leaf.id));
+  if (at < 0) at = Math.min(1, leaves.length);
+  return [...leaves.slice(0, at), ...below, ...leaves.slice(at), ...above];
+}
 function buildScene(doc) {
-  const visibleLeaves = doc.leaves.filter((leaf) => isLeafVisible(doc, leaf));
+  const visibleLeaves = stackWithElements(
+    doc,
+    doc.leaves.filter((leaf) => isLeafVisible(doc, leaf))
+  );
   const entryById = new Map(doc.entries.map((entry) => [entry.id, entry]));
   const clusters = [];
   const clusterOf = /* @__PURE__ */ new Map();
@@ -16898,16 +17690,18 @@ function buildScene(doc) {
     if (!doc.slots.has(leaf.id) || claimed.has(leaf.id)) continue;
     claimed.add(leaf.id);
     let rect = leafBounds(leaf);
+    const members = /* @__PURE__ */ new Set([leaf.id]);
     for (const other of visibleLeaves) {
-      if (claimed.has(other.id) || doc.slots.has(other.id)) continue;
+      if (claimed.has(other.id) || doc.slots.has(other.id) || other.isElement) continue;
       if (!isStackedCopy(leaf, other, doc)) continue;
       claimed.add(other.id);
+      members.add(other.id);
       rect = unionBounds(rect, leafBounds(other));
     }
     const cluster = {
       id: leaf.id,
       name: leaf.name,
-      members: /* @__PURE__ */ new Set([leaf.id]),
+      members,
       rect: {
         x: rect.left,
         y: rect.top,
@@ -16927,7 +17721,7 @@ function buildScene(doc) {
     const parent = entryById.get(leaf.entryId)?.parentId;
     if (!parent) continue;
     for (const other of visibleLeaves) {
-      if (claimed.has(other.id) || doc.slots.has(other.id)) continue;
+      if (claimed.has(other.id) || doc.slots.has(other.id) || other.isElement) continue;
       if (!other.path.includes(parent)) continue;
       if (boundsOverlapRatio(leafBounds(leaf), leafBounds(other)) < SLOT_SIBLING_OVERLAP) continue;
       cluster.members.add(other.id);
@@ -16964,6 +17758,1011 @@ function buildScene(doc) {
     suppressed,
     width: doc.width,
     height: doc.height
+  };
+}
+function disposeScene(scene) {
+  if (!scene) return;
+  for (const part of scene.parts) {
+    if (part.kind === "layers" && part.canvas) {
+      part.canvas.width = 1;
+      part.canvas.height = 1;
+    }
+  }
+}
+
+// src/core/apply-sheet.js
+import fs2 from "node:fs/promises";
+import path2 from "node:path";
+
+// src/core/mapping.js
+import fs from "node:fs/promises";
+import path from "node:path";
+
+// src/core/sheet.js
+var SS_NS = /xmlns(?::[^=]+)?="[^"]+"/g;
+function parseCsv(text) {
+  const source = String(text || "").replace(/^\uFEFF/, "");
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+  for (let index = 0; index < source.length; index += 1) {
+    const ch = source[index];
+    if (quoted) {
+      if (ch === '"') {
+        if (source[index + 1] === '"') {
+          cell += '"';
+          index += 1;
+        } else quoted = false;
+      } else cell += ch;
+      continue;
+    }
+    if (ch === '"') {
+      quoted = true;
+      continue;
+    }
+    if (ch === ",") {
+      row.push(cell);
+      cell = "";
+      continue;
+    }
+    if (ch === "\n" || ch === "\r") {
+      if (ch === "\r" && source[index + 1] === "\n") index += 1;
+      row.push(cell);
+      if (row.some((value) => String(value).trim() !== "")) rows.push(row);
+      row = [];
+      cell = "";
+      continue;
+    }
+    cell += ch;
+  }
+  if (cell.length || row.length) {
+    row.push(cell);
+    if (row.some((value) => String(value).trim() !== "")) rows.push(row);
+  }
+  return rows;
+}
+function csvToObjects(rows, { aliases = {} } = {}) {
+  if (!rows.length) return { headers: [], records: [] };
+  const headerIndex = rows.findIndex((row) => row.some((cell) => looksLikeHeader(cell)));
+  const at = headerIndex >= 0 ? headerIndex : 0;
+  const headers = rows[at].map((cell) => String(cell || "").trim());
+  const records = [];
+  for (const row of rows.slice(at + 1)) {
+    if (!row.some((cell) => String(cell || "").trim())) continue;
+    const raw = {};
+    headers.forEach((header, index) => {
+      if (header) raw[header] = row[index] == null ? "" : String(row[index]);
+    });
+    records.push(normalizeRecord(raw, aliases));
+  }
+  return { headers, records };
+}
+function looksLikeHeader(cell) {
+  return /^(sku|sku编码|商家编码|商品名称|产品名称|活动价|活动S价)$/i.test(String(cell || "").trim());
+}
+var DEFAULT_COLUMN_ALIASES = {
+  sku: ["sku\u7F16\u7801", "sku", "\u5546\u5BB6\u7F16\u7801"],
+  name: ["\u4EA7\u54C1\u540D\u79F0", "\u5546\u54C1\u540D\u79F0"],
+  price: ["\u6D3B\u52A8S\u4EF7", "\u6D3B\u52A8\u4EF7"],
+  buyGift: ["\u4E70\u5373\u8D60"],
+  fullGift: ["\u5168\u5E97\u6EE1\u8D60", "\u4E702\u8D60"],
+  headline: ["\u4E00\u7EA7\u5356\u70B9\u6587\u6848", "\u5229\u76CA\u70B9"],
+  feature: ["\u4E8C\u7EA7\u5356\u70B9\u6587\u6848", "\u4E3B\u5546\u54C1\u7279\u70B9"],
+  detail: ["\u4E09\u7EA7\u5356\u70B9\u6587\u6848", "\u6B21\u5546\u54C1\u7279\u70B9"],
+  icon: ["\u5176\u4ED6icon", "icon"],
+  productFile: ["\u4EA7\u54C1\u56FE\u6587\u4EF6", "\u4EA7\u54C1\u56FE"],
+  gift1File: ["\u8D60\u54C11\u6587\u4EF6", "\u8D60\u54C11"],
+  gift2File: ["\u8D60\u54C12\u6587\u4EF6", "\u8D60\u54C12"],
+  note: ["\u5907\u6CE8"]
+};
+function pickAliased(raw, names) {
+  for (const name of names) {
+    if (raw[name] != null && String(raw[name]).trim() !== "") return String(raw[name]);
+    const key = Object.keys(raw).find((item) => item.trim() === name);
+    if (key && String(raw[key]).trim() !== "") return String(raw[key]);
+  }
+  for (const name of names) {
+    if (Object.prototype.hasOwnProperty.call(raw, name)) return String(raw[name] ?? "");
+  }
+  return "";
+}
+function normalizeRecord(raw, aliases = DEFAULT_COLUMN_ALIASES) {
+  const map = { ...DEFAULT_COLUMN_ALIASES, ...aliases };
+  const record = { raw };
+  for (const [field, names] of Object.entries(map)) {
+    record[field] = pickAliased(raw, names);
+  }
+  return record;
+}
+function decodeUtf8(bytes) {
+  return new TextDecoder("utf-8").decode(bytes);
+}
+function cellRef(ref) {
+  const match = /^([A-Z]+)(\d+)$/i.exec(String(ref || ""));
+  if (!match) return null;
+  let col = 0;
+  for (const ch of match[1].toUpperCase()) col = col * 26 + (ch.charCodeAt(0) - 64);
+  return { col: col - 1, row: Number(match[2]) - 1 };
+}
+function parseXmlElements(xml, tag) {
+  const out = [];
+  const re = new RegExp(`<(?:[\\w]+:)?${tag}\\b([^>]*)>([\\s\\S]*?)</(?:[\\w]+:)?${tag}>`, "g");
+  const self = new RegExp(`<(?:[\\w]+:)?${tag}\\b([^>]*)/>`, "g");
+  let match;
+  while (match = re.exec(xml)) out.push({ attrs: match[1], body: match[2] });
+  while (match = self.exec(xml)) out.push({ attrs: match[1], body: "" });
+  return out;
+}
+function attr(attrs, name) {
+  const match = new RegExp(`\\b${name}="([^"]*)"`, "i").exec(attrs || "");
+  return match ? match[1] : "";
+}
+function innerText(xml) {
+  const texts = [];
+  const re = /<(?:[\w]+:)?t\b[^>]*>([\s\S]*?)<\/(?:[\w]+:)?t>/g;
+  let match;
+  while (match = re.exec(xml)) texts.push(decodeXml(match[1]));
+  return texts.join("");
+}
+function decodeXml(text) {
+  return String(text || "").replace(/&#x([0-9a-f]+);/gi, (_m, hex2) => String.fromCodePoint(parseInt(hex2, 16))).replace(/&#(\d+);/g, (_m, dec) => String.fromCodePoint(Number(dec))).replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
+}
+function parseSharedStrings(xml) {
+  const strings = [];
+  const re = /<(?:[\w]+:)?si\b[^>]*>([\s\S]*?)<\/(?:[\w]+:)?si>/g;
+  let match;
+  while (match = re.exec(xml)) strings.push(innerText(match[1]));
+  return strings;
+}
+function parseSheetGrid(xml, strings) {
+  const rows = /* @__PURE__ */ new Map();
+  let maxCol = -1;
+  const cells = parseXmlElements(xml.replace(SS_NS, ""), "c");
+  for (const cell of cells) {
+    const ref = cellRef(attr(cell.attrs, "r"));
+    if (!ref) continue;
+    const type = attr(cell.attrs, "t");
+    let value = "";
+    if (type === "s") {
+      const v = /<(?:[\w]+:)?v\b[^>]*>([\s\S]*?)<\/(?:[\w]+:)?v>/.exec(cell.body);
+      value = strings[Number(v ? v[1] : 0)] || "";
+    } else if (type === "inlineStr") {
+      value = innerText(cell.body);
+    } else {
+      const v = /<(?:[\w]+:)?v\b[^>]*>([\s\S]*?)<\/(?:[\w]+:)?v>/.exec(cell.body);
+      value = v ? v[1] : innerText(cell.body);
+    }
+    if (!rows.has(ref.row)) rows.set(ref.row, /* @__PURE__ */ new Map());
+    rows.get(ref.row).set(ref.col, value);
+    if (ref.col > maxCol) maxCol = ref.col;
+  }
+  const maxRow = rows.size ? Math.max(...rows.keys()) : -1;
+  const grid = [];
+  for (let row = 0; row <= maxRow; row += 1) {
+    const line = [];
+    const map = rows.get(row) || /* @__PURE__ */ new Map();
+    for (let col = 0; col <= maxCol; col += 1) line.push(map.has(col) ? String(map.get(col)) : "");
+    grid.push(line);
+  }
+  return grid;
+}
+function parseWorkbook(xml) {
+  const sheets = [];
+  const re = /<(?:[\w]+:)?sheet\b([^>]*)\/?>/g;
+  let match;
+  while (match = re.exec(xml)) {
+    sheets.push({
+      name: decodeXml(attr(match[1], "name")),
+      sheetId: attr(match[1], "sheetId"),
+      state: attr(match[1], "state") || "visible",
+      rid: attr(match[1], "r:id") || attr(match[1], "id")
+    });
+  }
+  return sheets;
+}
+function parseRels(xml) {
+  const map = {};
+  const re = /<(?:[\w]+:)?Relationship\b([^>]*)\/?>/g;
+  let match;
+  while (match = re.exec(xml)) {
+    const id = attr(match[1], "Id");
+    let target = attr(match[1], "Target").replace(/^\/+/, "");
+    if (!target.startsWith("xl/")) target = `xl/${target.replace(/^\.\//, "")}`;
+    map[id] = target;
+  }
+  return map;
+}
+function parseXlsx(buffer, { sheetName } = {}) {
+  const files = unzipSync(buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer));
+  const read = (name) => {
+    const bytes = files[name] || files[name.replace(/^\//, "")];
+    if (!bytes) throw new Error(`XLSX missing ${name}`);
+    return decodeUtf8(bytes);
+  };
+  const workbook = parseWorkbook(read("xl/workbook.xml"));
+  const rels = parseRels(read("xl/_rels/workbook.xml.rels"));
+  const wanted = workbook.find((sheet) => sheet.name === sheetName) || workbook.find((sheet) => sheet.state !== "hidden") || workbook[0];
+  if (!wanted) throw new Error("XLSX has no worksheets");
+  const target = rels[wanted.rid];
+  if (!target) throw new Error(`XLSX sheet ${wanted.name} has no target`);
+  const strings = files["xl/sharedStrings.xml"] ? parseSharedStrings(read("xl/sharedStrings.xml")) : [];
+  const grid = parseSheetGrid(read(target), strings);
+  return { sheetName: wanted.name, sheets: workbook.map((sheet) => sheet.name), grid };
+}
+function loadTableFromText(text, options) {
+  return csvToObjects(parseCsv(text), options);
+}
+function loadTableFromXlsx(buffer, options = {}) {
+  const parsed = parseXlsx(buffer, options);
+  const table = csvToObjects(parsed.grid, options);
+  return { ...table, sheetName: parsed.sheetName, sheets: parsed.sheets };
+}
+
+// src/core/mapping.js
+var JUNK_NAMES = /* @__PURE__ */ new Set(["Thumbs.db", ".DS_Store", "desktop.ini"]);
+var IMAGE_EXT = /* @__PURE__ */ new Set([".png", ".jpg", ".jpeg", ".webp", ".bmp"]);
+function isJunkName(name) {
+  if (JUNK_NAMES.has(name)) return true;
+  if (name.startsWith(".")) return true;
+  return false;
+}
+function normalizeKey(value) {
+  return String(value || "").toLowerCase().replace(/[_\-]+/g, " ").replace(/\s+/g, "").replace(/pcs|只装|枚|件|套组|联名款/gi, "").replace(/[()（）\[\]【】]/g, "").trim();
+}
+function isNoteRow(row) {
+  return !/\d/.test(String(row?.sku || "").trim());
+}
+function isUnset(value) {
+  if (value == null) return true;
+  const text = String(value).trim();
+  return text === "" || text === "/";
+}
+async function listImages(dir) {
+  if (!dir) return [];
+  let entries;
+  try {
+    entries = await fs.readdir(dir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  const files = [];
+  for (const entry of entries) {
+    if (!entry.isFile()) continue;
+    if (isJunkName(entry.name)) continue;
+    if (!IMAGE_EXT.has(path.extname(entry.name).toLowerCase())) continue;
+    files.push({
+      name: entry.name,
+      path: path.join(dir, entry.name),
+      stem: path.basename(entry.name, path.extname(entry.name))
+    });
+  }
+  return files.sort((a, b) => a.name.localeCompare(b.name, "zh-Hans-CN"));
+}
+async function loadMappingTable(filePath) {
+  const buffer = await fs.readFile(filePath);
+  const lower = filePath.toLowerCase();
+  if (lower.endsWith(".xlsx") || lower.endsWith(".xlsm")) {
+    return loadTableFromXlsx(buffer, { sheetName: "\u7D20\u6750\u6620\u5C04" });
+  }
+  return loadTableFromText(buffer.toString("utf8"));
+}
+async function loadRequirementSheet(filePath, { sheetName, aliases } = {}) {
+  const buffer = await fs.readFile(filePath);
+  const lower = filePath.toLowerCase();
+  if (lower.endsWith(".csv")) return loadTableFromText(buffer.toString("utf8"), { aliases });
+  return loadTableFromXlsx(buffer, { sheetName, aliases });
+}
+function exactProductFile(files, name) {
+  const key = String(name ?? "").trim();
+  if (!key) return void 0;
+  const hits = files.filter((file) => file.stem === key);
+  return hits.length === 1 ? hits[0].name : void 0;
+}
+function fileExistsIn(files, name) {
+  if (!name) return null;
+  const base = path.basename(String(name));
+  return files.find((file) => file.name === base) || null;
+}
+function catalogLookup(name, catalog) {
+  if (isUnset(name) || !Array.isArray(catalog)) return null;
+  const raw = String(name).trim();
+  const exact = catalog.find((item) => item.name === raw || (item.aliases || []).includes(raw));
+  if (exact) return exact;
+  return null;
+}
+async function preflight({
+  sheetPath,
+  sheetName,
+  mappingPath,
+  productDir,
+  giftDir,
+  aliases = DEFAULT_COLUMN_ALIASES,
+  giftCatalog = []
+} = {}) {
+  const products = await listImages(productDir);
+  const gifts = await listImages(giftDir);
+  const mappingTable = mappingPath ? await loadMappingTable(mappingPath) : { records: [] };
+  const sheet = sheetPath ? await loadRequirementSheet(sheetPath, { sheetName, aliases }) : { records: [] };
+  const mappingBySku = /* @__PURE__ */ new Map();
+  const mappingIssues = [];
+  for (const record of mappingTable.records || []) {
+    const row = normalizeRecord(record.raw || record, aliases);
+    if (!row.sku) continue;
+    if (mappingBySku.has(row.sku)) {
+      mappingIssues.push({ sku: row.sku, kind: "duplicate_mapping", detail: "mapping \u4E2D sku \u91CD\u590D" });
+    }
+    mappingBySku.set(row.sku, row);
+  }
+  const missingProduct = [];
+  const missingGift = [];
+  const ambiguous = [];
+  const unmappedName = [];
+  const rows = [];
+  for (const record of sheet.records || []) {
+    const row = normalizeRecord(record.raw || record, aliases);
+    if (!row.sku && !row.name) continue;
+    if (isNoteRow(row)) continue;
+    const mapped = mappingBySku.get(row.sku) || {};
+    const productFile = mapped.productFile || row.productFile || exactProductFile(products, mapped.name || row.name);
+    const gift1File = mapped.gift1File || row.gift1File;
+    const gift2File = mapped.gift2File || row.gift2File;
+    const item = {
+      sku: row.sku,
+      name: mapped.name || row.name,
+      productFile,
+      gift1File,
+      gift2File,
+      buyGift: row.buyGift,
+      fullGift: row.fullGift,
+      note: mapped.note || row.note
+    };
+    rows.push(item);
+    if (!productFile) {
+      const key = normalizeKey(item.name);
+      const hits = products.filter((file) => normalizeKey(file.stem) === key);
+      if (hits.length > 1) {
+        ambiguous.push({
+          sku: item.sku,
+          name: item.name,
+          kind: "product",
+          candidates: hits.map((file) => file.name)
+        });
+      } else if (hits.length === 1) {
+        unmappedName.push({
+          sku: item.sku,
+          name: item.name,
+          normalized: key,
+          candidate: hits[0].name,
+          detail: "\u4EC5\u89C4\u8303\u5316\u540E\u4E0E\u6587\u4EF6\u540D\u4E00\u81F4\uFF08\u540D\u79F0\u4E0D\u5B8C\u5168\u76F8\u540C\uFF09\uFF0C\u7981\u6B62\u9759\u9ED8\u4F7F\u7528\uFF0C\u8BF7\u6539\u6587\u4EF6\u540D\u6216\u4EA7\u54C1\u540D\u79F0"
+        });
+      } else {
+        missingProduct.push({ sku: item.sku, name: item.name, detail: "\u9700\u6C42\u8868\u4EA7\u54C1\u540D\u79F0\u5728\u4EA7\u54C1\u56FE\u76EE\u5F55\u91CC\u627E\u4E0D\u5230\u540C\u540D\u6587\u4EF6" });
+      }
+    } else if (!fileExistsIn(products, productFile)) {
+      missingProduct.push({ sku: item.sku, name: item.name, file: productFile, detail: "mapping.csv \u6307\u5411\u7684\u4EA7\u54C1\u56FE\u4E0D\u5B58\u5728" });
+    }
+    const giftNames = [row.buyGift, row.fullGift].filter((value) => !isUnset(value));
+    const giftFiles = [gift1File, gift2File].filter((value) => !isUnset(value));
+    for (const file of giftFiles) {
+      if (!fileExistsIn(gifts, file)) {
+        missingGift.push({ sku: item.sku, file, detail: "mapping \u6307\u5411\u7684\u8D60\u54C1\u56FE\u4E0D\u5B58\u5728" });
+      }
+    }
+    for (const giftName of giftNames) {
+      const cleaned = String(giftName).split(/[，,\n]/)[0].replace(/（.*?）/g, "").trim();
+      const hit = catalogLookup(cleaned, giftCatalog);
+      if (!hit && giftFiles.length === 0) {
+        const key = normalizeKey(cleaned);
+        const fuzzy = gifts.filter((file) => normalizeKey(file.stem) === key || key.includes(normalizeKey(file.stem)));
+        if (fuzzy.length > 1) {
+          ambiguous.push({ sku: item.sku, name: cleaned, kind: "gift", candidates: fuzzy.map((file) => file.name) });
+        } else if (fuzzy.length === 1) {
+          unmappedName.push({
+            sku: item.sku,
+            name: cleaned,
+            candidate: fuzzy[0].name,
+            detail: "\u8D60\u54C1\u540D\u4E0E\u6587\u4EF6\u540D\u89C4\u8303\u5316\u540E\u76F8\u8FD1\uFF0C\u4F46 catalog/mapping \u672A\u5199\u660E\uFF0C\u7981\u6B62\u9759\u9ED8\u4F7F\u7528"
+          });
+        } else {
+          missingGift.push({ sku: item.sku, name: cleaned, detail: "\u9700\u6C42\u8868\u91CC\u7684\u8D60\u54C1\u540D\u5728\u89C4\u5219\u7684\u8D60\u54C1\u6E05\u5355\uFF08gifts.catalog\uFF09\u91CC\u6CA1\u6709\uFF0C\u9700\u8981\u8865\u4E00\u6761" });
+        }
+      }
+    }
+  }
+  const referenced = /* @__PURE__ */ new Set();
+  for (const item of rows) {
+    if (item.productFile) referenced.add(item.productFile);
+    if (item.gift1File) referenced.add(item.gift1File);
+    if (item.gift2File) referenced.add(item.gift2File);
+  }
+  for (const entry of giftCatalog) if (entry.file) referenced.add(entry.file);
+  const unusedProducts = products.filter((file) => !referenced.has(file.name)).map((file) => file.name);
+  const unusedGifts = gifts.filter((file) => !referenced.has(file.name)).map((file) => file.name);
+  const junk = [];
+  for (const dir of [productDir, giftDir]) {
+    if (!dir) continue;
+    let entries = [];
+    try {
+      entries = await fs.readdir(dir);
+    } catch {
+      entries = [];
+    }
+    for (const name of entries) if (JUNK_NAMES.has(name)) junk.push(path.join(dir, name));
+  }
+  return {
+    sheetName: sheet.sheetName,
+    skuCount: rows.length,
+    mappingCount: mappingBySku.size,
+    rows,
+    missingProduct,
+    missingGift,
+    ambiguous,
+    unmappedName,
+    unusedProducts,
+    unusedGifts,
+    junk,
+    mappingIssues,
+    ok: missingProduct.length === 0 && missingGift.length === 0 && ambiguous.length === 0 && unmappedName.length === 0 && // macOS recreates .DS_Store on every Finder visit; list it, don't block on it.
+    junk.every((file) => path.basename(String(file)) === ".DS_Store") && mappingIssues.length === 0
+  };
+}
+function formatPreflightReport(report) {
+  const lines = [];
+  const section = (title, items, render) => {
+    lines.push(`## ${title} (${items.length})`);
+    if (!items.length) {
+      lines.push("  (none)");
+      return;
+    }
+    for (const item of items) lines.push(`  - ${render(item)}`);
+  };
+  lines.push(`# \u9884\u68C0\u7ED3\u679C\uFF1A${report.ok ? "\u901A\u8FC7\uFF0C\u53EF\u4EE5\u51FA\u56FE" : "\u6709\u95EE\u9898\uFF0C\u5148\u5904\u7406\u518D\u51FA\u56FE"}\uFF08\u9700\u6C42\u8868\u5171 ${report.skuCount} \u4E2A\u5546\u54C1\uFF09`);
+  section("\u274C \u7F3A\u4EA7\u54C1\u56FE\uFF08\u4EA7\u54C1\u56FE/ \u91CC\u6CA1\u6709\u548C\u300C\u4EA7\u54C1\u540D\u79F0\u300D\u540C\u540D\u7684\u6587\u4EF6\uFF09", report.missingProduct, (item) => `${item.sku} ${item.name || ""} ${item.file || ""} ${item.detail}`);
+  section("\u274C \u7F3A\u8D60\u54C1\u56FE\uFF08\u8D60\u54C1\u540D\u5728\u89C4\u5219\u7684\u8D60\u54C1\u6E05\u5355\u91CC\u627E\u4E0D\u5230\uFF09", report.missingGift, (item) => `${item.sku} ${item.name || item.file || ""} ${item.detail}`);
+  section("\u274C \u591A\u4E2A\u6587\u4EF6\u90FD\u50CF\uFF08\u8BF7\u4EBA\u5DE5\u6307\u5B9A\uFF0C\u4E0D\u4F1A\u81EA\u52A8\u9009\uFF09", report.ambiguous, (item) => `${item.sku} ${item.name} \u2192 ${item.candidates.join(" | ")}`);
+  section("\u274C \u540D\u5B57\u53EA\u662F\u76F8\u8FD1\u3001\u4E0D\u5B8C\u5168\u76F8\u540C\uFF08\u8BF7\u6539\u6587\u4EF6\u540D\u6216\u4EA7\u54C1\u540D\u79F0\uFF09", report.unmappedName, (item) => `${item.sku} ${item.name} \u2248 ${item.candidate}\uFF1B${item.detail}`);
+  section("\u2139\uFE0F \u6CA1\u88AB\u9700\u6C42\u8868\u7528\u5230\u7684\u4EA7\u54C1\u56FE\uFF08\u4EC5\u63D0\u793A\uFF09", report.unusedProducts, (name) => name);
+  section("\u2139\uFE0F \u6CA1\u88AB\u7528\u5230\u7684\u8D60\u54C1\u56FE\uFF08\u4EC5\u63D0\u793A\uFF09", report.unusedGifts, (name) => name);
+  section("\u2139\uFE0F \u6742\u7269\u6587\u4EF6\uFF08\u4EC5\u63D0\u793A\uFF09", report.junk, (name) => name);
+  section("\u274C mapping.csv \u95EE\u9898", report.mappingIssues, (item) => `${item.sku} ${item.detail}`);
+  return lines.join("\n");
+}
+
+// src/core/rules.js
+function pathBasename(file) {
+  const text = String(file || "").replace(/\\/g, "/");
+  const parts = text.split("/");
+  return parts[parts.length - 1];
+}
+function countChars(text) {
+  return Array.from(String(text || "")).length;
+}
+function resolveCopy(row) {
+  const name = String(row.name || row.productName || "").trim();
+  const headline = isUnset(row.headline) ? "" : String(row.headline).trim();
+  const feature = isUnset(row.feature) ? "" : String(row.feature).trim();
+  const detail = isUnset(row.detail) ? "" : String(row.detail).trim();
+  if (!headline) {
+    return {
+      level1: feature || name,
+      level2: name,
+      level3: detail,
+      headlinePromoted: true
+    };
+  }
+  return {
+    level1: headline,
+    level2: feature || name,
+    level3: detail,
+    headlinePromoted: false
+  };
+}
+function sizeForLength(text, bins = []) {
+  const length = countChars(text);
+  for (const bin of bins) {
+    if (bin.maxChars == null || length <= Number(bin.maxChars)) return Number(bin.sizePx);
+  }
+  return bins.length ? Number(bins[bins.length - 1].sizePx) : null;
+}
+function mixedNumberRuns(text, { text: textStyle = {}, digit: digitStyle = {} } = {}) {
+  const value = String(text || "");
+  const runs = [];
+  let index = 0;
+  while (index < value.length) {
+    const digit = /\d/.test(value[index]);
+    let end = index + 1;
+    while (end < value.length && /\d/.test(value[end]) === digit) end += 1;
+    const style = digit ? digitStyle : textStyle;
+    runs.push({
+      len: end - index,
+      family: style.family,
+      sizePx: style.sizePx,
+      color: style.color,
+      weight: style.weight
+    });
+    index = end;
+  }
+  return runs.filter((run) => run.len > 0);
+}
+function formatPrice(value) {
+  if (value == null) return "";
+  const raw = String(value).trim();
+  if (!raw || raw === "/") return "";
+  return raw;
+}
+function priceRuns(text, cfg = {}) {
+  const value = formatPrice(text);
+  if (!value) return [];
+  const family = cfg.family;
+  const color = cfg.color;
+  const dot = value.indexOf(".");
+  const intPart = dot < 0 ? value : value.slice(0, dot);
+  const intPx = intPart.length <= 2 ? cfg.sizePx2 ?? cfg.sizePx ?? 150 : cfg.sizePx3 ?? cfg.sizePx ?? 135;
+  const decimalPx = cfg.decimalPx ?? (cfg.decimalScale ? Math.round(intPx * Number(cfg.decimalScale)) : cfg.sizePxDecimal ?? 90);
+  if (dot < 0) {
+    return [{ len: value.length, family, sizePx: intPx, color }];
+  }
+  return [
+    { len: dot, family, sizePx: intPx, color },
+    { len: value.length - dot, family, sizePx: decimalPx, color }
+  ];
+}
+function resolveIcon(icon) {
+  if (isUnset(icon)) return { variant: "NONE", en: "", zh: "" };
+  const text = String(icon);
+  if (/HOT|爆品/i.test(text)) return { variant: "HOT", en: "HOT", zh: "\u7206\u54C1\u70ED\u5356" };
+  if (/包邮/i.test(text)) return { variant: "SHIP", en: "", zh: "\u5305\u90AE" };
+  if (/NEW|新品/i.test(text)) return { variant: "NEW", en: "NEW", zh: "\u65B0\u54C1\u4E0A\u5E02" };
+  return { variant: "CUSTOM", en: "", zh: text.trim(), raw: text };
+}
+function catalogFiles(name, catalog = []) {
+  if (isUnset(name)) return { files: [], missing: false };
+  const raw = String(name).split(/[，,\n]/)[0].replace(/（.*?）/g, "").trim();
+  const hit = catalog.find((item) => item.name === raw || (item.aliases || []).includes(raw));
+  if (!hit) return { files: [], missing: true, query: raw };
+  const files = hit.files || (hit.file ? [hit.file] : []);
+  return { files, missing: files.length === 0, query: raw, title: hit.title };
+}
+function resolveGifts(row, rules = {}) {
+  const gifts = rules.gifts || {};
+  const catalog = gifts.catalog || [];
+  const tiers = Object.fromEntries((gifts.tiers || []).map((tier) => [tier.id, tier]));
+  const full79 = tiers.full79 || { id: "full79", title: "\u6EE179\u9001", name: "\u8D1D\u679C\u77ED\u7ED2\u7C89\u6251*2" };
+  const full129 = tiers.full129 || { id: "full129", title: "\u6EE1129\u9001", name: "\u5575\u5575\u68C9\u7C89\u6251*1" };
+  const buy = isUnset(row.buyGift) ? "" : String(row.buyGift).trim();
+  const pack = (slot, title, name, extra = {}) => {
+    const found = extra.files ? { files: extra.files, missing: extra.files.length === 0 } : catalogFiles(name, catalog);
+    return { slot, title, name, files: found.files, missing: found.missing, query: found.query || name };
+  };
+  if (!buy) {
+    return [
+      pack("upper", full79.title || "\u6EE179\u9001", full79.name, { files: full79.files || catalogFiles(full79.name, catalog).files }),
+      pack(
+        "lower",
+        full129.title || "\u6EE1129\u9001",
+        full129.name,
+        { files: full129.files || catalogFiles(full129.name, catalog).files }
+      )
+    ];
+  }
+  const buyFiles = catalogFiles(buy, catalog);
+  return [
+    pack("upper", gifts.buyGiftTitle || "\u4E70\u5373\u8D60", buy, { files: buyFiles.files }),
+    pack("lower", full79.title || "\u6EE179\u9001", full79.name, { files: full79.files || catalogFiles(full79.name, catalog).files })
+  ];
+}
+function productNameDx(name, cfg = {}) {
+  if (!cfg || cfg.centerX == null || cfg.anchorX == null) return 0;
+  const width = countChars(name) * Number(cfg.widthPerChar || 27.5);
+  return Math.round(Number(cfg.centerX) - (Number(cfg.anchorX) + width / 2));
+}
+function filenameFromTemplate(template, values) {
+  const source = template || "{sku}-{name}.{ext}";
+  return source.replace(/\{(\w+)\}/g, (_, key) => {
+    const value = values[key];
+    return value == null ? "" : String(value);
+  });
+}
+function sanitizeFilename(name) {
+  return String(name || "sku").replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_").replace(/\s+/g, " ").trim().slice(0, 120) || "sku";
+}
+function layerRef(rules, key) {
+  const layers = rules?.layers || {};
+  return layers[key] || key;
+}
+function expandRow(row, mapping = {}, rules = {}) {
+  const name = (mapping.name || row.name || "").trim();
+  const sku = String(row.sku || mapping.sku || "").trim();
+  const copy = resolveCopy({ ...row, name });
+  const mappingValues = Object.fromEntries(Object.entries(mapping).filter(([, value]) => !isUnset(value)));
+  const gifts = resolveGifts({ ...row, ...mappingValues }, rules);
+  if (!isUnset(mapping.gift1File) && gifts[0] && (gifts[0].missing || !gifts[0].files.length)) {
+    gifts[0].files = [pathBasename(mapping.gift1File)];
+    gifts[0].missing = false;
+  }
+  if (!isUnset(mapping.gift2File) && gifts[1] && (gifts[1].missing || !gifts[1].files.length)) {
+    gifts[1].files = [pathBasename(mapping.gift2File)];
+    gifts[1].missing = false;
+  }
+  const icon = resolveIcon(row.icon);
+  const price = formatPrice(row.price);
+  const type = rules.type || {};
+  const texts = [];
+  const visibility = [];
+  const warnings = [];
+  const pushText = (key, patch) => {
+    const layer = layerRef(rules, key);
+    if (!layer || layer === key && !rules.layers?.[key]) {
+      warnings.push(`rules.layers \u7F3A\u5C11 ${key}`);
+    }
+    texts.push({ layer, ...patch });
+  };
+  if (price) {
+    pushText("price_value", {
+      value: price,
+      runs: priceRuns(price, type.price || {}),
+      decimalScale: type.price?.decimalScale
+    });
+  }
+  const headlineCfg = type.level1 || {};
+  const headlineRuns = copy.headlinePromoted ? mixedNumberRuns(copy.level1, { text: headlineCfg.text || headlineCfg, digit: headlineCfg.text || headlineCfg }) : mixedNumberRuns(copy.level1, headlineCfg);
+  pushText("headline", {
+    value: copy.level1,
+    runs: headlineRuns,
+    ...headlineCfg.fitWidth ? { fitWidth: headlineCfg.fitWidth, minPx: headlineCfg.minPx, maxPx: headlineCfg.maxPx } : {}
+  });
+  const level2 = type.level2 || {};
+  pushText("subhead", {
+    value: copy.level2,
+    font: level2.family,
+    sizePx: level2.sizePx,
+    color: level2.color
+  });
+  const level3 = type.level3 || {};
+  const level3Size = sizeForLength(copy.level3, level3.bins || []);
+  if (copy.level3) {
+    pushText("detail", {
+      value: copy.level3,
+      font: level3.family,
+      sizePx: level3Size,
+      ...level3.fitWidth ? { fitWidth: level3.fitWidth, minPx: level3.minPx, maxPx: level3.maxPx } : {}
+    });
+  }
+  const product = type.productName || {};
+  pushText("product_name", {
+    value: name,
+    font: product.family,
+    sizePx: product.sizePx,
+    dx: productNameDx(name, product)
+  });
+  const slotCfg = rules.gifts && rules.gifts.slots || [];
+  gifts.forEach((gift, index) => {
+    const slot = slotCfg[index] || {};
+    if (slot.titleLayer || slot.titleKey) {
+      texts.push({
+        layer: slot.titleLayer || layerRef(rules, slot.titleKey),
+        value: gift.title,
+        font: type.giftTitle?.family,
+        sizePx: gift.title.includes("129") ? type.giftTitle?.sizePxLong : type.giftTitle?.sizePx
+      });
+    }
+    if (slot.nameLayer || slot.nameKey) {
+      const long = countChars(gift.name) >= (type.giftName?.longChars || 16);
+      texts.push({
+        layer: slot.nameLayer || layerRef(rules, slot.nameKey),
+        value: gift.name,
+        font: type.giftName?.family,
+        sizePx: long ? type.giftName?.sizePxLong : type.giftName?.sizePx
+      });
+    }
+    if (gift.missing) warnings.push(`\u8D60\u54C1\u672A\u6620\u5C04: ${gift.query || gift.name}`);
+  });
+  const iconLayers = rules.variants?.icon || {};
+  const variant = iconLayers[icon.variant];
+  if (variant) {
+    for (const layer of variant.hide || []) visibility.push({ layer, hidden: true });
+    for (const layer of variant.show || []) visibility.push({ layer, hidden: false });
+  }
+  if (icon.zh && (rules.layers?.icon_zh || iconLayers.NEW)) {
+    pushText("icon_zh", { value: icon.zh, font: type.iconZh?.family, sizePx: type.iconZh?.sizePx });
+  }
+  if (icon.en && rules.layers?.icon_en) {
+    pushText("icon_en", { value: icon.en, font: type.iconEn?.family, sizePx: type.iconEn?.sizePx });
+  }
+  const productFile = mapping.productFile || row.productFile;
+  const ext = rules.export && rules.export.extension || "png";
+  const filename = sanitizeFilename(
+    filenameFromTemplate(rules.export?.filename, { sku, name, ext }).replace(/\.$/, "")
+  );
+  return {
+    sku,
+    name,
+    productFile,
+    copy,
+    gifts,
+    icon,
+    price,
+    texts,
+    visibility,
+    warnings,
+    filename,
+    variant: { icon: icon.variant }
+  };
+}
+function collectOverrideFonts(texts) {
+  const families = /* @__PURE__ */ new Set();
+  for (const item of texts || []) {
+    if (item.font) families.add(item.font);
+    for (const run of item.runs || []) if (run.family) families.add(run.family);
+  }
+  return [...families];
+}
+
+// src/core/apply-sheet.js
+async function loadRulesFile(filePath) {
+  const text = await fs2.readFile(filePath, "utf8");
+  return JSON.parse(text);
+}
+function mappingFor(sku, table) {
+  return (table.records || []).map((row) => normalizeRecord(row.raw || row)).find((row) => row.sku === sku) || {};
+}
+function splitAnchor(rect, count) {
+  if (!rect || count <= 1) return [rect];
+  const gap = 8;
+  const width = (rect.w - gap * (count - 1)) / count;
+  return Array.from({ length: count }, (_, index) => ({
+    x: rect.x + index * (width + gap),
+    y: rect.y,
+    w: width,
+    h: rect.h
+  }));
+}
+function elementsForJob(job, rules, { giftDir } = {}) {
+  const slots = rules.gifts?.slots || [];
+  const elements = [];
+  job.gifts.forEach((gift, index) => {
+    const slot = slots[index] || {};
+    const bounds = slot.anchor?.bounds || slot.bounds;
+    const rect = Array.isArray(bounds) ? { x: bounds[0], y: bounds[1], w: bounds[2] - bounds[0], h: bounds[3] - bounds[1] } : bounds;
+    const files = gift.files || [];
+    const cells = splitAnchor(rect, files.length);
+    files.forEach((file, fileIndex) => {
+      const cell = cells[fileIndex] || rect;
+      elements.push({
+        source: giftDir ? path2.join(giftDir, file) : file,
+        name: `el-${gift.slot}-${path2.basename(file, path2.extname(file))}`,
+        anchorRect: cell,
+        fit: "contain",
+        slot: gift.slot,
+        aboveSlots: true
+      });
+    });
+  });
+  return elements;
+}
+async function planSheet({
+  sheetPath,
+  sheetName,
+  mappingPath,
+  rulesPath,
+  rules,
+  productDir,
+  giftDir,
+  aliases = DEFAULT_COLUMN_ALIASES,
+  skus,
+  limit
+} = {}) {
+  const loadedRules = rules || (rulesPath ? await loadRulesFile(rulesPath) : {});
+  const sheet = await loadRequirementSheet(sheetPath, {
+    sheetName: sheetName || loadedRules.sheet?.name,
+    aliases: { ...aliases, ...loadedRules.sheet?.columns || {} }
+  });
+  const mappingTable = mappingPath ? await loadMappingTable(mappingPath) : { records: [] };
+  const report = await preflight({
+    sheetPath,
+    sheetName: sheet.sheetName,
+    mappingPath,
+    productDir,
+    giftDir,
+    aliases: { ...aliases, ...loadedRules.sheet?.columns || {} },
+    giftCatalog: loadedRules.gifts?.catalog || []
+  });
+  const productFiles = productDir ? await listImages(productDir) : [];
+  const wanted = Array.isArray(skus) && skus.length ? new Set(skus.map(String)) : null;
+  const jobs = [];
+  const skipped = [];
+  let count = 0;
+  for (const record of sheet.records || []) {
+    const row = normalizeRecord(record.raw || record, { ...aliases, ...loadedRules.sheet?.columns || {} });
+    if (!row.sku || isNoteRow(row)) continue;
+    if (wanted && !wanted.has(row.sku)) continue;
+    if (limit && count >= limit) break;
+    const mapped = mappingFor(row.sku, mappingTable);
+    const job = expandRow(row, mapped, loadedRules);
+    if (!job.productFile) job.productFile = exactProductFile(productFiles, job.name);
+    job.elements = elementsForJob(job, loadedRules, { giftDir });
+    job.productPath = job.productFile && productDir ? path2.join(productDir, path2.basename(job.productFile)) : job.productFile;
+    if (!job.productFile) {
+      skipped.push({ sku: job.sku, name: job.name, reason: "\u7F3A\u4EA7\u54C1\u56FE\uFF08mapping \u672A\u5199\u6216\u6587\u4EF6\u4E0D\u5B58\u5728\uFF09" });
+      continue;
+    }
+    jobs.push(job);
+    count += 1;
+  }
+  return { rules: loadedRules, sheetName: sheet.sheetName, jobs, skipped, preflight: report };
+}
+function outputNameFor(job, ext, rules) {
+  const template = rules?.export?.filename || "{sku}-{name}.{ext}";
+  return sanitizeFilename(filenameFromTemplate(template, { sku: job.sku, name: job.name, ext }));
+}
+
+// src/core/validate.js
+import { loadImage } from "@napi-rs/canvas";
+function rectFromBounds(bounds) {
+  if (!bounds) return null;
+  if (Array.isArray(bounds) && bounds.length >= 4) {
+    const [x0, y0, x1, y1] = bounds.map(Number);
+    return { x: Math.min(x0, x1), y: Math.min(y0, y1), w: Math.abs(x1 - x0), h: Math.abs(y1 - y0) };
+  }
+  if (bounds.w != null) return { x: Number(bounds.x) || 0, y: Number(bounds.y) || 0, w: Number(bounds.w), h: Number(bounds.h) };
+  return null;
+}
+function containsRect(outer, inner, pad = 2) {
+  if (!outer || !inner) return false;
+  return inner.x >= outer.x - pad && inner.y >= outer.y - pad && inner.x + inner.w <= outer.x + outer.w + pad && inner.y + inner.h <= outer.y + outer.h + pad;
+}
+function countColor(imageData, { r, g, b, tol = 45 }) {
+  const data = imageData.data;
+  let count = 0;
+  for (let index = 0; index < data.length; index += 4) {
+    if (Math.abs(data[index] - r) < tol && Math.abs(data[index + 1] - g) < tol && Math.abs(data[index + 2] - b) < tol && data[index + 3] > 8) {
+      count += 1;
+    }
+  }
+  return count;
+}
+function cropStats(ctx, rect) {
+  if (!rect || rect.w < 1 || rect.h < 1) return { mean: 0, std: 0, pixels: 0 };
+  const x = Math.max(0, Math.floor(rect.x));
+  const y = Math.max(0, Math.floor(rect.y));
+  const w = Math.max(1, Math.floor(rect.w));
+  const h = Math.max(1, Math.floor(rect.h));
+  let data;
+  try {
+    data = ctx.getImageData(x, y, w, h).data;
+  } catch {
+    return { mean: 0, std: 0, pixels: 0 };
+  }
+  let sum = 0;
+  let sum2 = 0;
+  const n = w * h;
+  for (let i = 0; i < data.length; i += 4) {
+    const luma = (data[i] + data[i + 1] + data[i + 2]) / 3;
+    sum += luma;
+    sum2 += luma * luma;
+  }
+  const mean = sum / n;
+  const variance = Math.max(0, sum2 / n - mean * mean);
+  return { mean, std: Math.sqrt(variance), pixels: n };
+}
+async function validateSku(input) {
+  const checks = [];
+  const pass = (id, ok, detail) => checks.push({ id, ok: !!ok, detail: detail || "" });
+  const job = input.job || {};
+  for (const item of job.texts || []) {
+    const layer = (input.inspect?.layers || []).find(
+      (entry) => entry.name === item.layer || entry.fullName === item.layer || entry.leafId === item.layer
+    );
+    if (item.value != null) {
+      if (!layer) pass("text_written", false, `\u5C42\u4E0D\u5B58\u5728: ${item.layer}`);
+      else pass("text_written", layer.textContent === item.value, `${item.layer} \u2192 ${JSON.stringify(layer.textContent)}`);
+    }
+    if (layer?.runs) {
+      for (const run of layer.runs) {
+        if (run.family && input.registered && !input.registered.has(run.family)) {
+          pass("font_registered", false, `${layer.name} ${run.family}`);
+        }
+      }
+    }
+  }
+  const missing = input.missingFonts || [];
+  if (missing.length && input.strictFonts === false) {
+    checks.push({ id: "font_registered", ok: true, warn: true, detail: `\u5DF2\u56DE\u9000\uFF1A${missing.join(", ")}` });
+  } else {
+    pass("font_registered", missing.length === 0, missing.length ? missing.join(", ") : "ok");
+  }
+  for (const spec of job.visibility || []) {
+    const layer = (input.inspect?.layers || []).find(
+      (entry) => entry.name === spec.layer || entry.fullName === spec.layer
+    );
+    if (!layer) {
+      pass("visibility", false, `\u5C42\u4E0D\u5B58\u5728: ${spec.layer}`);
+      continue;
+    }
+    const hidden = spec.hidden !== false;
+    pass("visibility", layer.visible !== hidden, `${spec.layer} visible=${layer.visible} expected hidden=${hidden}`);
+  }
+  const containers = input.rules?.containers || {};
+  for (const item of job.texts || []) {
+    const layer = (input.inspect?.layers || []).find(
+      (entry) => entry.name === item.layer || entry.fullName === item.layer
+    );
+    const box = containers[item.layer] || item.containerKey && containers[item.containerKey];
+    if (!layer?.bounds || !box) continue;
+    const inner = rectFromBounds(layer.bounds);
+    const outer = rectFromBounds(box);
+    pass("bbox", containsRect(outer, inner, 8), `${item.layer} ${JSON.stringify(inner)} vs ${JSON.stringify(outer)}`);
+  }
+  const giftSlots = input.rules?.gifts?.slots || [];
+  const placed = input.placedElements || [];
+  giftSlots.forEach((slot, index) => {
+    const gift = (job.gifts || [])[index];
+    if (!gift || !gift.files?.length) return;
+    const anchor = rectFromBounds(slot.anchor?.bounds || slot.bounds);
+    const hits = placed.filter((element) => element.slot === slot.id || element.slot === ["upper", "lower"][index]);
+    if (!hits.length) {
+      pass("gift_anchor", false, `${slot.id || index} \u6CA1\u6709\u7F6E\u5165`);
+      return;
+    }
+    for (const element of hits) {
+      if (element.left == null || element.w == null) {
+        pass("gift_anchor", true, `${element.name || slot.id} planned`);
+        continue;
+      }
+      const box = { x: element.left, y: element.top, w: element.w, h: element.h };
+      pass("gift_anchor", containsRect(anchor, box, 24), `${element.name} in ${slot.id}`);
+    }
+  });
+  if (input.scene?.slots) {
+    pass("single_product", input.scene.slots.length === 1, `slots=${input.scene.slots.length}`);
+  }
+  let imageCheck = null;
+  if (input.imagePath) {
+    try {
+      const image = await loadImage(input.imagePath);
+      const { createCanvas: createCanvas3 } = await import("@napi-rs/canvas");
+      const canvas = createCanvas3(image.width, image.height);
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(image, 0, 0);
+      const priceBox = rectFromBounds(input.rules?.validate?.priceRegion || input.rules?.containers?.price_value);
+      if (priceBox) {
+        const x = Math.max(0, Math.floor(priceBox.x));
+        const y = Math.max(0, Math.floor(priceBox.y));
+        const data = ctx.getImageData(x, y, Math.max(1, Math.floor(priceBox.w)), Math.max(1, Math.floor(priceBox.h)));
+        const red = input.rules?.validate?.priceRed || { r: 204, g: 48, b: 70, tol: 45 };
+        const count = countColor(data, red);
+        pass("price_red", count > 0, `\u7EA2\u5B57\u50CF\u7D20 ${count}`);
+        imageCheck = { priceRed: count };
+      }
+      const productBox = rectFromBounds(input.rules?.validate?.productRegion);
+      if (productBox) {
+        const stats = cropStats(ctx, productBox);
+        const maxStd = input.rules?.validate?.productStdMax;
+        pass("product_region", maxStd == null || stats.std <= maxStd, `std=${stats.std.toFixed(1)}`);
+        imageCheck = { ...imageCheck || {}, productStd: stats.std };
+      }
+    } catch (error) {
+      pass("image", false, error.message || String(error));
+    }
+  }
+  const failed = checks.filter((item) => !item.ok);
+  return {
+    sku: job.sku,
+    ok: failed.length === 0,
+    checks,
+    failed: failed.map((item) => item.id),
+    fonts: collectOverrideFonts(job.texts),
+    image: imageCheck
+  };
+}
+function summarizeValidation(reports) {
+  const failed = reports.filter((item) => !item.ok);
+  return {
+    count: reports.length,
+    passed: reports.length - failed.length,
+    failed: failed.map((item) => item.sku),
+    reports
   };
 }
 
@@ -17090,60 +18889,681 @@ function uniqueName(used, base, extension) {
   return name;
 }
 
+// src/core/view.js
+var LABEL_FONT = '"PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif';
+var PALETTE = ["#ff2d55", "#0a84ff", "#30d158", "#ff9f0a", "#bf5af2", "#00c7be"];
+function toRect(value) {
+  if (!value) return null;
+  if (Array.isArray(value) && value.length >= 4) {
+    const [x0, y0, x1, y1] = value.map(Number);
+    if ([x0, y0, x1, y1].some((n) => !Number.isFinite(n))) return null;
+    return { x: Math.min(x0, x1), y: Math.min(y0, y1), w: Math.abs(x1 - x0), h: Math.abs(y1 - y0) };
+  }
+  if (typeof value === "object" && value.w != null) {
+    const { x, y, w, h } = value;
+    if ([x, y, w, h].some((n) => !Number.isFinite(Number(n)))) return null;
+    return { x: Number(x), y: Number(y), w: Number(w), h: Number(h) };
+  }
+  return null;
+}
+function resolveCrop(crop, width, height) {
+  const rect = toRect(crop);
+  if (!rect || rect.w < 1 || rect.h < 1) return { x: 0, y: 0, w: width, h: height };
+  const x = Math.max(0, Math.min(width - 1, Math.round(rect.x)));
+  const y = Math.max(0, Math.min(height - 1, Math.round(rect.y)));
+  const w = Math.max(1, Math.min(width - x, Math.round(rect.w)));
+  const h = Math.max(1, Math.min(height - y, Math.round(rect.h)));
+  return { x, y, w, h };
+}
+function resolveScale(scale, crop, maxWidth = 1600) {
+  const wanted = Number(scale);
+  if (Number.isFinite(wanted) && wanted > 0) return Math.min(16, wanted);
+  return Math.max(1, Math.min(16, Math.floor(maxWidth / crop.w * 100) / 100));
+}
+function niceStep(visiblePx) {
+  const raw = visiblePx / 8;
+  for (const step of [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500]) if (step >= raw) return step;
+  return 500;
+}
+function renderView({ image, crop, scale, rects = [], grid = false, maxWidth = 1600 }) {
+  const region = resolveCrop(crop, image.width, image.height);
+  const factor = resolveScale(scale, region, maxWidth);
+  const width = Math.max(1, Math.round(region.w * factor));
+  const height = Math.max(1, Math.round(region.h * factor));
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = factor < 3;
+  ctx.drawImage(image, region.x, region.y, region.w, region.h, 0, 0, width, height);
+  const toView = (rect) => ({
+    x: (rect.x - region.x) * factor,
+    y: (rect.y - region.y) * factor,
+    w: rect.w * factor,
+    h: rect.h * factor
+  });
+  if (grid) {
+    const step = typeof grid === "number" && grid > 0 ? grid : niceStep(region.w);
+    ctx.save();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(0,255,255,0.45)";
+    ctx.fillStyle = "rgba(0,0,0,0.65)";
+    ctx.font = `${Math.max(10, Math.min(14, 11 + factor))}px sans-serif`;
+    ctx.textBaseline = "top";
+    const label = (text, x, y) => {
+      const w = ctx.measureText(text).width + 4;
+      ctx.fillStyle = "rgba(0,0,0,0.65)";
+      ctx.fillRect(x, y, w, 14);
+      ctx.fillStyle = "#7ff";
+      ctx.fillText(text, x + 2, y + 1);
+    };
+    const firstX = Math.ceil(region.x / step) * step;
+    for (let x = firstX; x < region.x + region.w; x += step) {
+      const vx = Math.round((x - region.x) * factor) + 0.5;
+      ctx.beginPath();
+      ctx.moveTo(vx, 0);
+      ctx.lineTo(vx, height);
+      ctx.stroke();
+      label(String(x), vx + 1, 1);
+    }
+    const firstY = Math.ceil(region.y / step) * step;
+    for (let y = firstY; y < region.y + region.h; y += step) {
+      const vy = Math.round((y - region.y) * factor) + 0.5;
+      ctx.beginPath();
+      ctx.moveTo(0, vy);
+      ctx.lineTo(width, vy);
+      ctx.stroke();
+      label(String(y), 1, vy + 1);
+    }
+    ctx.restore();
+  }
+  const drawn = [];
+  rects.forEach((item, index) => {
+    const rect = toRect(item.rect);
+    if (!rect) return;
+    const color = item.color || PALETTE[index % PALETTE.length];
+    const view = toView(rect);
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(view.x, view.y, view.w, view.h);
+    if (item.label) {
+      ctx.font = `12px ${LABEL_FONT}`;
+      ctx.textBaseline = "top";
+      const text = /[^\x00-\x7f]/.test(String(item.label)) ? `#${index + 1}` : String(item.label);
+      const w = ctx.measureText(text).width + 6;
+      const above = view.y >= 16;
+      const ty = above ? view.y - 16 : view.y + 1;
+      ctx.fillStyle = color;
+      ctx.fillRect(view.x, ty, w, 15);
+      ctx.fillStyle = "#fff";
+      ctx.fillText(text, view.x + 3, ty + 1);
+    }
+    ctx.restore();
+    drawn.push({ label: item.label ? `#${index + 1} ${item.label}` : `#${index + 1}`, rect: [rect.x, rect.y, rect.x + rect.w, rect.y + rect.h] });
+  });
+  return { canvas, crop: region, scale: factor, rects: drawn };
+}
+
+// src/core/calibrate.js
+function inkBounds(canvas, threshold = 40) {
+  if (!canvas || canvas.width < 1 || canvas.height < 1) return null;
+  const { width, height } = canvas;
+  const data = canvas.getContext("2d").getImageData(0, 0, width, height).data;
+  let x0 = width;
+  let y0 = height;
+  let x1 = -1;
+  let y1 = -1;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (data[(y * width + x) * 4 + 3] > threshold) {
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        if (y > y1) y1 = y;
+      }
+    }
+  }
+  return x1 < 0 ? null : [x0, y0, x1 + 1, y1 + 1];
+}
+var round = (value) => Math.round(value * 100) / 100;
+function calibrateText(doc, hasFont, { layers } = {}) {
+  const wanted = layers && layers.length ? new Set(layers.map(String)) : null;
+  const rows = [];
+  for (const entry of doc.entries) {
+    if (!entry.text || !entry.leafId) continue;
+    if (wanted && !wanted.has(entry.name) && !wanted.has(entry.fullName) && !wanted.has(entry.id)) continue;
+    const leaf = doc.leaves.find((item) => item.id === entry.leafId);
+    if (!leaf) continue;
+    const row = { layer: entry.fullName || entry.name, text: entry.text.value.slice(0, 24) };
+    const original = leaf.__raster || { canvas: leaf.canvas, left: leaf.left, top: leaf.top };
+    const before = inkBounds(original.canvas);
+    if (!before) {
+      rows.push({ ...row, ok: false, note: "\u539F\u56FE\u5C42\u6CA1\u6709\u50CF\u7D20" });
+      continue;
+    }
+    const orig = [before[0] + original.left, before[1] + original.top, before[2] + original.left, before[3] + original.top];
+    if (!leaf.__raster) leaf.__raster = { canvas: leaf.canvas, left: leaf.left, top: leaf.top, width: leaf.width, height: leaf.height };
+    else restoreTextLeaf(leaf);
+    try {
+      const warnings = synthesizeTextLeaf(leaf, entry.text, { value: entry.text.value, dx: 0 }, hasFont);
+      const after = inkBounds(leaf.canvas);
+      if (!after) {
+        rows.push({ ...row, ok: false, note: "\u91CD\u7ED8\u540E\u6CA1\u6709\u50CF\u7D20", warnings });
+        continue;
+      }
+      const re = [after[0] + leaf.left, after[1] + leaf.top, after[2] + leaf.left, after[3] + leaf.top];
+      const ow = orig[2] - orig[0];
+      const oh = orig[3] - orig[1];
+      const rw = re[2] - re[0];
+      const rh = re[3] - re[1];
+      rows.push({
+        ...row,
+        ok: true,
+        orig,
+        rendered: re,
+        widthRatio: round(rw / ow),
+        heightRatio: round(rh / oh),
+        // Centre offsets: positive dx = engine draws to the right, dy = lower.
+        dx: round((re[0] + re[2]) / 2 - (orig[0] + orig[2]) / 2),
+        dy: round((re[1] + re[3]) / 2 - (orig[1] + orig[3]) / 2),
+        // Top and bottom edge gaps separate "wrong size" from "wrong baseline".
+        topGap: re[1] - orig[1],
+        bottomGap: re[3] - orig[3],
+        warnings
+      });
+    } catch (error) {
+      rows.push({ ...row, ok: false, note: `\u91CD\u7ED8\u5931\u8D25\uFF1A${error?.message || error}` });
+    } finally {
+      restoreTextLeaf(leaf);
+    }
+  }
+  return rows;
+}
+
+// src/core/draft-rules.js
+var ROLE_GROUPS = [
+  ["headline", /一级|主标|利益点|headline|title/i],
+  ["subhead", /二级|副标|subhead|sub/i],
+  ["detail", /三级|detail|短句/i],
+  ["product_name", /产品名|商品名|品名|product.?name/i]
+];
+var GIFT_TITLE = /^\s*(买即赠|满\s*\d+\s*(?:元)?\s*(?:送|赠)|买\s*\d+\s*(?:送|赠))\s*$/;
+var NUMBER = /^\s*[¥￥$]?\s*\d+(?:\.\d+)?\s*$/;
+var round2 = (value, digits = 0) => {
+  const factor = 10 ** digits;
+  return Math.round(value * factor) / factor;
+};
+var hex = (color) => `#${(color || [0, 0, 0]).slice(0, 3).map((n) => Math.round(n).toString(16).padStart(2, "0")).join("").toUpperCase()}`;
+var hasCjk = (text) => /[㐀-鿿]/.test(text);
+function rectOf(entry) {
+  const [x0, y0, x1, y1] = entry.bounds;
+  return { x0, y0, x1, y1, w: x1 - x0, h: y1 - y0, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+}
+function textInfo(entry) {
+  const text = entry.text;
+  const scale = text.scale > 0 ? text.scale : 1;
+  const sizes = (text.runs || []).map((run) => (run.size || 0) * scale).filter((n) => n > 0);
+  return { scale, px: sizes.length ? Math.max(...sizes) : 0, run: text.runs?.[0] || {} };
+}
+function digitSplit(entry) {
+  const chars = charStyles(entry.text.runs || [], entry.text.value);
+  const scale = entry.text.scale > 0 ? entry.text.scale : 1;
+  const pick = (test) => {
+    const found = chars.find((style, index) => test(entry.text.value[index] || ""));
+    return found ? { family: found.family, sizePx: round2((found.size || 0) * scale), color: hex(found.color) } : null;
+  };
+  return { digit: pick((ch) => /\d/.test(ch)), text: pick((ch) => !/[\d\s]/.test(ch)) };
+}
+function draftRules(doc, { giftFiles = [], sheetName, templateName, sample } = {}) {
+  const byId = new Map(doc.entries.map((entry) => [entry.id, entry]));
+  const ancestors = (entry) => {
+    const names = [];
+    let parent = entry.parentId ? byId.get(entry.parentId) : null;
+    while (parent) {
+      names.unshift(parent.name);
+      parent = parent.parentId ? byId.get(parent.parentId) : null;
+    }
+    return names;
+  };
+  const hiddenByAncestor = (entry) => {
+    let parent = entry.parentId ? byId.get(entry.parentId) : null;
+    while (parent) {
+      if (parent.psdHidden) return true;
+      parent = parent.parentId ? byId.get(parent.parentId) : null;
+    }
+    return false;
+  };
+  const visible = (entry) => !entry.psdHidden && !hiddenByAncestor(entry);
+  const texts = doc.entries.filter((entry) => entry.kind === "text" && entry.text && entry.bounds).map((entry) => ({ entry, rect: rectOf(entry), ...textInfo(entry), groups: ancestors(entry), visible: visible(entry) }));
+  const layers = {};
+  const evidence = {};
+  const unresolved = [];
+  const used = /* @__PURE__ */ new Set();
+  const assign = (key, item, reason) => {
+    layers[key] = item.entry.fullName;
+    evidence[key] = { layer: item.entry.fullName, reason };
+    used.add(item.entry.id);
+  };
+  const titles = texts.filter((item) => item.visible && GIFT_TITLE.test(item.entry.text.value)).sort((a, b) => a.rect.y0 - b.rect.y0);
+  const giftSlots = [];
+  titles.forEach((title, index) => {
+    const key = `gift_slot${index + 1}`;
+    assign(`${key}_title`, title, `\u6587\u5B57\u300C${title.entry.text.value.trim()}\u300D\u7B26\u5408\u8D60\u54C1\u6807\u9898\u6A21\u5F0F`);
+    const below = texts.filter(
+      (item) => item.visible && !used.has(item.entry.id) && item.rect.y0 >= title.rect.y1 - 4 && item.rect.x0 < title.rect.x1 + 100 && item.rect.x1 > title.rect.x0 - 100 && !NUMBER.test(item.entry.text.value)
+    ).sort((a, b) => {
+      const sameA = a.entry.parentId === title.entry.parentId ? 0 : 1;
+      const sameB = b.entry.parentId === title.entry.parentId ? 0 : 1;
+      return sameA - sameB || a.rect.y0 - b.rect.y0;
+    });
+    const next = titles[index + 1];
+    const name2 = below.find((item) => !next || item.rect.y0 < next.rect.y0);
+    if (name2) assign(`${key}_name`, name2, "\u8D60\u54C1\u6807\u9898\u4E0B\u65B9\u3001\u6C34\u5E73\u91CD\u53E0\u7684\u7B2C\u4E00\u6BB5\u6587\u5B57");
+    else unresolved.push(`${key}_name\uFF1A\u6CA1\u627E\u5230\u6807\u9898\u4E0B\u65B9\u7684\u6587\u5B57`);
+    giftSlots.push({ index, title, name: name2 });
+  });
+  if (!titles.length) unresolved.push("gift\uFF1A\u6CA1\u6709\u8BC6\u522B\u5230\u8D60\u54C1\u6807\u9898\uFF08\u4E70\u5373\u8D60 / \u6EE1N\u9001\uFF09");
+  const numbers = texts.filter((item) => NUMBER.test(item.entry.text.value));
+  const priceShown = numbers.filter((item) => item.visible).sort((a, b) => b.px - a.px)[0];
+  const priceHidden = numbers.filter((item) => !item.visible).sort((a, b) => b.px - a.px)[0];
+  if (priceShown) assign("price_value", priceShown, `\u53EF\u89C1\u7684\u7EAF\u6570\u5B57\u6587\u5B57\uFF0C\u5B57\u53F7\u6700\u5927\uFF08${round2(priceShown.px)}px\uFF09`);
+  else unresolved.push("price_value\uFF1A\u6CA1\u6709\u53EF\u89C1\u7684\u7EAF\u6570\u5B57\u6587\u5B57\u5C42");
+  if (priceHidden) {
+    layers.price_legacy = priceHidden.entry.fullName;
+    evidence.price_legacy = { layer: priceHidden.entry.fullName, reason: "\u9690\u85CF\u7684\u7EAF\u6570\u5B57\u6587\u5B57\u5C42\uFF08\u65E7\u4EF7\u683C\uFF0C\u4FDD\u6301\u9690\u85CF\uFF09" };
+    used.add(priceHidden.entry.id);
+  }
+  for (const [key, pattern] of ROLE_GROUPS) {
+    const hit = texts.find((item) => item.visible && !used.has(item.entry.id) && item.groups.some((name2) => pattern.test(name2)));
+    if (hit) assign(key, hit, `\u6240\u5728\u5206\u7EC4\u300C${hit.groups.find((name2) => pattern.test(name2))}\u300D`);
+  }
+  const free = () => texts.filter((item) => item.visible && !used.has(item.entry.id));
+  if (!layers.headline) {
+    const top = free().filter((item) => item.rect.cy < doc.height * 0.3).sort((a, b) => b.px - a.px)[0];
+    if (top) assign("headline", top, "\u753B\u5E03\u4E0A\u90E8 30% \u5185\u5B57\u53F7\u6700\u5927\u7684\u6587\u5B57\uFF08\u6309\u4F4D\u7F6E\u63A8\u65AD\uFF09");
+  }
+  if (!layers.subhead && layers.headline) {
+    const head2 = texts.find((item) => item.entry.fullName === layers.headline);
+    const sub2 = free().filter((item) => item.rect.y0 >= head2.rect.y1 - 4 && item.rect.cy < doc.height * 0.4).sort((a, b) => a.rect.y0 - b.rect.y0)[0];
+    if (sub2) assign("subhead", sub2, "\u4E00\u7EA7\u6587\u6848\u6B63\u4E0B\u65B9\u7684\u7B2C\u4E00\u6BB5\u6587\u5B57\uFF08\u6309\u4F4D\u7F6E\u63A8\u65AD\uFF09");
+  }
+  if (!layers.detail) {
+    const detail2 = free().filter((item) => item.rect.cy > doc.height * 0.85).sort((a, b) => b.px - a.px)[0];
+    if (detail2) assign("detail", detail2, "\u753B\u5E03\u5E95\u90E8 15% \u5185\u5B57\u53F7\u6700\u5927\u7684\u6587\u5B57\uFF08\u6309\u4F4D\u7F6E\u63A8\u65AD\uFF09");
+  }
+  if (!layers.product_name) {
+    const name2 = free().filter((item) => item.rect.cy > doc.height * 0.76 && item.rect.cy < doc.height * 0.88)[0];
+    if (name2) assign("product_name", name2, "\u5546\u54C1\u56FE\u4E0B\u65B9\u3001\u4EF7\u683C\u6761\u4E0A\u65B9\u7684\u6587\u5B57\uFF08\u6309\u4F4D\u7F6E\u63A8\u65AD\uFF09");
+  }
+  for (const key of ["headline", "subhead", "detail", "product_name"]) {
+    if (!layers[key]) unresolved.push(`${key}\uFF1A\u6CA1\u6709\u8BC6\u522B\u5230\u5BF9\u5E94\u6587\u5B57\u5C42`);
+  }
+  const icons = texts.filter((item) => item.visible && !used.has(item.entry.id) && item.groups.some((name2) => /icon|角标|标签/i.test(name2)));
+  const iconZh = icons.find((item) => hasCjk(item.entry.text.value));
+  const iconEn = icons.find((item) => !hasCjk(item.entry.text.value));
+  if (iconZh) assign("icon_zh", iconZh, "\u5206\u7EC4\u540D\u542B icon\uFF0C\u6587\u5B57\u4E3A\u4E2D\u6587");
+  if (iconEn) assign("icon_en", iconEn, "\u5206\u7EC4\u540D\u542B icon\uFF0C\u6587\u5B57\u4E3A\u82F1\u6587");
+  const slotCandidates = doc.entries.filter((entry) => entry.kind === "layer" && entry.hasPixels && entry.bounds && visible(entry)).map((entry) => ({ entry, rect: rectOf(entry), groups: ancestors(entry) })).filter((item) => item.groups.some((name2) => /产品|商品|product|主体/i.test(name2))).sort((a, b) => b.rect.w * b.rect.h - a.rect.w * a.rect.h);
+  const slots = {};
+  let slotRect = null;
+  if (slotCandidates[0]) {
+    slots.product = slotCandidates[0].entry.fullName;
+    slotRect = slotCandidates[0].rect;
+    evidence.product_slot = { layer: slots.product, reason: "\u4EA7\u54C1\u5206\u7EC4\u91CC\u6700\u5927\u7684\u53EF\u89C1\u50CF\u7D20\u5C42" };
+  } else if (doc.slots && doc.slots.size) {
+    unresolved.push("slots.product\uFF1A\u5206\u7EC4\u540D\u65E0\u6CD5\u5224\u65AD\uFF0C\u4F7F\u7528\u5F15\u64CE\u81EA\u52A8\u8BC6\u522B\u7684\u5546\u54C1\u4F4D\u524D\u8BF7\u5148\u786E\u8BA4");
+  } else {
+    unresolved.push("slots.product\uFF1A\u6CA1\u6709\u627E\u5230\u5546\u54C1\u4F4D");
+  }
+  const byKey = (key) => texts.find((item) => item.entry.fullName === layers[key]);
+  const type = {};
+  const head = byKey("headline");
+  if (head) {
+    const { digit, text } = digitSplit(head.entry);
+    const body = text || { family: head.run.family, sizePx: round2(head.px), color: hex(head.run.color) };
+    type.level1 = {
+      fitWidth: round2(head.rect.w),
+      minPx: round2(body.sizePx * 0.67),
+      text: body,
+      digit: digit || body
+    };
+  }
+  const sub = byKey("subhead");
+  if (sub) type.level2 = { family: sub.run.family, sizePx: round2(sub.px), color: hex(sub.run.color) };
+  const detail = byKey("detail");
+  if (detail) {
+    type.level3 = {
+      family: detail.run.family,
+      bins: [{ maxChars: null, sizePx: round2(detail.px) }],
+      fitWidth: round2(detail.rect.w),
+      minPx: round2(detail.px * 0.45)
+    };
+  }
+  const name = byKey("product_name");
+  if (name) {
+    const length = Math.max(1, name.entry.text.value.trim().length);
+    type.productName = {
+      family: name.run.family,
+      sizePx: round2(name.px, 1),
+      centerX: round2(name.rect.cx),
+      anchorX: round2(name.rect.x0),
+      widthPerChar: round2(name.rect.w / length, 1)
+    };
+  }
+  const price = byKey("price_value");
+  if (price) {
+    const runs = price.entry.text.runs || [];
+    const first = runs[0];
+    const rest = runs.slice(1).filter((run) => run.size);
+    const decimal = rest.length ? rest[rest.length - 1].size / (first.size || 1) : null;
+    type.price = {
+      family: first.family,
+      color: hex(first.color),
+      sizePx2: round2((first.size || 0) * price.scale),
+      ...decimal ? { decimalScale: round2(decimal, 2) } : {}
+    };
+  }
+  const t1 = giftSlots[0];
+  if (t1) {
+    type.giftTitle = { family: t1.title.run.family, sizePx: round2(t1.title.px) };
+    if (t1.name) type.giftName = { family: t1.name.run.family, sizePx: round2(t1.name.px) };
+  }
+  if (iconZh) type.iconZh = { family: iconZh.run.family, sizePx: round2(iconZh.px) };
+  if (iconEn) type.iconEn = { family: iconEn.run.family, sizePx: round2(iconEn.px) };
+  const named = giftSlots.filter((slot) => slot.name);
+  const cardLeft = named.length ? Math.min(...named.map((slot) => slot.name.rect.x0)) : 0;
+  const cardRight = named.length ? Math.max(...named.map((slot) => slot.name.rect.x1)) : 0;
+  const giftSlotRules = named.map((slot, index) => ({
+    id: index === 0 ? "upper" : index === 1 ? "lower" : `slot${index + 1}`,
+    titleKey: `gift_slot${slot.index + 1}_title`,
+    nameKey: `gift_slot${slot.index + 1}_name`,
+    anchor: {
+      name: `gift_slot${slot.index + 1}_img`,
+      bounds: [
+        round2(cardLeft + 4),
+        round2(slot.title.rect.y1 + 7),
+        round2(cardRight - 1),
+        round2(slot.name.rect.y0 - 9)
+      ]
+    }
+  }));
+  const tiers = giftSlots.slice(0).map((slot) => {
+    const title = slot.title.entry.text.value.trim();
+    const match = /满\s*(\d+)/.exec(title);
+    return match ? { id: `full${match[1]}`, title, name: slot.name ? slot.name.entry.text.value.trim().split("\n")[0] : "" } : null;
+  }).filter(Boolean);
+  const catalog = giftFiles.map((file) => {
+    const stem = file.replace(/\.[^.]+$/, "");
+    return { name: stem, file };
+  });
+  const fileList = giftFiles.length ? `\uFF1B\u5019\u9009\u56FE\u7247\uFF1A${giftFiles.join("\u3001")}` : "";
+  for (const tier of tiers) {
+    unresolved.push(`gifts.tiers.${tier.id}\uFF1APSD \u53EA\u6709\u6587\u6848\u300C${tier.title} / ${tier.name}\u300D\uFF0C\u9700\u8981\u6307\u5B9A\u5B83\u5BF9\u5E94\u7684\u56FE\u7247${fileList}`);
+  }
+  if (giftFiles.length) {
+    unresolved.push("gifts.catalog\uFF1A\u53EA\u80FD\u7528\u6587\u4EF6\u540D\u4F5C\u4E3A\u8D60\u54C1\u540D\uFF1B\u9700\u6C42\u8868\u91CC\u7684\u8D60\u54C1\u540D\uFF08\u542B *N\u3001+ \u7EC4\u5408\uFF09\u8981\u5BF9\u5E94\u5230\u6587\u4EF6\uFF0C\u8BF7\u8865 aliases / files");
+  }
+  const rules = {
+    version: 1,
+    template: templateName || doc.fileName || doc.name,
+    canvas: { width: doc.width, height: doc.height },
+    sheet: {
+      name: sheetName || "\u4E3B\u56FE",
+      columns: Object.fromEntries(
+        Object.entries(DEFAULT_COLUMN_ALIASES).map(([key, aliases]) => [key, Array.isArray(aliases) ? aliases : [aliases]])
+      )
+    },
+    layers,
+    slots,
+    type,
+    gifts: {
+      buyGiftTitle: titles.find((item) => /买即赠/.test(item.entry.text.value))?.entry.text.value.trim() || "\u4E70\u5373\u8D60",
+      catalog,
+      tiers,
+      slots: giftSlotRules
+    },
+    containers: price ? { price_value: [round2(price.rect.x0 - 60), round2(price.rect.y0 - 12), round2(price.rect.x1 + 25), round2(price.rect.y1 + 26)] } : {},
+    validate: {
+      ...price ? { priceRegion: [round2(price.rect.x0 - 60), round2(price.rect.y0 - 12), round2(price.rect.x1 + 25), round2(price.rect.y1 + 26)] } : {},
+      ...price ? { priceRed: { r: price.run.color?.[0] ?? 204, g: price.run.color?.[1] ?? 48, b: price.run.color?.[2] ?? 70, tol: 45 } } : {},
+      ...slotRect ? { productRegion: [slotRect.x0 - 48, slotRect.y0 - 43, slotRect.x1 + 60, slotRect.y1 + 91].map(round2) } : {}
+    },
+    export: { formats: ["jpg"], quality: 95, filename: "{sku}-{name}.{ext}" }
+  };
+  const iconGroups = [...new Set([layers.icon_zh, layers.icon_en].filter(Boolean).map((name2) => name2.split("/").slice(0, -1).join("/")))].filter(Boolean);
+  if (iconGroups.length) {
+    rules.variants = { icon: { NEW: { show: iconGroups, hide: [] }, HOT: { show: iconGroups, hide: [] }, NONE: { show: [], hide: iconGroups } } };
+  }
+  const notes = [
+    "\u4E00\u7EA7/\u4E8C\u7EA7\u6587\u6848\u7684\u5C42\u7EA7\u89C4\u5219\uFF08\u5229\u76CA\u70B9\u4E3A / \u65F6\u4E8C\u7EA7\u4E0A\u63D0\uFF09\u3001\u8D60\u54C1\u987A\u5EF6\u4F18\u5148\u7EA7\u3001\u4E09\u7EA7\u6587\u6848\u6309\u5B57\u6570\u5206\u6863\uFF0CPSD \u91CC\u6CA1\u6709\uFF0C\u9700\u8981\u5BF9\u7167\u4FEE\u6539\u8BF4\u660E\u8865\u5145\u3002",
+    ...giftSlots.length ? ["PSD \u53EA\u753B\u4E86\u5DF2\u5C55\u793A\u7684\u8D60\u54C1\u6863\u4F4D\uFF1B\u5982\u679C\u4FEE\u6539\u8BF4\u660E\u91CC\u6709\u7B2C\u4E09\u6863\uFF0C\u9700\u8981\u624B\u52A8\u8865\u8FDB gifts.tiers\u3002"] : []
+  ];
+  return { rules, evidence, unresolved, notes };
+}
+
 // src/server.js
 setCanvasFactory((width, height) => createCanvas2(width, height));
 (0, import_ag_psd2.initializeCanvas)((width, height) => createCanvas2(width, height));
 var IMAGE_EXTENSIONS = /* @__PURE__ */ new Set([".png", ".jpg", ".jpeg", ".webp", ".bmp"]);
+var FONT_EXTENSIONS = /* @__PURE__ */ new Set([".ttf", ".otf", ".ttc", ".otc", ".woff", ".woff2"]);
 var templateCache = /* @__PURE__ */ new Map();
+var registeredFamilies = /* @__PURE__ */ new Set();
+async function registerFonts(cwd, { dir, paths } = {}) {
+  const files = [];
+  if (dir) {
+    const absolute = await resolveInWorkspace(cwd, dir);
+    const stat = await fs3.stat(absolute);
+    if (stat.isDirectory()) {
+      const entries = await fs3.readdir(absolute, { withFileTypes: true });
+      for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+        if (entry.isFile()) files.push(path3.join(absolute, entry.name));
+      }
+    } else {
+      files.push(absolute);
+    }
+  }
+  for (const item of paths || []) files.push(await resolveInWorkspace(cwd, item));
+  const registered = [];
+  const skipped = [];
+  for (const full of files) {
+    const extension = path3.extname(full).toLowerCase();
+    if (!FONT_EXTENSIONS.has(extension)) {
+      skipped.push(path3.basename(full));
+      continue;
+    }
+    const stem = path3.basename(full, extension).replace(/_+/g, " ").replace(/\s+/g, " ").trim() || "font";
+    const aliases = [stem];
+    try {
+      const postScript = readFontPostScriptName(await fs3.readFile(full));
+      if (postScript) aliases.push(postScript);
+    } catch {
+    }
+    for (const alias of [...aliases]) {
+      const mapped = fontFamilyOf(alias);
+      if (mapped && !aliases.includes(mapped) && !GlobalFonts.has(mapped)) aliases.push(mapped);
+    }
+    let ok = false;
+    for (const alias of new Set(aliases)) {
+      try {
+        if (GlobalFonts.registerFromPath(full, alias) !== false) {
+          registered.push(alias);
+          registeredFamilies.add(alias);
+          ok = true;
+        }
+      } catch {
+      }
+    }
+    if (!ok) skipped.push(path3.basename(full));
+  }
+  return { registered: [...new Set(registered)], skipped };
+}
+function templateFamilies(doc) {
+  const families = /* @__PURE__ */ new Set();
+  for (const entry of doc.entries) {
+    for (const run of entry.text?.runs || []) if (run.family) families.add(run.family);
+  }
+  for (const edit of doc.textEdits?.values() || []) {
+    if (edit.font) families.add(String(edit.font));
+    for (const run of edit.runs || []) if (run.family) families.add(String(run.family));
+  }
+  return [...families].sort();
+}
+function isInside(root, target) {
+  const relative = path3.relative(root, target);
+  return relative === "" || !relative.startsWith("..") && !path3.isAbsolute(relative);
+}
 async function resolveInWorkspace(cwd, candidate, { mustExist = true } = {}) {
   if (typeof candidate !== "string" || candidate.trim() === "") {
     throw new Error("A non-empty path is required");
   }
-  const absolute = path.resolve(cwd, candidate);
-  const relative = path.relative(cwd, absolute);
-  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+  const absolute = path3.resolve(cwd, candidate);
+  if (!isInside(cwd, absolute)) {
     throw new Error(`Path must stay inside the session workspace: ${candidate}`);
   }
+  const realCwd = await fs3.realpath(cwd).catch(() => cwd);
+  const insideWorkspace = (real) => isInside(cwd, real) || isInside(realCwd, real);
+  const outside = () => new Error(`Path resolves outside the session workspace: ${candidate}`);
   if (mustExist) {
     let real;
     try {
-      real = await fs.realpath(absolute);
+      real = await fs3.realpath(absolute);
     } catch {
       throw new Error(`Path does not exist: ${candidate}`);
     }
-    const realRelative = path.relative(cwd, real);
-    if (realRelative.startsWith("..") || path.isAbsolute(realRelative)) {
-      throw new Error(`Path resolves outside the session workspace: ${candidate}`);
-    }
+    if (!insideWorkspace(real)) throw outside();
     return real;
+  }
+  const link = await fs3.lstat(absolute).catch(() => null);
+  if (link) {
+    const real = await fs3.realpath(absolute).catch(() => null);
+    if (!real || !insideWorkspace(real)) throw outside();
+  }
+  let ancestor = path3.dirname(absolute);
+  for (; ; ) {
+    const real = await fs3.realpath(ancestor).catch(() => null);
+    if (real) {
+      if (!insideWorkspace(real)) throw outside();
+      break;
+    }
+    const parent = path3.dirname(ancestor);
+    if (parent === ancestor) break;
+    ancestor = parent;
   }
   return absolute;
 }
+var editStates = /* @__PURE__ */ new Map();
+function editStateFor(absolutePath, stat) {
+  let state = editStates.get(absolutePath);
+  if (state && (state.mtimeMs !== stat.mtimeMs || state.size !== stat.size)) {
+    const hadEdits = state.textEdits.size > 0 || state.elements.length > 0 || !!state.pinnedSlots;
+    state = { ...freshEditState(stat), dropped: hadEdits ? "template changed on disk since the edits were made" : void 0 };
+    editStates.set(absolutePath, state);
+  }
+  if (!state) {
+    state = freshEditState(stat);
+    editStates.set(absolutePath, state);
+  }
+  return state;
+}
+function freshEditState(stat) {
+  return {
+    mtimeMs: stat.mtimeMs,
+    size: stat.size,
+    textEdits: /* @__PURE__ */ new Map(),
+    elements: [],
+    pinnedSlots: null,
+    history: []
+  };
+}
+function snapshotEdits(state) {
+  return {
+    textEdits: [...state.textEdits.entries()].map(([key, value]) => [key, { ...value }]),
+    elements: state.elements.slice(),
+    pinnedSlots: state.pinnedSlots ? [...state.pinnedSlots] : null
+  };
+}
+function pushHistory(doc, absolutePath) {
+  const state = editStates.get(absolutePath);
+  if (!state) return;
+  state.history = state.history || [];
+  state.history.push(snapshotEdits(state));
+  if (state.history.length > 20) state.history.shift();
+}
+function restoreSnapshot(doc, snapshot) {
+  doc.textEdits = new Map(snapshot.textEdits);
+  doc.elements = snapshot.elements.slice();
+  doc.pinnedSlots = snapshot.pinnedSlots ? new Set(snapshot.pinnedSlots) : null;
+  if (snapshot.pinnedSlots) doc.slots = new Set(snapshot.pinnedSlots);
+}
+function applyVisibility(doc, specs, results = []) {
+  for (const spec of specs || []) {
+    const matches = findEntries(doc, spec.layer);
+    if (!matches.length) {
+      results.push({ layer: spec.layer, ok: false, error: "layer not found" });
+      continue;
+    }
+    for (const entry of matches) {
+      if (spec.hidden) doc.hidden.add(entry.id);
+      else doc.hidden.delete(entry.id);
+      results.push({ layer: spec.layer, ok: true, hidden: !!spec.hidden, id: entry.id });
+    }
+  }
+  return results;
+}
+function attachEditState(doc, absolutePath) {
+  if (doc.__editPath === absolutePath) return;
+  Object.defineProperty(doc, "__editPath", { value: absolutePath, enumerable: false });
+  for (const key of ["textEdits", "elements", "pinnedSlots"]) {
+    Object.defineProperty(doc, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => editStates.get(absolutePath)[key],
+      set: (value) => {
+        editStates.get(absolutePath)[key] = value;
+      }
+    });
+  }
+}
 async function loadTemplateDoc(absolutePath) {
-  const stat = await fs.stat(absolutePath);
+  const stat = await fs3.stat(absolutePath);
+  editStateFor(absolutePath, stat);
   const cached = templateCache.get(absolutePath);
-  if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) return cached.doc;
-  const buffer = await fs.readFile(absolutePath);
+  if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) {
+    attachEditState(cached.doc, absolutePath);
+    return cached.doc;
+  }
+  const buffer = await fs3.readFile(absolutePath);
   const doc = await parseTemplate({
-    name: path.basename(absolutePath),
+    name: path3.basename(absolutePath),
     size: stat.size,
     arrayBuffer: async () => buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
   });
   if (templateCache.size >= 2) templateCache.delete(templateCache.keys().next().value);
   templateCache.set(absolutePath, { mtimeMs: stat.mtimeMs, size: stat.size, doc });
+  attachEditState(doc, absolutePath);
   return doc;
+}
+function canonicalOverrides(doc, list2) {
+  if (!Array.isArray(list2) || list2.length === 0) return list2;
+  return list2.map((override) => {
+    const target = String(override.layer ?? "");
+    const matches = findEntries(doc, target);
+    const textMatches = matches.filter((item) => item.text);
+    const entry = textMatches[0] || matches[0];
+    return entry ? { ...override, layer: entry.id } : override;
+  });
 }
 function resolveSlots(doc, specs) {
   const ids = [];
+  const missing = [];
   for (const spec of specs) {
     if (/^l\d+$/.test(spec) && doc.leaves.some((leaf) => leaf.id === spec)) {
       ids.push(spec);
       continue;
     }
-    const matches = doc.leaves.filter((leaf) => leaf.name === spec);
+    const matches = findLeaves(doc, spec);
     if (matches.length === 0) {
-      const names = doc.leaves.map((leaf) => leaf.name);
-      throw new Error(`Layer not found: ${spec}. Pixel layers: ${names.join(" | ")}`);
+      missing.push(spec);
+      continue;
     }
     if (matches.length > 1) {
       const visible = matches.filter((leaf) => isLeafVisible(doc, leaf));
@@ -17152,10 +19572,14 @@ function resolveSlots(doc, specs) {
         continue;
       }
       throw new Error(
-        `Layer name is ambiguous (${matches.length} matches): ${spec}. Use one of the layer ids: ${matches.map((leaf) => leaf.id).join(", ")}`
+        `Layer name is ambiguous (${matches.length} matches): ${spec}. Use one of the layer ids or a full path: ${matches.map((leaf) => leaf.fullName || leaf.id).join(", ")}`
       );
     }
     ids.push(matches[0].id);
+  }
+  if (!ids.length && missing.length) {
+    const names = doc.leaves.map((leaf) => leaf.fullName || leaf.name);
+    throw new Error(`Layer not found: ${missing.join(", ")}. Pixel layers: ${names.join(" | ")}`);
   }
   return ids;
 }
@@ -17195,11 +19619,11 @@ async function listSkuFiles(cwd, { skus, skuDir }) {
   }
   if (skuDir) {
     const directory = await resolveInWorkspace(cwd, skuDir);
-    const entries = await fs.readdir(directory, { withFileTypes: true });
+    const entries = await fs3.readdir(directory, { withFileTypes: true });
     for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name, "zh-Hans-CN"))) {
       if (!entry.isFile()) continue;
-      if (!IMAGE_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) continue;
-      files.push(path.join(directory, entry.name));
+      if (!IMAGE_EXTENSIONS.has(path3.extname(entry.name).toLowerCase())) continue;
+      files.push(path3.join(directory, entry.name));
     }
   }
   return files;
@@ -17215,10 +19639,13 @@ async function inspectTemplate({ cwd, template }) {
       depth: entry.depth,
       visible: isEntryVisible(doc, entry.id)
     };
+    if (entry.fullName && entry.fullName !== entry.name) layer.fullName = entry.fullName;
+    if (entry.name !== entry.name.trim()) layer.namePadded = true;
     if (entry.leafId) layer.leafId = entry.leafId;
     if (entry.kind === "text") layer.text = true;
     if (entry.text) {
       layer.textContent = entry.text.value;
+      layer.textAlign = entry.text.align;
       layer.runCount = entry.text.runs.length;
       if (entry.text.runs.length) {
         layer.runs = entry.text.runs.slice(0, 8).map(({ family, ...run }) => family ? { ...run, family } : run);
@@ -17229,14 +19656,93 @@ async function inspectTemplate({ cwd, template }) {
     return layer;
   });
   const suggestedIds = suggestSlots(doc);
+  const named = preferredSlotLeaves(doc);
+  const slotWarnings = [];
+  if (!named.length && suggestedIds.length) {
+    slotWarnings.push(
+      "No layer named product_slot / \u5546\u54C1\u4F4D / \u4EA7\u54C1\u4F4D; auto-detected slots may be wrong (E01). Pass slots explicitly."
+    );
+  }
+  const counts = /* @__PURE__ */ new Map();
+  for (const entry of doc.entries) counts.set(entry.name, (counts.get(entry.name) || 0) + 1);
+  for (const [name, count] of counts) {
+    if (count > 1) slotWarnings.push(`Duplicate layer name (${count}): ${JSON.stringify(name)} \u2014 use fullName`);
+  }
   return {
     name: doc.name,
     width: doc.width,
     height: doc.height,
     layers,
     truncated: doc.entries.length > layerLimit,
-    suggestedSlots: slotSummary(doc, suggestedIds)
+    suggestedSlots: slotSummary(doc, suggestedIds),
+    namedSlots: slotSummary(doc, named.map((leaf) => leaf.id)),
+    anchors: anchorLeaves(doc).slice(0, 40).map((leaf) => ({
+      name: leaf.name,
+      fullName: leaf.fullName,
+      leafId: leaf.id,
+      bounds: [leaf.left, leaf.top, leaf.left + leaf.width, leaf.top + leaf.height]
+    })),
+    ...slotWarnings.length ? { slotWarnings } : {}
   };
+}
+function schemaViolations(schema, value, at, out = []) {
+  const { type } = schema;
+  const matches = type === "array" ? Array.isArray(value) : type === "object" ? value !== null && typeof value === "object" && !Array.isArray(value) : type === "integer" ? Number.isInteger(value) : type === "number" ? typeof value === "number" && Number.isFinite(value) : typeof value === type;
+  if (!matches) {
+    out.push(`${at} must be ${type === "integer" ? "an integer" : `a${type === "object" || type === "array" ? "n" : ""} ${type}`}`);
+    return out;
+  }
+  if (schema.enum && !schema.enum.includes(value)) out.push(`${at} must be one of ${schema.enum.join(", ")}`);
+  if (type === "array" && schema.items) value.forEach((item, index) => schemaViolations(schema.items, item, `${at}[${index}]`, out));
+  if (type === "object") {
+    for (const key of schema.required || []) if (value[key] === void 0) out.push(`${at}.${key} is required`);
+    for (const [key, item] of Object.entries(value)) {
+      const sub = schema.properties && schema.properties[key];
+      if (sub) schemaViolations(sub, item, `${at}.${key}`, out);
+      else if (schema.additionalProperties === false) out.push(`${at}.${key} is not a known field`);
+    }
+  }
+  return out;
+}
+function assertTextBySku(textBySku) {
+  if (textBySku == null) return;
+  const problems = schemaViolations({ type: "object" }, textBySku, "textBySku");
+  if (!problems.length) {
+    for (const [sku, list2] of Object.entries(textBySku)) {
+      schemaViolations({ type: "array", items: TEXT_OVERRIDE_SCHEMA }, list2, `textBySku[${JSON.stringify(sku)}]`, problems);
+    }
+  }
+  if (problems.length) {
+    throw new Error(`Invalid textBySku: ${problems.slice(0, 5).join("; ")}${problems.length > 5 ? ` (+${problems.length - 5} more)` : ""}`);
+  }
+}
+function filenameFromSafe(template, values) {
+  return String(template || "{sku}.{ext}").replace(
+    /\{(\w+)\}/g,
+    (_, key) => values[key] == null ? "" : String(values[key])
+  );
+}
+function mimeOf(format) {
+  if (format === "png") return "image/png";
+  if (format === "webp") return "image/webp";
+  return "image/jpeg";
+}
+function encodeCanvas(canvas, format, quality) {
+  const mime = mimeOf(format);
+  if (format === "png") return canvas.toBuffer(mime);
+  return canvas.toBuffer(mime, Math.round(quality));
+}
+function resizeCanvas(source, width, height) {
+  if (!width && !height) return source;
+  const w = width || Math.round(source.width * height / source.height);
+  const h = height || Math.round(source.height * width / source.width);
+  if (w === source.width && h === source.height) return source;
+  const canvas = createCanvas2(w, h);
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(source, 0, 0, w, h);
+  return canvas;
 }
 async function renderBatch({
   cwd,
@@ -17246,16 +19752,31 @@ async function renderBatch({
   slots = [],
   outDir,
   format = "jpg",
+  formats,
   quality = 92,
   fit = "contain",
   anchor = "center",
   fill = 1,
   adjustments = {},
-  zip = false
+  text,
+  textBySku,
+  fontDir,
+  zip = false,
+  useSessionEdits = true,
+  elements,
+  elementsBySku,
+  visibility,
+  visibilityBySku,
+  nameBySku,
+  filenameTemplate,
+  strictFonts = false,
+  sizes,
+  manifest = false
 }) {
+  assertTextBySku(textBySku);
   const absolute = await resolveInWorkspace(cwd, template);
   const doc = await loadTemplateDoc(absolute);
-  const slotIds = slots.length > 0 ? resolveSlots(doc, slots) : suggestSlots(doc);
+  const slotIds = slots && slots.length > 0 ? resolveSlots(doc, slots) : useSessionEdits && doc.pinnedSlots && doc.pinnedSlots.size ? [...doc.pinnedSlots] : suggestSlots(doc);
   if (slotIds.length === 0) {
     throw new Error(
       "No product slot was detected. Inspect the layer tree and pass one or more slot layer names."
@@ -17267,61 +19788,581 @@ async function renderBatch({
   if (skuFiles.length === 0) {
     throw new Error("No SKU images were found. Pass `skus` paths or a `skuDir` folder.");
   }
+  let fontsRegistered;
+  let fontsSkipped;
+  if (fontDir) {
+    const registration = await registerFonts(cwd, { dir: fontDir });
+    fontsRegistered = registration.registered;
+    fontsSkipped = registration.skipped;
+  }
+  const formatList = (Array.isArray(formats) && formats.length ? formats : [format]).map(
+    (item) => String(item).toLowerCase() === "jpeg" ? "jpg" : String(item).toLowerCase()
+  );
+  for (const item of formatList) {
+    if (!["jpg", "png", "webp"].includes(item)) throw new Error(`Unsupported format: ${item}`);
+  }
+  const textWarnings = [];
+  const savedEdits = useSessionEdits && doc.textEdits && doc.textEdits.size ? canonicalOverrides(doc, [...doc.textEdits.values()]) : null;
+  const batchText = canonicalOverrides(doc, text);
+  const neededFonts = new Set(templateFamilies(doc));
+  for (const family of collectOverrideFonts(text))
+    neededFonts.add(family);
+  if (textBySku) {
+    for (const list2 of Object.values(textBySku)) for (const family of collectOverrideFonts(list2)) neededFonts.add(family);
+  }
+  const missingFonts = [...neededFonts].filter((family) => {
+    if (!family) return false;
+    if (GlobalFonts.has(family)) return false;
+    const mapped = fontFamilyOf(family);
+    return !(mapped && GlobalFonts.has(mapped));
+  });
+  if (strictFonts && missingFonts.length) {
+    throw new Error(`Missing fonts (strictFonts): ${missingFonts.join(", ")}`);
+  }
+  const groups = /* @__PURE__ */ new Map();
+  const used = /* @__PURE__ */ new Set();
+  const primaryExt = formatList[0] === "png" ? "png" : formatList[0] === "webp" ? "webp" : "jpg";
+  const jobs = skuFiles.map((file, index) => {
+    const base = path3.basename(file, path3.extname(file));
+    const fileName = path3.basename(file);
+    const overrides = mergeOverrideLists(
+      mergeOverrideLists(savedEdits, batchText),
+      canonicalOverrides(doc, textBySku ? textBySku[fileName] ?? textBySku[base] : void 0)
+    );
+    const vis = [...visibility || [], ...visibilityBySku && (visibilityBySku[fileName] || visibilityBySku[base]) || []];
+    const els = [...elements || [], ...elementsBySku && (elementsBySku[fileName] || elementsBySku[base]) || []];
+    const signature = JSON.stringify({ overrides, vis, els: els.map((item) => item.source || item) });
+    let group = groups.get(signature);
+    if (!group) {
+      group = { overrides, vis, els, jobs: [] };
+      groups.set(signature, group);
+    }
+    const stem = nameBySku && (nameBySku[fileName] || nameBySku[base]) || (filenameTemplate ? filenameFromSafe(filenameTemplate, { sku: base, name: base, ext: primaryExt }).replace(/\.[^.]+$/, "") : sanitizeName(base));
+    const job = { index, file, base, fileName, vis, els, name: uniqueName(used, sanitizeName(stem), primaryExt) };
+    group.jobs.push(job);
+    return job;
+  });
+  const textVariants = [...groups.values()].filter((group) => group.overrides).length;
   const stamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  const relativeOut = outDir || path.join("out", "psd-batch", `${sanitizeName(doc.name)}-${stamp}`);
+  const relativeOut = outDir || path3.join("out", "psd-batch", `${sanitizeName(doc.name)}-${stamp}`);
   const absoluteOut = await resolveInWorkspace(cwd, relativeOut, { mustExist: false });
-  await fs.mkdir(absoluteOut, { recursive: true });
-  const isPng = format === "png";
-  const mime = isPng ? "image/png" : "image/jpeg";
-  const extension = isPng ? "png" : "jpg";
+  await fs3.mkdir(absoluteOut, { recursive: true });
   const settings = {
     mode: fit || DEFAULT_SETTINGS.mode,
     anchor: anchor || DEFAULT_SETTINGS.anchor,
     fill: Number.isFinite(Number(fill)) ? Number(fill) : DEFAULT_SETTINGS.fill
   };
-  const used = /* @__PURE__ */ new Set();
-  const files = [];
-  const zipEntries = {};
-  for (const file of skuFiles) {
-    const image = await loadImage(file);
-    const content = measureContent(image);
-    const base = path.basename(file, path.extname(file));
-    const adjust = toAdjustment(adjustments[path.basename(file)] ?? adjustments[base]);
-    const canvas = createCanvas2(doc.width, doc.height);
-    const ctx = canvas.getContext("2d");
-    if (!isPng) {
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, doc.width, doc.height);
+  const extraNames = [];
+  for (const job of jobs) {
+    extraNames.push(job.name);
+    for (const extra of formatList.slice(1)) extraNames.push(job.name.replace(/\.[^.]+$/, `.${extra}`));
+    for (const size of sizes || []) {
+      const tag = `${size.width || ""}x${size.height || ""}`;
+      extraNames.push(job.name.replace(/(\.[^.]+)$/, `-${tag}$1`));
     }
-    drawScene(ctx, doc.scene, image, content, settings, adjust);
-    const buffer = canvas.toBuffer(mime, isPng ? void 0 : Math.round(quality));
-    const name = uniqueName(used, sanitizeName(base), extension);
-    await fs.writeFile(path.join(absoluteOut, name), buffer);
-    files.push(name);
-    if (zip) zipEntries[name] = new Uint8Array(buffer);
   }
-  let zipPath;
-  if (zip) {
-    const data = zipSync(zipEntries, { level: 0 });
-    zipPath = path.join(absoluteOut, `${sanitizeName(doc.name)}-${files.length}.zip`);
-    await fs.writeFile(zipPath, data);
+  const zipPath = zip ? path3.join(absoluteOut, `${sanitizeName(doc.name)}-${jobs.length}.zip`) : null;
+  for (const target of [...extraNames.map((name) => path3.join(absoluteOut, name)), ...zipPath ? [zipPath] : []]) {
+    await resolveInWorkspace(cwd, path3.relative(cwd, target), { mustExist: false });
+  }
+  const zipEntries = {};
+  const written = [];
+  const layerResults = [];
+  let lastScene = doc.scene;
+  for (const group of groups.values()) {
+    const clone = cloneDoc(doc);
+    clone.slots = new Set(slotIds);
+    clone.hidden = new Set(doc.hidden);
+    if (useSessionEdits && doc.elements?.length && !(group.els && group.els.length)) {
+      clone.elements = doc.elements;
+    } else {
+      clone.elements = [];
+      for (const spec of group.els || []) clone.elements.push(await loadElement(cwd, spec, clone));
+    }
+    applyVisibility(clone, group.vis);
+    if (group.overrides) {
+      const applied = applyTextOverrides(clone, group.overrides, (family) => GlobalFonts.has(family));
+      textWarnings.push(...applied);
+      layerResults.push(...applied.results || []);
+    }
+    const scene = buildScene(clone);
+    lastScene = scene;
+    try {
+      for (const job of group.jobs) {
+        const image = await loadImage2(job.file);
+        const content = measureContent(image);
+        const adjust = toAdjustment(adjustments[job.fileName] ?? adjustments[job.base]);
+        const canvas = createCanvas2(doc.width, doc.height);
+        const ctx = canvas.getContext("2d");
+        if (formatList[0] !== "png") {
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, doc.width, doc.height);
+        }
+        drawScene(ctx, scene, image, content, settings, adjust);
+        const outputs = [];
+        for (const fmt of formatList) {
+          const name = fmt === primaryExt ? job.name : job.name.replace(/\.[^.]+$/, `.${fmt}`);
+          const buffer = encodeCanvas(canvas, fmt, quality);
+          await fs3.writeFile(path3.join(absoluteOut, name), buffer);
+          outputs.push(name);
+          written.push(name);
+          if (zip) zipEntries[name] = new Uint8Array(buffer);
+        }
+        for (const size of sizes || []) {
+          const sized = resizeCanvas(canvas, size.width, size.height);
+          const fmt = size.format || primaryExt;
+          const tag = `${size.width || sized.width}x${size.height || sized.height}`;
+          const name = job.name.replace(/(\.[^.]+)$/, `-${tag}.`) + (fmt === "jpg" ? "jpg" : fmt);
+          const buffer = encodeCanvas(sized, fmt, size.quality || quality);
+          await fs3.writeFile(path3.join(absoluteOut, name), buffer);
+          outputs.push(name);
+          written.push(name);
+          if (zip) zipEntries[name] = new Uint8Array(buffer);
+        }
+        job.outputs = outputs;
+        job.placed = (clone.elements || []).map((element) => ({
+          name: element.name,
+          left: element.left,
+          top: element.top,
+          w: element.canvas.width,
+          h: element.canvas.height,
+          slot: element.slot
+        }));
+      }
+    } finally {
+      if (scene !== doc.scene) disposeScene(scene);
+    }
+  }
+  const files = written.length ? jobs.flatMap((job) => job.outputs || []) : jobs.map((job) => job.name);
+  if (zipPath) await fs3.writeFile(zipPath, zipSync(zipEntries, { level: 0 }));
+  const manifestRows = jobs.map((job) => ({
+    sku: job.base,
+    source: path3.relative(cwd, job.file),
+    files: job.outputs || [job.name]
+  }));
+  if (manifest) {
+    const manifestPath = path3.join(absoluteOut, "manifest.json");
+    await resolveInWorkspace(cwd, path3.relative(cwd, manifestPath), { mustExist: false });
+    await fs3.writeFile(manifestPath, JSON.stringify(manifestRows, null, 2));
   }
   return {
-    count: files.length,
-    outDir: path.relative(cwd, absoluteOut) || ".",
+    count: jobs.length,
+    outDir: path3.relative(cwd, absoluteOut) || ".",
     files: files.slice(0, 50),
     truncated: files.length > 50,
-    slots: doc.scene.slots.map((slot) => ({
+    slots: (lastScene || doc.scene).slots.map((slot) => ({
       name: slot.name,
       leafId: slot.leafId,
       bounds: [slot.rect.x, slot.rect.y, slot.rect.x + slot.rect.w, slot.rect.y + slot.rect.h]
     })),
-    suppressed: doc.scene.suppressed.slice(0, 50),
-    suppressedCount: doc.scene.suppressed.length,
-    suppressedTruncated: doc.scene.suppressed.length > 50,
-    ...zipPath ? { zip: path.relative(cwd, zipPath) } : {}
+    suppressed: (lastScene || doc.scene).suppressed.slice(0, 50),
+    suppressedCount: (lastScene || doc.scene).suppressed.length,
+    suppressedTruncated: (lastScene || doc.scene).suppressed.length > 50,
+    textVariants,
+    ...fontsRegistered ? { fontsRegistered } : {},
+    ...fontsSkipped && fontsSkipped.length ? { fontsSkipped } : {},
+    ...textWarnings.length ? { textWarnings: [...new Set(textWarnings)] } : {},
+    ...missingFonts.length ? { missingFonts } : {},
+    ...layerResults.length ? { layerResults: layerResults.slice(0, 80) } : {},
+    ...zipPath ? { zip: path3.relative(cwd, zipPath) } : {},
+    ...manifest ? { manifest: manifestRows } : {}
   };
 }
+async function inspectForValidation(cwd, template, job, layerResults = []) {
+  const doc = await loadTemplateDoc(await resolveInWorkspace(cwd, template));
+  const clone = cloneDoc(doc);
+  applyVisibility(clone, job.visibility);
+  const written = /* @__PURE__ */ new Map();
+  for (const item of job.texts || []) {
+    if (item.value == null) continue;
+    const entries = findEntries(clone, item.layer).filter((entry) => entry.text);
+    const applied = layerResults.some(
+      (result) => result.ok && (result.layer === item.layer || entries.some((entry) => entry.id === result.layer || entry.fullName === result.fullName))
+    );
+    if (!applied) continue;
+    for (const entry of entries) written.set(entry.id, item.value);
+  }
+  return {
+    layers: clone.entries.map((entry) => ({
+      name: entry.name,
+      fullName: entry.fullName,
+      ...entry.leafId ? { leafId: entry.leafId } : {},
+      visible: isEntryVisible(clone, entry.id),
+      ...entry.bounds ? { bounds: entry.bounds } : {},
+      ...entry.text ? { textContent: written.has(entry.id) ? written.get(entry.id) : entry.text.value } : {}
+    }))
+  };
+}
+function findTextEntry(doc, spec) {
+  const wanted = String(spec || "");
+  if (!wanted.trim()) throw new Error("A text layer name or id is required");
+  const matches = findEntries(doc, wanted);
+  const textMatches = matches.filter((entry) => entry.text);
+  if (textMatches.length === 1) return textMatches[0];
+  if (textMatches.length > 1) {
+    throw new Error(
+      `Text layer name is ambiguous (${textMatches.length} matches): ${wanted}. Use one of: ${textMatches.map((entry) => entry.fullName || entry.id).join(", ")}`
+    );
+  }
+  const names = doc.entries.filter((entry) => entry.text).map((entry) => entry.fullName || entry.name);
+  throw new Error(`Text layer not found: ${wanted}. Text layers: ${names.join(" | ")}`);
+}
+var TEXT_OVERRIDE_FIELDS = [
+  "value",
+  "runs",
+  "font",
+  "weight",
+  "size",
+  "sizePx",
+  "color",
+  "tracking",
+  "align",
+  "leading",
+  "dx",
+  "dy",
+  "fitWidth",
+  "minPx",
+  "maxPx",
+  "decimalScale"
+];
+function composeElement(image, { scale = 1, rotation = 0 } = {}) {
+  const width = Math.max(1, Math.round(image.width * scale));
+  const height = Math.max(1, Math.round(image.height * scale));
+  if (!rotation) {
+    const canvas2 = createCanvas2(width, height);
+    canvas2.getContext("2d").drawImage(image, 0, 0, width, height);
+    return canvas2;
+  }
+  const radians = rotation * Math.PI / 180;
+  const cos = Math.abs(Math.cos(radians));
+  const sin = Math.abs(Math.sin(radians));
+  const canvas = createCanvas2(Math.ceil(width * cos + height * sin), Math.ceil(width * sin + height * cos));
+  const ctx = canvas.getContext("2d");
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate(radians);
+  ctx.drawImage(image, -width / 2, -height / 2, width, height);
+  return canvas;
+}
+function rectOfAnchor(doc, spec) {
+  if (spec.anchorRect && spec.anchorRect.w != null) return spec.anchorRect;
+  if (Array.isArray(spec.anchorRect) && spec.anchorRect.length >= 4) {
+    const [x0, y0, x1, y1] = spec.anchorRect.map(Number);
+    return { x: Math.min(x0, x1), y: Math.min(y0, y1), w: Math.abs(x1 - x0), h: Math.abs(y1 - y0) };
+  }
+  if (spec.anchor && doc) return layerBounds(doc, spec.anchor);
+  return null;
+}
+async function loadElement(cwd, spec, doc) {
+  const file = await resolveInWorkspace(cwd, spec.source);
+  const image = await loadImage2(file);
+  const rotation = Number(spec.rotation) || 0;
+  let scale = Number(spec.scale) > 0 ? Number(spec.scale) : 1;
+  let left = Number.isFinite(Number(spec.left)) ? Number(spec.left) : Number(spec.dx) || 0;
+  let top = Number.isFinite(Number(spec.top)) ? Number(spec.top) : Number(spec.dy) || 0;
+  const fit = spec.fit || (spec.anchor || spec.anchorRect ? "contain" : void 0);
+  const box = rectOfAnchor(doc, spec);
+  if (box && (fit === "contain" || fit === "cover")) {
+    const content = measureContent(image);
+    scale = fit === "cover" ? Math.max(box.w / content.w, box.h / content.h) : Math.min(box.w / content.w, box.h / content.h);
+    left = box.x + box.w / 2 - (content.x + content.w / 2) * scale;
+    top = box.y + box.h / 2 - (content.y + content.h / 2) * scale;
+  }
+  return {
+    name: spec.name ? String(spec.name) : path3.basename(file, path3.extname(file)),
+    source: path3.relative(cwd, file),
+    canvas: composeElement(image, { scale, rotation }),
+    left,
+    top,
+    scale,
+    rotation,
+    opacity: spec.opacity == null ? 1 : Math.max(0, Math.min(1, Number(spec.opacity))),
+    blend: spec.blend || "normal",
+    aboveSlots: spec.aboveSlots !== false,
+    slot: spec.slot,
+    fit: fit || null,
+    anchor: spec.anchor || null
+  };
+}
+function currentSlots(doc) {
+  return [...doc.pinnedSlots && doc.pinnedSlots.size ? doc.pinnedSlots : doc.slots || []];
+}
+function serializeProject(doc, template) {
+  return {
+    version: 2,
+    template,
+    slots: currentSlots(doc),
+    textEdits: Object.fromEntries(doc.textEdits),
+    elements: doc.elements.map(({ canvas: _canvas, ...element }) => element),
+    fonts: [...registeredFamilies].sort()
+  };
+}
+async function readProject(doc, cwd, project) {
+  if (!project || typeof project !== "object") throw new Error("Project file is not a JSON object");
+  const slots = Array.isArray(project.slots) ? project.slots.map(String) : [];
+  for (const id of slots) {
+    if (!doc.leaves.some((leaf) => leaf.id === id)) throw new Error(`Project slot not in this template: ${id}`);
+  }
+  const textEdits = /* @__PURE__ */ new Map();
+  for (const [key, raw] of Object.entries(project.textEdits || {})) {
+    const entry = findTextEntry(doc, key);
+    textEdits.set(entry.id, { ...pickOverride(raw), layer: entry.id });
+  }
+  const elements = [];
+  for (const spec of project.elements || []) {
+    if (!spec || !spec.source) throw new Error("Project element without a `source` image");
+    try {
+      elements.push(await loadElement(cwd, spec, doc));
+    } catch (error) {
+      throw new Error(`Project element ${spec.name || spec.source}: ${error.message || error}`);
+    }
+  }
+  return { slots, textEdits, elements };
+}
+function pickOverride(raw) {
+  const out = {};
+  for (const key of TEXT_OVERRIDE_FIELDS) if (raw && raw[key] != null) out[key] = raw[key];
+  return out;
+}
+function missingFamilies(doc) {
+  return templateFamilies(doc).filter((family) => !GlobalFonts.has(family));
+}
+async function editTemplate(options) {
+  const { cwd, template, action } = options;
+  if (!action) throw new Error("An action is required");
+  const absolute = await resolveInWorkspace(cwd, template);
+  const doc = await loadTemplateDoc(absolute);
+  if (!doc.textEdits) doc.textEdits = /* @__PURE__ */ new Map();
+  if (!doc.elements) doc.elements = [];
+  if (action === "status") {
+    return {
+      template: path3.relative(cwd, absolute) || template,
+      slots: currentSlots(doc),
+      slotsPinned: !!(doc.pinnedSlots && doc.pinnedSlots.size),
+      ...editStates.get(absolute)?.dropped ? { editsDropped: editStates.get(absolute).dropped } : {},
+      textEdits: [...doc.textEdits.keys()],
+      elements: doc.elements.map((element) => element.name),
+      fonts: [...registeredFamilies].sort(),
+      neededFonts: templateFamilies(doc),
+      missingFonts: missingFamilies(doc)
+    };
+  }
+  if (action === "undo") {
+    const state = editStates.get(absolute);
+    const snapshot = state?.history?.pop();
+    if (!snapshot) return { ok: false, reason: "nothing to undo" };
+    restoreSnapshot(doc, snapshot);
+    return {
+      ok: true,
+      remaining: state.history.length,
+      textEdits: [...doc.textEdits.keys()],
+      elements: doc.elements.map((element) => element.name)
+    };
+  }
+  if (action === "diff") {
+    const diffs = [];
+    for (const edit of doc.textEdits.values()) {
+      const entry = doc.entries.find((item) => item.id === edit.layer);
+      diffs.push({
+        layer: entry?.fullName || entry?.name || edit.layer,
+        from: entry?.text?.value ?? null,
+        to: edit.value ?? null
+      });
+    }
+    return { textEdits: diffs, elements: doc.elements.map((element) => element.name) };
+  }
+  if (action === "text") {
+    pushHistory(doc, absolute);
+    const entry = findTextEntry(doc, options.layer);
+    const patch = pickOverride(options);
+    if (!Object.keys(patch).length) {
+      throw new Error(`Pass at least one of: ${TEXT_OVERRIDE_FIELDS.join(", ")}`);
+    }
+    const edit = { ...doc.textEdits.get(entry.id) || {}, ...patch, layer: entry.id };
+    const leaf = doc.leaves.find((item) => item.id === entry.leafId);
+    const pxPerPt = leaf ? pxPerPtOf(entry.text, (leaf.__raster || leaf).height) : 0;
+    const effective = mergeTextOverride(entry.text, edit, pxPerPt) || entry.text;
+    doc.textEdits.set(entry.id, edit);
+    const missing = [...new Set(effective.runs.map((run) => run.family).filter(Boolean))].filter(
+      (family) => !GlobalFonts.has(family)
+    );
+    return {
+      layer: entry.name,
+      entryId: entry.id,
+      value: effective.value,
+      runs: effective.runs.map((run) => ({
+        len: run.len,
+        family: run.family,
+        weight: run.weight,
+        size: run.size,
+        sizePx: Math.round(run.size * pxPerPt * 100) / 100,
+        color: run.color
+      })),
+      ...missing.length ? { warning: `Font not registered, the canvas will fall back: ${missing.join(", ")}` } : {}
+    };
+  }
+  if (action === "element") {
+    if (!Array.isArray(options.paths) || options.paths.length === 0) {
+      throw new Error("Pass `paths` with one or more images");
+    }
+    pushHistory(doc, absolute);
+    const loaded = [];
+    const cells = [];
+    if ((options.anchor || options.anchorRect) && options.paths.length > 1) {
+      const box = rectOfAnchor(doc, options);
+      if (box) {
+        const gap = 8;
+        const width = (box.w - gap * (options.paths.length - 1)) / options.paths.length;
+        options.paths.forEach((_, index) => {
+          cells.push({ x: box.x + index * (width + gap), y: box.y, w: width, h: box.h });
+        });
+      }
+    }
+    for (const [index, source] of options.paths.entries()) {
+      loaded.push(
+        await loadElement(
+          cwd,
+          {
+            source,
+            name: options.paths.length === 1 ? options.name : void 0,
+            left: options.dx,
+            top: options.dy,
+            scale: options.scale,
+            rotation: options.rotation,
+            opacity: options.opacity,
+            blend: options.blend,
+            aboveSlots: options.aboveSlots,
+            anchor: options.anchor,
+            anchorRect: cells[index] || options.anchorRect,
+            fit: options.fit
+          },
+          doc
+        )
+      );
+    }
+    doc.elements.push(...loaded);
+    return {
+      placed: loaded.map((element) => ({
+        name: element.name,
+        left: element.left,
+        top: element.top,
+        w: element.canvas.width,
+        h: element.canvas.height,
+        aboveSlots: element.aboveSlots
+      })),
+      total: doc.elements.length
+    };
+  }
+  if (action === "remelement") {
+    const names = (options.names || []).map(String);
+    if (names.length === 0) throw new Error("Pass `names` with the elements to remove");
+    pushHistory(doc, absolute);
+    const before = doc.elements.length;
+    doc.elements = doc.elements.filter((element) => !names.includes(element.name));
+    return {
+      removed: before - doc.elements.length,
+      total: doc.elements.length,
+      names: doc.elements.map((element) => element.name)
+    };
+  }
+  if (action === "fonts") {
+    const paths = options.fonts || options.paths;
+    if (!options.dir && !(paths && paths.length)) throw new Error("Pass `dir` or `fonts` with font files to register");
+    const result = await registerFonts(cwd, { dir: options.dir, paths });
+    return {
+      loaded: result.registered,
+      skipped: result.skipped,
+      registered: [...registeredFamilies].sort(),
+      missingFonts: missingFamilies(doc)
+    };
+  }
+  if (action === "save_project") {
+    if (!options.project) throw new Error("Pass `project` with the JSON path to write");
+    const projectPath = await resolveInWorkspace(cwd, options.project, { mustExist: false });
+    await fs3.mkdir(path3.dirname(projectPath), { recursive: true });
+    await resolveInWorkspace(cwd, path3.relative(cwd, projectPath), { mustExist: false });
+    const data = serializeProject(doc, path3.relative(cwd, absolute));
+    await fs3.writeFile(projectPath, JSON.stringify(data, null, 2));
+    return {
+      project: path3.relative(cwd, projectPath),
+      textEdits: Object.keys(data.textEdits).length,
+      elements: data.elements.length,
+      slots: data.slots
+    };
+  }
+  if (action === "load_project") {
+    if (!options.project) throw new Error("Pass `project` with the JSON path to read");
+    const projectPath = await resolveInWorkspace(cwd, options.project);
+    let project;
+    try {
+      project = JSON.parse(await fs3.readFile(projectPath, "utf8"));
+    } catch (error) {
+      throw new Error(`Project file is not valid JSON: ${error.message || error}`);
+    }
+    const next = await readProject(doc, cwd, project);
+    pushHistory(doc, absolute);
+    doc.textEdits = next.textEdits;
+    doc.elements = next.elements;
+    doc.pinnedSlots = next.slots.length ? new Set(next.slots) : null;
+    editStates.get(absolute).dropped = void 0;
+    if (next.slots.length) doc.slots = new Set(next.slots);
+    return {
+      project: path3.relative(cwd, projectPath),
+      textEdits: doc.textEdits.size,
+      elements: doc.elements.length,
+      slots: currentSlots(doc),
+      missingFonts: missingFamilies(doc)
+    };
+  }
+  if (action === "reset") {
+    pushHistory(doc, absolute);
+    doc.textEdits = /* @__PURE__ */ new Map();
+    doc.elements = [];
+    doc.pinnedSlots = null;
+    editStates.get(absolute).dropped = void 0;
+    return { ok: true, textEdits: 0, elements: 0 };
+  }
+  throw new Error(
+    `Unknown action: ${action}. Use status / text / element / remelement / fonts / save_project / load_project / reset / undo / diff`
+  );
+}
+var TEXT_RUN_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["len"],
+  properties: {
+    len: { type: "integer", description: "Character count of this run." },
+    family: { type: "string", description: "Font family or PostScript name." },
+    weight: { type: "number", description: "Font weight, 100-900." },
+    size: { type: "number", description: "Font size in PSD points." },
+    sizePx: { type: "number", description: "Font size in canvas pixels; wins over `size`." },
+    color: { type: "string", description: "Fill colour as #rrggbb." },
+    tracking: { type: "number", description: "Letter spacing in 1/1000 em, as in Photoshop." }
+  }
+};
+var TEXT_OVERRIDE_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["layer"],
+  properties: {
+    layer: { type: "string", description: "Text layer name, entry id (e12) or leaf id (l3)." },
+    value: { type: "string", description: "New copy; characters keep their original styles." },
+    runs: { type: "array", items: TEXT_RUN_SCHEMA },
+    ...Object.fromEntries(
+      ["family", "weight", "size", "sizePx", "color", "tracking"].map((key) => [
+        key === "family" ? "font" : key,
+        TEXT_RUN_SCHEMA.properties[key]
+      ])
+    ),
+    align: { type: "string", enum: ["left", "center", "right"], description: "Paragraph alignment." },
+    leading: { type: "number", description: "Fixed line height in PSD points." },
+    dx: { type: "number", description: "Horizontal nudge in canvas pixels." },
+    dy: { type: "number", description: "Vertical nudge in canvas pixels." },
+    fitWidth: { type: "number", description: "Shrink glyphs so the line fits this pixel width." },
+    minPx: { type: "number", description: "Lower bound for fitWidth scaling." },
+    maxPx: { type: "number", description: "Upper bound for glyph pixel size." },
+    decimalScale: { type: "number", description: "Scale factor applied to digits after a decimal point." }
+  }
+};
 async function resolveSessionCwd(ctx, exec) {
   const service = ctx.reflect?.get?.("workingDirectory");
   if (service && typeof service.ensure === "function") {
@@ -17330,6 +20371,226 @@ async function resolveSessionCwd(ctx, exec) {
   const cwd = exec.agent?.session?.header?.cwd;
   if (typeof cwd === "string" && cwd.length > 0) return cwd;
   throw new Error("This session has no workspace directory; open a workspace and try again");
+}
+var list = (items) => items && items.length ? items.join(", ") : "none";
+function describeEditResult(action, value) {
+  let summary;
+  switch (action) {
+    case "status":
+      summary = `${value.textEdits.length} text edit(s); elements: ${list(value.elements)}; slots${value.slotsPinned ? " (from project)" : ""}: ${list(value.slots)}; missing fonts: ${list(value.missingFonts)}${value.editsDropped ? `; edits dropped: ${value.editsDropped}` : ""}`;
+      break;
+    case "text":
+      summary = `${value.layer} (${value.entryId}) \u2192 ${JSON.stringify(value.value)} in ${value.runs.length} run(s)${value.warning ? `. Warning: ${value.warning}` : ""}`;
+      break;
+    case "element":
+      summary = `placed ${list(value.placed.map((item) => `${item.name} at ${item.left},${item.top} (${item.w}\xD7${item.h})`))}; ${value.total} element(s) total`;
+      break;
+    case "remelement":
+      summary = `removed ${value.removed}; remaining: ${list(value.names)}`;
+      break;
+    case "fonts":
+      summary = `registered ${list(value.loaded)}; skipped: ${list(value.skipped)}; still missing: ${list(value.missingFonts)}`;
+      break;
+    case "save_project":
+      summary = `saved ${value.project}: ${value.textEdits} text edit(s), ${value.elements} element(s), slots ${list(value.slots)}`;
+      break;
+    case "load_project":
+      summary = `loaded ${value.project}: ${value.textEdits} text edit(s), ${value.elements} element(s), slots ${list(value.slots)}; missing fonts: ${list(value.missingFonts)}`;
+      break;
+    case "reset":
+      summary = "all text edits, elements and project slots cleared";
+      break;
+    case "undo":
+      summary = value.ok ? `undo ok, ${value.remaining} snapshot(s) left` : value.reason || "nothing to undo";
+      break;
+    case "diff":
+      summary = `${(value.textEdits || []).length} text edit(s); elements: ${list(value.elements)}`;
+      break;
+    default:
+      summary = "done";
+  }
+  const json = JSON.stringify(value);
+  return `psd_edit ${action}: ${summary}
+${json.length > 4e3 ? `${json.slice(0, 4e3)}\u2026` : json}`;
+}
+function toWorkspacePath(cwd, candidate) {
+  if (!candidate) return candidate;
+  const absolute = path3.isAbsolute(candidate) ? candidate : path3.resolve(cwd, candidate);
+  const relative = path3.relative(cwd, absolute);
+  if (relative.startsWith("..") || path3.isAbsolute(relative)) {
+    throw new Error(`Path must stay inside the session workspace: ${candidate}`);
+  }
+  return relative || ".";
+}
+async function writeContactSheet(absoluteOut, files, { cols = 4, thumb = 240 } = {}) {
+  const images = [];
+  for (const name of files) {
+    if (!/\.(png|jpe?g|webp)$/i.test(name)) continue;
+    if (name.startsWith("contact-")) continue;
+    images.push({ name, image: await loadImage2(path3.join(absoluteOut, name)) });
+  }
+  if (!images.length) return null;
+  const columns = Math.min(cols, images.length);
+  const rows = Math.ceil(images.length / columns);
+  const canvas = createCanvas2(columns * thumb, rows * thumb);
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#111111";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  images.forEach((item, index) => {
+    const col = index % columns;
+    const row = Math.floor(index / columns);
+    const scale = Math.min(thumb / item.image.width, thumb / item.image.height);
+    const w = item.image.width * scale;
+    const h = item.image.height * scale;
+    ctx.drawImage(item.image, col * thumb + (thumb - w) / 2, row * thumb + (thumb - h) / 2, w, h);
+  });
+  const file = "contact-sheet.jpg";
+  await fs3.writeFile(path3.join(absoluteOut, file), canvas.toBuffer("image/jpeg", 90));
+  return file;
+}
+async function applySheet(options) {
+  const { cwd } = options;
+  const sheetPath = await resolveInWorkspace(cwd, options.sheet);
+  const mappingPath = options.mapping ? await resolveInWorkspace(cwd, options.mapping) : void 0;
+  const rulesPath = options.rules ? await resolveInWorkspace(cwd, options.rules) : void 0;
+  const productDir = options.productDir ? await resolveInWorkspace(cwd, options.productDir) : void 0;
+  const giftDir = options.giftDir ? await resolveInWorkspace(cwd, options.giftDir) : void 0;
+  const plan = await planSheet({
+    sheetPath,
+    sheetName: options.sheetName,
+    mappingPath,
+    rulesPath,
+    productDir,
+    giftDir,
+    skus: options.skus,
+    limit: options.limit
+  });
+  const templateList = options.templates && options.templates.length ? options.templates : [options.template, ...plan.rules.templates || []].filter(Boolean);
+  if (!templateList.length) throw new Error("Pass `template` or set rules.templates");
+  const stamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  const relativeOut = options.outDir || path3.join("out", "psd-sheet", stamp);
+  const absoluteOut = await resolveInWorkspace(cwd, relativeOut, { mustExist: false });
+  await fs3.mkdir(absoluteOut, { recursive: true });
+  const formats = options.formats || (options.format ? [options.format] : plan.rules.export?.formats) || ["png", "jpg"];
+  const quality = options.quality ?? plan.rules.export?.quality ?? 95;
+  const slots = options.slots || (plan.rules.slots?.product ? [plan.rules.slots.product].flat() : void 0);
+  const strictFonts = options.strictFonts !== false;
+  const doValidate = options.validate !== false;
+  const runOne = async (job) => {
+    const skuRel = toWorkspacePath(cwd, job.productPath);
+    const stem = outputNameFor(job, "png", plan.rules).replace(/\.[^.]+$/, "");
+    const elements = (job.elements || []).map((element) => ({
+      ...element,
+      source: toWorkspacePath(cwd, element.source)
+    }));
+    const files = [];
+    const validations = [];
+    for (const template of templateList) {
+      const tag = templateList.length > 1 ? `-${sanitizeName(path3.basename(template, path3.extname(template)))}` : "";
+      const rendered = await renderBatch({
+        cwd,
+        template,
+        skus: [skuRel],
+        slots,
+        outDir: relativeOut,
+        formats,
+        quality,
+        fontDir: options.fontDir,
+        useSessionEdits: false,
+        strictFonts,
+        text: job.texts,
+        elements,
+        visibility: job.visibility,
+        nameBySku: {
+          [path3.basename(skuRel)]: stem + tag,
+          [path3.basename(skuRel, path3.extname(skuRel))]: stem + tag
+        },
+        manifest: false
+      });
+      files.push(...rendered.files);
+      if (doValidate) {
+        const imageName = rendered.files.find((name) => /\.(png|jpe?g|webp)$/i.test(name));
+        validations.push(
+          await validateSku({
+            imagePath: imageName ? path3.join(cwd, rendered.outDir, imageName) : void 0,
+            job,
+            inspect: await inspectForValidation(cwd, template, job, rendered.layerResults),
+            strictFonts,
+            scene: { slots: rendered.slots },
+            missingFonts: rendered.missingFonts,
+            registered: new Set(rendered.fontsRegistered || []),
+            rules: plan.rules,
+            placedElements: job.elements
+          })
+        );
+      }
+    }
+    return { sku: job.sku, name: job.name, files, validations, warnings: job.warnings };
+  };
+  let pending = plan.jobs.slice();
+  const results = [];
+  const failed = [];
+  for (const job of pending) {
+    try {
+      const row = await runOne(job);
+      const bad = (row.validations || []).some((item) => !item.ok);
+      results.push({ ...row, ok: !bad });
+      if (bad) failed.push(job);
+    } catch (error) {
+      const row = { sku: job.sku, name: job.name, ok: false, error: error.message || String(error) };
+      results.push(row);
+      failed.push(job);
+    }
+  }
+  if (options.retryFailed && failed.length) {
+    const retry = [];
+    for (const job of failed) {
+      try {
+        const row = await runOne(job);
+        const bad = (row.validations || []).some((item) => !item.ok);
+        retry.push({ ...row, ok: !bad, retried: true });
+      } catch (error) {
+        retry.push({ sku: job.sku, name: job.name, ok: false, retried: true, error: error.message || String(error) });
+      }
+    }
+    const bySku = new Map(retry.map((item) => [item.sku, item]));
+    for (let index = 0; index < results.length; index += 1) {
+      const next = bySku.get(results[index].sku);
+      if (next) results[index] = next;
+    }
+  }
+  const allFiles = results.flatMap((item) => item.files || []);
+  let contact = null;
+  if (options.contactSheet && allFiles.length) {
+    contact = await writeContactSheet(absoluteOut, allFiles);
+  }
+  const validation = summarizeValidation(results.flatMap((item) => item.validations || []));
+  await fs3.writeFile(
+    path3.join(absoluteOut, "report.json"),
+    JSON.stringify(
+      {
+        sheet: plan.sheetName,
+        preflight: plan.preflight,
+        skipped: plan.skipped,
+        results,
+        validation
+      },
+      null,
+      2
+    )
+  );
+  return {
+    count: results.length,
+    outDir: path3.relative(cwd, absoluteOut) || ".",
+    files: allFiles.slice(0, 50),
+    skipped: plan.skipped,
+    failed: results.filter((item) => !item.ok).map((item) => item.sku),
+    preflightOk: plan.preflight.ok,
+    preflight: formatPreflightReport(plan.preflight),
+    validation,
+    contactSheet: contact,
+    results
+  };
 }
 function registerTools(ctx) {
   const disposers = [];
@@ -17373,6 +20634,7 @@ function registerTools(ctx) {
                   leafId: { type: "string" },
                   bounds: { type: "array", items: { type: "integer" } },
                   textContent: { type: "string" },
+                  textAlign: { type: "string", enum: ["left", "center", "right"] },
                   runs: {
                     type: "array",
                     items: {
@@ -17392,10 +20654,40 @@ function registerTools(ctx) {
                     }
                   },
                   runCount: { type: "integer" },
-                  runsTruncated: { type: "boolean" }
+                  runsTruncated: { type: "boolean" },
+                  fullName: { type: "string" },
+                  namePadded: { type: "boolean" }
                 }
               }
             },
+            namedSlots: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: false,
+                required: ["name", "leafId", "bounds"],
+                properties: {
+                  name: { type: "string" },
+                  leafId: { type: "string" },
+                  bounds: { type: "array", items: { type: "integer" } }
+                }
+              }
+            },
+            anchors: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: false,
+                required: ["name", "leafId", "bounds"],
+                properties: {
+                  name: { type: "string" },
+                  fullName: { type: "string" },
+                  leafId: { type: "string" },
+                  bounds: { type: "array", items: { type: "integer" } }
+                }
+              }
+            },
+            slotWarnings: { type: "array", items: { type: "string" } },
             suggestedSlots: {
               type: "array",
               items: {
@@ -17430,7 +20722,7 @@ Auto slots: ${value.suggestedSlots.map((slot) => `${slot.name} [${slot.bounds.jo
   disposers.push(
     ctx.tools.register({
       name: "psd_batch_render",
-      description: "Render a PSD/PSB main-image template with many SKU images at once. Each SKU image is trimmed to its visible content, fitted into the product slots, composited between the template layers, and written as JPG/PNG into a workspace folder. Visible sibling layers that overlap a slot are suppressed together with the slot (reported as `suppressed`) so stale product art cannot show through. Returns the output folder and file names; optionally packs a ZIP.",
+      description: "Render a PSD/PSB main-image template with many SKU images at once. Each SKU image is trimmed to its visible content, fitted into the product slots, composited between the template layers, and written as JPG/PNG into a workspace folder. Visible sibling layers that overlap a slot are suppressed together with the slot (reported as `suppressed`) so stale product art cannot show through. Text layers can be rewritten per batch (`text`) or per SKU (`textBySku`) \u2014 re-rendered with real glyphs, not pasted pixels; register brand fonts first with `fontDir`. Returns the output folder and file names; optionally packs a ZIP.",
       parameters: {
         type: "object",
         additionalProperties: false,
@@ -17454,11 +20746,32 @@ Auto slots: ${value.suggestedSlots.map((slot) => `${slot.name} [${slot.bounds.jo
             items: { type: "string" },
             description: "Product slot layer names or leaf ids. Omit to use the auto-detected slots reported by psd_inspect."
           },
+          text: {
+            type: "array",
+            description: "Rewrite text layers in every render: [{layer, value, runs, font, weight, size, sizePx, color, tracking, align, leading, dx, dy}]. `layer` is a layer name or leaf id; `value` replaces the copy (styles follow their characters); `runs` [{len, family?, weight?, size?, sizePx?, color?, tracking?}] restyle consecutive segments from the first character; flat font/weight/size/sizePx/color/tracking restyle all runs. `size` is in pt, exactly what psd_inspect reports; `sizePx` is in canvas pixels; color is #rrggbb. Wins over psd_edit text edits for the same layer.",
+            items: TEXT_OVERRIDE_SCHEMA
+          },
+          textBySku: {
+            type: "object",
+            // dsh only accepts a boolean here, so the per-SKU list shape is
+            // checked at call time against TEXT_OVERRIDE_SCHEMA instead.
+            additionalProperties: true,
+            description: 'Per-SKU text overrides: {"<SKU file name, with or without extension>": [<item>, ...]}, where each item has exactly the shape of a `text` item ({layer, value?, runs?, font?, weight?, size?, sizePx?, color?, tracking?, align?, leading?, dx?, dy?}). Entries win over `text` and psd_edit text edits per layer. Use it to give every SKU its own price.'
+          },
+          fontDir: {
+            type: "string",
+            description: "Directory of .ttf/.otf font files to register before rendering. Registered family names (file stems) are returned in `fontsRegistered`."
+          },
           outDir: {
             type: "string",
             description: "Output folder relative to the working directory. Defaults to out/psd-batch/<template>-<time>."
           },
-          format: { type: "string", enum: ["jpg", "png"], description: "Output format. Default jpg." },
+          format: { type: "string", enum: ["jpg", "png", "webp"], description: "Output format. Default jpg." },
+          formats: {
+            type: "array",
+            items: { type: "string", enum: ["jpg", "png", "webp"] },
+            description: "Write several formats per SKU (P-09). Overrides `format` when set."
+          },
           quality: { type: "integer", description: "JPEG quality 1-100. Default 92." },
           fit: {
             type: "string",
@@ -17476,14 +20789,45 @@ Auto slots: ${value.suggestedSlots.map((slot) => `${slot.name} [${slot.bounds.jo
             additionalProperties: true,
             description: 'Optional per-SKU tweaks keyed by file name with or without extension: {"01-a.png":{"dx":12,"dy":-8,"scale":1.05,"rotation":0}}.'
           },
-          zip: { type: "boolean", description: "Also pack every output into a ZIP. Default false." }
+          zip: { type: "boolean", description: "Also pack every output into a ZIP. Default false." },
+          useSessionEdits: {
+            type: "boolean",
+            description: "When false, ignore psd_edit text/elements/slots (P-07). Default true for compatibility."
+          },
+          strictFonts: {
+            type: "boolean",
+            description: "Fail the batch if a required font is not registered instead of falling back (P-08)."
+          },
+          filenameTemplate: {
+            type: "string",
+            description: "Output name template, e.g. {sku}-{name}.{ext}. Default is the SKU file stem."
+          },
+          manifest: { type: "boolean", description: "Also write manifest.json listing SKU \u2192 files." },
+          elements: {
+            type: "array",
+            description: "Images to place for every SKU. Each item: {source, name?, anchor?, fit?, dx?, dy?, scale?}.",
+            items: { type: "object", additionalProperties: true }
+          },
+          visibility: {
+            type: "array",
+            description: "Show or hide layers: [{layer, hidden}].",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["layer"],
+              properties: {
+                layer: { type: "string" },
+                hidden: { type: "boolean" }
+              }
+            }
+          }
         }
       },
       output: {
         schema: {
           type: "object",
           additionalProperties: false,
-          required: ["count", "outDir", "files", "slots", "suppressed", "suppressedCount", "suppressedTruncated"],
+          required: ["count", "outDir", "files", "slots", "suppressed", "suppressedCount", "suppressedTruncated", "textVariants"],
           properties: {
             count: { type: "integer" },
             outDir: { type: "string" },
@@ -17516,14 +20860,24 @@ Auto slots: ${value.suggestedSlots.map((slot) => `${slot.name} [${slot.bounds.jo
               }
             },
             suppressedCount: { type: "integer" },
-            suppressedTruncated: { type: "boolean" }
+            suppressedTruncated: { type: "boolean" },
+            textVariants: { type: "integer" },
+            textWarnings: { type: "array", items: { type: "string" } },
+            fontsRegistered: { type: "array", items: { type: "string" } },
+            fontsSkipped: { type: "array", items: { type: "string" } },
+            missingFonts: { type: "array", items: { type: "string" } },
+            layerResults: { type: "array", items: { type: "object", additionalProperties: true } },
+            manifest: { type: "array", items: { type: "object", additionalProperties: true } }
           }
         },
         render: (_args, value) => [
           {
             type: "text",
             text: `Rendered ${value.count} image(s) into ${value.outDir} using ${value.slots.map((slot) => slot.name).join(", ")}${value.suppressed && value.suppressed.length ? `
-Suppressed overlapping slot siblings (hidden with the slot): ${value.suppressed.map((layer) => layer.name).join(", ")}${value.suppressedTruncated ? ` (+${value.suppressedCount - value.suppressed.length} more)` : ""}` : ""}${value.zip ? `
+Suppressed overlapping slot siblings (hidden with the slot): ${value.suppressed.map((layer) => layer.name).join(", ")}${value.suppressedTruncated ? ` (+${value.suppressedCount - value.suppressed.length} more)` : ""}` : ""}${value.textVariants ? `
+Text rewritten in ${value.textVariants} variant(s).` : ""}${value.fontsRegistered && value.fontsRegistered.length ? `
+Fonts registered: ${value.fontsRegistered.join(", ")}` : ""}${value.textWarnings && value.textWarnings.length ? `
+Text warnings: ${value.textWarnings.slice(0, 8).join("\uFF1B")}` : ""}${value.zip ? `
 ZIP: ${value.zip}` : ""}`
           }
         ]
@@ -17539,16 +20893,449 @@ ZIP: ${value.zip}` : ""}`
           slots: args.slots,
           outDir: args.outDir,
           format: args.format,
+          formats: args.formats,
           quality: args.quality,
           fit: args.fit,
           anchor: args.anchor,
           fill: args.fill,
           adjustments: args.adjustments,
-          zip: args.zip
+          text: args.text,
+          textBySku: args.textBySku,
+          fontDir: args.fontDir,
+          zip: args.zip,
+          useSessionEdits: args.useSessionEdits !== false,
+          strictFonts: args.strictFonts,
+          filenameTemplate: args.filenameTemplate,
+          manifest: args.manifest,
+          elements: args.elements,
+          visibility: args.visibility
         });
       },
       timeoutMs: 20 * 60 * 1e3,
       isConcurrencySafe: () => false
+    })
+  );
+  disposers.push(
+    ctx.tools.register({
+      name: "psd_edit",
+      description: "Edit a loaded PSD/PSB template before rendering: rewrite a text layer (same fields as one psd_batch_render `text` item, so a price line can mix two fonts, sizes and colours), place extra image layers above the product slot or between the background and the slot, register font files, and save or load the project so edits survive between sessions. Edits land on the cached document, so a following psd_batch_render uses them (its own `text`/`textBySku` still win per layer) and, after load_project, the project's slots when `slots` is omitted.",
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        required: ["template", "action"],
+        properties: {
+          template: {
+            type: "string",
+            description: "PSD or PSB path relative to the session working directory."
+          },
+          action: {
+            type: "string",
+            enum: [
+              "status",
+              "text",
+              "element",
+              "remelement",
+              "fonts",
+              "save_project",
+              "load_project",
+              "reset",
+              "undo",
+              "diff"
+            ],
+            description: "status: current edits, fonts and missing fonts. text: rewrite a text layer. element / remelement: add or remove placed images. fonts: register font files. save_project / load_project: persist edits. reset: drop every edit. undo / diff: revert or inspect edits (C3)."
+          },
+          // action=text: the same fields as one psd_batch_render `text` item.
+          ...TEXT_OVERRIDE_SCHEMA.properties,
+          layer: {
+            type: "string",
+            description: "Text layer name, entry id (e12) or leaf id (l3). Required for action=text."
+          },
+          dx: { type: "number", description: "Horizontal offset in canvas pixels (text nudge, or element left)." },
+          dy: { type: "number", description: "Vertical offset in canvas pixels (text nudge, or element top)." },
+          paths: {
+            type: "array",
+            description: "Images to place (relative paths). Required for action=element.",
+            items: { type: "string" }
+          },
+          name: { type: "string", description: "Element name. Defaults to the file name." },
+          scale: { type: "number", description: "Element scale, 1 = original size." },
+          fit: {
+            type: "string",
+            enum: ["contain", "cover"],
+            description: "Fit the image into `anchor` / `anchorRect` instead of passing dx/dy (P-02)."
+          },
+          anchor: {
+            type: "string",
+            description: "Layer name whose bbox is the placement target for action=element."
+          },
+          rotation: { type: "number", description: "Element rotation in degrees." },
+          opacity: { type: "number", description: "Element opacity, 0-1." },
+          blend: { type: "string", description: "Blend mode, e.g. multiply / screen / overlay." },
+          aboveSlots: {
+            type: "boolean",
+            description: "Draw the element above everything (default true). Set false to place it directly under the lowest product slot, above the background."
+          },
+          names: {
+            type: "array",
+            description: "Element names to remove (action=remelement).",
+            items: { type: "string" }
+          },
+          dir: { type: "string", description: "Folder of font files to register (action=fonts)." },
+          fonts: {
+            type: "array",
+            description: "Font files to register (action=fonts).",
+            items: { type: "string" }
+          },
+          project: {
+            type: "string",
+            description: "Project JSON path for action=save_project / load_project."
+          }
+        }
+      },
+      output: {
+        schema: {
+          type: "object",
+          additionalProperties: true
+        },
+        // dsh requires `render`: it is what the model reads back.
+        render: (args, value) => [{ type: "text", text: describeEditResult(args.action, value) }]
+      },
+      async execute(args, exec) {
+        if (!exec.agent) throw new Error("psd_edit requires an agent session");
+        const cwd = await resolveSessionCwd(ctx, exec);
+        return editTemplate({ cwd, ...args });
+      },
+      timeoutMs: 5 * 60 * 1e3,
+      isConcurrencySafe: () => false
+    })
+  );
+  disposers.push(
+    ctx.tools.register({
+      name: "psd_apply_sheet",
+      description: "Expand a requirement sheet + mapping.csv + template.rules.json into per-SKU renders. Does preflight (missing/ambiguous assets are reported, never fuzzy-matched), writes text/gifts/icon from the rules file, validates outputs, and can retry failures. Prefer this over hand-written layer lists. Session edits are ignored.",
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        required: ["sheet", "template", "rules"],
+        properties: {
+          sheet: { type: "string", description: "Requirement xlsx/csv path." },
+          sheetName: { type: "string", description: "Workbook sheet name. Default from rules.sheet.name." },
+          mapping: { type: "string", description: "mapping.csv (sku \u2192 product/gift files)." },
+          rules: { type: "string", description: "template.rules.json next to the PSD." },
+          template: { type: "string", description: "PSD/PSB template path." },
+          templates: {
+            type: "array",
+            items: { type: "string" },
+            description: "Optional extra templates (main + long-form) (P-10)."
+          },
+          productDir: { type: "string", description: "Folder of product cut-outs." },
+          giftDir: { type: "string", description: "Folder of gift cut-outs." },
+          fontDir: { type: "string", description: "Font folder to register before rendering." },
+          outDir: { type: "string" },
+          format: { type: "string", enum: ["jpg", "png", "webp"] },
+          formats: { type: "array", items: { type: "string", enum: ["jpg", "png", "webp"] } },
+          quality: { type: "integer" },
+          skus: { type: "array", items: { type: "string" }, description: "Only these SKUs." },
+          limit: { type: "integer", description: "First N renderable SKUs (use 1\u20132 for a sample)." },
+          validate: { type: "boolean", description: "Run post-render checks. Default true." },
+          retryFailed: { type: "boolean", description: "Re-render SKUs that failed validation." },
+          contactSheet: { type: "boolean", description: "Write a thumbnail contact sheet (C2)." },
+          strictFonts: { type: "boolean", description: "Block on missing fonts. Default true." },
+          slots: { type: "array", items: { type: "string" } }
+        }
+      },
+      output: {
+        schema: { type: "object", additionalProperties: true },
+        render: (_args, value) => [
+          {
+            type: "text",
+            text: `psd_apply_sheet: ${value.count} SKU(s) \u2192 ${value.outDir}; failed ${list(
+              value.failed
+            )}; skipped ${list((value.skipped || []).map((item) => item.sku))}${value.contactSheet ? `
+Contact sheet: ${value.contactSheet}` : ""}
+${value.preflight}`
+          }
+        ]
+      },
+      async execute(args, exec) {
+        if (!exec.agent) throw new Error("psd_apply_sheet requires an agent session");
+        const cwd = await resolveSessionCwd(ctx, exec);
+        return applySheet({ cwd, ...args });
+      },
+      timeoutMs: 20 * 60 * 1e3,
+      isConcurrencySafe: () => false
+    })
+  );
+  disposers.push(
+    ctx.tools.register({
+      name: "psd_view",
+      description: "Look at a rendered image up close. Crops and zooms a PNG/JPG/WebP in the workspace and writes a PNG you can open, with optional labelled rectangles, a pixel-coordinate grid, and the bounds of named PSD layers drawn on top (all in the image's own pixel space, which equals the template canvas for renders). Use it to read exact positions, check whether text is clipped or a gift image fits its card, and to compare where a layer sits against what was actually drawn.",
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        required: ["image"],
+        properties: {
+          image: { type: "string", description: "Image path relative to the session working directory." },
+          crop: {
+            type: "array",
+            items: { type: "number" },
+            description: "Region [x0, y0, x1, y1] in image pixels. Default: the whole image."
+          },
+          scale: { type: "number", description: "Zoom factor (max 16). Default: fit the crop to about 1600px wide." },
+          grid: {
+            type: "number",
+            description: "Draw a coordinate grid every N pixels. 0 draws none; omit for none, -1 for an automatic step."
+          },
+          rects: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["rect"],
+              properties: {
+                rect: { type: "array", items: { type: "number" }, description: "[x0, y0, x1, y1] in image pixels." },
+                label: { type: "string" },
+                color: { type: "string", description: "CSS colour. Default cycles through a palette." }
+              }
+            },
+            description: "Rectangles to draw."
+          },
+          template: {
+            type: "string",
+            description: "PSD/PSB path; required when `layers` or `textLayers` is used."
+          },
+          layers: {
+            type: "array",
+            items: { type: "string" },
+            description: "Layer names, full paths or ids whose bounds to outline and label."
+          },
+          textLayers: { type: "boolean", description: "Outline every visible text layer of `template`." },
+          outDir: { type: "string", description: "Output folder relative to the working directory. Default out/_view." }
+        }
+      },
+      output: {
+        schema: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            file: { type: "string" },
+            width: { type: "integer" },
+            height: { type: "integer" },
+            source: {
+              type: "object",
+              additionalProperties: false,
+              properties: { width: { type: "integer" }, height: { type: "integer" } }
+            },
+            crop: { type: "array", items: { type: "integer" } },
+            scale: { type: "number" },
+            rects: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: false,
+                properties: { label: { type: "string" }, rect: { type: "array", items: { type: "number" } } }
+              }
+            },
+            missing: { type: "array", items: { type: "string" } }
+          }
+        },
+        render: (_args, value) => [
+          {
+            type: "text",
+            text: `psd_view: ${value.file} (${value.width}\xD7${value.height}, crop [${value.crop.join(", ")}], \xD7${value.scale}, ${value.rects.length} rect(s)${value.missing.length ? `; not found: ${value.missing.join(", ")}` : ""})`
+          }
+        ]
+      },
+      async execute(args, exec) {
+        if (!exec.agent) throw new Error("psd_view requires an agent session");
+        const cwd = await resolveSessionCwd(ctx, exec);
+        const imagePath = await resolveInWorkspace(cwd, args.image);
+        if (!IMAGE_EXTENSIONS.has(path3.extname(imagePath).toLowerCase())) {
+          throw new Error(`Not an image file: ${args.image}`);
+        }
+        const image = await loadImage2(await fs3.readFile(imagePath));
+        const rects = (args.rects || []).map((item) => ({ ...item }));
+        const missing = [];
+        const wantsTemplate = args.layers && args.layers.length || args.textLayers;
+        if (wantsTemplate) {
+          if (!args.template) throw new Error("Pass `template` to outline layers");
+          const doc = await loadTemplateDoc(await resolveInWorkspace(cwd, args.template));
+          for (const spec of args.layers || []) {
+            const found = layerBounds(doc, spec);
+            if (!found) missing.push(spec);
+            else rects.push({ rect: [found.x, found.y, found.x + found.w, found.y + found.h], label: spec.split("/").pop() });
+          }
+          if (args.textLayers) {
+            for (const entry of doc.entries) {
+              if (entry.kind !== "text" || !entry.bounds || !isEntryVisible(doc, entry.id)) continue;
+              rects.push({ rect: entry.bounds, label: entry.name.trim() });
+            }
+          }
+        }
+        const grid = args.grid === -1 ? true : Number(args.grid) > 0 ? Number(args.grid) : false;
+        const view = renderView({ image, crop: args.crop, scale: args.scale, rects, grid });
+        const outDir = toWorkspacePath(cwd, args.outDir || "out/_view");
+        const absoluteOut = await resolveInWorkspace(cwd, outDir, { mustExist: false });
+        await fs3.mkdir(absoluteOut, { recursive: true });
+        const crop = view.crop;
+        const stem = sanitizeName(path3.basename(imagePath, path3.extname(imagePath)));
+        const file = `${stem}-${crop.x}_${crop.y}_${crop.w}x${crop.h}-x${view.scale}.png`;
+        await fs3.writeFile(path3.join(absoluteOut, file), view.canvas.toBuffer("image/png"));
+        return {
+          file: path3.join(outDir, file),
+          width: view.canvas.width,
+          height: view.canvas.height,
+          source: { width: image.width, height: image.height },
+          crop: [crop.x, crop.y, crop.x + crop.w, crop.y + crop.h],
+          scale: view.scale,
+          rects: view.rects,
+          missing
+        };
+      },
+      timeoutMs: 60 * 1e3,
+      isConcurrencySafe: () => true
+    })
+  );
+  disposers.push(
+    ctx.tools.register({
+      name: "psd_text_check",
+      description: "Measure how closely the text engine reproduces the template's own text. Re-renders every text layer of a PSD/PSB with its ORIGINAL copy and compares ink bounds with the pixels Photoshop rasterized: size ratios (1 = identical), centre offsets in px, and whether a font had to fall back. A row marked `drift` means rewriting that layer will not sit where the designer put it (wrong size, baseline or font); fix the font or the rule before a batch run.",
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        required: ["template"],
+        properties: {
+          template: { type: "string", description: "PSD or PSB path relative to the session working directory." },
+          fontDir: { type: "string", description: "Font folder to register before measuring." },
+          layers: { type: "array", items: { type: "string" }, description: "Only these layer names, full paths or ids." },
+          tolerance: { type: "number", description: "Allowed size error as a fraction. Default 0.05." },
+          offset: { type: "number", description: "Allowed centre offset in px. Default 4." }
+        }
+      },
+      output: {
+        schema: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            template: { type: "string" },
+            total: { type: "integer" },
+            drift: { type: "integer" },
+            rows: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  layer: { type: "string" },
+                  text: { type: "string" },
+                  ok: { type: "boolean" },
+                  drift: { type: "boolean" },
+                  note: { type: "string" },
+                  widthRatio: { type: "number" },
+                  heightRatio: { type: "number" },
+                  dx: { type: "number" },
+                  dy: { type: "number" },
+                  orig: { type: "array", items: { type: "number" } },
+                  rendered: { type: "array", items: { type: "number" } },
+                  warnings: { type: "array", items: { type: "string" } }
+                }
+              }
+            }
+          }
+        },
+        render: (_args, value) => [
+          {
+            type: "text",
+            text: `psd_text_check: ${value.total} text layer(s), ${value.drift} drifting
+${value.rows.map(
+              (row) => `${row.drift ? "\u2717" : "\u2713"} ${row.layer}  ${row.ok ? `W\xD7${row.widthRatio} H\xD7${row.heightRatio} dx${row.dx} dy${row.dy}` : row.note}${row.warnings && row.warnings.length ? `  [${row.warnings.join("; ")}]` : ""}`
+            ).join("\n")}`
+          }
+        ]
+      },
+      async execute(args, exec) {
+        if (!exec.agent) throw new Error("psd_text_check requires an agent session");
+        const cwd = await resolveSessionCwd(ctx, exec);
+        const absolute = await resolveInWorkspace(cwd, args.template);
+        if (args.fontDir) await registerFonts(cwd, { dir: args.fontDir });
+        const doc = await loadTemplateDoc(absolute);
+        const tolerance = Number(args.tolerance) > 0 ? Number(args.tolerance) : 0.05;
+        const offset = Number(args.offset) > 0 ? Number(args.offset) : 4;
+        const rows = calibrateText(doc, (family) => GlobalFonts.has(family), { layers: args.layers }).map((row) => {
+          const { topGap: _top, bottomGap: _bottom, ...rest } = row;
+          const warnings = (rest.warnings || []).map(String);
+          const drift = !rest.ok || warnings.length > 0 || Math.abs(rest.widthRatio - 1) > tolerance || Math.abs(rest.heightRatio - 1) > tolerance * 3 || Math.abs(rest.dx) > offset || Math.abs(rest.dy) > offset;
+          return { ...rest, warnings, drift };
+        });
+        return { template: path3.relative(cwd, absolute), total: rows.length, drift: rows.filter((row) => row.drift).length, rows };
+      },
+      timeoutMs: 2 * 60 * 1e3,
+      isConcurrencySafe: () => true
+    })
+  );
+  disposers.push(
+    ctx.tools.register({
+      name: "psd_draft_rules",
+      description: "Draft a template.rules.json from a PSD/PSB alone: tags each layer (price, headline / sub-head / detail copy, product name, gift titles and names, icons, product slot), reads fonts, true pixel sizes and colours from the file, and computes gift picture zones between each title and name. Every tag carries its evidence and anything undecidable is listed in `unresolved`; copy-hierarchy rules, size bins by text length and unseen gift tiers still have to come from the modification note. Optionally writes the draft to a file for psd_apply_sheet.",
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        required: ["template"],
+        properties: {
+          template: { type: "string", description: "PSD or PSB path relative to the session working directory." },
+          giftDir: { type: "string", description: "Folder of gift cut-outs; its file names seed gifts.catalog." },
+          sheetName: { type: "string", description: "Requirement workbook sheet name to record in the rules." },
+          outRules: { type: "string", description: "Write the draft rules JSON here (relative path)." },
+          overwrite: { type: "boolean", description: "Allow replacing an existing outRules file. Default false." }
+        }
+      },
+      output: {
+        schema: {
+          type: "object",
+          additionalProperties: true,
+          properties: {
+            written: { type: "string" },
+            unresolved: { type: "array", items: { type: "string" } },
+            notes: { type: "array", items: { type: "string" } }
+          }
+        },
+        render: (_args, value) => [
+          {
+            type: "text",
+            text: `psd_draft_rules: ${Object.keys(value.rules.layers).length} layer(s) tagged${value.rules.slots?.product ? ", product slot found" : ", NO product slot"}${value.written ? `, written to ${value.written}` : ""}
+${Object.entries(value.evidence).map(([key, item]) => `  ${key} \u2192 ${item.layer}  (${item.reason})`).join("\n")}${value.unresolved.length ? `
+unresolved:
+  ${value.unresolved.join("\n  ")}` : ""}
+notes:
+  ${value.notes.join("\n  ")}`
+          }
+        ]
+      },
+      async execute(args, exec) {
+        if (!exec.agent) throw new Error("psd_draft_rules requires an agent session");
+        const cwd = await resolveSessionCwd(ctx, exec);
+        const absolute = await resolveInWorkspace(cwd, args.template);
+        const doc = await loadTemplateDoc(absolute);
+        let giftFiles = [];
+        if (args.giftDir) {
+          const dir = await resolveInWorkspace(cwd, args.giftDir);
+          giftFiles = (await fs3.readdir(dir)).filter((name) => IMAGE_EXTENSIONS.has(path3.extname(name).toLowerCase()) && !name.startsWith(".")).sort();
+        }
+        const draft = draftRules(doc, { giftFiles, sheetName: args.sheetName, templateName: path3.basename(absolute) });
+        let written;
+        if (args.outRules) {
+          const target = await resolveInWorkspace(cwd, args.outRules, { mustExist: false });
+          const exists = await fs3.stat(target).then(() => true, () => false);
+          if (exists && !args.overwrite) throw new Error(`${args.outRules} already exists; pass overwrite: true to replace it`);
+          await fs3.mkdir(path3.dirname(target), { recursive: true });
+          await fs3.writeFile(target, `${JSON.stringify(draft.rules, null, 2)}
+`);
+          written = path3.relative(cwd, target);
+        }
+        return { ...draft, ...written ? { written } : {} };
+      },
+      timeoutMs: 2 * 60 * 1e3,
+      isConcurrencySafe: () => true
     })
   );
   return () => {
@@ -17556,6 +21343,8 @@ ZIP: ${value.zip}` : ""}`
   };
 }
 export {
+  applySheet,
+  editTemplate,
   inspectTemplate,
   registerTools,
   renderBatch

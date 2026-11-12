@@ -3,6 +3,18 @@ dist/
 out/
 *.log
 .DS_Store
+__MACOSX/
 *.psd
 *.psb
 *.tgz
+
+# 业务素材不进仓库（模板、产品图、赠品图、说明图、输出）
+模板/
+产品图/
+赠品图/
+说明图/
+输出/
+
+# 需求表：只保留 examples 里的空白模板
+*.xlsx
+!examples/*.xlsx
