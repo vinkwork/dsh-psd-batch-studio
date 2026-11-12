@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>批量主图工具 使用教程</title>
+<style>
+:root{
+  --bg:#f7f5f2; --card:#ffffff; --ink:#1f1d1b; --muted:#6f6a65; --line:#e8e3dd; --soft:#f1ede8;
+  --brand:#c8102e; --brand-2:#ff5a73; --brand-soft:#fdecef;
+  --ok:#14804a; --ok-soft:#e6f5ed; --warn:#a85d00; --warn-soft:#fff2df; --bad:#c0302f; --bad-soft:#fdeceb; --info:#2d5fd0; --info-soft:#e9f0ff;
+  --chat-bg:#f3f1ee; --bubble-a:#ffffff; --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 28px rgba(60,40,30,.07);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#141415;--card:#1c1c1f;--ink:#efeeec;--muted:#a09b96;--line:#2c2b2f;--soft:#242427;
+    --brand:#ff6a80;--brand-2:#ff6a80;--brand-soft:#3a1e25;--ok:#5fd49c;--ok-soft:#17302a;--warn:#ffb454;--warn-soft:#38290f;
+    --bad:#ff8480;--bad-soft:#3a1f1e;--info:#8fb0ff;--info-soft:#1b2744;--chat-bg:#19191c;--bubble-a:#26262a;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 28px rgba(0,0,0,.35)}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--brand)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+.hero{position:relative;overflow:hidden;padding:64px 0 44px;background:
+  radial-gradient(900px 360px at 85% -10%,color-mix(in srgb,var(--brand-2) 22%,transparent),transparent 70%),
+  radial-gradient(700px 300px at -5% 110%,color-mix(in srgb,var(--brand) 12%,transparent),transparent 70%);
+  border-bottom:1px solid var(--line)}
+.hero .kicker{display:inline-block;font-size:13px;letter-spacing:2px;color:var(--brand);font-weight:700;margin-bottom:12px}
+.hero h1{font-size:clamp(30px,5.4vw,52px);line-height:1.15;margin:0 0 16px;letter-spacing:.5px}
+.hero h1 em{font-style:normal;color:var(--brand)}
+.hero p{color:var(--muted);margin:0;max-width:680px;font-size:18px}
+.hero-flow{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.hero-flow div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 16px;box-shadow:var(--shadow);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
+.hero-flow b{width:24px;height:24px;border-radius:50%;background:var(--brand);color:#fff;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+
+.layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:48px;padding:36px 0 90px}
+nav.toc{position:sticky;top:20px;align-self:start;max-height:calc(100vh - 40px);overflow:auto;font-size:14px}
+nav.toc .t{font-size:12px;letter-spacing:2px;color:var(--muted);margin:0 0 10px 12px;font-weight:700}
+nav.toc a{display:flex;gap:8px;padding:6px 12px;border-radius:10px;color:var(--muted);text-decoration:none}
+nav.toc a i{font-style:normal;color:var(--brand);font-weight:700;min-width:16px}
+nav.toc a:hover{background:var(--soft);color:var(--ink)}
+main section{margin-bottom:68px;scroll-margin-top:20px}
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.sec-head .no{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;font-weight:800;font-size:19px;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 6px 16px color-mix(in srgb,var(--brand) 30%,transparent)}
+.sec-head h2{font-size:28px;margin:0;line-height:1.3}
+.lead{color:var(--muted);margin:4px 0 22px 56px}
+h3{font-size:19px;margin:34px 0 8px;display:flex;align-items:center;gap:10px}
+h3::before{content:"";width:5px;height:20px;border-radius:3px;background:var(--brand)}
+p{margin:10px 0}
+code{background:var(--soft);padding:1px 7px;border-radius:6px;font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink);border:1px solid var(--line)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:16px 0}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.card h4{margin:0 0 6px;font-size:16px}
+.card .ic{font-size:22px;margin-bottom:6px}
+.callout{display:flex;gap:12px;border-radius:14px;padding:14px 16px;margin:18px 0;font-size:15px;border:1px solid transparent}
+.callout .ci{font-size:20px;line-height:1.5}
+.callout b{display:block}
+.callout.tip{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 25%,transparent)}
+.callout.warn{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+.callout.info{background:var(--info-soft);border-color:color-mix(in srgb,var(--info) 25%,transparent)}
+figure{margin:20px 0}
+figure img{max-width:100%;height:auto;border-radius:14px;border:1px solid var(--line);display:block;box-shadow:var(--shadow)}
+figcaption{font-size:14px;color:var(--muted);margin-top:10px}
+.imgs img{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
+
+.steps{list-style:none;padding:0;margin:16px 0;counter-reset:s}
+.steps>li{counter-increment:s;position:relative;padding:0 0 18px 52px}
+.steps>li::before{content:counter(s);position:absolute;left:0;top:-2px;width:34px;height:34px;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-weight:800;display:flex;align-items:center;justify-content:center}
+.steps>li::after{content:"";position:absolute;left:16px;top:36px;bottom:2px;width:2px;background:var(--line)}
+.steps>li:last-child::after{display:none}
+
+.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:20px 0}
+.flow .s{padding:9px 16px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-weight:600;font-size:15px;box-shadow:var(--shadow)}
+.flow .s.hl{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;border-color:transparent}
+.flow i{color:var(--muted);font-style:normal}
+
+.tbl{width:100%;border-collapse:separate;border-spacing:0;margin:16px 0;font-size:15px;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);display:block;overflow-x:auto}
+.tbl th,.tbl td{padding:11px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl th{background:var(--soft);font-weight:700;white-space:nowrap;font-size:14px}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody{display:table;width:100%}
+.sheet th{background:var(--brand);color:#fff;text-align:center;font-size:13px}
+.sheet td{font-size:13px;border-right:1px solid var(--line)}
+.sheet td:last-child{border-right:0}
+
+.folders{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}
+.fd{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;align-items:flex-start}
+.fd .ico{font-size:24px;line-height:1.2}
+.fd b{display:block;font-size:15px}
+.fd span.desc{color:var(--muted);font-size:13.5px;line-height:1.55;display:block}
+.who{display:inline-block;font-size:12px;padding:0 8px;border-radius:999px;margin-left:6px;font-weight:700;vertical-align:1px}
+.who.b{background:var(--info-soft);color:var(--info)}
+.who.d{background:#f1e7ff;color:#7a3cc4}
+.who.a{background:var(--ok-soft);color:var(--ok)}
+.who.g{background:var(--soft);color:var(--muted)}
+@media (prefers-color-scheme:dark){.who.d{background:#2c2145;color:#d2adff}}
+
+/* chat simulator */
+.chatwin{margin:22px 0;border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:var(--chat-bg)}
+.chatbar{display:flex;align-items:center;gap:8px;padding:11px 16px;background:var(--card);border-bottom:1px solid var(--line)}
+.chatbar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.chatbar i:nth-child(1){background:#ff5f57}.chatbar i:nth-child(2){background:#febc2e}.chatbar i:nth-child(3){background:#28c840}
+.chatbar span{margin-left:10px;font-size:13px;color:var(--muted);font-weight:600}
+.chatbar em{margin-left:auto;font-style:normal;font-size:12px;color:var(--muted);background:var(--soft);padding:1px 10px;border-radius:999px}
+.chatbody{padding:20px 18px 8px;display:flex;flex-direction:column;gap:18px}
+.row{display:flex;gap:10px;align-items:flex-start}
+.row.u{flex-direction:row-reverse}
+.av{flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff}
+.row.u .av{background:linear-gradient(135deg,#5b8def,#3b66d6)}
+.row.a .av{background:linear-gradient(135deg,var(--brand),var(--brand-2))}
+.bub{max-width:min(78%,640px);padding:11px 16px;border-radius:18px;font-size:15.5px;line-height:1.7}
+.row.u .bub{background:linear-gradient(135deg,#4d86f0,#3a64d4);color:#fff;border-top-right-radius:6px}
+.row.a .bub{background:var(--bubble-a);border:1px solid var(--line);border-top-left-radius:6px;max-width:min(88%,720px)}
+.bub p{margin:4px 0}
+.bub ul{margin:6px 0 6px 18px;padding:0}
+.act{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);background:var(--soft);border:1px solid var(--line);padding:5px 12px;border-radius:999px;margin:8px 0 2px;width:fit-content;max-width:100%}
+.act b{color:var(--ok);font-weight:700;display:inline}
+.chatfoot{display:flex;gap:10px;align-items:center;padding:12px 16px;background:var(--card);border-top:1px solid var(--line);margin-top:10px}
+.chatfoot .in{flex:1;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:8px 16px;color:var(--muted);font-size:14px}
+.chatfoot .send{width:32px;height:32px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px}
+.cap{font-size:13.5px;color:var(--muted)}
+.thumbs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 2px;max-width:420px}
+.thumbs img{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
+.bigimg{margin:8px 0 2px}.bigimg img{width:100%;max-width:560px;border-radius:12px;border:1px solid var(--line);display:block}
+
+.report{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:8px 0 4px;background:var(--card);font-size:14.5px;min-width:min(100%,420px)}
+.report .rh{padding:10px 14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.report .rh.bad{background:var(--bad-soft);color:var(--bad)}
+.report .rr{padding:9px 14px;border-top:1px solid var(--line);display:flex;gap:10px;line-height:1.55}
+.report .rr .k{flex:none;font-weight:700;font-size:13px;padding:1px 9px;border-radius:999px;height:fit-content;white-space:nowrap}
+.report .rr .k.bad{background:var(--bad-soft);color:var(--bad)}
+.report .rr .k.inf{background:var(--info-soft);color:var(--info)}
+.report .rr small{display:block;color:var(--muted)}
+.mini{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}
+.mini th,.mini td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.mini th{color:var(--muted);font-weight:600;font-size:12.5px}
+.tag{white-space:nowrap;display:inline-block;font-size:12.5px;font-weight:700;padding:0 9px;border-radius:999px;margin:0}
+.tag.bad{background:var(--bad-soft);color:var(--bad)}.tag.inf{background:var(--info-soft);color:var(--info)}
+
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 18px;margin:10px 0}
+details summary{cursor:pointer;font-weight:700;padding:11px 0;list-style:none;display:flex;gap:10px;align-items:center}
+details summary::before{content:"＋";color:var(--brand);font-weight:800}
+details[open] summary::before{content:"－"}
+details[open] summary{border-bottom:1px solid var(--line);margin-bottom:6px}
+details p{color:var(--muted)}
+.say{display:flex;flex-direction:column;gap:10px;margin:14px 0}
+.say div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 16px;display:flex;gap:10px;align-items:center;font-size:15px}
+.say div::before{content:"💬";font-size:16px}
+footer{border-top:1px solid var(--line);padding:28px 0 56px;color:var(--muted);font-size:14px}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:0}
+  nav.toc{position:static;max-height:none;display:flex;flex-wrap:wrap;gap:4px;margin-bottom:24px}
+  nav.toc .t{width:100%}
+  nav.toc a{border:1px solid var(--line);border-radius:999px;padding:2px 12px}
+  .grid2,.grid3,.folders{grid-template-columns:1fr}.grid4{grid-template-columns:repeat(2,1fr)}
+  .lead{margin-left:0}.bub,.row.a .bub{max-width:88%}
+}
+@media print{nav.toc{display:none}.layout{display:block}.card,.chatwin,figure img{box-shadow:none}}
+</style>
+</head>
+<body>
+
+<header class="hero"><div class="wrap">
+  <span class="kicker">COOKBOOK · 使用教程</span>
+  <h1>一张需求表，<br><em>一句话</em>出整套主图</h1>
+  <p>把设计好的 PSD 模板和业务填的需求表交给 agent，它会检查素材、出样张、批量生成，全程用聊天完成。你不需要打开 Photoshop，也不需要敲任何命令。</p>
+  <div class="hero-flow">
+    <div><b>1</b>填需求表</div><div><b>2</b>放产品图和赠品图</div><div><b>3</b>对 agent 说「出图」</div><div><b>4</b>确认样张</div><div><b>5</b>拿成品</div>
+  </div>
+</div></header>
+
+<div class="wrap layout">
+<nav class="toc"><div class="t">目录</div>
+  <a href="#s0"><i>0</i>先看效果</a>
+  <a href="#s1"><i>1</i>开始之前</a>
+  <a href="#s2"><i>2</i>文件夹说明</a>
+  <a href="#s3"><i>3</i>日常出图</a>
+  <a href="#s4"><i>4</i>看懂预检报告</a>
+  <a href="#s5"><i>5</i>检查与修改</a>
+  <a href="#s6"><i>6</i>换新模板</a>
+  <a href="#s7"><i>7</i>规则文件速读</a>
+  <a href="#s8"><i>8</i>规则对照效果</a>
+  <a href="#s9"><i>9</i>常见问题</a>
+  <a href="#s10"><i>10</i>已知局限</a>
+  <a href="#s11"><i>11</i>常用的话</a>
+</nav>
+<main>
+
+<section id="s0">
+<div class="sec-head"><div class="no">0</div><h2>先看效果</h2></div>
+<p class="lead">下面是用项目自带的示例数据一次出的 7 张图，整批通常一分钟内完成。</p>
+<figure><img src="教程图片-脱敏/联系表.jpg" alt="联系表：7 张成品缩略图"><figcaption>联系表：每次出图自动生成，一眼扫完整批。</figcaption></figure>
+<div class="grid4 imgs">
+  <img src="教程图片-脱敏/成品-a.jpg" alt="成品 A"><img src="教程图片-脱敏/成品-b.jpg" alt="成品 B"><img src="教程图片-脱敏/成品-c.jpg" alt="成品 C"><img src="教程图片-脱敏/成品-d.jpg" alt="成品 D">
+</div>
+<p class="cap">四张的文案、价格、赠品、角标都不同，版式完全来自同一个模板。</p>
+<div class="grid3">
+  <div class="card"><div class="ic">✍️</div><h4>自动写文字</h4>把需求表里的价格、卖点、产品名写进模板对应位置，字体、字号、颜色、位置和原模板一致。</div>
+  <div class="card"><div class="ic">🖼️</div><h4>自动摆图</h4>产品图放进商品位，赠品图按框等比居中，不变形。</div>
+  <div class="card"><div class="ic">🛡️</div><h4>自动把关</h4>出图前检查缺图、名字对不上；出图后检查价格红色、商品位等。有问题先停下来告诉你。</div>
+</div>
+</section>
+
+<section id="s1">
+<div class="sec-head"><div class="no">1</div><h2>开始之前</h2></div>
+<p class="lead">一次性准备，之后每次出图都不用再做。</p>
+<ol class="steps">
+<li><b>准备一个 agent。</b>Claude Code 或 DeepSeek Harness 都可以。它们要能读写文件夹里的文件、能运行程序、能看图片。</li>
+<li><b>安装 Node.js（版本 20 或更高）。</b>到 <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a> 下载 LTS 安装包，一路点「下一步」即可。这是程序运行需要的基础环境，不需要你懂它。</li>
+<li><b>解压项目。</b>把收到的压缩包解压到电脑上任意位置，例如桌面。中文路径也没关系。</li>
+<li><b>让 agent 打开这个文件夹。</b>这一步最关键：agent 的「工作文件夹」必须是项目根目录（里面能看到 <code>模板</code>、<code>产品图</code>、<code>需求表</code> 这些文件夹）。
+  <table class="tbl">
+  <tr><th>你用的 agent</th><th>怎么做</th></tr>
+  <tr><td>Claude Code</td><td>用 Claude Code 打开项目文件夹（桌面版选择「打开文件夹」，或在 VS Code 里打开该文件夹再启动 Claude Code）。它会自动读取根目录的 <code>CLAUDE.md</code>，了解全部工作规矩。</td></tr>
+  <tr><td>DeepSeek Harness</td><td>把 Harness 的工作目录选为项目文件夹。如果它没有自动读取说明，第一句话告诉它：「先阅读 AGENTS.md，然后按里面的流程工作」。</td></tr>
+  </table>
+</li>
+<li><b>让 agent 帮你装好并自检。</b>对它说下面这句，剩下的它自己完成：
+<div class="chatwin">
+  <div class="chatbar"><i></i><i></i><i></i><span>agent · 批量主图工具</span><em>首次使用</em></div>
+  <div class="chatbody">
+    <div class="row u"><div class="av">你</div><div class="bub">帮我检查环境能不能用，缺什么就装上。</div></div>
+    <div class="row a"><div class="av">AI</div><div class="bub">
+      <div class="act"><b>✓</b>检查 Node.js 版本：满足要求</div>
+      <div class="act"><b>✓</b>安装程序依赖（只需一次）</div>
+      <div class="act"><b>✓</b>运行预检：7 个商品，素材齐全</div>
+      <p>环境没问题，可以开始出图了。</p></div></div>
+  </div>
+</div>
+</li>
+</ol>
+<div class="callout tip"><div class="ci">💡</div><div><b>为什么不用安装任何插件或技能包？</b>agent 需要知道的所有规矩，都写在项目根目录的 <code>AGENTS.md</code> 里，随项目一起走。把整个文件夹发给同事，他打开就能用。</div></div>
+</section>
+
+<section id="s2">
+<div class="sec-head"><div class="no">2</div><h2>文件夹说明</h2></div>
+<p class="lead">一句话：先按类别分文件夹，每个类别里再按「案例」分子文件夹。</p>
+<div class="card">
+  <h4>什么是「案例」？</h4>
+  一次活动、或一套模板配一批商品，就是一个案例，起一个名字，比如「示范案例」「1111大促」「618新品」。<b>每个类别文件夹里都用同一个案例名建一个子文件夹</b>，这个案例的东西就分别放在里面，不同案例互不混在一起。
+</div>
+<div class="grid2">
+<figure><div class="card" style="font:14px/1.9 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto;white-space:pre">批量主图工具/
+├─ 模板/
+│  └─ <b>示范案例</b>/  模版-1-优化.psb
+├─ 规则/
+│  └─ <b>示范案例</b>/  模版-1.rules.json
+├─ 需求表/
+│  ├─ 需求表模板.xlsx  <span style="color:var(--muted)">（空白样板）</span>
+│  └─ <b>示范案例</b>/  需求表.xlsx
+├─ 产品图/
+│  └─ <b>示范案例</b>/  11 张产品图
+├─ 赠品图/
+│  └─ <b>示范案例</b>/  4 张赠品图
+├─ 字体包/
+│  └─ <b>示范案例</b>/  9 个字体文件
+├─ 说明图/
+│  └─ <b>示范案例</b>/  主图修改说明.png
+├─ 输出/
+│  └─ <b>示范案例</b>/  （出图后自动出现）
+└─ 引擎/  <span style="color:var(--muted)">（程序，不要动）</span></div>
+<figcaption>随项目附带的「示范案例」：这一整套就是完整样例，照着它建自己的案例。</figcaption></figure>
+<figure><div class="card" style="font:14px/1.9 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto;white-space:pre">批量主图工具/
+├─ 产品图/
+│  ├─ 示范案例/
+│  └─ <b style="color:var(--brand)">1111大促</b>/  <span style="color:var(--muted)">← 新活动</span>
+├─ 需求表/
+│  ├─ 示范案例/
+│  └─ <b style="color:var(--brand)">1111大促</b>/  需求表.xlsx
+├─ 模板/
+│  ├─ 示范案例/
+│  └─ <b style="color:var(--brand)">1111大促</b>/  新模板.psb
+└─ …其他类别同理</div>
+<figcaption>新活动：每个类别下各加一个同名子文件夹。不用自己建，对 agent 说「新建一个 1111大促 案例」即可。</figcaption></figure>
+</div>
+<h3>每个文件夹放什么</h3>
+<div class="folders">
+  <div class="fd"><div class="ico">📐</div><div><b>模板 <span class="who d">设计师</span></b><span class="desc">PSD / PSB 模板。只读，工具不会改动它。</span></div></div>
+  <div class="fd"><div class="ico">📏</div><div><b>规则 <span class="who d">设计师</span></b><span class="desc">每个模板一份规则文件，记录文字、字号、赠品位置等。agent 起草，设计师确认。</span></div></div>
+  <div class="fd"><div class="ico">📊</div><div><b>需求表 <span class="who b">业务</span></b><span class="desc">每次活动填的商品清单。<code>需求表模板.xlsx</code> 是带填写说明的空白样板，放在这个文件夹的最外层。</span></div></div>
+  <div class="fd"><div class="ico">📦</div><div><b>产品图 <span class="who b">业务</span></b><span class="desc">产品抠图（透明底 PNG）。文件名 = 需求表里的产品名称。</span></div></div>
+  <div class="fd"><div class="ico">🎁</div><div><b>赠品图 <span class="who b">业务</span></b><span class="desc">赠品抠图（透明底 PNG）。</span></div></div>
+  <div class="fd"><div class="ico">🔤</div><div><b>字体包 <span class="who d">设计师</span></b><span class="desc">模板用到的字体文件。PSD 里只记字体名，不含字体本身。案例下没有字体时，会用字体包最外层的字体。</span></div></div>
+  <div class="fd"><div class="ico">🗒️</div><div><b>说明图 <span class="who b">业务</span></b><span class="desc">业务规则说明图，例如「主图修改说明.png」。agent 会读它。</span></div></div>
+  <div class="fd"><div class="ico">📤</div><div><b>输出 <span class="who a">自动</span></b><span class="desc">成品都在这里。每次出图在案例下新建一个按时间命名的子文件夹，不会覆盖旧的。</span></div></div>
+  <div class="fd"><div class="ico">📘</div><div><b>经验手册.md <span class="who g">备查</span></b><span class="desc">以前踩过的坑。出问题时 agent 会先查它。</span></div></div>
+  <div class="fd"><div class="ico">⚙️</div><div><b>引擎 <span class="who g">程序</span></b><span class="desc">程序本体，不要动。</span></div></div>
+</div>
+<h3>新建一个案例</h3>
+<div class="chatwin">
+  <div class="chatbar"><i></i><i></i><i></i><span>agent · 批量主图工具</span><em>新建案例</em></div>
+  <div class="chatbody">
+    <div class="row u"><div class="av">你</div><div class="bub">新建一个「1111大促」案例。</div></div>
+    <div class="row a"><div class="av">AI</div><div class="bub">
+      <div class="act"><b>✓</b>在模板、规则、需求表、产品图、赠品图、说明图下各建了「1111大促」文件夹</div>
+      <div class="act"><b>✓</b>已放好空白需求表：需求表 / 1111大促 / 需求表.xlsx</div>
+      <p>接下来请你：</p>
+      <ul><li>把产品抠图放进 <b>产品图 / 1111大促</b>，赠品抠图放进 <b>赠品图 / 1111大促</b></li><li>把业务说明图放进 <b>说明图 / 1111大促</b></li><li>填好需求表</li><li>用的是新模板的话，把模板放进 <b>模板 / 1111大促</b>；沿用示范案例的模板就不用放，告诉我就行</li></ul>
+      <p>放好后跟我说一声，我来预检。</p></div></div>
+  </div>
+</div>
+<h3>四条铁律</h3>
+<div class="grid2">
+  <div class="card"><h4>① 产品名称 = 图片文件名</h4>需求表写「柔雾定妆蜜粉饼8g」，产品图的案例文件夹里就必须有 <code>柔雾定妆蜜粉饼8g.png</code>。多一个空格都不行，工具永远不会猜哪张图最像。</div>
+  <div class="card"><h4>② 模板只读</h4>模板文件夹里的 PSD 不会被修改。成品是另外画出来的新图片。</div>
+  <div class="card"><h4>③ 不覆盖旧成品</h4>每次出图新建一个文件夹，上一次的结果随时可以回看。</div>
+  <div class="card"><h4>④ 有问题先停</h4>缺图、名字对不上、赠品没登记，预检会直接拦下，让你补完再继续，不会带着错误硬出。</div>
+</div>
+</section>
+
+<section id="s3">
+<div class="sec-head"><div class="no">3</div><h2>日常出图</h2></div>
+<p class="lead">前提：设计师已经为这个案例的模板准备好规则（项目自带的「示范案例」就是）。业务同学只做 4 步。</p>
+<div class="flow"><span class="s">① 填需求表</span><i>→</i><span class="s">② 放图</span><i>→</i><span class="s hl">③ 对 agent 说话</span><i>→</i><span class="s">④ 确认样张，批量出图</span></div>
+
+<h3>第 1 步　填需求表</h3>
+<p>打开 <code>需求表/需求表模板.xlsx</code>，按里面的样例填写，保存为 <code>需求表/你的案例名/需求表.xlsx</code>（示范案例里已有一份，可以直接参照）。第一个工作表叫「主图」，每个商品一行；第二个工作表「填写说明」讲了每一列怎么填。</p>
+<table class="tbl sheet">
+<tr><th>sku编码</th><th>产品名称</th><th>活动S价</th><th>买即赠</th><th>全店满赠</th><th>其他icon</th><th>一级卖点文案</th><th>二级卖点文案</th><th>三级卖点文案</th></tr>
+<tr><td>990000000001</td><td>柔雾定妆蜜粉饼8g</td><td>89</td><td>/</td><td>满99赠 绒面美妆蛋*2<br>满159元赠气垫粉扑*1</td><td>NEW新品上市</td><td>买1享到手3件礼</td><td>8H清爽不脱妆</td><td>12H服帖不卡粉</td></tr>
+<tr><td>990000000002</td><td>便携睫毛夹联名款</td><td>19.8</td><td>绒面美妆蛋*1</td><td></td><td></td><td>/</td><td>持久卷翘 不粘连</td><td>小巧便携 随身带</td></tr>
+</table>
+<table class="tbl">
+<tr><th>列</th><th>填什么</th><th>特殊写法</th></tr>
+<tr><td>产品名称</td><td>必须与产品图文件名一模一样（不含 .png）</td><td>—</td></tr>
+<tr><td>活动S价</td><td>数字，如 <code>89</code>、<code>19.8</code></td><td>小数点后的数字会自动缩小，不用手动处理</td></tr>
+<tr><td>买即赠</td><td>赠品名，如 <code>局部睫毛夹*1+遮瑕刷*1</code></td><td>没有就填 <code>/</code>，赠品区改成「满99送 + 满159送」</td></tr>
+<tr><td>其他icon</td><td><code>NEW新品上市</code> 或 <code>HOT爆品热卖</code></td><td>留空 = 不显示左上角角标</td></tr>
+<tr><td>一级卖点文案</td><td>利益点，如 <code>买1享到手3件礼</code></td><td>没有就填 <code>/</code>：二级文案上提为一级，二级改成产品名称（上表第二行就是这样）</td></tr>
+<tr><td>三级卖点文案</td><td>8–12 个字最合适</td><td>字越多，字号自动越小</td></tr>
+</table>
+<div class="callout warn"><div class="ci">⚠️</div><div><b>别做这些</b>不要改表头名称，不要在表头上面插入别的行，不要合并单元格。要加商品就往下加行，要删就删整行。</div></div>
+
+<h3>第 2 步　放图</h3>
+<ol class="steps">
+<li>把本批商品的产品抠图放进 <code>产品图/你的案例名</code> 文件夹，<b>文件名写成「产品名称.png」</b>。</li>
+<li>把赠品抠图放进 <code>赠品图/你的案例名</code> 文件夹。常用赠品（绒面美妆蛋、气垫粉扑、睫毛夹、遮瑕刷）已经在规则里登记好了。</li>
+<li>抠图要求：透明底 PNG，内容四周不要留大片空白（工具按内容等比缩放，不会变形）。</li>
+</ol>
+
+<h3>第 3 步　对 agent 说话</h3>
+<div class="chatwin">
+  <div class="chatbar"><i></i><i></i><i></i><span>agent · 批量主图工具</span><em>日常出图</em></div>
+  <div class="chatbody">
+    <div class="row u"><div class="av">你</div><div class="bub">按需求表出「示范案例」这批主图，先出 2 张样张给我看。</div></div>
+    <div class="row a"><div class="av">AI</div><div class="bub">
+      <div class="act"><b>✓</b>读取需求表：7 个商品</div>
+      <div class="act"><b>✓</b>预检素材：产品图、赠品都齐全</div>
+      <div class="act"><b>✓</b>出样张：2 张，用时约 7 秒</div>
+      <p>预检通过。有 4 张产品图没被需求表用到，只是提示，不影响出图。</p>
+      <p>样张我已经自己看过一遍：价格是红色、小数点后更小，赠品居中，文字没有被截断。你看看：</p>
+      <div class="thumbs"><img src="教程图片-脱敏/成品-a.jpg" alt="样张 1"><img src="教程图片-脱敏/成品-b.jpg" alt="样张 2"></div>
+      <p class="cap">文件位置：输出 / 示范案例 / 样张-20260101-1200</p>
+      <p>没问题的话，回复「可以」我就批量出剩下的。</p></div></div>
+  </div>
+  <div class="chatfoot"><div class="in">发消息给 agent…</div><div class="send">↑</div></div>
+</div>
+
+<h3>第 4 步　确认样张，批量出图</h3>
+<div class="chatwin">
+  <div class="chatbar"><i></i><i></i><i></i><span>agent · 批量主图工具</span><em>批量</em></div>
+  <div class="chatbody">
+    <div class="row u"><div class="av">你</div><div class="bub">可以，全部出吧。</div></div>
+    <div class="row a"><div class="av">AI</div><div class="bub">
+      <div class="act"><b>✓</b>批量出图：7 张成功，0 张失败</div>
+      <div class="act"><b>✓</b>自动校验：价格红字、商品位、文案写入，全部通过</div>
+      <p>全部完成。成品在 <b>输出 / 示范案例 / 批量-20260101-1201</b>，文件名是「sku编码-产品名称.jpg」。里面还有一张联系表，可以一眼扫完整批：</p>
+      <div class="bigimg"><img src="教程图片-脱敏/联系表.jpg" alt="联系表"></div></div></div>
+  </div>
+  <div class="chatfoot"><div class="in">发消息给 agent…</div><div class="send">↑</div></div>
+</div>
+<div class="callout tip"><div class="ci">💡</div><div><b>熟练之后一句话就行</b>「把这批图全部出了，先给我看 2 张样张。」agent 会自己走完预检和样张，等你一句「可以」再批量。</div></div>
+</section>
+
+<section id="s4">
+<div class="sec-head"><div class="no">4</div><h2>看懂预检报告</h2></div>
+<p class="lead">预检是整个流程的安全阀：出图之前，把所有会出错的点全部列出来。</p>
+<p>下面是故意把需求表写错之后的真实情况（产品名多了个空格、赠品没登记、产品不存在）：</p>
+<div class="chatwin">
+  <div class="chatbar"><i></i><i></i><i></i><span>agent · 批量主图工具</span><em>预检不通过</em></div>
+  <div class="chatbody">
+    <div class="row u"><div class="av">你</div><div class="bub">按需求表出「示范案例」这批图。</div></div>
+    <div class="row a"><div class="av">AI</div><div class="bub">
+      <div class="act"><b>✓</b>读取需求表：2 个商品</div>
+      <div class="act"><b style="color:var(--bad)">✕</b>预检发现 3 个问题，我先不出图</div>
+      <div class="report">
+        <div class="rh bad">⛔ 预检未通过，请先处理</div>
+        <div class="rr"><span class="k bad">缺产品图</span><div>990000000002　不存在的产品<small>产品图文件夹里没有和「产品名称」同名的文件</small></div></div>
+        <div class="rr"><span class="k bad">名字不完全一致</span><div>990000000001　柔雾定妆蜜粉饼 8g<small>很像「柔雾定妆蜜粉饼8g.png」，但中间多了一个空格。请统一成同一种写法</small></div></div>
+        <div class="rr"><span class="k bad">赠品没登记</span><div>990000000001　满99赠 神秘赠品*3<small>规则的赠品清单里没有这个赠品，需要设计师补一条</small></div></div>
+        <div class="rr"><span class="k inf">仅提示</span><div>产品图文件夹里有 11 张图本次没被用到<small>不影响出图</small></div></div>
+      </div>
+      <p>我不会自己挑一张相近的图。你处理好之后告诉我，我再继续。</p></div></div>
+  </div>
+</div>
+<table class="tbl">
+<tr><th>标记</th><th>意思</th><th>你怎么办</th></tr>
+<tr><td><span class="tag bad">缺产品图</span></td><td>需求表里的商品，在产品图里找不到同名文件</td><td>补图；或者让 agent 把这个商品从需求表删掉（它会先备份、先征得你同意）</td></tr>
+<tr><td><span class="tag bad">名字不完全一致</span></td><td>两个名字去掉空格后一样，但原样不一样</td><td>统一其中一边：改需求表，或改图片文件名。工具不替你选</td></tr>
+<tr><td><span class="tag bad">赠品没登记</span></td><td>需求表里的赠品名，规则里没有对应</td><td>告诉 agent「这个赠品对应 xxx.png」，它会补进规则；规则改动请设计师确认</td></tr>
+<tr><td><span class="tag bad">多个文件都像</span></td><td>有两张以上的图都符合</td><td>把不要的那张移出文件夹</td></tr>
+<tr><td><span class="tag inf">仅提示</span></td><td>图在文件夹里，但本批需求表没用到</td><td>不用管</td></tr>
+</table>
+<div class="callout info"><div class="ci">🔒</div><div><b>agent 的约定</b>只要有红色问题，agent 会停下来告诉你原因，而不会自己换图或悄悄改需求表。主图出错的代价远大于多问一句。</div></div>
+</section>
+
+<section id="s5">
+<div class="sec-head"><div class="no">5</div><h2>检查与修改</h2></div>
+<p class="lead">图出来了，怎么确认没问题？有问题怎么改？</p>
+
+<h3>5.1 你自己看什么</h3>
+<table class="tbl">
+<tr><th>看哪里</th><th>正确的样子</th></tr>
+<tr><td>一级文案</td><td>数字红色、汉字黑色，两种字号；一行不换行、不被截断</td></tr>
+<tr><td>二级文案</td><td>黑色、大小固定；一级为「/」的商品，这里会变成产品名称</td></tr>
+<tr><td>三级文案（价格条里）</td><td>文案长就会变小，但不会超出白色底条</td></tr>
+<tr><td>价格</td><td>红色，小数点后的数字明显更小（看 19.9、19.8 那几张）</td></tr>
+<tr><td>赠品区</td><td>上下两档，图居中不变形；买即赠为「/」时变成「满99送 + 满159送」</td></tr>
+<tr><td>左上角角标</td><td>NEW / HOT 文字被替换；需求表留空则整块不显示</td></tr>
+</table>
+
+<h3>5.2 让 agent 放大看细节</h3>
+<div class="chatwin">
+  <div class="chatbar"><i></i><i></i><i></i><span>agent · 批量主图工具</span><em>放大查看</em></div>
+  <div class="chatbody">
+    <div class="row u"><div class="av">你</div><div class="bub">把第一张的上半部分放大 2 倍，加上坐标网格，我看看文字有没有被切。</div></div>
+    <div class="row a"><div class="av">AI</div><div class="bub">
+      <div class="act"><b>✓</b>放大 2 倍，网格间隔 100 像素</div>
+      <div class="bigimg"><img src="教程图片-脱敏/放大网格.jpg" alt="放大 2 倍并带坐标网格"></div>
+      <p>文字完整，没有被截断。网格每 100 像素一条线，你可以直接用坐标告诉我「再往上 10 像素」。</p></div></div>
+  </div>
+</div>
+
+<h3>5.3 常见修改怎么说</h3>
+<table class="tbl">
+<tr><th>你想改什么</th><th>怎么对 agent 说</th><th>它会怎么做</th></tr>
+<tr><td>某个商品文案或价格写错了</td><td>「990000000001 的价格改成 59，重出」</td><td>改需求表那一格（先备份），只重出这一个</td></tr>
+<tr><td>只重出几个</td><td>「把 990000000003 和 990000000004 重新出一遍」</td><td>只重跑这两个商品</td></tr>
+<tr><td>文字太大或太小</td><td>「三级文案整体再小一点」</td><td>改规则里的字号参数（先备份），重出样张给你确认</td></tr>
+<tr><td>位置偏了</td><td>「价格条里那行文字往上挪 6 像素」</td><td>调整该文字层位置，重出样张</td></tr>
+<tr><td>想核对和原模板是否一致</td><td>「核对一下文字的大小和位置有没有和原模板对上」</td><td>把每个文字层重画一遍与原稿比较，列出偏差</td></tr>
+<tr><td>换输出格式</td><td>「再出一份 PNG」</td><td>同一批再导出一份</td></tr>
+</table>
+<div class="callout info"><div class="ci">📐</div><div><b>关于「和模板逐像素一致」</b>字号、基线位置、行距、倾斜都是按 PSD 里记录的数值还原的，大多数文字层偏差在 2–5 像素以内。个别层（例如价格数字比原模板窄约 4%）因为字体文件版本不同会有细小差异。核对时 agent 会把这些偏差明确列给你。</div></div>
+</section>
+
+<section id="s6">
+<div class="sec-head"><div class="no">6</div><h2>换新模板</h2></div>
+<p class="lead">给设计师。拿到一个全新的 PSD，没有任何规则文件，也能做：agent 先读模板起草规则，再对照业务说明补全，最后样张确认。</p>
+<div class="flow"><span class="s">放入模板、说明图、赠品图</span><i>→</i><span class="s hl">agent 读模板起草规则</span><i>→</i><span class="s">读说明图补全</span><i>→</i><span class="s">有疑问先问你</span><i>→</i><span class="s">样张确认</span></div>
+
+<h3>6.1 准备材料</h3>
+<ol class="steps">
+<li>模板放进 <code>模板/你的案例名</code> 文件夹（.psd 或 .psb 都行，几百 MB 也能处理）。<b>模板里的图层最好有清晰的分组名</b>，例如「价格 / 一级卖点 / 二级文案 / 三级文案 / 产品名 / 赠品 / icon / 产品」。分组名越规范，自动识别越准。</li>
+<li>模板用到的字体文件放进 <code>字体包/你的案例名</code>。不知道用了哪些也没关系，agent 会列出缺哪些。</li>
+<li>业务给的「修改说明」图放进 <code>说明图/你的案例名</code>。下图是示例，agent 会读它：</li>
+</ol>
+<figure><img src="教程图片-脱敏/说明图.jpg" alt="主图修改说明"><figcaption>业务给的修改说明图：哪个层怎么替换、字号颜色保不保持、赠品怎么排优先级。</figcaption></figure>
+
+<h3>6.2 agent 读模板、起草规则</h3>
+<div class="chatwin">
+  <div class="chatbar"><i></i><i></i><i></i><span>agent · 批量主图工具</span><em>新模板</em></div>
+  <div class="chatbody">
+    <div class="row u"><div class="av">你</div><div class="bub">「示范案例」里已经放好了模板和说明图，帮我生成规则，再出两张样张。</div></div>
+    <div class="row a"><div class="av">AI</div><div class="bub">
+      <div class="act"><b>✓</b>读取模板：1280×1280，识别出 12 个图层的用途</div>
+      <p>我只看模板就识别出了下面这些，每一项都写了判断依据，请你扫一眼有没有认错：</p>
+      <table class="mini">
+        <tr><th>用途</th><th>图层</th><th>依据</th></tr>
+        <tr><td>价格</td><td>价格 / 价格数字</td><td>可见的纯数字，字号最大（141px）</td></tr>
+        <tr><td>一级文案</td><td>一级卖点 / 买1享到手3件礼</td><td>所在分组「一级卖点」</td></tr>
+        <tr><td>二级文案</td><td>二级文案 / 四色轻透遮…</td><td>所在分组「二级文案」</td></tr>
+        <tr><td>三级文案</td><td>三级文案 / 轻透贴肤…</td><td>所在分组「三级文案」</td></tr>
+        <tr><td>产品名称</td><td>产品名 / 四色遮瑕盘6g</td><td>所在分组「产品名」</td></tr>
+        <tr><td>赠品标题</td><td>买即赠、满99送</td><td>文字符合赠品标题模式</td></tr>
+        <tr><td>角标</td><td>icon / new、新品上市</td><td>分组名含 icon，分别是英文和中文</td></tr>
+        <tr><td>商品位</td><td>产品 / 四色遮瑕盘6g</td><td>产品分组里最大的可见像素层</td></tr>
+      </table>
+      <p>下图是把我识别出的文字层框在成品上，框的位置和大小就是写字时用的基准：</p>
+      <div class="bigimg"><img src="教程图片-脱敏/文字层标注.jpg" alt="识别出的文字层位置"></div>
+      <p>字体、字号、颜色也已经从模板里读出来了（例如一级数字是 MiSans-Medium 109px 红色）。</p></div></div>
+  </div>
+</div>
+
+<h3>6.3 补全「PSD 里没有」的业务规则</h3>
+<p>PSD 只能告诉我们「文字长什么样」，而「一级为 / 时二级上提」「赠品怎么排优先级」「满 99 送什么」是业务规则，要从说明图和需求表里读。agent 会读图补规则，<b>读不出来的会直接问你</b>：</p>
+<div class="chatwin">
+  <div class="chatbar"><i></i><i></i><i></i><span>agent · 批量主图工具</span><em>补全规则</em></div>
+  <div class="chatbody">
+    <div class="row a"><div class="av">AI</div><div class="bub">
+      <div class="act"><b>✓</b>读取说明图和需求表里的「说明」行</div>
+      <p>我对照说明图补好了：</p>
+      <ul><li>满99送 → 绒面美妆蛋；满159送 → 亲水气垫粉扑</li><li>买即赠为「/」时：上方满99、下方满159</li><li>角标：英文换英文、中文换中文，留空则隐藏</li></ul>
+      <p>有两件事需要你确认：</p>
+      <p><b>① </b>说明图里满159的赠品画的是「粉扑组合装」，但赠品图文件夹里没有这张图。需求表写的是「气垫粉扑*1」，我先按需求表处理，对吗？</p>
+      <p><b>② </b>说明图对三级文案只写了「按字数调整大小」，没给具体字号。我先按「超出模板原宽度就等比缩小」处理，可以吗？</p></div></div>
+    <div class="row u"><div class="av">设计</div><div class="bub">①对。②可以，先看样张。</div></div>
+  </div>
+  <div class="chatfoot"><div class="in">发消息给 agent…</div><div class="send">↑</div></div>
+</div>
+
+<h3>6.4 样张确认，以后复用</h3>
+<p>规则补完后，流程和第 3 章一样：预检、样张、确认。<b>新模板第一次必须人工看样张</b>，因为自动识别在结构特别的模板上可能认错图层。确认没问题后，规则就留在 <code>规则/你的案例名</code> 文件夹里，以后同一个模板的活动直接复用（新案例里用 --rules 的方式指向它，让 agent 来做就行），业务同学不用再碰它。</p>
+<div class="callout warn"><div class="ci">👀</div><div><b>设计师要特别看的 3 处</b>① 角标字体是否缺失；② 文字最长的商品有没有撑出底条；③ 赠品名是否真的对到了赠品图。</div></div>
+</section>
+
+<section id="s7">
+<div class="sec-head"><div class="no">7</div><h2>规则文件速读</h2></div>
+<p class="lead">规则文件一般由 agent 维护。设计师读懂下面几块，就能判断它写得对不对。</p>
+<table class="tbl">
+<tr><th>内容</th><th>作用</th><th>示例</th></tr>
+<tr><td>图层对应</td><td>各用途与 PSD 图层的对应</td><td>「一级文案」= 「一级卖点」分组里的文字层</td></tr>
+<tr><td>商品位</td><td>产品图放在哪个层的位置</td><td>产品分组里最大的像素层</td></tr>
+<tr><td>一级文案</td><td>字体、字号、颜色；数字与文字分开设置；超宽时等比缩小</td><td>文字 GlowSans Book 97px 黑；数字 MiSans Medium 109px 红 #CC3046</td></tr>
+<tr><td>二级、三级文案</td><td>二级固定大小；三级按字数分档，或按宽度适配</td><td>三级：8 字内 70px，11 字内 60px，更长 35px</td></tr>
+<tr><td>价格</td><td>字号，以及小数点后缩小比例</td><td>141px，小数部分约 57%</td></tr>
+<tr><td>赠品清单</td><td>需求表里的赠品名与赠品图的对应（含别名、组合）</td><td>「局部睫毛夹*1+遮瑕刷*1」= 两张图并排</td></tr>
+<tr><td>赠品档位</td><td>「满99送」「满159送」各送什么，以及上下两个位置框</td><td>—</td></tr>
+<tr><td>角标显隐</td><td>NEW / HOT 显示，留空隐藏</td><td>—</td></tr>
+<tr><td>校验</td><td>出图后检查的区域：价格区域、红色色值、商品位范围</td><td>—</td></tr>
+<tr><td>导出</td><td>格式、质量、文件名模板</td><td>jpg，质量 95，「sku编码-产品名称」</td></tr>
+</table>
+<div class="callout info"><div class="ci">✋</div><div><b>怎么改</b>不用自己改规则文件，直接对 agent 说「把一级文案的数字改成 120px」「满99送的赠品换成 xxx」。它会先备份、再修改、再出样张给你确认。</div></div>
+</section>
+
+<section id="s8">
+<div class="sec-head"><div class="no">8</div><h2>规则对照效果</h2></div>
+<p class="lead">说明图里的每一条规则，在成品里应该是什么样。看到不对，就拿这张表对。</p>
+<table class="tbl">
+<tr><th>说明图里的规则</th><th>成品里应该是</th></tr>
+<tr><td>一级文案：文字与数字 2 种字体、2 种字号、2 种颜色；文字黑、数字红；色值不变</td><td>「买<b style="color:#cc3046">1</b>享到手<b style="color:#cc3046">3</b>件礼」——数字红色且是另一种字体，汉字黑色</td></tr>
+<tr><td>二级文案：保持颜色字体大小不变；一级有内容就用表里的二级，一级为 / 则二级上提、二级改产品名称</td><td>「便携睫毛夹」那一行（一级为 /）：一级位置显示「持久卷翘 不粘连」，二级位置显示「便携睫毛夹联名款」</td></tr>
+<tr><td>产品名称：字体颜色字号不变，只替换文字</td><td>商品图左下方那行小字，字号固定，字数多了也不会变小</td></tr>
+<tr><td>三级文案：大小随字长调整</td><td>价格条里的黑字：8 个字时大，十几个字明显变小，但仍在白条内</td></tr>
+<tr><td>赠品区：总有 3 档、展示 2 档；买即赠优先；买即赠为 / 则上满99、下满159</td><td>有买即赠：上「买即赠」、下「满99送」；没有：上「满99送」、下「满159送」。赠品图在框内居中、等比缩放</td></tr>
+<tr><td>价格：小数点后字号变小</td><td>「19.9」中的「.9」比「19」小</td></tr>
+<tr><td>角标：英文换英文、中文换中文</td><td>「NEW 新品上市」换成「HOT 爆品热卖」，表里留空则不显示</td></tr>
+<tr><td>输出命名：sku编码-产品名称</td><td><code>990000000001-柔雾定妆蜜粉饼8g.jpg</code></td></tr>
+</table>
+<div class="grid2">
+  <figure><img src="教程图片-脱敏/成品-d.jpg" alt="一级为 / 的例子"><figcaption>一级为「/」：二级上提，产品名称在左下角。</figcaption></figure>
+  <figure><img src="教程图片-脱敏/成品-c.jpg" alt="三级文案较长的例子"><figcaption>三级文案较长：自动缩小，仍在白条内。</figcaption></figure>
+</div>
+</section>
+
+<section id="s9">
+<div class="sec-head"><div class="no">9</div><h2>常见问题</h2></div>
+<p class="lead">点开看答案。</p>
+<details><summary>agent 说预检有问题，我不想补图，能先出能出的吗？</summary>
+<p>可以。对它说「把缺图的商品先去掉，其余的先出」。它会先问你确认，备份需求表后再把这几行整行删掉，然后继续。它不会自己换图。</p></details>
+<details><summary>提示「字体 xxx 未找到，将用替代字体」是什么意思？</summary>
+<p>模板里用了某个字体，但字体包里没有这个字体文件，工具改用了电脑里的相近字体，字形会和模板略有差别。请设计师把缺的字体文件放进字体包，再重出。示例模板里目前缺 AuliareRegular（NEW 角标的英文字母），NEW 字样会比原版略大。</p></details>
+<details><summary>出来的图文字被截断了，或者压到别的元素</summary>
+<p>把图发给 agent，说「第 3 张三级文案超出白条了」。它会放大确认，再调整该文字的宽度适配或字号，重出样张。文案特别长（20 字以上）时，自动缩小后可能小到不好看，建议改短文案。</p></details>
+<details><summary>想用另一份需求表，或者同一个文件里的另一个工作表？</summary>
+<p>直接说「用 618大促 案例里的另一份需求表出图」或「用 Sheet2 那个工作表出图」。</p></details>
+<details><summary>能出 PNG 或其他尺寸吗？</summary>
+<p>格式支持 jpg、png、webp，说「再出一份 PNG」即可。尺寸由模板画布决定（示例模板是 1280×1280）。想要别的尺寸，需要设计师另做一个模板。</p></details>
+<details><summary>出图很慢，或者提示内存不够？</summary>
+<p>模板很大（几百 MB）时，第一张要花十几秒读取模板，之后同一批更快。示例：2 张样张约 7 秒，7 张整批通常一分钟内。内存不够时，关掉其他大程序，或让 agent 分几批出。</p></details>
+<details><summary>agent 没按流程来（比如没做预检就出图）</summary>
+<p>对它说：「先完整阅读项目根目录的 AGENTS.md，然后按里面的流程重新做。」绝大多数偏差这样就能纠正。</p></details>
+<details><summary>别人给的需求表，列名和你们的不一样怎么办？</summary>
+<p>工具认识常见的叫法，比如「商家编码 / sku编码」「产品名称 / 商品名称」「活动S价 / 活动价」「一级卖点文案 / 利益点」。不认识的列，告诉 agent「这一列是价格」，它会补进规则。</p></details>
+<details><summary>报了一个看不懂的错误</summary>
+<p>把报错整段发给 agent。它会先查经验手册（里面是历史踩坑记录），解决后把新问题补进去。</p></details>
+</section>
+
+<section id="s10">
+<div class="sec-head"><div class="no">10</div><h2>已知局限</h2></div>
+<p class="lead">先说在前面，免得踩坑。</p>
+<table class="tbl">
+<tr><th>局限</th><th>影响</th><th>解决办法</th></tr>
+<tr><td>角标只换文字，底图不变</td><td>HOT、「包邮」仍用模板里的樱桃底图；「包邮」没有英文，英文处仍是模板原来的 New</td><td>设计师提供对应角标素材后，登记进规则</td></tr>
+<tr><td>缺少 AuliareRegular 字体</td><td>NEW 角标的英文字母比原版略大</td><td>把字体文件放进字体包</td></tr>
+<tr><td>文字位置与 Photoshop 有 2–7 像素差</td><td>价格数字约窄 4%；「买即赠」、一级文案水平偏 5–7 像素</td><td>让 agent 核对并给出具体数值，由设计师判断是否可接受</td></tr>
+<tr><td>三级文案缩放档位</td><td>说明图没给具体字号，默认按宽度等比缩放</td><td>设计师给出分档后写进规则</td></tr>
+<tr><td>新模板的自动识别只在示例模板上验证过</td><td>结构很不同的模板可能认错图层</td><td>新模板第一次必须看样张，设计师确认</td></tr>
+<tr><td>只出图片，不出分层 PSD</td><td>成品是 JPG / PNG / WebP，不能再到 Photoshop 里改层</td><td>要改版就回到模板改，再重出</td></tr>
+</table>
+</section>
+
+<section id="s11">
+<div class="sec-head"><div class="no">11</div><h2>常用的话</h2></div>
+<p class="lead">直接复制给 agent 就行。</p>
+<div class="say">
+  <div>帮我检查环境能不能用，缺什么就装上。</div>
+  <div>按需求表出「示范案例」这批主图，先出 2 张样张给我看。</div>
+  <div>可以，全部出吧。</div>
+  <div>把 990000000001 和 990000000003 重新出一遍。</div>
+  <div>第 3 张价格太大了，帮我放大看看再调。</div>
+  <div>把缺图的商品先去掉，其余的先出。</div>
+  <div>新建一个「618大促」案例。</div>
+  <div>「618大促」的模板、说明图和图片都放好了，帮我生成规则，再出样张。</div>
+  <div>「618大促」沿用示范案例的模板，需求表我填好了，帮我预检。</div>
+  <div>核对一下文字的大小和位置有没有和原模板对上。</div>
+  <div>再出一份 PNG。</div>
+  <div>先完整阅读 AGENTS.md，然后按里面的流程工作。</div>
+</div>
+<h3>出了问题先看哪里</h3>
+<table class="tbl">
+<tr><th>现象</th><th>先看</th></tr>
+<tr><td>agent 说预检不通过</td><td>第 4 章：看懂预检报告</td></tr>
+<tr><td>图出来了但样子不对</td><td>第 5 章：检查与修改；第 8 章：规则对照效果</td></tr>
+<tr><td>新模板识别错了</td><td>第 6 章：对照文字层标注图</td></tr>
+<tr><td>agent 不按流程来</td><td>对它说「先完整阅读 AGENTS.md，然后按里面的流程工作」</td></tr>
+</table>
+</section>
+
+</main>
+</div>
+<footer><div class="wrap">批量主图工具 · 本教程的示例数据均为虚构：SKU 编码、产品名称、价格、赠品与卖点文案已脱敏，仅用于演示流程与版式（示例图已做局部遮挡处理：品牌标识、代言人、商品实物、产品名称、价格与赠品区已打码，版式与规则说明文字保持原样）。对话内容为示意，实际回复措辞会有不同。</div></footer>
+</body>
+</html>

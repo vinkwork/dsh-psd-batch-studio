@@ -119,7 +119,41 @@ async function main() {
 
     // --- dsh 0.2.0: no workingDirectory service, the session header wins ----
     const legacy = register()
-    assert.deepEqual([...legacy.tools.keys()].sort(), ['psd_batch_render', 'psd_inspect'])
+    assert.deepEqual([...legacy.tools.keys()].sort(), ['psd_apply_sheet', 'psd_batch_render', 'psd_draft_rules', 'psd_edit', 'psd_inspect', 'psd_text_check', 'psd_view'])
+    // psd_draft_rules: tags layers with evidence, lists what it cannot decide, and refuses to clobber a file.
+    const drafted = await call(
+      legacy.tools.get('psd_draft_rules'),
+      { template: 'tpl.psd', outRules: 'draft/rules.json' },
+      sessionAt(workspace),
+    )
+    assert.equal(drafted.written, path.join('draft', 'rules.json'))
+    assert.ok(drafted.rules.layers.price_value, 'the numeric price layer is tagged')
+    assert.ok(drafted.evidence.price_value.reason.length > 0, 'a tag carries its evidence')
+    assert.ok(Array.isArray(drafted.unresolved))
+    await assert.rejects(
+      legacy.tools.get('psd_draft_rules').execute({ template: 'tpl.psd', outRules: 'draft/rules.json' }, sessionAt(workspace)),
+      /already exists/,
+    )
+    // psd_text_check: every text layer is re-rendered with its own copy and measured.
+    const checked = await call(legacy.tools.get('psd_text_check'), { template: 'tpl.psd' }, sessionAt(workspace))
+    assert.ok(checked.total >= 1, 'text layers were measured')
+    assert.equal(checked.rows.length, checked.total)
+    assert.ok(checked.rows.every((row) => typeof row.drift === 'boolean'))
+    // psd_view: crop + zoom + overlays on a workspace image, written as a PNG.
+    const viewed = await call(
+      legacy.tools.get('psd_view'),
+      { image: 'sku.png', crop: [0, 0, 60, 80], scale: 2, grid: 20, rects: [{ rect: [5, 5, 40, 40], label: 'box' }] },
+      sessionAt(workspace),
+    )
+    assert.deepEqual(viewed.crop, [0, 0, 60, 80])
+    assert.equal(viewed.width, 120)
+    assert.equal(viewed.height, 160)
+    assert.equal(viewed.rects.length, 1)
+    await fs.access(path.join(workspace, viewed.file))
+    await assert.rejects(
+      legacy.tools.get('psd_view').execute({ image: '../outside.png' }, sessionAt(workspace)),
+      /workspace/,
+    )
     const inspected = await call(legacy.tools.get('psd_inspect'), { template: 'tpl.psd' }, sessionAt(workspace))
     assert.equal(inspected.width, 400)
     const price = inspected.layers.find((layer) => layer.name === '价格')
@@ -136,6 +170,52 @@ async function main() {
     )
     assert.equal(rendered.count, 1)
     await fs.access(path.join(workspace, 'out', rendered.files[0]))
+
+    // Per-SKU text goes through a free-form object (dsh only allows a boolean
+    // `additionalProperties`), so the plugin checks its shape itself.
+    const perSku = await call(
+      legacy.tools.get('psd_batch_render'),
+      {
+        template: 'tpl.psd',
+        skus: ['sku.png'],
+        slots: ['产品位'],
+        outDir: 'out-sku',
+        format: 'png',
+        text: [{ layer: '价格', color: '#0000ff' }],
+        textBySku: { sku: [{ layer: '价格', value: '¥1.00', runs: [{ len: 1 }, { len: 4, size: 24 }] }] },
+      },
+      sessionAt(workspace),
+    )
+    assert.equal(perSku.textVariants, 1)
+    for (const [textBySku, message] of [
+      [{ sku: { layer: '价格' } }, /textBySku\["sku"\] must be an array/],
+      [{ sku: [{ value: '¥1' }] }, /textBySku\["sku"\]\[0\]\.layer is required/],
+      [{ sku: [{ layer: '价格', price: '¥1' }] }, /\.price is not a known field/],
+      [{ sku: [{ layer: '价格', runs: [{ len: 1.5 }] }] }, /runs\[0\]\.len must be an integer/],
+    ]) {
+      await assert.rejects(
+        legacy.tools.get('psd_batch_render').execute(
+          { template: 'tpl.psd', skus: ['sku.png'], slots: ['产品位'], outDir: 'out-bad', textBySku },
+          sessionAt(workspace),
+        ),
+        message,
+      )
+    }
+    await assert.rejects(fs.access(path.join(workspace, 'out-bad')), 'nothing written for an invalid textBySku')
+
+    // psd_edit: every action goes through the host path (no workingDirectory
+    // on 0.2.0), returns a result its schema accepts and renders a summary.
+    const edit = (args) => call(legacy.tools.get('psd_edit'), { template: 'tpl.psd', ...args }, sessionAt(workspace))
+    const texted = await edit({ action: 'text', layer: '价格', value: '¥5.50', sizePx: 30 })
+    assert.equal(texted.value, '¥5.50')
+    const editRender = legacy.tools.get('psd_edit').output.render({ action: 'text' }, texted)[0].text
+    assert.match(editRender, /^psd_edit text: 价格 .*"¥5\.50"/)
+    await edit({ action: 'element', paths: ['sku.png'], name: 'badge', dx: 10, dy: 10, scale: 0.2 })
+    await edit({ action: 'status' })
+    await edit({ action: 'save_project', project: 'p.json' })
+    await edit({ action: 'remelement', names: ['badge'] })
+    await edit({ action: 'load_project', project: 'p.json' })
+    await edit({ action: 'reset' })
     legacy.dispose()
 
     // --- dsh >= 0.2.1: the workingDirectory service is preferred ------------

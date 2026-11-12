@@ -1,0 +1,295 @@
+{
+  "version": 1,
+  "template": "模板/示范案例/模版-1-优化.psb",
+  "canvas": {
+    "width": 1280,
+    "height": 1280
+  },
+  "sheet": {
+    "name": "主图",
+    "columns": {
+      "sku": [
+        "sku编码",
+        "sku"
+      ],
+      "name": [
+        "产品名称",
+        "商品名称"
+      ],
+      "price": [
+        "活动S价",
+        "活动价"
+      ],
+      "buyGift": [
+        "买即赠"
+      ],
+      "fullGift": [
+        "全店满赠",
+        "买2赠"
+      ],
+      "headline": [
+        "一级卖点文案",
+        "利益点"
+      ],
+      "feature": [
+        "二级卖点文案",
+        "主商品特点"
+      ],
+      "detail": [
+        "三级卖点文案",
+        "次商品特点"
+      ],
+      "icon": [
+        "其他icon",
+        "icon"
+      ]
+    }
+  },
+  "layers": {
+    "price_value": "1-柔润贴肤四色遮瑕盘6g/价格/价格数字",
+    "price_legacy": "1-柔润贴肤四色遮瑕盘6g/价格/价格数字-旧(勿用)",
+    "headline": "1-柔润贴肤四色遮瑕盘6g/一级卖点/买1享到手2件礼",
+    "subhead": "1-柔润贴肤四色遮瑕盘6g/二级文案/四色超能遮 12h裸感无瑕 ",
+    "detail": "1-柔润贴肤四色遮瑕盘6g/三级文案/养妆合一 敏肌安心 ",
+    "product_name": "1-柔润贴肤四色遮瑕盘6g/产品名/组 185/柔润贴肤四色遮瑕盘6g ",
+    "icon_zh": "1-柔润贴肤四色遮瑕盘6g/icon/新品上市",
+    "icon_en": "1-柔润贴肤四色遮瑕盘6g/icon/new",
+    "gift_slot1_title": "1-柔润贴肤四色遮瑕盘6g/赠品/买即赠/买即赠",
+    "gift_slot1_name": "1-柔润贴肤四色遮瑕盘6g/赠品/买即赠/拇指粉扑*1 +遮瑕刷*1 ",
+    "gift_slot2_title": "1-柔润贴肤四色遮瑕盘6g/赠品/买79送/满79送 ",
+    "gift_slot2_name": "1-柔润贴肤四色遮瑕盘6g/赠品/买79送/贝果短绒绒粉扑*2 限量1000件"
+  },
+  "slots": {
+    "product": "1-柔润贴肤四色遮瑕盘6g/产品/柔润贴肤四色遮瑕盘6g"
+  },
+  "type": {
+    "level1": {
+      "fitWidth": 700,
+      "minPx": 65,
+      "text": {
+        "family": "GlowSansSC-Normal-Book",
+        "sizePx": 97,
+        "color": "#000000"
+      },
+      "digit": {
+        "family": "MiSans-Medium",
+        "sizePx": 109,
+        "color": "#CC3046"
+      }
+    },
+    "level2": {
+      "family": "GlowSansSC-Normal-Regular",
+      "sizePx": 43,
+      "color": "#000000"
+    },
+    "level3": {
+      "family": "GlowSansSC-Normal-Medium",
+      "bins": [
+        {
+          "maxChars": 8,
+          "sizePx": 70
+        },
+        {
+          "maxChars": 11,
+          "sizePx": 60
+        },
+        {
+          "maxChars": null,
+          "sizePx": 35
+        }
+      ]
+    },
+    "productName": {
+      "family": "GlowSansSC-Normal-Regular",
+      "sizePx": 29,
+      "centerX": 679,
+      "anchorX": 519,
+      "widthPerChar": 27.5
+    },
+    "price": {
+      "family": "MiSans-Medium",
+      "color": "#CC3046",
+      "sizePx2": 141,
+      "sizePx3": 135,
+      "decimalPx": 80
+    },
+    "giftTitle": {
+      "family": "PingFangSC-Medium",
+      "sizePx": 34,
+      "sizePxLong": 31
+    },
+    "giftName": {
+      "family": "MiSans-Regular",
+      "sizePx": 24,
+      "sizePxLong": 20,
+      "longChars": 16
+    },
+    "iconZh": {
+      "family": "GlowSansSC-Normal-Book",
+      "sizePx": 27
+    },
+    "iconEn": {
+      "family": "AuliareRegular",
+      "sizePx": 57
+    }
+  },
+  "gifts": {
+    "buyGiftTitle": "买即赠",
+    "catalog": [
+      {
+        "name": "贝果短绒绒*1",
+        "aliases": [
+          "贝果短绒粉扑*1",
+          "贝果短绒绒粉扑*1"
+        ],
+        "file": "贝果粉扑.png"
+      },
+      {
+        "name": "贝果短绒粉扑*2",
+        "aliases": [
+          "贝果短绒绒粉扑*2",
+          "贝果短绒绒粉扑*2 限量1000件",
+          "满79赠 贝果短绒粉扑*2"
+        ],
+        "file": "贝果粉扑.png"
+      },
+      {
+        "name": "啵啵棉粉扑*1",
+        "aliases": [
+          "亲水啵啵棉粉扑*1"
+        ],
+        "file": "亲水啵啵棉粉扑.png"
+      },
+      {
+        "name": "局部睫毛夹",
+        "aliases": [
+          "局部睫毛夹*1"
+        ],
+        "file": "局部睫毛夹.png"
+      },
+      {
+        "name": "遮瑕刷",
+        "aliases": [
+          "遮瑕刷*1"
+        ],
+        "file": "遮瑕刷.png"
+      },
+      {
+        "name": "局部睫毛夹*1+遮瑕刷*1",
+        "aliases": [
+          "局部睫毛夹*1 +遮瑕刷*1"
+        ],
+        "files": [
+          "局部睫毛夹.png",
+          "遮瑕刷.png"
+        ]
+      }
+    ],
+    "tiers": [
+      {
+        "id": "full79",
+        "title": "满79送",
+        "name": "贝果短绒粉扑*2",
+        "files": [
+          "贝果粉扑.png"
+        ]
+      },
+      {
+        "id": "full129",
+        "title": "满129送",
+        "name": "啵啵棉粉扑*1",
+        "files": [
+          "亲水啵啵棉粉扑.png"
+        ]
+      }
+    ],
+    "slots": [
+      {
+        "id": "upper",
+        "titleKey": "gift_slot1_title",
+        "nameKey": "gift_slot1_name",
+        "anchor": {
+          "name": "gift_slot1_img",
+          "bounds": [
+            990,
+            558,
+            1208,
+            686
+          ]
+        }
+      },
+      {
+        "id": "lower",
+        "titleKey": "gift_slot2_title",
+        "nameKey": "gift_slot2_name",
+        "anchor": {
+          "name": "gift_slot2_img",
+          "bounds": [
+            990,
+            806,
+            1208,
+            934
+          ]
+        }
+      }
+    ]
+  },
+  "variants": {
+    "icon": {
+      "NEW": {
+        "show": [
+          "1-柔润贴肤四色遮瑕盘6g/icon"
+        ],
+        "hide": []
+      },
+      "HOT": {
+        "show": [
+          "1-柔润贴肤四色遮瑕盘6g/icon"
+        ],
+        "hide": []
+      },
+      "NONE": {
+        "show": [],
+        "hide": [
+          "1-柔润贴肤四色遮瑕盘6g/icon"
+        ]
+      }
+    }
+  },
+  "containers": {
+    "price_value": [
+      120,
+      1095,
+      400,
+      1245
+    ]
+  },
+  "validate": {
+    "priceRegion": [
+      120,
+      1095,
+      400,
+      1245
+    ],
+    "priceRed": {
+      "r": 204,
+      "g": 48,
+      "b": 70,
+      "tol": 45
+    },
+    "productRegion": [
+      400,
+      380,
+      970,
+      1010
+    ]
+  },
+  "export": {
+    "formats": [
+      "png",
+      "jpg"
+    ],
+    "quality": 95,
+    "filename": "{sku}-{name}.{ext}"
+  }
+}

@@ -68,10 +68,25 @@ out/0715-main/*.jpg  (+ optional ZIP)
   width / cover, plus anchor and fill controls.
 - **Canvas fine-tune** — drag the product, scale with corner handles, set
   offset/scale/rotation numerically, and copy one adjustment to the whole batch.
+- **Text overrides** — price bars and campaign copy can be rewritten per batch or
+  per SKU and re-rendered with real glyphs from the PSD's style runs (not pasted
+  pixels): copy, font, size (pt, or `sizePx` in pixels), colour, tracking,
+  alignment and leading. The workbench panel edits the same data, and exports
+  match once fonts are loaded.
+- **Per-run styles** — one line can mix faces, sizes and colours through
+  `{len, family, weight, size/sizePx, color, tracking}` segments.
+- **Font registration** — imported font files register under their file stem,
+  their PostScript name and the mapped system family; a template that needs a
+  missing font is reported instead of silently falling back.
+- **Placed elements** — drop extra image layers (gift shots, props) with offset,
+  scale, rotation, opacity and blend mode, on top of everything or between the
+  background and the product slot.
+- **Project files** — slots, text edits, elements and the font registry persist
+  as JSON between sessions.
 - **Export** — JPG or PNG at the template resolution, one file per SKU, packed
   into a ZIP when requested.
-- **Agent tools** — `psd_inspect` and `psd_batch_render` expose the same pipeline
-  to the agent for unattended batches.
+- **Agent tools** — `psd_inspect`, `psd_batch_render` and `psd_edit` expose the
+  same pipeline to the agent for unattended batches.
 - **Local-first** — PSD parsing and compositing happen in the browser (or in the
   Host process for agent batches). No network calls, no telemetry, no upload.
 
@@ -81,7 +96,8 @@ out/0715-main/*.jpg  (+ optional ZIP)
   (`dsh.engines.dsh >= 0.2.0-rc.2`).
   - Verified end to end on the desktop app 0.2.0-rc.2 (bundled dsh 0.2.0-rc.2,
     pnpm 11.7.0): GitHub install, cold-start activation, the workbench panel,
-    both agent tools registered, and a real PSD batch.
+    all three agent tools (`psd_inspect`, `psd_batch_render`, `psd_edit`)
+    registered, and a real PSD batch.
   - dsh `0.2.1-rc.5` and `0.2.2-rc.1`: tool registration and schemas checked
     with the matching `@deepseek-ai/dsh-tools`. These releases provide the
     `workingDirectory` service, which the tools prefer for the session
@@ -128,7 +144,7 @@ plugin_manager install_bundle, target = /absolute/path/to/dsh-psd-batch-studio
 ```
 
 After installation, refresh the Harness page. A **PSD Batch Studio** icon
-appears in the sidebar, and the agent gains the two tools below.
+appears in the sidebar, and the agent gains the three tools below.
 
 ### Build artifacts
 
@@ -170,6 +186,30 @@ release ([#7](https://github.com/vinkwork/dsh-psd-batch-studio/issues/7)), and
 upgrade. Do not keep two copies of this plugin in one profile (an old local
 install plus the GitHub one, say): they share the `psd-batch-studio` entry.
 
+## Command line (any host, no dsh needed)
+
+The same compositor also ships as a CLI, for environments where the dsh plugin cannot be installed
+(Claude Code, Codex, CI, a plain terminal):
+
+```bash
+npm i -g dsh-psd-batch-studio
+psd-batch help
+
+psd-batch preflight --case demo     # missing cut-outs, name mismatches, missing fonts
+psd-batch draft     --case demo     # draft rules.json from the template alone
+psd-batch render    --case demo --limit 2
+psd-batch render    --case demo
+psd-batch check     --case demo     # text redraw drift report
+```
+
+Work-directory layout (`模板/规则/需求表/产品图/赠品图/说明图/字体包/输出` + `--case <name>`)
+and the full agent playbook are documented in [docs/agent-workflow.md](docs/agent-workflow.md);
+`examples/` holds a blank sheet template and a sample rules file.
+Open-source fonts used by the sample template live in `assets/fonts/`; Apple system fonts
+(PingFang) are intentionally not redistributed — drop your own copy into `字体包/`.
+`psd-batch tool <name>` runs any of the four dsh tools with JSON arguments, so another agent
+host can reuse the same schemas.
+
 ## Using the workbench
 
 1. Open the **PSD Batch Studio** panel from the sidebar.
@@ -187,8 +227,9 @@ install plus the GitHub one, say): they share the `psd-batch-studio` entry.
 
 | Tool | Purpose |
 | --- | --- |
-| `psd_inspect` | Template size, layer tree (name, depth, visibility, bounds, leaf id), and auto-detected slots. Text layers also report their copy plus per-run styles (family, weight, size, color). |
-| `psd_batch_render` | Render many SKUs into one template and write JPG/PNG files (optionally a ZIP) inside the workspace. The `suppressed` result lists slot siblings hidden together with the slot. |
+| `psd_inspect` | Template size, layer tree (name, depth, visibility, bounds, leaf id), and auto-detected slots. Text layers also report their copy, alignment, and per-run styles (family, weight, size, color). |
+| `psd_batch_render` | Render many SKUs into one template and write JPG/PNG files (optionally a ZIP) inside the workspace. Supports `text` / `textBySku` text rewriting and `fontDir` font registration; the `suppressed` result lists slot siblings hidden together with the slot. |
+| `psd_edit` | Edit the template before rendering: `text` (same fields as one `psd_batch_render` `text` item), `element` / `remelement` (add or remove image layers), `fonts` (register font files), `save_project` / `load_project` (project round-trip, slots included), `status`, `reset`. Edits land on the cached document, so the next `psd_batch_render` uses them; its own `text` / `textBySku` win per layer, and after `load_project` a render without `slots` keeps the project's slots. Edits outlive the template parse cache, so viewing other templates keeps them; they are dropped only when the PSD changes on disk (`status.editsDropped` says so). A layer named by name, entry id or leaf id merges as the same layer. |
 
 Example request:
 
@@ -207,8 +248,10 @@ Example request:
 }
 ```
 
-Both tools resolve paths relative to the session working directory and refuse
-paths outside it. `psd_batch_render` defaults to JPG at quality 92 and returns
+All three tools resolve paths relative to the session working directory and
+refuse paths outside it; every write target (output folder, each exported file
+and the ZIP) is checked by its real path, so a symlink cannot lead out of the
+workspace. `psd_batch_render` defaults to JPG at quality 92 and returns
 the output folder plus the first 50 file names.
 
 Visible siblings inside a slot's group that overlap the slot by at least 25% are
@@ -218,6 +261,43 @@ product's pixels. Suppressed layers are reported in the `suppressed` result, and
 decorations that intentionally sit on top of the product should live in another
 group. Near-identical stacked copies (shadow/highlight) keep using the existing
 slot-cluster logic, and the slot fit rect is never inflated by suppression.
+
+### Text overrides
+
+Text layers render from their rasterized pixels by default; `text` / `textBySku`
+re-render them with real glyphs from the PSD's style runs:
+
+```json
+{
+  "template": "templates/summer-main.psd",
+  "skuDir": "skus/0715",
+  "fontDir": "fonts/campaign",
+  "text": [{ "layer": "campaign title", "value": "618 SALE" }],
+  "textBySku": {
+    "sku-001": [{ "layer": "price", "value": "¥16.80",
+                  "runs": [{ "len": 3, "family": "DIN Alternate", "weight": 700 }, { "len": 3 }] }],
+    "sku-002": [{ "layer": "price", "value": "¥19.90" }]
+  }
+}
+```
+
+- `layer` takes a layer name or leaf id. `value` rewrites the copy — every
+  character keeps its original style, so the common "swap the price" case needs
+  nothing else. `runs` restyle consecutive segments from the first character,
+  each exactly `len` long (family/weight/size/color/tracking); fields and
+  characters a run does not cover keep their style. `size` is in pt, matching the per-run styles `psd_inspect` reports.
+  Flat `font`/`weight`/`size`/`color` apply to the whole layer.
+- `textBySku` is keyed by SKU file name (with or without extension) and wins
+  over `text` per layer — give every SKU its own price. SKUs sharing an
+  override set render as one group on one scene, which is freed before the
+  next group, so all-distinct prices are slower but memory stays flat.
+- `fontDir` registers .ttf/.otf/.ttc files (family = file stem) and echoes them
+  in `fontsRegistered`; unresolvable fonts still render (canvas fallback) and
+  are named in `textWarnings`.
+- The workbench's **Text overrides** panel edits the same data: type a new
+  value and press Enter, `{}` edits the runs JSON (same shape as the `text`
+  parameter), and the **Fonts** button loads local font files so preview and
+  export agree.
 
 ## How it works
 
@@ -244,8 +324,13 @@ server.js      built Host artifact
 
 ## Compatibility and limits
 
-- Text layers are used as rasterized PSD pixels; editing copy/fonts inside the
-  studio is not supported yet.
+- Text layers default to their rasterized PSD pixels; `text` / `textBySku` or
+  `psd_edit` rewrite them with live glyphs (see the agent-tools section). Point
+  sizes map to pixels through the layer's original box and `sizePx` is drawn
+  as-is; extreme sizes may need a nudge.
+- Unregistered fonts fall back to a default face and are named in
+  `textWarnings`, in `psd_edit`'s `warning` and in `status.missingFonts` — never
+  silently.
 - Bevel/emboss and inner-shadow layer styles are approximated or skipped;
   stroke/shadow/glow are approximations. The compositor is tuned for typical
   e-commerce main-image templates.
