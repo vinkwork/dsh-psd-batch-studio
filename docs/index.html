@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DSH PSD Batch Studio · 文档</title>
+<style>
+  :root { color-scheme: light; }
+  body { margin:0; font:16px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif; color:#17263a; background:#f6f8fc; }
+  main { max-width: 760px; margin: 0 auto; padding: 72px 24px 96px; }
+  h1 { font-size: 30px; line-height:1.3; margin: 0 0 8px; letter-spacing:-.02em; }
+  .sub { color:#6b7c93; margin:0 0 40px; }
+  .cards { display:grid; gap:14px; }
+  a.card { display:block; padding:20px 22px; background:#fff; border:1px solid #e6ebf4; border-radius:14px;
+           text-decoration:none; color:inherit; transition: border-color .14s ease, box-shadow .14s ease, transform .14s ease; }
+  a.card:hover { border-color:#cfdcf0; box-shadow:0 6px 20px rgba(15,27,45,.08); transform: translateY(-1px); }
+  .card b { display:block; font-size:16px; margin-bottom:4px; color:#0f1b2d; }
+  .card span { color:#6b7c93; font-size:14px; }
+  footer { margin-top:48px; color:#93a2b8; font-size:13px; }
+  code { background:#eef3fb; padding:1px 6px; border-radius:5px; font-size:.9em; }
+  a { color:#2563eb; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DSH PSD Batch Studio</h1>
+  <p class="sub">PSD 模板 + SKU 抠图 → 批量电商主图。一个内核，两种入口：dsh 插件 / 命令行。</p>
+
+  <div class="cards">
+    <a class="card" href="./guide.html">
+      <b>使用教程</b>
+      <span>从装插件到出第一张图的完整流程，含面板每一块的作用。</span>
+    </a>
+    <a class="card" href="./agent-workflow.html">
+      <b>Agent 工作流</b>
+      <span>命令行 / 任意宿主下的目录约定：模板、规则、需求表、产品图、赠品图、输出，以及 preflight → 样张 → 批量 → 校验的流程。</span>
+    </a>
+    <a class="card" href="./lessons.html">
+      <b>踩坑记录</b>
+      <span>E01 起的错误现象、根因与正确表述，出新坑就往下编号。</span>
+    </a>
+    <a class="card" href="https://github.com/vinkwork/dsh-psd-batch-studio">
+      <b>仓库与 Release</b>
+      <span>源码、Issue、版本下载。命令行：<code>npm i -g dsh-psd-batch-studio</code>，然后 <code>psd-batch help</code>。</span>
+    </a>
+  </div>
+
+  <footer>
+    协议：修改版 Apache License 2.0，允许商用；多租户服务或去除品牌标识需书面授权。<br>
+    仓库里 <code>assets/fonts/</code> 附了模板用到的开源字体；苹果系统字体（苹方）不可再分发，请自备。
+  </footer>
+</main>
+</body>
+</html>
