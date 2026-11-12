@@ -4510,12 +4510,12 @@ var require_helpers = __commonJS({
           throw new Error("Unrecognized value for enum: '".concat(val, "'"));
         return rev2[value] || def;
       };
-      var encode = function(val) {
+      var encode2 = function(val) {
         if (val && !map[val])
           throw new Error("Invalid value for enum: '".concat(val, "'"));
         return "".concat(prefix, ".").concat(map[val] || map[def]);
       };
-      return { decode, encode };
+      return { decode, encode: encode2 };
     }
     exports.createEnum = createEnum;
     var ColorSpace;
@@ -4771,10 +4771,10 @@ var require_helpers = __commonJS({
       }
     }
     exports.writeDataZipWithoutPrediction = writeDataZipWithoutPrediction;
-    var createCanvas3 = function() {
+    var createCanvas4 = function() {
       throw new Error("Canvas not initialized, use initializeCanvas method to set up createCanvas method");
     };
-    exports.createCanvas = createCanvas3;
+    exports.createCanvas = createCanvas4;
     var createCanvasFromData = function() {
       throw new Error("Canvas not initialized, use initializeCanvas method to set up createCanvasFromData method");
     };
@@ -5848,8 +5848,8 @@ var require_descriptor = __commonJS({
           var sig = (0, psdReader_1.readSignature)(reader);
           (0, psdReader_1.readInt32LE)(reader);
           var charsCount = (0, psdReader_1.readInt32LE)(reader);
-          var path2 = (0, psdReader_1.readUnicodeStringWithLengthLE)(reader, charsCount);
-          return { sig, path: path2 };
+          var path3 = (0, psdReader_1.readUnicodeStringWithLengthLE)(reader, charsCount);
+          return { sig, path: path3 };
         }
         default:
           throw new Error("Invalid TySh descriptor OSType: ".concat(type2, " at ").concat(reader.offset.toString(16)));
@@ -6119,7 +6119,7 @@ var require_descriptor = __commonJS({
       if (fx.overprint !== void 0)
         stroke.overprint = fx.overprint;
       if (fx["Clr "])
-        stroke.color = parseColor(fx["Clr "]);
+        stroke.color = parseColor2(fx["Clr "]);
       if (fx.Grad)
         stroke.gradient = parseGradientContent(fx);
       if (fx.Ptrn)
@@ -6424,13 +6424,13 @@ var require_descriptor = __commonJS({
             result.reverse = !!val;
             break;
           case "Clr ":
-            result.color = parseColor(val);
+            result.color = parseColor2(val);
             break;
           case "hglC":
-            result.highlightColor = parseColor(val);
+            result.highlightColor = parseColor2(val);
             break;
           case "sdwC":
-            result.shadowColor = parseColor(val);
+            result.shadowColor = parseColor2(val);
             break;
           case "Styl":
             result.position = exports.FStl.decode(val);
@@ -6709,7 +6709,7 @@ var require_descriptor = __commonJS({
           smoothness: grad.Intr / 4096,
           colorStops: grad.Clrs.map(function(s) {
             return {
-              color: parseColor(s["Clr "]),
+              color: parseColor2(s["Clr "]),
               location: s.Lctn / samples_1,
               midpoint: s.Mdpn / 100
             };
@@ -6824,7 +6824,7 @@ var require_descriptor = __commonJS({
       } else if ("Ptrn" in descriptor) {
         return __assign({ type: "pattern" }, parsePatternContent(descriptor));
       } else if ("Clr " in descriptor) {
-        return { type: "color", color: parseColor(descriptor["Clr "]) };
+        return { type: "color", color: parseColor2(descriptor["Clr "]) };
       } else {
         throw new Error("Invalid vector content");
       }
@@ -6877,7 +6877,7 @@ var require_descriptor = __commonJS({
       }
     }
     exports.serializeVectorContent = serializeVectorContent;
-    function parseColor(color) {
+    function parseColor2(color) {
       if ("H   " in color) {
         return { h: parsePercentOrAngle(color["H   "]), s: color.Strt, b: color.Brgh };
       } else if ("Rd  " in color) {
@@ -6894,7 +6894,7 @@ var require_descriptor = __commonJS({
         throw new Error("Unsupported color descriptor");
       }
     }
-    exports.parseColor = parseColor;
+    exports.parseColor = parseColor2;
     function serializeColor(color) {
       if (!color) {
         return { _name: "", _classID: "RGBC", "Rd  ": 0, "Grn ": 0, "Bl  ": 0 };
@@ -8562,8 +8562,8 @@ var require_psdReader = __commonJS({
       }
     }
     function createReader(buffer, offset, length) {
-      var view = new DataView(buffer, offset, length);
-      return { view, offset: 0, strict: false, debug: false, large: false, globalAlpha: false, log: console.log };
+      var view2 = new DataView(buffer, offset, length);
+      return { view: view2, offset: 0, strict: false, debug: false, large: false, globalAlpha: false, log: console.log };
     }
     exports.createReader = createReader;
     function warnOrThrow(reader, message) {
@@ -9457,7 +9457,7 @@ var require_psdReader = __commonJS({
       }
     }
     exports.readDataRLE = readDataRLE;
-    function readSection(reader, round, func, skipEmpty, eightBytes) {
+    function readSection(reader, round2, func, skipEmpty, eightBytes) {
       if (skipEmpty === void 0) {
         skipEmpty = true;
       }
@@ -9485,7 +9485,7 @@ var require_psdReader = __commonJS({
           warnOrThrow(reader, "Unread section data");
         }
       }
-      while (end % round)
+      while (end % round2)
         end++;
       reader.offset = end;
       return result;
@@ -11077,7 +11077,7 @@ var require_additionalInfo = __commonJS({
     function readVectorMask(reader, vectorMask, width, height, size) {
       var end = reader.offset + size;
       var paths = vectorMask.paths;
-      var path2 = void 0;
+      var path3 = void 0;
       while (end - reader.offset >= 26) {
         var selector = (0, psdReader_1.readUint16)(reader);
         switch (selector) {
@@ -11088,14 +11088,14 @@ var require_additionalInfo = __commonJS({
             var boolOp = (0, psdReader_1.readInt16)(reader);
             var flags = (0, psdReader_1.readUint16)(reader);
             (0, psdReader_1.skipBytes)(reader, 18);
-            path2 = {
+            path3 = {
               open: selector === 3,
               knots: [],
               fillRule: flags === 2 ? "non-zero" : "even-odd"
             };
             if (boolOp !== -1)
-              path2.operation = exports.booleanOperations[boolOp];
-            paths.push(path2);
+              path3.operation = exports.booleanOperations[boolOp];
+            paths.push(path3);
             break;
           }
           case 1:
@@ -11105,7 +11105,7 @@ var require_additionalInfo = __commonJS({
           case 4:
           // Open subpath Bezier knot, linked
           case 5:
-            path2.knots.push({ linked: selector === 1 || selector === 4, points: readBezierKnot(reader, width, height) });
+            path3.knots.push({ linked: selector === 1 || selector === 4, points: readBezierKnot(reader, width, height) });
             break;
           case 6:
             (0, psdReader_1.skipBytes)(reader, 24);
@@ -11167,15 +11167,15 @@ var require_additionalInfo = __commonJS({
         (0, psdWriter_1.writeZeros)(writer, 22);
       }
       for (var _i = 0, _b2 = vectorMask.paths; _i < _b2.length; _i++) {
-        var path2 = _b2[_i];
-        (0, psdWriter_1.writeUint16)(writer, path2.open ? 3 : 0);
-        (0, psdWriter_1.writeUint16)(writer, path2.knots.length);
-        (0, psdWriter_1.writeUint16)(writer, path2.operation ? exports.booleanOperations.indexOf(path2.operation) : -1);
-        (0, psdWriter_1.writeUint16)(writer, path2.fillRule === "non-zero" ? 2 : 1);
+        var path3 = _b2[_i];
+        (0, psdWriter_1.writeUint16)(writer, path3.open ? 3 : 0);
+        (0, psdWriter_1.writeUint16)(writer, path3.knots.length);
+        (0, psdWriter_1.writeUint16)(writer, path3.operation ? exports.booleanOperations.indexOf(path3.operation) : -1);
+        (0, psdWriter_1.writeUint16)(writer, path3.fillRule === "non-zero" ? 2 : 1);
         (0, psdWriter_1.writeZeros)(writer, 18);
-        var linkedKnot = path2.open ? 4 : 1;
-        var unlinkedKnot = path2.open ? 5 : 2;
-        for (var _c = 0, _d = path2.knots; _c < _d.length; _c++) {
+        var linkedKnot = path3.open ? 4 : 1;
+        var unlinkedKnot = path3.open ? 5 : 2;
+        for (var _c = 0, _d = path3.knots; _c < _d.length; _c++) {
           var _e = _d[_c], linked = _e.linked, points = _e.points;
           (0, psdWriter_1.writeUint16)(writer, linked ? linkedKnot : unlinkedKnot);
           writeBezierKnot(writer, points, width, height);
@@ -12826,12 +12826,12 @@ var require_additionalInfo = __commonJS({
                       _name: "",
                       _classID: "PaCm",
                       shapeOperation: "shapeOperation.".concat(c.shapeOperation),
-                      SbpL: c.paths.map(function(path2) {
+                      SbpL: c.paths.map(function(path3) {
                         return {
                           _name: "",
                           _classID: "Sbpl",
-                          Clsp: path2.closed,
-                          "Pts ": path2.points.map(function(pt) {
+                          Clsp: path3.closed,
+                          "Pts ": path3.points.map(function(pt) {
                             return {
                               _name: "",
                               _classID: "Pthp",
@@ -14426,9 +14426,9 @@ var require_psdWriter = __commonJS({
         size = 4096;
       }
       var buffer = new ArrayBuffer(size);
-      var view = new DataView(buffer);
+      var view2 = new DataView(buffer);
       var offset = 0;
-      return { buffer, view, offset, tempBuffer: void 0 };
+      return { buffer, view: view2, offset, tempBuffer: void 0 };
     }
     exports.createWriter = createWriter;
     function getWriterBuffer(writer) {
@@ -14571,7 +14571,7 @@ var require_psdWriter = __commonJS({
       }
       return max;
     }
-    function writeSection(writer, round, func, writeTotalLength, large) {
+    function writeSection(writer, round2, func, writeTotalLength, large) {
       if (writeTotalLength === void 0) {
         writeTotalLength = false;
       }
@@ -14585,7 +14585,7 @@ var require_psdWriter = __commonJS({
       func();
       var length = writer.offset - offset - 4;
       var len = length;
-      while (len % round !== 0) {
+      while (len % round2 !== 0) {
         writeUint8(writer, 0);
         len++;
       }
@@ -15642,10 +15642,9 @@ var require_dist = __commonJS({
 });
 
 // src/server.js
-var import_ag_psd2 = __toESM(require_dist(), 1);
-import fs from "node:fs/promises";
-import path from "node:path";
-import { createCanvas as createCanvas2, loadImage } from "@napi-rs/canvas";
+import fs2 from "node:fs/promises";
+import path2 from "node:path";
+import { createCanvas as createCanvas3, loadImage as loadImage2 } from "@napi-rs/canvas";
 
 // node_modules/fflate/esm/index.mjs
 import { createRequire } from "module";
@@ -16363,6 +16362,9 @@ function zipSync(data, opts) {
   return out;
 }
 
+// src/core/psd.js
+var import_ag_psd = __toESM(require_dist(), 1);
+
 // src/core/canvas.js
 var factory = null;
 function setCanvasFactory(create) {
@@ -16383,8 +16385,555 @@ function createCanvas(width, height) {
   return canvas;
 }
 
+// src/core/text.js
+var FONT_FAMILY_MAP = [
+  [/^PingFangSC/i, "PingFang SC"],
+  [/^PingFang/i, "PingFang SC"],
+  [/^HiraginoSansGB/i, "Hiragino Sans GB"],
+  [/^MicrosoftYaHei/i, "Microsoft YaHei"],
+  [/^MicrosoftJhengHei/i, "Microsoft JhengHei"],
+  [/^(SourceHanSans|SourceHanSansCN|NotoSansSC|NotoSansCJK)/i, "Noto Sans SC"],
+  [/^SourceHanSerif/i, "Noto Serif SC"],
+  [/^SimHei|^STHeiti/i, "Heiti SC"],
+  [/^SimSun|^STSong/i, "Songti SC"],
+  [/^AlibabaPuHuiTi/i, "Alibaba PuHuiTi"],
+  [/^OPPOSans/i, "OPPO Sans"],
+  [/^HarmonyOS/i, "HarmonyOS Sans"],
+  [/^DIN/i, "DIN Alternate"],
+  [/^ArialMT|^Arial/i, "Arial"],
+  [/^HelveticaNeue|^Helvetica/i, "Helvetica Neue"],
+  [/^Inter/i, "Inter"],
+  [/^Roboto/i, "Roboto"]
+];
+function fontFamilyOf(name) {
+  const raw = String(name || "").replace(/^#/, "").trim();
+  if (!raw) return null;
+  for (const [pattern, family] of FONT_FAMILY_MAP) {
+    if (pattern.test(raw)) return family;
+  }
+  return raw;
+}
+function readFontPostScriptName(buffer) {
+  try {
+    const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer;
+    const view2 = new DataView(bytes.buffer, bytes.byteOffset || 0, bytes.byteLength);
+    const tagAt = (offset) => String.fromCharCode(view2.getUint8(offset), view2.getUint8(offset + 1), view2.getUint8(offset + 2), view2.getUint8(offset + 3));
+    const fontStart = tagAt(0) === "ttcf" ? view2.getUint32(12) : 0;
+    const tables = view2.getUint16(fontStart + 4);
+    let nameOffset = 0;
+    for (let index = 0; index < tables; index += 1) {
+      const record = fontStart + 12 + index * 16;
+      if (tagAt(record) === "name") {
+        nameOffset = view2.getUint32(record + 8);
+        break;
+      }
+    }
+    if (!nameOffset) return null;
+    const count = view2.getUint16(nameOffset + 2);
+    const stringsStart = nameOffset + view2.getUint16(nameOffset + 4);
+    for (let index = 0; index < count; index += 1) {
+      const record = nameOffset + 6 + index * 12;
+      if (view2.getUint16(record + 6) !== 6) continue;
+      const platformId = view2.getUint16(record);
+      const length = view2.getUint16(record + 8);
+      const start = stringsStart + view2.getUint16(record + 10);
+      let value = "";
+      if (platformId === 3 || platformId === 0) {
+        for (let cursor = 0; cursor + 1 < length; cursor += 2) value += String.fromCharCode(view2.getUint16(start + cursor));
+      } else {
+        for (let cursor = 0; cursor < length; cursor += 1) value += String.fromCharCode(view2.getUint8(start + cursor));
+      }
+      value = value.trim();
+      if (value) return value;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+function fontWeightOf(name, fauxBold) {
+  const raw = String(name || "").toLowerCase();
+  if (/heavy|black|extrabold|ultrabold/.test(raw)) return 800;
+  if (/semibold|demibold|bold/.test(raw)) return 700;
+  if (/medium/.test(raw)) return 500;
+  if (/light|thin/.test(raw)) return 300;
+  return fauxBold ? 700 : 400;
+}
+function fillColorOf(fill) {
+  if (!fill) return [0, 0, 0];
+  if (fill.r != null) {
+    return [Math.round(fill.r ?? 0), Math.round(fill.g ?? 0), Math.round(fill.b ?? 0)];
+  }
+  if (fill.k != null && fill.c == null) {
+    const value = Math.round(fill.k);
+    return [value, value, value];
+  }
+  if (fill.c != null) {
+    const c = (fill.c ?? 0) / 255;
+    const m = (fill.m ?? 0) / 255;
+    const y = (fill.y ?? 0) / 255;
+    const k = (fill.k ?? 0) / 255;
+    return [
+      Math.round(255 * (1 - c) * (1 - k)),
+      Math.round(255 * (1 - m) * (1 - k)),
+      Math.round(255 * (1 - y) * (1 - k))
+    ];
+  }
+  return [0, 0, 0];
+}
+function parseColor(input) {
+  if (Array.isArray(input)) return [input[0] | 0, input[1] | 0, input[2] | 0];
+  const hex = String(input || "").replace(/^#/, "");
+  const value = parseInt(hex, 16);
+  if (!Number.isFinite(value)) return null;
+  return [value >> 16 & 255, value >> 8 & 255, value & 255];
+}
+function cssColor(color) {
+  return `rgb(${color[0]},${color[1]},${color[2]})`;
+}
+function describeTextStyle(raw) {
+  const style = raw || {};
+  return {
+    family: fontFamilyOf(style.font ? style.font.name : ""),
+    weight: fontWeightOf(style.font ? style.font.name : "", style.fauxBold),
+    size: Math.round((style.fontSize || 0) * 100) / 100,
+    color: fillColorOf(style.fillColor),
+    tracking: style.tracking || 0
+  };
+}
+function mergeTextStyle(base, raw, baseStyle) {
+  const style = raw && raw.style || {};
+  const has = (key) => style[key] !== void 0 && style[key] !== null;
+  const merged = { ...base };
+  if (has("font") && style.font && style.font.name) {
+    merged.family = fontFamilyOf(style.font.name);
+    merged.weight = fontWeightOf(style.font.name, has("fauxBold") ? style.fauxBold : baseStyle?.fauxBold);
+  } else if (has("fauxBold")) {
+    merged.weight = fontWeightOf(merged.family, style.fauxBold);
+  }
+  if (has("fontSize") && style.fontSize > 0) merged.size = Math.round(style.fontSize * 100) / 100;
+  if (has("fillColor") && style.fillColor) {
+    merged.color = [
+      Math.round(style.fillColor.r ?? 0),
+      Math.round(style.fillColor.g ?? 0),
+      Math.round(style.fillColor.b ?? 0)
+    ];
+  }
+  if (has("tracking")) merged.tracking = style.tracking;
+  return merged;
+}
+function describeTextLayer(text) {
+  const style = Array.isArray(text.style) ? text.style[0] : text.style || {};
+  const paragraph = Array.isArray(text.paragraphStyle) ? text.paragraphStyle[0] || {} : text.paragraphStyle || {};
+  const justification = String(paragraph.justification || "");
+  const base = describeTextStyle(style);
+  const value = String(text.text || "").replace(/\r$/, "").replace(/\r/g, "\n");
+  const runs = [];
+  for (const run of text.styleRuns || []) {
+    const length = Math.max(0, Math.round(run.length || 0));
+    if (!length) continue;
+    runs.push({ len: length, ...mergeTextStyle(base, run, style) });
+  }
+  let total = runs.reduce((sum, run) => sum + run.len, 0);
+  if (total !== value.length && runs.length) {
+    if (total < value.length) {
+      runs.push({ len: value.length - total, ...base });
+    } else {
+      let left = value.length;
+      for (let index = 0; index < runs.length && left > 0; index += 1) {
+        runs[index].len = Math.min(runs[index].len, left);
+        left -= runs[index].len;
+      }
+      while (runs.length && runs[runs.length - 1].len <= 0) runs.pop();
+    }
+  }
+  if (!runs.length && value.length) runs.push({ len: value.length, ...base });
+  const leading = style.autoLeading === false && style.leading > 0 ? Math.round(style.leading * 100) / 100 : 0;
+  const matrix = Array.isArray(text.transform) ? text.transform.map(Number) : [];
+  const sx = Math.hypot(matrix[0] || 0, matrix[1] || 0);
+  const sy = Math.hypot(matrix[2] || 0, matrix[3] || 0);
+  const scale = sx > 0 && sy > 0 ? (sx + sy) / 2 : 0;
+  return {
+    value,
+    runs,
+    align: /center/i.test(justification) ? "center" : /right/i.test(justification) ? "right" : "left",
+    leading,
+    ...scale > 0 ? { scale } : {},
+    // Baseline origin of the first line in canvas px (matrix translation), and
+    // whether the layer is rotated/skewed enough that it can't be used directly.
+    ...matrix.length >= 6 && Number.isFinite(matrix[4]) && Number.isFinite(matrix[5]) ? {
+      origin: { x: matrix[4], y: matrix[5] },
+      rotated: Math.abs(matrix[1] || 0) > 0.01 * (sx || 1) || Math.abs(matrix[2] || 0) > 0.01 * (sy || 1),
+      angle: Math.atan2(matrix[1] || 0, matrix[0] || 1)
+    } : {}
+  };
+}
+function pxPerPtOf(base, rasterHeight) {
+  if (base.scale > 0) return base.scale;
+  const lines = Math.max(1, String(base.value || "\u5B57").split("\n").length);
+  const maxPt = (base.runs || []).reduce((max, run) => Math.max(max, run.size || 0), 0) || 24;
+  return rasterHeight > 0 ? rasterHeight / (lines * maxPt * 1.2) : 1;
+}
+function sameStyle(a, b) {
+  return a.family === b.family && a.weight === b.weight && a.size === b.size && a.tracking === b.tracking && a.color[0] === b.color[0] && a.color[1] === b.color[1] && a.color[2] === b.color[2];
+}
+function compressRuns(chars) {
+  const runs = [];
+  for (const { len: _len, ...style } of chars) {
+    const last = runs[runs.length - 1];
+    if (last && sameStyle(last, style)) last.len += 1;
+    else runs.push({ ...style, len: 1 });
+  }
+  return runs;
+}
+function remapRuns(runs, oldText, newText) {
+  const chars = [];
+  for (const run of runs || []) {
+    for (let index = 0; index < run.len; index += 1) chars.push(run);
+  }
+  while (chars.length < oldText.length && chars.length) chars.push(chars[chars.length - 1]);
+  if (!chars.length) return [];
+  let head = 0;
+  while (head < oldText.length && head < newText.length && oldText[head] === newText[head]) head += 1;
+  let tail = 0;
+  while (tail < oldText.length - head && tail < newText.length - head && oldText[oldText.length - 1 - tail] === newText[newText.length - 1 - tail]) {
+    tail += 1;
+  }
+  const inserted = newText.length - head - tail;
+  const inherit = chars[head - 1] || chars[head] || chars[0];
+  const out = chars.slice(0, head);
+  for (let index = 0; index < inserted; index += 1) out.push(inherit);
+  out.push(...chars.slice(oldText.length - tail));
+  while (out.length < newText.length) out.push(inherit);
+  return compressRuns(out.slice(0, newText.length));
+}
+function charStyles(runs, value) {
+  const out = [];
+  const source = runs && runs.length ? runs : [];
+  for (const run of source) {
+    for (let index = 0; index < run.len && out.length < value.length; index += 1) out.push(run);
+  }
+  while (out.length < value.length && source.length) out.push(source[source.length - 1]);
+  return out;
+}
+var ALIGNS = /* @__PURE__ */ new Set(["left", "center", "right"]);
+function sizeOf(row, pxPerPt) {
+  if (row.sizePx != null && Number(row.sizePx) > 0 && pxPerPt > 0) {
+    return Math.round(Number(row.sizePx) / pxPerPt * 100) / 100;
+  }
+  if (row.size != null && Number(row.size) > 0) return Number(row.size);
+  return null;
+}
+function mergeTextOverride(base, override = {}, pxPerPt = 0) {
+  const value = override.value != null ? String(override.value) : base.value;
+  const layout = ["align", "leading", "dx", "dy", "fitWidth", "minPx", "maxPx"].some(
+    (key) => override[key] != null
+  );
+  if (value === base.value && !override.runs && override.font == null && override.weight == null && override.size == null && override.sizePx == null && override.color == null && override.tracking == null && !layout) {
+    return null;
+  }
+  let runs = (value === base.value ? base.runs : remapRuns(base.runs, base.value, value)).map(
+    (run) => ({ ...run })
+  );
+  if (!runs.length && value.length) {
+    const only = base.runs[0];
+    runs = [{ len: value.length, ...only || { family: null, weight: 400, size: 24, color: [0, 0, 0], tracking: 0 } }];
+  }
+  if (Array.isArray(override.runs) && override.runs.length) {
+    const chars = charStyles(runs, value).map(({ len: _len, ...style }) => style);
+    let offset = 0;
+    for (const row of override.runs) {
+      const len = Math.max(0, Math.round(Number(row.len) || 0));
+      if (!len || offset >= chars.length) continue;
+      const patch2 = {};
+      if (row.family != null) patch2.family = String(row.family);
+      if (row.weight != null) patch2.weight = Number(row.weight);
+      const size2 = sizeOf(row, pxPerPt);
+      if (size2 != null) patch2.size = size2;
+      if (row.tracking != null) patch2.tracking = Number(row.tracking);
+      if (row.color != null) {
+        const parsed = parseColor(row.color);
+        if (parsed) patch2.color = parsed;
+      }
+      const end = Math.min(chars.length, offset + len);
+      for (let index = offset; index < end; index += 1) chars[index] = { ...chars[index], ...patch2 };
+      offset = end;
+    }
+    if (chars.length) runs = compressRuns(chars);
+  }
+  const patch = {};
+  if (override.font != null) patch.family = String(override.font);
+  if (override.weight != null) patch.weight = Number(override.weight);
+  const size = sizeOf(override, pxPerPt);
+  if (size != null) patch.size = size;
+  if (override.tracking != null) patch.tracking = Number(override.tracking);
+  if (override.color != null) {
+    const parsed = parseColor(override.color);
+    if (parsed) patch.color = parsed;
+  }
+  if (Object.keys(patch).length) {
+    runs = runs.map((run) => ({ ...run, ...patch }));
+  }
+  return {
+    value,
+    runs,
+    align: ALIGNS.has(override.align) ? override.align : base.align,
+    leading: Number(override.leading) > 0 ? Number(override.leading) : base.leading || 0,
+    dx: Number(override.dx) || 0,
+    dy: Number(override.dy) || 0,
+    fitWidth: Number(override.fitWidth) > 0 ? Number(override.fitWidth) : 0,
+    minPx: Number(override.minPx) > 0 ? Number(override.minPx) : 0,
+    maxPx: Number(override.maxPx) > 0 ? Number(override.maxPx) : 0
+  };
+}
+function segmentsOf(chars, pxPerPt) {
+  const out = [];
+  for (const style of chars) {
+    const px = Math.max(1, style.size * pxPerPt);
+    const last = out[out.length - 1];
+    if (last && last.family === style.family && last.weight === style.weight && Math.abs(last.px - px) < 0.01 && last.tracking === style.tracking && last.color[0] === style.color[0] && last.color[1] === style.color[1] && last.color[2] === style.color[2]) {
+      last.text += style.ch;
+      continue;
+    }
+    out.push({
+      text: style.ch,
+      family: style.family,
+      weight: style.weight,
+      px,
+      tracking: style.tracking || 0,
+      color: style.color
+    });
+  }
+  return out;
+}
+function fontString(segment) {
+  return `${segment.weight} ${segment.px}px "${segment.family || "sans-serif"}", "PingFang SC", "Microsoft YaHei", sans-serif`;
+}
+function applyTracking(ctx, segment) {
+  try {
+    ctx.letterSpacing = `${(segment.tracking / 1e3 * segment.px).toFixed(2)}px`;
+  } catch {
+  }
+}
+function drawSegments(ctx, segments, x, baseline) {
+  let cursor = x;
+  for (const segment of segments) {
+    ctx.font = fontString(segment);
+    ctx.fillStyle = cssColor(segment.color);
+    applyTracking(ctx, segment);
+    ctx.fillText(segment.text, cursor, baseline);
+    const trackPx = segment.tracking / 1e3 * segment.px;
+    cursor += ctx.measureText(segment.text).width + Math.max(0, segment.text.length) * trackPx;
+  }
+}
+function measureSegments(ctx, segments) {
+  let width = 0;
+  for (const segment of segments) {
+    ctx.font = fontString(segment);
+    const trackPx = segment.tracking / 1e3 * segment.px;
+    width += ctx.measureText(segment.text).width + Math.max(0, segment.text.length) * trackPx;
+  }
+  return width;
+}
+function synthesizeTextLeaf(leaf, base, override, hasFont2) {
+  const raster = leaf.__raster || {
+    left: leaf.left,
+    top: leaf.top,
+    width: leaf.width,
+    height: leaf.height
+  };
+  const pxPerPt = pxPerPtOf(base, raster.height);
+  const effective = mergeTextOverride(base, override, pxPerPt);
+  if (!effective) {
+    restoreTextLeaf(leaf);
+    return [];
+  }
+  const warnings = [];
+  const seen = /* @__PURE__ */ new Set();
+  for (const run of effective.runs) {
+    if (!run.family || seen.has(run.family)) continue;
+    seen.add(run.family);
+    if (hasFont2 && !hasFont2(run.family)) {
+      warnings.push(`\u5B57\u4F53 ${run.family} \u672A\u6CE8\u518C\uFF0C\u8BE5\u6BB5\u5C06\u7528\u56DE\u9000\u5B57\u4F53\u6E32\u67D3`);
+    }
+  }
+  const lines = effective.value.split("\n");
+  const chars = charStyles(effective.runs, effective.value);
+  const perLine = [];
+  let cursor = 0;
+  for (const line of lines) {
+    const slice = [];
+    for (let index = 0; index < line.length; index += 1) {
+      slice.push({ ch: line[index], ...chars[cursor] });
+      cursor += 1;
+    }
+    perLine.push(segmentsOf(slice, pxPerPt));
+  }
+  if (effective.maxPx > 0) {
+    for (const segments of perLine) {
+      for (const segment of segments) if (segment.px > effective.maxPx) segment.px = effective.maxPx;
+    }
+  }
+  const scratch = createCanvas(4, 4).getContext("2d");
+  let widths = perLine.map((segments) => measureSegments(scratch, segments));
+  let maxW = Math.max(1, ...widths);
+  if (effective.fitWidth > 0 && maxW > effective.fitWidth) {
+    const minPx = effective.minPx > 0 ? effective.minPx : 1;
+    let scale = effective.fitWidth / maxW;
+    const smallest = Math.min(...perLine.flatMap((segments) => segments.map((segment) => segment.px)));
+    if (smallest * scale < minPx) scale = minPx / smallest;
+    for (const segments of perLine) {
+      for (const segment of segments) segment.px = Math.max(minPx, segment.px * scale);
+    }
+    widths = perLine.map((segments) => measureSegments(scratch, segments));
+    maxW = Math.max(1, ...widths);
+  }
+  const fixedLeading = effective.leading > 0 ? effective.leading * pxPerPt : 0;
+  const lineHeights = perLine.map((segments) => {
+    const size = Math.max(1, ...segments.map((segment) => segment.px));
+    return fixedLeading >= size ? fixedLeading : size * 1.2;
+  });
+  const totalH = lineHeights.reduce((sum, height) => sum + height, 0);
+  const maxPx = Math.max(1, ...perLine.flatMap((segments) => segments.map((segment) => segment.px)));
+  const pad = Math.ceil(maxPx * 0.25) + 2;
+  let canvas = createCanvas(Math.max(1, Math.ceil(maxW) + pad * 2), Math.max(1, Math.ceil(totalH) + pad * 2));
+  const ctx = canvas.getContext("2d");
+  ctx.textBaseline = "alphabetic";
+  ctx.textAlign = "left";
+  let top = pad;
+  for (let index = 0; index < perLine.length; index += 1) {
+    const segments = perLine[index];
+    const lineHeight = lineHeights[index];
+    const baseline = top + lineHeight * 0.82;
+    let x = pad;
+    if (effective.align === "center") x = pad + (maxW - widths[index]) / 2;
+    else if (effective.align === "right") x = pad + (maxW - widths[index]);
+    drawSegments(ctx, segments, x, baseline);
+    top += lineHeight;
+  }
+  if (base.rotated && Number.isFinite(base.angle) && Math.abs(base.angle) > 2e-3) {
+    const cos = Math.abs(Math.cos(base.angle));
+    const sin = Math.abs(Math.sin(base.angle));
+    const rw = Math.max(1, Math.ceil(canvas.width * cos + canvas.height * sin));
+    const rh = Math.max(1, Math.ceil(canvas.width * sin + canvas.height * cos));
+    const turned = createCanvas(rw, rh);
+    const tctx = turned.getContext("2d");
+    tctx.translate(rw / 2, rh / 2);
+    tctx.rotate(base.angle);
+    tctx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+    canvas = turned;
+  }
+  let left = raster.left + raster.width / 2 - canvas.width / 2;
+  if (effective.align === "left") left = raster.left - pad;
+  else if (effective.align === "right") left = raster.left + raster.width - canvas.width + pad;
+  let topEdge = raster.top + raster.height / 2 - canvas.height / 2;
+  const origin = base.origin;
+  if (origin && !base.rotated) {
+    const baseLines = Math.max(1, String(base.value || "").split("\n").length);
+    const baseSize = Math.max(1, ...(base.runs || []).map((run) => (run.size || 0) * pxPerPt));
+    const baseLeading = base.leading > 0 && base.leading * pxPerPt >= baseSize ? base.leading * pxPerPt : baseSize * 1.2;
+    const lastBaseline = origin.y + (baseLines - 1) * baseLeading;
+    if (lastBaseline >= raster.top - 5 && lastBaseline <= raster.top + raster.height + 40) {
+      topEdge = origin.y - (pad + lineHeights[0] * 0.82);
+    }
+    const rasterRight = raster.left + raster.width;
+    const rasterMid = raster.left + raster.width / 2;
+    if (effective.align === "center" && Math.abs(origin.x - rasterMid) <= 40) left = origin.x - pad - maxW / 2;
+    else if (effective.align === "right" && Math.abs(origin.x - rasterRight) <= 40) left = origin.x - pad - maxW;
+    else if (effective.align === "left" && origin.x <= raster.left + 3 && origin.x >= raster.left - 160) left = origin.x - pad;
+  }
+  leaf.canvas = canvas;
+  leaf.left = Math.round(left + effective.dx);
+  leaf.top = Math.round(topEdge + effective.dy);
+  leaf.width = canvas.width;
+  leaf.height = canvas.height;
+  return warnings;
+}
+function restoreTextLeaf(leaf) {
+  if (!leaf.__raster) return;
+  leaf.canvas = leaf.__raster.canvas;
+  leaf.left = leaf.__raster.left;
+  leaf.top = leaf.__raster.top;
+  leaf.width = leaf.__raster.width;
+  leaf.height = leaf.__raster.height;
+}
+function applyTextOverrides(doc, overrides, hasFont2) {
+  const warnings = [];
+  const results = [];
+  const list = Array.isArray(overrides) ? overrides : [];
+  for (const override of list) {
+    const target = String(override.layer ?? "");
+    const matches = doc.entries.filter(
+      (item) => item.id === target || item.leafId === target || item.fullName === target || item.name === target
+    );
+    const textMatches = matches.filter((item) => item.text && item.leafId);
+    const entry = textMatches.length === 1 ? textMatches[0] : matches.length === 1 ? matches[0] : null;
+    if (!entry) {
+      const detail = matches.length > 1 ? `\u540C\u540D ${matches.length} \u5C42\uFF0C\u8BF7\u7528\u5B8C\u6574\u8DEF\u5F84` : `\u6587\u5B57\u5C42\u4E0D\u5B58\u5728\uFF1A${target}`;
+      warnings.push(detail);
+      results.push({ layer: target, ok: false, error: detail });
+      continue;
+    }
+    if (!entry.text || !entry.leafId) {
+      const detail = `${entry.fullName || entry.name}\uFF1A\u6CA1\u6709\u6805\u683C\u50CF\u7D20\u6216\u6587\u5B57\u6570\u636E\uFF0C\u8DF3\u8FC7`;
+      warnings.push(detail);
+      results.push({ layer: target, ok: false, error: detail });
+      continue;
+    }
+    const leaf = doc.leaves.find((item) => item.id === entry.leafId);
+    if (!leaf) {
+      const detail = `${entry.name}\uFF1A\u627E\u4E0D\u5230\u5BF9\u5E94\u56FE\u5C42\uFF0C\u8DF3\u8FC7`;
+      warnings.push(detail);
+      results.push({ layer: target, ok: false, error: detail });
+      continue;
+    }
+    if (!leaf.__raster) {
+      leaf.__raster = {
+        canvas: leaf.canvas,
+        left: leaf.left,
+        top: leaf.top,
+        width: leaf.width,
+        height: leaf.height
+      };
+    } else {
+      restoreTextLeaf(leaf);
+    }
+    try {
+      const local = synthesizeTextLeaf(leaf, entry.text, override, hasFont2);
+      warnings.push(...local);
+      results.push({ layer: target, ok: true, name: entry.name, fullName: entry.fullName, warnings: local });
+    } catch (error) {
+      restoreTextLeaf(leaf);
+      const detail = `${entry.name}\uFF1A\u91CD\u7ED8\u5931\u8D25\uFF08${error?.message || error}\uFF09\uFF0C\u4FDD\u7559\u539F\u50CF\u7D20`;
+      warnings.push(detail);
+      results.push({ layer: target, ok: false, error: detail });
+    }
+  }
+  warnings.results = results;
+  return warnings;
+}
+function cloneDoc(doc) {
+  return {
+    ...doc,
+    slots: new Set(doc.slots),
+    hidden: new Set(doc.hidden),
+    entries: doc.entries.map((entry) => ({ ...entry })),
+    leaves: doc.leaves.map((leaf) => ({ ...leaf }))
+  };
+}
+function mergeOverrideLists(globalList, skuList) {
+  const globalOverrides = Array.isArray(globalList) ? globalList : [];
+  const skuOverrides = Array.isArray(skuList) ? skuList : [];
+  if (!globalOverrides.length && !skuOverrides.length) return null;
+  if (!skuOverrides.length) return globalOverrides;
+  if (!globalOverrides.length) return skuOverrides;
+  const byTarget = /* @__PURE__ */ new Map();
+  for (const override of globalOverrides) byTarget.set(String(override.layer), override);
+  for (const override of skuOverrides) byTarget.set(String(override.layer), override);
+  return [...byTarget.values()];
+}
+
 // src/core/psd.js
-var import_ag_psd = __toESM(require_dist(), 1);
 var makeCanvas = createCanvas;
 var BLEND_MODES = {
   normal: "source-over",
@@ -16444,134 +16993,24 @@ async function parseTemplate(file, onStage = () => {
     leaves,
     hidden,
     slots: /* @__PURE__ */ new Set(),
-    size: file.size
+    size: file.size,
+    // Images placed by psd_edit; drawn through the same layer compositor.
+    elements: []
   };
-}
-var FONT_FAMILY_MAP = [
-  [/^PingFangSC/i, "PingFang SC"],
-  [/^PingFang/i, "PingFang SC"],
-  [/^HiraginoSansGB/i, "Hiragino Sans GB"],
-  [/^MicrosoftYaHei/i, "Microsoft YaHei"],
-  [/^MicrosoftJhengHei/i, "Microsoft JhengHei"],
-  [/^(SourceHanSans|SourceHanSansCN|NotoSansSC|NotoSansCJK)/i, "Noto Sans SC"],
-  [/^SourceHanSerif/i, "Noto Serif SC"],
-  [/^SimHei|^STHeiti/i, "Heiti SC"],
-  [/^SimSun|^STSong/i, "Songti SC"],
-  [/^AlibabaPuHuiTi/i, "Alibaba PuHuiTi"],
-  [/^OPPOSans/i, "OPPO Sans"],
-  [/^HarmonyOS/i, "HarmonyOS Sans"],
-  [/^DIN/i, "DIN Alternate"],
-  [/^ArialMT|^Arial/i, "Arial"],
-  [/^HelveticaNeue|^Helvetica/i, "Helvetica Neue"],
-  [/^Inter/i, "Inter"],
-  [/^Roboto/i, "Roboto"]
-];
-function fontFamilyOf(name) {
-  const raw = String(name || "");
-  for (const [pattern, family] of FONT_FAMILY_MAP) {
-    if (pattern.test(raw)) return family;
-  }
-  return raw.split(/[-_ ]/)[0] || raw || null;
-}
-function fontWeightOf(name, fauxBold) {
-  const raw = String(name || "").toLowerCase();
-  if (/heavy|black|extrabold|ultrabold/.test(raw)) return 800;
-  if (/semibold|demibold|bold/.test(raw)) return 700;
-  if (/medium/.test(raw)) return 500;
-  if (/light|thin/.test(raw)) return 300;
-  return fauxBold ? 700 : 400;
-}
-function fillColorOf(fill) {
-  if (!fill) return [0, 0, 0];
-  if (fill.r != null) {
-    return [Math.round(fill.r ?? 0), Math.round(fill.g ?? 0), Math.round(fill.b ?? 0)];
-  }
-  if (fill.k != null && fill.c == null) {
-    const value = Math.round(fill.k);
-    return [value, value, value];
-  }
-  if (fill.c != null) {
-    const c = (fill.c ?? 0) / 255;
-    const m = (fill.m ?? 0) / 255;
-    const y = (fill.y ?? 0) / 255;
-    const k = (fill.k ?? 0) / 255;
-    return [
-      Math.round(255 * (1 - c) * (1 - k)),
-      Math.round(255 * (1 - m) * (1 - k)),
-      Math.round(255 * (1 - y) * (1 - k))
-    ];
-  }
-  return [0, 0, 0];
-}
-function describeTextStyle(raw) {
-  const style = raw || {};
-  return {
-    family: fontFamilyOf(style.font ? style.font.name : ""),
-    weight: fontWeightOf(style.font ? style.font.name : "", style.fauxBold),
-    size: Math.round((style.fontSize || 0) * 100) / 100,
-    color: fillColorOf(style.fillColor),
-    tracking: style.tracking || 0
-  };
-}
-function mergeTextStyle(base, raw, baseStyle) {
-  const style = raw && raw.style || {};
-  const has = (key) => style[key] !== void 0 && style[key] !== null;
-  const merged = { ...base };
-  if (has("font") && style.font && style.font.name) {
-    merged.family = fontFamilyOf(style.font.name);
-    merged.weight = fontWeightOf(style.font.name, has("fauxBold") ? style.fauxBold : baseStyle?.fauxBold);
-  } else if (has("fauxBold")) {
-    merged.weight = fontWeightOf(merged.family, style.fauxBold);
-  }
-  if (has("fontSize") && style.fontSize > 0) merged.size = Math.round(style.fontSize * 100) / 100;
-  if (has("fillColor") && style.fillColor) {
-    merged.color = [
-      Math.round(style.fillColor.r ?? 0),
-      Math.round(style.fillColor.g ?? 0),
-      Math.round(style.fillColor.b ?? 0)
-    ];
-  }
-  if (has("tracking")) merged.tracking = style.tracking;
-  return merged;
-}
-function describeTextLayer(text) {
-  const style = Array.isArray(text.style) ? text.style[0] : text.style || {};
-  const base = describeTextStyle(style);
-  const value = String(text.text || "").replace(/\r$/, "").replace(/\r/g, "\n");
-  const runs = [];
-  for (const run of text.styleRuns || []) {
-    const length = Math.max(0, Math.round(run.length || 0));
-    if (!length) continue;
-    runs.push({ len: length, ...mergeTextStyle(base, run, style) });
-  }
-  let total = runs.reduce((sum, run) => sum + run.len, 0);
-  if (total !== value.length && runs.length) {
-    if (total < value.length) {
-      runs.push({ len: value.length - total, ...base });
-    } else {
-      let left = value.length;
-      for (let index = 0; index < runs.length && left > 0; index += 1) {
-        runs[index].len = Math.min(runs[index].len, left);
-        left -= runs[index].len;
-      }
-      while (runs.length && runs[runs.length - 1].len <= 0) runs.pop();
-    }
-    total = runs.reduce((sum, run) => sum + run.len, 0);
-  }
-  if (!runs.length && value.length) runs.push({ len: value.length, ...base });
-  return { value, runs };
 }
 function buildTree(psd) {
   const entries = [];
   const leaves = [];
   let leafIndex = 0;
-  const walk = (nodes, depth, ancestorIds, inheritedOpacity, parentId) => {
+  const walk = (nodes, depth, ancestorIds, ancestorNames, inheritedOpacity, parentId) => {
     for (const node of nodes || []) {
       const isGroup = Array.isArray(node.children) && node.children.length > 0;
       const id = `e${entries.length}`;
+      const name = node.name || (isGroup ? "\u7EC4" : "\u56FE\u5C42");
       const entry = {
         id,
-        name: node.name || (isGroup ? "\u7EC4" : "\u56FE\u5C42"),
+        name,
+        fullName: [...ancestorNames, name].join("/"),
         depth,
         kind: isGroup ? "group" : node.text ? "text" : "layer",
         psdHidden: !!node.hidden,
@@ -16581,7 +17020,7 @@ function buildTree(psd) {
       if (!isGroup && node.text) entry.text = describeTextLayer(node.text);
       entries.push(entry);
       if (isGroup) {
-        walk(node.children, depth + 1, entry.path, inheritedOpacity * (node.opacity ?? 1), id);
+        walk(node.children, depth + 1, entry.path, [...ancestorNames, name], inheritedOpacity * (node.opacity ?? 1), id);
         continue;
       }
       if (!node.canvas) {
@@ -16598,6 +17037,7 @@ function buildTree(psd) {
         id: `l${leafIndex++}`,
         entryId: id,
         name: entry.name,
+        fullName: entry.fullName,
         left: node.left ?? 0,
         top: node.top ?? 0,
         width,
@@ -16621,8 +17061,36 @@ function buildTree(psd) {
       entry.hasPixels = true;
     }
   };
-  walk(psd.children || [], 0, [], 1, null);
+  walk(psd.children || [], 0, [], [], 1, null);
   return { entries, leaves };
+}
+function findEntries(doc, spec) {
+  const wanted = String(spec || "");
+  if (!wanted) return [];
+  const byId = doc.entries.filter((entry) => entry.id === wanted || entry.leafId === wanted);
+  if (byId.length) return byId;
+  const byFull = doc.entries.filter((entry) => entry.fullName === wanted);
+  if (byFull.length) return byFull;
+  return doc.entries.filter((entry) => entry.name === wanted);
+}
+function findLeaves(doc, spec) {
+  const wanted = String(spec || "");
+  if (!wanted) return [];
+  const byId = doc.leaves.filter((leaf) => leaf.id === wanted || leaf.entryId === wanted);
+  if (byId.length) return byId;
+  const byFull = doc.leaves.filter((leaf) => leaf.fullName === wanted);
+  if (byFull.length) return byFull;
+  return doc.leaves.filter((leaf) => leaf.name === wanted);
+}
+function layerBounds(doc, spec) {
+  const leaf = findLeaves(doc, spec)[0];
+  if (leaf) return { x: leaf.left, y: leaf.top, w: leaf.width, h: leaf.height, name: leaf.name, leafId: leaf.id };
+  const entry = findEntries(doc, spec)[0];
+  if (entry?.bounds) {
+    const [x0, y0, x1, y1] = entry.bounds;
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0, name: entry.name, entryId: entry.id };
+  }
+  return null;
 }
 function isEntryVisible(doc, entryId) {
   const entry = doc.entries.find((item) => item.id === entryId);
@@ -16677,7 +17145,7 @@ function effectList(effects, name) {
   if (!value) return [];
   return (Array.isArray(value) ? value : [value]).filter((item) => item && item.enabled);
 }
-function cssColor(color, alpha = 1) {
+function cssColor2(color, alpha = 1) {
   if (!color) return `rgba(0,0,0,${alpha})`;
   const r = Math.round(color.r ?? 0);
   const g = Math.round(color.g ?? 0);
@@ -16712,7 +17180,7 @@ function paintGradient(ctx, width, height, effect) {
     );
   }
   for (const stop of stops) {
-    fill.addColorStop(Math.max(0, Math.min(1, stop.location)), cssColor(stop.color, 1));
+    fill.addColorStop(Math.max(0, Math.min(1, stop.location)), cssColor2(stop.color, 1));
   }
   ctx.save();
   ctx.globalCompositeOperation = "source-atop";
@@ -16783,7 +17251,7 @@ function composeLeaf(leaf, previous) {
     ctx.save();
     ctx.globalCompositeOperation = "source-atop";
     ctx.globalAlpha = solid.opacity ?? 1;
-    ctx.fillStyle = cssColor(solid.color, 1);
+    ctx.fillStyle = cssColor2(solid.color, 1);
     ctx.fillRect(0, 0, leaf.width, leaf.height);
     ctx.restore();
   }
@@ -16799,7 +17267,7 @@ function composeLeaf(leaf, previous) {
   const out = makeCanvas(leaf.width + pad * 2, leaf.height + pad * 2);
   const outCtx = out.getContext("2d");
   for (const shadow of shadows) {
-    const color = cssColor(shadow.color, shadow.opacity ?? 1);
+    const color = cssColor2(shadow.color, shadow.opacity ?? 1);
     const isGlow = shadow === effectList(leaf.effects, "outerGlow")[0];
     const distance = isGlow ? 0 : effectValue(shadow.distance);
     const angle = (shadow.angle ?? 120) * Math.PI / 180;
@@ -16814,7 +17282,7 @@ function composeLeaf(leaf, previous) {
   }
   if (stroke) {
     const width = effectValue(stroke.size);
-    const tinted = silhouette(base, cssColor(stroke.color, 1));
+    const tinted = silhouette(base, cssColor2(stroke.color, 1));
     const steps = 24;
     outCtx.save();
     outCtx.globalAlpha = stroke.opacity ?? 1;
@@ -16887,8 +17355,40 @@ function isStackedCopy(base, other, doc) {
   return true;
 }
 var SLOT_SIBLING_OVERLAP = 0.25;
+function elementLeaves(doc) {
+  return (doc.elements || []).filter((element) => element.canvas).map((element, index) => ({
+    id: `x${index}`,
+    entryId: null,
+    name: element.name || `\u5143\u7D20 ${index + 1}`,
+    left: Math.round(element.left || 0),
+    top: Math.round(element.top || 0),
+    width: element.canvas.width,
+    height: element.canvas.height,
+    canvas: element.canvas,
+    mask: null,
+    opacity: element.opacity == null ? 1 : element.opacity,
+    blendMode: element.blend || "normal",
+    clipping: false,
+    effects: null,
+    path: [],
+    isElement: true,
+    aboveSlots: element.aboveSlots !== false
+  }));
+}
+function stackWithElements(doc, leaves) {
+  const elements = elementLeaves(doc);
+  if (!elements.length) return leaves;
+  const above = elements.filter((element) => element.aboveSlots);
+  const below = elements.filter((element) => !element.aboveSlots);
+  let at = leaves.findIndex((leaf) => doc.slots.has(leaf.id));
+  if (at < 0) at = Math.min(1, leaves.length);
+  return [...leaves.slice(0, at), ...below, ...leaves.slice(at), ...above];
+}
 function buildScene(doc) {
-  const visibleLeaves = doc.leaves.filter((leaf) => isLeafVisible(doc, leaf));
+  const visibleLeaves = stackWithElements(
+    doc,
+    doc.leaves.filter((leaf) => isLeafVisible(doc, leaf))
+  );
   const entryById = new Map(doc.entries.map((entry) => [entry.id, entry]));
   const clusters = [];
   const clusterOf = /* @__PURE__ */ new Map();
@@ -16898,16 +17398,18 @@ function buildScene(doc) {
     if (!doc.slots.has(leaf.id) || claimed.has(leaf.id)) continue;
     claimed.add(leaf.id);
     let rect = leafBounds(leaf);
+    const members = /* @__PURE__ */ new Set([leaf.id]);
     for (const other of visibleLeaves) {
-      if (claimed.has(other.id) || doc.slots.has(other.id)) continue;
+      if (claimed.has(other.id) || doc.slots.has(other.id) || other.isElement) continue;
       if (!isStackedCopy(leaf, other, doc)) continue;
       claimed.add(other.id);
+      members.add(other.id);
       rect = unionBounds(rect, leafBounds(other));
     }
     const cluster = {
       id: leaf.id,
       name: leaf.name,
-      members: /* @__PURE__ */ new Set([leaf.id]),
+      members,
       rect: {
         x: rect.left,
         y: rect.top,
@@ -16927,7 +17429,7 @@ function buildScene(doc) {
     const parent = entryById.get(leaf.entryId)?.parentId;
     if (!parent) continue;
     for (const other of visibleLeaves) {
-      if (claimed.has(other.id) || doc.slots.has(other.id)) continue;
+      if (claimed.has(other.id) || doc.slots.has(other.id) || other.isElement) continue;
       if (!other.path.includes(parent)) continue;
       if (boundsOverlapRatio(leafBounds(leaf), leafBounds(other)) < SLOT_SIBLING_OVERLAP) continue;
       cluster.members.add(other.id);
@@ -16965,6 +17467,15 @@ function buildScene(doc) {
     width: doc.width,
     height: doc.height
   };
+}
+function disposeScene(scene) {
+  if (!scene) return;
+  for (const part of scene.parts) {
+    if (part.kind === "layers" && part.canvas) {
+      part.canvas.width = 1;
+      part.canvas.height = 1;
+    }
+  }
 }
 
 // src/core/fit.js
@@ -17047,6 +17558,15 @@ function placement(rect, image, content, settings, adjust) {
     content: box
   };
 }
+function productBox(rect, image, content, settings, adjust) {
+  const placed = placement(rect, image, content, settings, adjust);
+  const rad = placed.rotation * Math.PI / 180;
+  const cos = Math.abs(Math.cos(rad));
+  const sin = Math.abs(Math.sin(rad));
+  const w = placed.contentWidth * cos + placed.contentHeight * sin;
+  const h = placed.contentWidth * sin + placed.contentHeight * cos;
+  return { x: placed.cx - w / 2, y: placed.cy - h / 2, w, h };
+}
 function drawProduct(ctx, image, rect, content, settings, adjust) {
   const placed = placement(rect, image, content, settings, adjust);
   const box = placed.content;
@@ -17090,20 +17610,218 @@ function uniqueName(used, base, extension) {
   return name;
 }
 
-// src/server.js
+// src/engine.js
+var import_ag_psd2 = __toESM(require_dist(), 1);
+import fs from "node:fs/promises";
+import path from "node:path";
+import { createCanvas as createCanvas2, loadImage, GlobalFonts } from "@napi-rs/canvas";
+
+// src/core/view.js
+var LABEL_FONT = '"PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif';
+var PALETTE = ["#ff2d55", "#0a84ff", "#30d158", "#ff9f0a", "#bf5af2", "#00c7be"];
+function toRect(value) {
+  if (!value) return null;
+  if (Array.isArray(value) && value.length >= 4) {
+    const [x0, y0, x1, y1] = value.map(Number);
+    if ([x0, y0, x1, y1].some((n) => !Number.isFinite(n))) return null;
+    return { x: Math.min(x0, x1), y: Math.min(y0, y1), w: Math.abs(x1 - x0), h: Math.abs(y1 - y0) };
+  }
+  if (typeof value === "object" && value.w != null) {
+    const { x, y, w, h } = value;
+    if ([x, y, w, h].some((n) => !Number.isFinite(Number(n)))) return null;
+    return { x: Number(x), y: Number(y), w: Number(w), h: Number(h) };
+  }
+  return null;
+}
+function resolveCrop(crop, width, height) {
+  const rect = toRect(crop);
+  if (!rect || rect.w < 1 || rect.h < 1) return { x: 0, y: 0, w: width, h: height };
+  const x = Math.max(0, Math.min(width - 1, Math.round(rect.x)));
+  const y = Math.max(0, Math.min(height - 1, Math.round(rect.y)));
+  const w = Math.max(1, Math.min(width - x, Math.round(rect.w)));
+  const h = Math.max(1, Math.min(height - y, Math.round(rect.h)));
+  return { x, y, w, h };
+}
+function resolveScale(scale, crop, maxWidth = 1600) {
+  const wanted = Number(scale);
+  if (Number.isFinite(wanted) && wanted > 0) return Math.min(16, wanted);
+  return Math.max(1, Math.min(16, Math.floor(maxWidth / crop.w * 100) / 100));
+}
+function niceStep(visiblePx) {
+  const raw = visiblePx / 8;
+  for (const step of [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500]) if (step >= raw) return step;
+  return 500;
+}
+function renderView({ image, crop, scale, rects = [], grid = false, maxWidth = 1600 }) {
+  const region = resolveCrop(crop, image.width, image.height);
+  const factor = resolveScale(scale, region, maxWidth);
+  const width = Math.max(1, Math.round(region.w * factor));
+  const height = Math.max(1, Math.round(region.h * factor));
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = factor < 3;
+  ctx.drawImage(image, region.x, region.y, region.w, region.h, 0, 0, width, height);
+  const toView = (rect) => ({
+    x: (rect.x - region.x) * factor,
+    y: (rect.y - region.y) * factor,
+    w: rect.w * factor,
+    h: rect.h * factor
+  });
+  if (grid) {
+    const step = typeof grid === "number" && grid > 0 ? grid : niceStep(region.w);
+    ctx.save();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(0,255,255,0.45)";
+    ctx.fillStyle = "rgba(0,0,0,0.65)";
+    ctx.font = `${Math.max(10, Math.min(14, 11 + factor))}px sans-serif`;
+    ctx.textBaseline = "top";
+    const label = (text, x, y) => {
+      const w = ctx.measureText(text).width + 4;
+      ctx.fillStyle = "rgba(0,0,0,0.65)";
+      ctx.fillRect(x, y, w, 14);
+      ctx.fillStyle = "#7ff";
+      ctx.fillText(text, x + 2, y + 1);
+    };
+    const firstX = Math.ceil(region.x / step) * step;
+    for (let x = firstX; x < region.x + region.w; x += step) {
+      const vx = Math.round((x - region.x) * factor) + 0.5;
+      ctx.beginPath();
+      ctx.moveTo(vx, 0);
+      ctx.lineTo(vx, height);
+      ctx.stroke();
+      label(String(x), vx + 1, 1);
+    }
+    const firstY = Math.ceil(region.y / step) * step;
+    for (let y = firstY; y < region.y + region.h; y += step) {
+      const vy = Math.round((y - region.y) * factor) + 0.5;
+      ctx.beginPath();
+      ctx.moveTo(0, vy);
+      ctx.lineTo(width, vy);
+      ctx.stroke();
+      label(String(y), 1, vy + 1);
+    }
+    ctx.restore();
+  }
+  const drawn = [];
+  rects.forEach((item, index) => {
+    const rect = toRect(item.rect);
+    if (!rect) return;
+    const color = item.color || PALETTE[index % PALETTE.length];
+    const view2 = toView(rect);
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(view2.x, view2.y, view2.w, view2.h);
+    if (item.label) {
+      ctx.font = `12px ${LABEL_FONT}`;
+      ctx.textBaseline = "top";
+      const text = /[^\x00-\x7f]/.test(String(item.label)) ? `#${index + 1}` : String(item.label);
+      const w = ctx.measureText(text).width + 6;
+      const above = view2.y >= 16;
+      const ty = above ? view2.y - 16 : view2.y + 1;
+      ctx.fillStyle = color;
+      ctx.fillRect(view2.x, ty, w, 15);
+      ctx.fillStyle = "#fff";
+      ctx.fillText(text, view2.x + 3, ty + 1);
+    }
+    ctx.restore();
+    drawn.push({ label: item.label ? `#${index + 1} ${item.label}` : `#${index + 1}`, rect: [rect.x, rect.y, rect.x + rect.w, rect.y + rect.h] });
+  });
+  return { canvas, crop: region, scale: factor, rects: drawn };
+}
+
+// src/core/calibrate.js
+function inkBounds(canvas, threshold = 40) {
+  if (!canvas || canvas.width < 1 || canvas.height < 1) return null;
+  const { width, height } = canvas;
+  const data = canvas.getContext("2d").getImageData(0, 0, width, height).data;
+  let x0 = width;
+  let y0 = height;
+  let x1 = -1;
+  let y1 = -1;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (data[(y * width + x) * 4 + 3] > threshold) {
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        if (y > y1) y1 = y;
+      }
+    }
+  }
+  return x1 < 0 ? null : [x0, y0, x1 + 1, y1 + 1];
+}
+var round = (value) => Math.round(value * 100) / 100;
+function calibrateText(doc, hasFont2, { layers } = {}) {
+  const wanted = layers && layers.length ? new Set(layers.map(String)) : null;
+  const rows = [];
+  for (const entry of doc.entries) {
+    if (!entry.text || !entry.leafId) continue;
+    if (wanted && !wanted.has(entry.name) && !wanted.has(entry.fullName) && !wanted.has(entry.id)) continue;
+    const leaf = doc.leaves.find((item) => item.id === entry.leafId);
+    if (!leaf) continue;
+    const row = { layer: entry.fullName || entry.name, text: entry.text.value.slice(0, 24) };
+    const original = leaf.__raster || { canvas: leaf.canvas, left: leaf.left, top: leaf.top };
+    const before = inkBounds(original.canvas);
+    if (!before) {
+      rows.push({ ...row, ok: false, note: "\u539F\u56FE\u5C42\u6CA1\u6709\u50CF\u7D20" });
+      continue;
+    }
+    const orig = [before[0] + original.left, before[1] + original.top, before[2] + original.left, before[3] + original.top];
+    if (!leaf.__raster) leaf.__raster = { canvas: leaf.canvas, left: leaf.left, top: leaf.top, width: leaf.width, height: leaf.height };
+    else restoreTextLeaf(leaf);
+    try {
+      const warnings = synthesizeTextLeaf(leaf, entry.text, { value: entry.text.value, dx: 0 }, hasFont2);
+      const after = inkBounds(leaf.canvas);
+      if (!after) {
+        rows.push({ ...row, ok: false, note: "\u91CD\u7ED8\u540E\u6CA1\u6709\u50CF\u7D20", warnings });
+        continue;
+      }
+      const re = [after[0] + leaf.left, after[1] + leaf.top, after[2] + leaf.left, after[3] + leaf.top];
+      const ow = orig[2] - orig[0];
+      const oh = orig[3] - orig[1];
+      const rw = re[2] - re[0];
+      const rh = re[3] - re[1];
+      rows.push({
+        ...row,
+        ok: true,
+        orig,
+        rendered: re,
+        widthRatio: round(rw / ow),
+        heightRatio: round(rh / oh),
+        // Centre offsets: positive dx = engine draws to the right, dy = lower.
+        dx: round((re[0] + re[2]) / 2 - (orig[0] + orig[2]) / 2),
+        dy: round((re[1] + re[3]) / 2 - (orig[1] + orig[3]) / 2),
+        // Top and bottom edge gaps separate "wrong size" from "wrong baseline".
+        topGap: re[1] - orig[1],
+        bottomGap: re[3] - orig[3],
+        warnings
+      });
+    } catch (error) {
+      rows.push({ ...row, ok: false, note: `\u91CD\u7ED8\u5931\u8D25\uFF1A${error?.message || error}` });
+    } finally {
+      restoreTextLeaf(leaf);
+    }
+  }
+  return rows;
+}
+
+// src/engine.js
 setCanvasFactory((width, height) => createCanvas2(width, height));
 (0, import_ag_psd2.initializeCanvas)((width, height) => createCanvas2(width, height));
-var IMAGE_EXTENSIONS = /* @__PURE__ */ new Set([".png", ".jpg", ".jpeg", ".webp", ".bmp"]);
-var templateCache = /* @__PURE__ */ new Map();
-async function resolveInWorkspace(cwd, candidate, { mustExist = true } = {}) {
-  if (typeof candidate !== "string" || candidate.trim() === "") {
-    throw new Error("A non-empty path is required");
-  }
-  const absolute = path.resolve(cwd, candidate);
-  const relative = path.relative(cwd, absolute);
-  if (relative.startsWith("..") || path.isAbsolute(relative)) {
-    throw new Error(`Path must stay inside the session workspace: ${candidate}`);
-  }
+var FONT_EXTENSIONS = /* @__PURE__ */ new Set([".ttf", ".otf", ".ttc", ".otc", ".woff", ".woff2"]);
+var FORMATS = /* @__PURE__ */ new Set(["jpg", "png", "webp"]);
+function isInside(base, target) {
+  const relative = path.relative(base, target);
+  return relative === "" || !relative.startsWith("..") && !path.isAbsolute(relative);
+}
+async function resolvePath(root, candidate, { mustExist = true, confine = false } = {}) {
+  if (typeof candidate !== "string" || candidate.trim() === "") throw new Error("A non-empty path is required");
+  const base = root || process.cwd();
+  const absolute = path.resolve(base, candidate);
+  const realBase = confine ? await fs.realpath(base).catch(() => base) : base;
+  const inside = (target) => isInside(base, target) || isInside(realBase, target);
+  if (confine && !inside(absolute)) throw new Error(`Path must stay inside the workspace: ${candidate}`);
   if (mustExist) {
     let real;
     try {
@@ -17111,15 +17829,31 @@ async function resolveInWorkspace(cwd, candidate, { mustExist = true } = {}) {
     } catch {
       throw new Error(`Path does not exist: ${candidate}`);
     }
-    const realRelative = path.relative(cwd, real);
-    if (realRelative.startsWith("..") || path.isAbsolute(realRelative)) {
-      throw new Error(`Path resolves outside the session workspace: ${candidate}`);
-    }
+    if (confine && !inside(real)) throw new Error(`Path resolves outside the workspace: ${candidate}`);
     return real;
+  }
+  if (confine) {
+    const link = await fs.lstat(absolute).catch(() => null);
+    if (link) {
+      const real = await fs.realpath(absolute).catch(() => null);
+      if (!real || !inside(real)) throw new Error(`Path resolves outside the workspace: ${candidate}`);
+    }
+    let ancestor = path.dirname(absolute);
+    for (; ; ) {
+      const real = await fs.realpath(ancestor).catch(() => null);
+      if (real) {
+        if (!inside(real)) throw new Error(`Path resolves outside the workspace: ${candidate}`);
+        break;
+      }
+      const parent = path.dirname(ancestor);
+      if (parent === ancestor) break;
+      ancestor = parent;
+    }
   }
   return absolute;
 }
-async function loadTemplateDoc(absolutePath) {
+var templateCache = /* @__PURE__ */ new Map();
+async function loadTemplate(absolutePath) {
   const stat = await fs.stat(absolutePath);
   const cached = templateCache.get(absolutePath);
   if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) return cached.doc;
@@ -17133,6 +17867,746 @@ async function loadTemplateDoc(absolutePath) {
   templateCache.set(absolutePath, { mtimeMs: stat.mtimeMs, size: stat.size, doc });
   return doc;
 }
+function hasFont(family) {
+  if (!family) return true;
+  if (GlobalFonts.has(family)) return true;
+  const mapped = fontFamilyOf(family);
+  return !!(mapped && GlobalFonts.has(mapped));
+}
+async function registerFonts({ root, confine, fonts = [] }) {
+  const files = [];
+  for (const item of [].concat(fonts || [])) {
+    const absolute = await resolvePath(root, item, { confine });
+    const stat = await fs.stat(absolute);
+    if (stat.isDirectory()) {
+      const entries = await fs.readdir(absolute, { withFileTypes: true });
+      for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+        if (entry.isFile()) files.push(path.join(absolute, entry.name));
+      }
+    } else {
+      files.push(absolute);
+    }
+  }
+  const registered = [];
+  const skipped = [];
+  for (const full of files) {
+    const extension = path.extname(full).toLowerCase();
+    if (!FONT_EXTENSIONS.has(extension)) {
+      if (!path.basename(full).startsWith(".")) skipped.push(path.basename(full));
+      continue;
+    }
+    const stem = path.basename(full, extension).replace(/_+/g, " ").replace(/\s+/g, " ").trim() || "font";
+    const aliases = [stem];
+    try {
+      const postScript = readFontPostScriptName(await fs.readFile(full));
+      if (postScript) aliases.push(postScript);
+    } catch {
+    }
+    for (const alias of [...aliases]) {
+      const mapped = fontFamilyOf(alias);
+      if (mapped && !aliases.includes(mapped) && !GlobalFonts.has(mapped)) aliases.push(mapped);
+    }
+    let ok = false;
+    for (const alias of new Set(aliases)) {
+      try {
+        if (GlobalFonts.registerFromPath(full, alias) !== false) {
+          registered.push(alias);
+          ok = true;
+        }
+      } catch {
+      }
+    }
+    if (!ok) skipped.push(path.basename(full));
+  }
+  return { registered: [...new Set(registered)], skipped };
+}
+function templateFamilies(doc) {
+  const families = /* @__PURE__ */ new Set();
+  for (const entry of doc.entries) for (const run of entry.text?.runs || []) if (run.family) families.add(run.family);
+  return families;
+}
+var toBounds = (rect) => rect ? [Math.round(rect.x), Math.round(rect.y), Math.round(rect.x + rect.w), Math.round(rect.y + rect.h)] : null;
+var RUN_LIMIT = 64;
+function cleanRun({ len, family, weight, size, color, tracking }) {
+  const run = { len };
+  if (family) run.family = family;
+  if (weight != null) run.weight = weight;
+  if (size != null) run.size = size;
+  if (Array.isArray(color)) run.color = color;
+  if (tracking != null) run.tracking = tracking;
+  return run;
+}
+async function inspect({ root, confine, template, fonts, limit = 600 }) {
+  const absolute = await resolvePath(root, template, { confine });
+  if (fonts) await registerFonts({ root, confine, fonts });
+  const doc = await loadTemplate(absolute);
+  const listed = doc.entries.filter((entry) => entry.kind === "group" || entry.leafId);
+  const layers = listed.slice(0, limit).map((entry) => {
+    const layer = {
+      id: entry.id,
+      name: entry.name,
+      path: entry.fullName || entry.name,
+      kind: entry.kind,
+      depth: entry.depth,
+      visible: isEntryVisible(doc, entry.id)
+    };
+    if (entry.leafId) layer.leafId = entry.leafId;
+    if (entry.kind === "text") layer.text = true;
+    if (entry.bounds) layer.bounds = entry.bounds;
+    if (entry.text) {
+      const leaf = doc.leaves.find((item) => item.id === entry.leafId);
+      const runs = entry.text.runs || [];
+      layer.textContent = entry.text.value;
+      layer.runCount = runs.length;
+      if (runs.length) {
+        layer.runs = runs.slice(0, RUN_LIMIT).map(cleanRun);
+        layer.runsTruncated = runs.length > RUN_LIMIT;
+      }
+      if (entry.text.align) layer.align = entry.text.align;
+      layer.pxPerPt = Math.round(pxPerPtOf(entry.text, leaf ? leaf.height : 0) * 1e4) / 1e4;
+    }
+    return layer;
+  });
+  const families = [...templateFamilies(doc)].sort();
+  return {
+    name: doc.name,
+    width: doc.width,
+    height: doc.height,
+    layers,
+    truncated: listed.length > limit,
+    suggestedSlots: suggestSlots(doc).map((id) => {
+      const leaf = doc.leaves.find((item) => item.id === id);
+      return { leafId: id, name: leaf.name, path: leaf.fullName || leaf.name, bounds: [leaf.left, leaf.top, leaf.left + leaf.width, leaf.top + leaf.height] };
+    }),
+    fonts: families,
+    missingFonts: families.filter((family) => !hasFont(family))
+  };
+}
+function resolveSlotIds(doc, specs) {
+  const ids = [];
+  for (const spec of specs) {
+    const matches = findLeaves(doc, spec);
+    if (!matches.length) throw new Error(`Slot layer not found: ${spec}`);
+    if (matches.length > 1) {
+      throw new Error(`Slot layer name is ambiguous (${matches.length} matches): ${spec}. Use the path or leafId: ${matches.map((leaf) => leaf.fullName || leaf.id).join(" | ")}`);
+    }
+    ids.push(matches[0].id);
+  }
+  return ids;
+}
+function rectOf(doc, spec) {
+  const raw = spec.rect;
+  if (Array.isArray(raw) && raw.length >= 4) {
+    const [x0, y0, x1, y1] = raw.map(Number);
+    return { x: Math.min(x0, x1), y: Math.min(y0, y1), w: Math.abs(x1 - x0), h: Math.abs(y1 - y0) };
+  }
+  if (raw && raw.w != null) return { x: Number(raw.x) || 0, y: Number(raw.y) || 0, w: Number(raw.w), h: Number(raw.h) };
+  if (spec.layer) {
+    const box = layerBounds(doc, spec.layer);
+    if (!box) throw new Error(`Image target layer not found: ${spec.layer}`);
+    return box;
+  }
+  return null;
+}
+async function loadImageElement(root, confine, spec, doc) {
+  const file = await resolvePath(root, spec.source, { confine });
+  const image = await loadImage(file);
+  const rotation = Number(spec.rotation) || 0;
+  const box = rectOf(doc, spec);
+  const fit = spec.fit || (box ? "contain" : "none");
+  const content = measureContent(image);
+  let scale = 1;
+  let left = Number(spec.x) || 0;
+  let top = Number(spec.y) || 0;
+  if (box && fit !== "none") {
+    scale = fit === "cover" ? Math.max(box.w / content.w, box.h / content.h) : Math.min(box.w / content.w, box.h / content.h);
+    if (fit === "contain" && spec.upscale === false) scale = Math.min(1, scale);
+  }
+  scale *= Number(spec.scale) > 0 ? Number(spec.scale) : 1;
+  const width = Math.max(1, Math.round(image.width * scale));
+  const height = Math.max(1, Math.round(image.height * scale));
+  let canvas = createCanvas2(width, height);
+  canvas.getContext("2d").drawImage(image, 0, 0, width, height);
+  if (box) {
+    const cw = content.w * scale;
+    const ch = content.h * scale;
+    const align = String(spec.align || "center");
+    let cx = box.x + (box.w - cw) / 2;
+    let cy = box.y + (box.h - ch) / 2;
+    if (/left/.test(align)) cx = box.x;
+    if (/right/.test(align)) cx = box.x + box.w - cw;
+    if (/top/.test(align)) cy = box.y;
+    if (/bottom/.test(align)) cy = box.y + box.h - ch;
+    left = cx - content.x * scale;
+    top = cy - content.y * scale;
+  }
+  if (rotation) {
+    const radians = rotation * Math.PI / 180;
+    const cos = Math.abs(Math.cos(radians));
+    const sin = Math.abs(Math.sin(radians));
+    const turned = createCanvas2(Math.ceil(width * cos + height * sin), Math.ceil(width * sin + height * cos));
+    const ctx = turned.getContext("2d");
+    ctx.translate(turned.width / 2, turned.height / 2);
+    ctx.rotate(radians);
+    ctx.drawImage(canvas, -width / 2, -height / 2);
+    left -= (turned.width - width) / 2;
+    top -= (turned.height - height) / 2;
+    canvas = turned;
+  }
+  left += Number(spec.dx) || 0;
+  top += Number(spec.dy) || 0;
+  const ink = inkBounds(canvas, 8);
+  return {
+    name: spec.name ? String(spec.name) : path.basename(file, path.extname(file)),
+    canvas,
+    left,
+    top,
+    opacity: spec.opacity == null ? 1 : Math.max(0, Math.min(1, Number(spec.opacity))),
+    blend: spec.blend || "normal",
+    aboveSlots: spec.above !== false,
+    report: {
+      name: spec.name ? String(spec.name) : path.basename(file),
+      ...box ? { target: toBounds(box) } : {},
+      ...ink ? { box: [Math.round(left + ink[0]), Math.round(top + ink[1]), Math.round(left + ink[2]), Math.round(top + ink[3])] } : {},
+      scale: Math.round(scale * 1e3) / 1e3
+    }
+  };
+}
+function setVisibility(doc, specs, hidden, problems) {
+  for (const spec of specs || []) {
+    const matches = findEntries(doc, spec);
+    if (!matches.length) {
+      problems.push(`layer not found: ${spec}`);
+      continue;
+    }
+    for (const entry of matches) {
+      if (hidden) doc.hidden.add(entry.id);
+      else {
+        doc.hidden.delete(entry.id);
+        for (const id of entry.path || []) doc.hidden.delete(id);
+      }
+    }
+  }
+}
+function mergeJob(defaults = {}, job = {}) {
+  return {
+    ...defaults,
+    ...job,
+    text: mergeOverrideLists(defaults.text, job.text) || [],
+    show: [...defaults.show || [], ...job.show || []],
+    hide: [...defaults.hide || [], ...job.hide || []],
+    images: [...defaults.images || [], ...job.images || []],
+    product: job.product === void 0 ? defaults.product : job.product,
+    adjust: { ...defaults.adjust || {}, ...job.adjust || {} }
+  };
+}
+function encode(canvas, format, quality) {
+  if (format === "png") return canvas.toBuffer("image/png");
+  return canvas.toBuffer(format === "webp" ? "image/webp" : "image/jpeg", Math.round(quality));
+}
+async function render({
+  root,
+  confine,
+  template,
+  jobs = [],
+  defaults = {},
+  outDir,
+  format = "jpg",
+  quality = 92,
+  background,
+  fonts,
+  strictFonts = false
+}) {
+  if (!Array.isArray(jobs) || !jobs.length) throw new Error("`jobs` must be a non-empty array");
+  const fmt = String(format).toLowerCase() === "jpeg" ? "jpg" : String(format).toLowerCase();
+  if (!FORMATS.has(fmt)) throw new Error(`Unsupported format: ${format}`);
+  const absolute = await resolvePath(root, template, { confine });
+  const fontReport = fonts ? await registerFonts({ root, confine, fonts }) : null;
+  const doc = await loadTemplate(absolute);
+  const stamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  const relativeOut = outDir || path.join("out", `${sanitizeName(doc.name.replace(/\.[^.]+$/, ""))}-${stamp}`);
+  const absoluteOut = await resolvePath(root, relativeOut, { mustExist: false, confine });
+  await fs.mkdir(absoluteOut, { recursive: true });
+  const used = /* @__PURE__ */ new Set();
+  const results = [];
+  for (let index = 0; index < jobs.length; index += 1) {
+    const job = mergeJob(defaults, jobs[index]);
+    const stem = sanitizeName(job.name != null && String(job.name).trim() ? String(job.name) : `job-${index + 1}`);
+    const file = uniqueName(used, stem, fmt);
+    const result = { index, name: String(job.name ?? stem), file, ok: false };
+    results.push(result);
+    let scene = null;
+    try {
+      const clone = cloneDoc(doc);
+      const problems = [];
+      setVisibility(clone, job.hide, true, problems);
+      setVisibility(clone, job.show, false, problems);
+      const families = /* @__PURE__ */ new Set();
+      for (const override of job.text) {
+        const entry = findEntries(clone, String(override.layer ?? "")).find((item) => item.text);
+        for (const run of entry?.text.runs || []) if (run.family) families.add(run.family);
+        if (override.font) families.add(String(override.font));
+        for (const run of override.runs || []) if (run.family) families.add(String(run.family));
+      }
+      const missing = [...families].filter((family) => !hasFont(family));
+      if (strictFonts && missing.length) throw new Error(`Missing fonts: ${missing.join(", ")}`);
+      const textReport = [];
+      if (job.text.length) {
+        const applied = applyTextOverrides(clone, job.text, hasFont);
+        for (const row of applied.results || []) {
+          const entry = findEntries(clone, row.layer).find((item) => item.text && item.leafId);
+          const leaf = entry && clone.leaves.find((item) => item.id === entry.leafId);
+          const ink = row.ok && leaf ? inkBounds(leaf.canvas) : null;
+          textReport.push({
+            layer: row.layer,
+            ok: row.ok,
+            ...row.error ? { error: row.error } : {},
+            ...row.warnings && row.warnings.length ? { warnings: row.warnings } : {},
+            ...entry?.bounds ? { original: entry.bounds } : {},
+            ...ink ? { box: [leaf.left + ink[0], leaf.top + ink[1], leaf.left + ink[2], leaf.top + ink[3]] } : {}
+          });
+        }
+      }
+      clone.elements = [];
+      for (const spec of job.images) clone.elements.push(await loadImageElement(root, confine, spec, clone));
+      let image = null;
+      let content = null;
+      const settings = {
+        mode: job.fit || DEFAULT_SETTINGS.mode,
+        anchor: job.anchor || DEFAULT_SETTINGS.anchor,
+        fill: Number.isFinite(Number(job.fill)) ? Number(job.fill) : DEFAULT_SETTINGS.fill
+      };
+      const adjust = { ...DEFAULT_ADJUST };
+      for (const key of ["dx", "dy", "scale", "rotation"]) if (Number.isFinite(Number(job.adjust[key]))) adjust[key] = Number(job.adjust[key]);
+      if (job.product) {
+        image = await loadImage(await resolvePath(root, job.product, { confine }));
+        content = measureContent(image);
+        const ids = job.slots && job.slots.length ? resolveSlotIds(clone, job.slots) : suggestSlots(clone);
+        if (!ids.length) throw new Error("No product slot detected; pass `slots` (see inspect.suggestedSlots)");
+        clone.slots = new Set(ids);
+      } else {
+        clone.slots = /* @__PURE__ */ new Set();
+      }
+      scene = buildScene(clone);
+      const canvas = createCanvas2(doc.width, doc.height);
+      const ctx = canvas.getContext("2d");
+      const fill = job.background ?? background ?? (fmt === "jpg" ? "#ffffff" : null);
+      if (fill) {
+        ctx.fillStyle = fill;
+        ctx.fillRect(0, 0, doc.width, doc.height);
+      }
+      drawScene(ctx, scene, image, content, settings, adjust);
+      await fs.writeFile(path.join(absoluteOut, file), encode(canvas, fmt, quality));
+      result.ok = true;
+      if (textReport.length) result.text = textReport;
+      if (clone.elements.length) result.images = clone.elements.map((element) => element.report);
+      if (image) {
+        result.product = scene.slots.map((slot) => ({
+          slot: slot.name,
+          target: toBounds(slot.rect),
+          box: toBounds(productBox(slot.rect, image, content, settings, adjust))
+        }));
+        if (scene.suppressed.length) result.suppressed = scene.suppressed.map((layer) => layer.name);
+      }
+      if (missing.length) result.missingFonts = missing;
+      if (problems.length) result.warnings = problems;
+    } catch (error) {
+      result.error = String(error?.message || error);
+    } finally {
+      if (scene) disposeScene(scene);
+    }
+  }
+  const failed = results.filter((item) => !item.ok);
+  return {
+    template: doc.name,
+    width: doc.width,
+    height: doc.height,
+    outDir: path.relative(root || process.cwd(), absoluteOut) || ".",
+    count: results.length - failed.length,
+    failed: failed.length,
+    ...fontReport ? { fonts: fontReport } : {},
+    jobs: results
+  };
+}
+async function view({ root, confine, image, out, crop, scale, rects, grid, maxWidth }) {
+  const file = await resolvePath(root, image, { confine });
+  const source = await loadImage(file);
+  const result = renderView({ image: source, crop, scale, rects, grid, maxWidth });
+  const target = out || path.join(path.dirname(path.relative(root || process.cwd(), file)), `${path.basename(file, path.extname(file))}.view.png`);
+  const absoluteOut = await resolvePath(root, target, { mustExist: false, confine });
+  await fs.mkdir(path.dirname(absoluteOut), { recursive: true });
+  await fs.writeFile(absoluteOut, result.canvas.toBuffer("image/png"));
+  return {
+    file: path.relative(root || process.cwd(), absoluteOut),
+    width: result.canvas.width,
+    height: result.canvas.height,
+    crop: toBounds(result.crop),
+    scale: Math.round(result.scale * 1e3) / 1e3,
+    rects: result.rects
+  };
+}
+async function checkText({ root, confine, template, layers, fonts, sizeTolerance = 0.06, offsetTolerance = 4 }) {
+  const absolute = await resolvePath(root, template, { confine });
+  const fontReport = fonts ? await registerFonts({ root, confine, fonts }) : null;
+  const doc = await loadTemplate(absolute);
+  const clone = cloneDoc(doc);
+  const rows = calibrateText(clone, hasFont, { layers }).map((row) => {
+    if (!row.ok) return row;
+    const drift = Math.abs(row.widthRatio - 1) > sizeTolerance || Math.abs(row.heightRatio - 1) > sizeTolerance || Math.abs(row.dx) > offsetTolerance || Math.abs(row.dy) > offsetTolerance;
+    return { ...row, drift };
+  });
+  return {
+    template: doc.name,
+    ...fontReport ? { fonts: fontReport } : {},
+    rows,
+    drifted: rows.filter((row) => row.drift).length
+  };
+}
+
+// src/tools.js
+var BOUNDS = { type: "array", items: { type: "integer" } };
+var STRINGS = { type: "array", items: { type: "string" } };
+var TEXT_RUN_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["len"],
+  properties: {
+    len: { type: "integer", description: "Characters in this run, counted from the end of the previous run." },
+    family: { type: "string", description: "Font family or PostScript name." },
+    weight: { type: "number", description: "Font weight, 100-900." },
+    size: { type: "number", description: "Font size in PSD points (see psd_inspect pxPerPt)." },
+    sizePx: { type: "number", description: "Font size in canvas pixels; wins over `size`." },
+    color: { type: "string", description: "Fill colour as #rrggbb." },
+    tracking: { type: "number", description: "Letter spacing in 1/1000 em, as in Photoshop." }
+  }
+};
+var TEXT_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["layer"],
+  properties: {
+    layer: { type: "string", description: "Text layer id (e12), leaf id (l3), full path or unique name." },
+    value: { type: "string", description: "New copy. Without `runs`, characters keep the original styles." },
+    runs: { type: "array", items: TEXT_RUN_SCHEMA, description: "Per-run styles over the new copy." },
+    font: { type: "string", description: "Font for every run." },
+    weight: { type: "number" },
+    size: { type: "number", description: "Size in pt for every run." },
+    sizePx: { type: "number", description: "Size in px for every run." },
+    color: { type: "string", description: "#rrggbb for every run." },
+    tracking: { type: "number" },
+    align: { type: "string", enum: ["left", "center", "right"] },
+    leading: { type: "number", description: "Fixed line height in pt." },
+    dx: { type: "number", description: "Horizontal nudge in px." },
+    dy: { type: "number", description: "Vertical nudge in px." },
+    fitWidth: { type: "number", description: "Shrink glyphs evenly so the widest line fits this many px." },
+    minPx: { type: "number", description: "Smallest glyph size fitWidth may shrink to." },
+    maxPx: { type: "number", description: "Largest glyph size in px." }
+  }
+};
+var IMAGE_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["source"],
+  properties: {
+    source: { type: "string", description: "Image path." },
+    name: { type: "string" },
+    layer: { type: "string", description: "Fit into this layer\u2019s bounds." },
+    rect: { type: "array", items: { type: "number" }, description: "Fit into [x0, y0, x1, y1] instead." },
+    x: { type: "number", description: "Left edge when there is no target box." },
+    y: { type: "number", description: "Top edge when there is no target box." },
+    fit: { type: "string", enum: ["contain", "cover", "none"], description: "Default contain when a box is given." },
+    upscale: { type: "boolean", description: "false: never enlarge past 100%." },
+    align: { type: "string", description: 'center (default), or any of top/bottom/left/right, e.g. "bottom".' },
+    dx: { type: "number" },
+    dy: { type: "number" },
+    scale: { type: "number", description: "Multiplier after fitting." },
+    rotation: { type: "number", description: "Degrees." },
+    opacity: { type: "number" },
+    blend: { type: "string", description: "Canvas blend mode, e.g. multiply." },
+    above: { type: "boolean", description: "false: draw under the product slot instead of on top. Default true." }
+  }
+};
+var JOB_PROPERTIES = {
+  name: { type: "string", description: "Output file stem. Default job-<n>." },
+  text: { type: "array", items: TEXT_SCHEMA },
+  show: { ...STRINGS, description: "Layers (id/path/name) to show." },
+  hide: { ...STRINGS, description: "Layers (id/path/name) to hide." },
+  images: { type: "array", items: IMAGE_SCHEMA },
+  product: { type: "string", description: "Product cut-out drawn into the slot layers in place of their art." },
+  slots: { ...STRINGS, description: "Slot layers for `product`. Default: psd_inspect suggestedSlots." },
+  fit: { type: "string", enum: ["contain", "height", "width", "cover"] },
+  anchor: { type: "string", enum: ["bottom", "center", "top"] },
+  fill: { type: "number", description: "Scale after fitting the product, e.g. 0.9." },
+  adjust: {
+    type: "object",
+    additionalProperties: false,
+    properties: { dx: { type: "number" }, dy: { type: "number" }, scale: { type: "number" }, rotation: { type: "number" } }
+  },
+  background: { type: "string", description: "Canvas colour under the template." }
+};
+var JOB_SCHEMA = { type: "object", additionalProperties: false, properties: JOB_PROPERTIES };
+var JOB_RESULT_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["index", "name", "file", "ok"],
+  properties: {
+    index: { type: "integer" },
+    name: { type: "string" },
+    file: { type: "string" },
+    ok: { type: "boolean" },
+    error: { type: "string" },
+    text: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["layer", "ok"],
+        properties: {
+          layer: { type: "string" },
+          ok: { type: "boolean" },
+          error: { type: "string" },
+          warnings: STRINGS,
+          original: BOUNDS,
+          box: BOUNDS
+        }
+      }
+    },
+    images: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["name", "scale"],
+        properties: { name: { type: "string" }, target: BOUNDS, box: BOUNDS, scale: { type: "number" } }
+      }
+    },
+    product: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["slot", "target", "box"],
+        properties: { slot: { type: "string" }, target: BOUNDS, box: BOUNDS }
+      }
+    },
+    suppressed: STRINGS,
+    missingFonts: STRINGS,
+    warnings: STRINGS
+  }
+};
+var FONT_REPORT_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["registered", "skipped"],
+  properties: { registered: STRINGS, skipped: STRINGS }
+};
+function registerEngineTools(ctx, resolveSessionCwd2) {
+  const workspace = async (exec, name) => {
+    if (!exec.agent) throw new Error(`${name} requires an agent session`);
+    return resolveSessionCwd2(ctx, exec);
+  };
+  const disposers = [];
+  disposers.push(
+    ctx.tools.register({
+      name: "psd_render",
+      description: "Render a PSD/PSB template once per job. A job says exactly what to change: text layers (new copy, per-run font/size/colour, fit-to-width), layers to show or hide, a product cut-out for the slot layers, and extra images fitted into a layer\u2019s box or a rect. `defaults` is merged under every job (text by layer). Returns, per job, the output file and where each rewritten text and placed image actually landed (`box` vs `original`/`target`), so you can check overflow before looking at the image. A failing job does not stop the others.",
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        required: ["template", "jobs"],
+        properties: {
+          template: { type: "string", description: "PSD or PSB path relative to the session working directory." },
+          jobs: { type: "array", items: JOB_SCHEMA },
+          defaults: { ...JOB_SCHEMA, description: "Merged under every job." },
+          outDir: { type: "string", description: "Output folder. Default out/<template>-<time>." },
+          format: { type: "string", enum: ["jpg", "png", "webp"] },
+          quality: { type: "integer", description: "JPEG/WebP quality 1-100. Default 92." },
+          background: { type: "string", description: "Canvas colour. Default white for JPG, transparent otherwise." },
+          fonts: { ...STRINGS, description: "Font files or folders to register first." },
+          strictFonts: { type: "boolean", description: "Fail a job whose rewritten text needs a missing font." }
+        }
+      },
+      output: {
+        schema: {
+          type: "object",
+          additionalProperties: false,
+          required: ["template", "width", "height", "outDir", "count", "failed", "jobs"],
+          properties: {
+            template: { type: "string" },
+            width: { type: "integer" },
+            height: { type: "integer" },
+            outDir: { type: "string" },
+            count: { type: "integer" },
+            failed: { type: "integer" },
+            fonts: FONT_REPORT_SCHEMA,
+            jobs: { type: "array", items: JOB_RESULT_SCHEMA }
+          }
+        },
+        render: (_args, value) => {
+          const lines = [`Rendered ${value.count}/${value.jobs.length} into ${value.outDir}`];
+          for (const job of value.jobs) {
+            if (!job.ok) lines.push(`  \u2717 ${job.name}: ${job.error}`);
+            else if (job.missingFonts?.length || job.warnings?.length || job.text?.some((row) => !row.ok)) {
+              const notes = [
+                ...(job.text || []).filter((row) => !row.ok).map((row) => row.error),
+                ...job.warnings || [],
+                ...job.missingFonts?.length ? [`missing fonts: ${job.missingFonts.join(", ")}`] : []
+              ];
+              lines.push(`  ! ${job.file}: ${notes.join("; ")}`);
+            }
+          }
+          return [{ type: "text", text: lines.join("\n") }];
+        }
+      },
+      async execute(args, exec) {
+        const cwd = await workspace(exec, "psd_render");
+        return render({ ...args, root: cwd, confine: true });
+      },
+      timeoutMs: 20 * 60 * 1e3,
+      isConcurrencySafe: () => false
+    })
+  );
+  disposers.push(
+    ctx.tools.register({
+      name: "psd_view",
+      description: "Crop and zoom an image (a render or any PNG/JPG) and optionally draw a coordinate grid and labelled boxes, then save it as PNG for you to look at. Use it to check small details: clipped glyphs, overlaps, decimal sizes, edges of placed images.",
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        required: ["image"],
+        properties: {
+          image: { type: "string", description: "Image path relative to the session working directory." },
+          crop: { type: "array", items: { type: "number" }, description: "[x0, y0, x1, y1] in image pixels. Default whole image." },
+          scale: { type: "number", description: "Zoom factor. Default: fit about 1600px wide." },
+          grid: { type: "boolean", description: "Draw a coordinate grid." },
+          gridStep: { type: "number", description: "Grid step in image pixels (implies grid)." },
+          rects: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["rect"],
+              properties: {
+                rect: { type: "array", items: { type: "number" }, description: "[x0, y0, x1, y1] in image pixels." },
+                label: { type: "string" },
+                color: { type: "string" }
+              }
+            }
+          },
+          out: { type: "string", description: "Output PNG path. Default <image>.view.png next to the image." }
+        }
+      },
+      output: {
+        schema: {
+          type: "object",
+          additionalProperties: false,
+          required: ["file", "width", "height", "crop", "scale", "rects"],
+          properties: {
+            file: { type: "string" },
+            width: { type: "integer" },
+            height: { type: "integer" },
+            crop: BOUNDS,
+            scale: { type: "number" },
+            rects: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: false,
+                required: ["label", "rect"],
+                properties: { label: { type: "string" }, rect: { type: "array", items: { type: "number" } } }
+              }
+            }
+          }
+        },
+        render: (_args, value) => [
+          { type: "text", text: `Saved ${value.file} (${value.width}\xD7${value.height}, crop [${value.crop.join(",")}], \xD7${value.scale})` }
+        ]
+      },
+      async execute(args, exec) {
+        const cwd = await workspace(exec, "psd_view");
+        const { gridStep, grid, ...rest } = args;
+        return view({ ...rest, grid: gridStep > 0 ? gridStep : !!grid, root: cwd, confine: true });
+      },
+      isConcurrencySafe: () => false
+    })
+  );
+  disposers.push(
+    ctx.tools.register({
+      name: "psd_text_check",
+      description: "Re-draw every text layer (or the listed ones) with its ORIGINAL copy through the same engine psd_render uses, and compare with Photoshop\u2019s pixels. Rows with `drift: true` will not match the template when rewritten (wrong or missing font, size or baseline off); fix fonts or nudge with dx/dy/size before batch rendering.",
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        required: ["template"],
+        properties: {
+          template: { type: "string", description: "PSD or PSB path relative to the session working directory." },
+          layers: { ...STRINGS, description: "Limit to these layer ids, paths or names." },
+          fonts: { ...STRINGS, description: "Font files or folders to register first." },
+          sizeTolerance: { type: "number", description: "Allowed width/height ratio error. Default 0.06." },
+          offsetTolerance: { type: "number", description: "Allowed centre offset in px. Default 4." }
+        }
+      },
+      output: {
+        schema: {
+          type: "object",
+          additionalProperties: false,
+          required: ["template", "rows", "drifted"],
+          properties: {
+            template: { type: "string" },
+            fonts: FONT_REPORT_SCHEMA,
+            drifted: { type: "integer" },
+            rows: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: false,
+                required: ["layer", "text", "ok"],
+                properties: {
+                  layer: { type: "string" },
+                  text: { type: "string" },
+                  ok: { type: "boolean" },
+                  note: { type: "string" },
+                  drift: { type: "boolean" },
+                  orig: BOUNDS,
+                  rendered: BOUNDS,
+                  widthRatio: { type: "number" },
+                  heightRatio: { type: "number" },
+                  dx: { type: "number" },
+                  dy: { type: "number" },
+                  topGap: { type: "number" },
+                  bottomGap: { type: "number" },
+                  warnings: STRINGS
+                }
+              }
+            }
+          }
+        },
+        render: (_args, value) => [
+          {
+            type: "text",
+            text: [
+              `${value.template}: ${value.rows.length} text layer(s), ${value.drifted} drifted`,
+              ...value.rows.filter((row) => row.drift || !row.ok).map(
+                (row) => row.ok ? `  ${row.layer}: width \xD7${row.widthRatio}, height \xD7${row.heightRatio}, offset ${row.dx},${row.dy}` : `  ${row.layer}: ${row.note}`
+              )
+            ].join("\n")
+          }
+        ]
+      },
+      async execute(args, exec) {
+        const cwd = await workspace(exec, "psd_text_check");
+        return checkText({ ...args, root: cwd, confine: true });
+      },
+      isConcurrencySafe: () => false
+    })
+  );
+  return disposers;
+}
+
+// src/server.js
+var IMAGE_EXTENSIONS = /* @__PURE__ */ new Set([".png", ".jpg", ".jpeg", ".webp", ".bmp"]);
+var resolveInWorkspace = (cwd, candidate, { mustExist = true } = {}) => resolvePath(cwd, candidate, { mustExist, confine: true });
+var loadTemplateDoc = loadTemplate;
 function resolveSlots(doc, specs) {
   const ids = [];
   for (const spec of specs) {
@@ -17159,16 +18633,6 @@ function resolveSlots(doc, specs) {
   }
   return ids;
 }
-function slotSummary(doc, ids) {
-  return ids.map((id) => {
-    const leaf = doc.leaves.find((item) => item.id === id);
-    return {
-      name: leaf.name,
-      leafId: leaf.id,
-      bounds: [leaf.left, leaf.top, leaf.left + leaf.width, leaf.top + leaf.height]
-    };
-  });
-}
 function toAdjustment(raw) {
   const adjust = { ...DEFAULT_ADJUST };
   if (!raw || typeof raw !== "object") return adjust;
@@ -17179,10 +18643,10 @@ function toAdjustment(raw) {
   return adjust;
 }
 function describeTextLayers(layers) {
-  const lines = layers.filter((layer) => layer.textContent != null).slice(0, 12).map((layer) => {
+  const lines = layers.filter((layer) => layer.textContent != null).slice(0, 40).map((layer) => {
     const run = (layer.runs || [])[0];
     const font = run ? ` ${run.family || "?"} ${run.size}pt` : "";
-    return `  ${layer.name}: ${JSON.stringify(layer.textContent)}${font}`;
+    return `  ${layer.id || ""} ${layer.path || layer.name}: ${JSON.stringify(layer.textContent)}${font}`;
   });
   return lines.length ? `
 Text layers:
@@ -17195,48 +18659,17 @@ async function listSkuFiles(cwd, { skus, skuDir }) {
   }
   if (skuDir) {
     const directory = await resolveInWorkspace(cwd, skuDir);
-    const entries = await fs.readdir(directory, { withFileTypes: true });
+    const entries = await fs2.readdir(directory, { withFileTypes: true });
     for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name, "zh-Hans-CN"))) {
       if (!entry.isFile()) continue;
-      if (!IMAGE_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) continue;
-      files.push(path.join(directory, entry.name));
+      if (!IMAGE_EXTENSIONS.has(path2.extname(entry.name).toLowerCase())) continue;
+      files.push(path2.join(directory, entry.name));
     }
   }
   return files;
 }
-async function inspectTemplate({ cwd, template }) {
-  const absolute = await resolveInWorkspace(cwd, template);
-  const doc = await loadTemplateDoc(absolute);
-  const layerLimit = 400;
-  const layers = doc.entries.filter((entry) => entry.kind === "group" || entry.leafId).slice(0, layerLimit).map((entry) => {
-    const layer = {
-      name: entry.name,
-      kind: entry.kind,
-      depth: entry.depth,
-      visible: isEntryVisible(doc, entry.id)
-    };
-    if (entry.leafId) layer.leafId = entry.leafId;
-    if (entry.kind === "text") layer.text = true;
-    if (entry.text) {
-      layer.textContent = entry.text.value;
-      layer.runCount = entry.text.runs.length;
-      if (entry.text.runs.length) {
-        layer.runs = entry.text.runs.slice(0, 8).map(({ family, ...run }) => family ? { ...run, family } : run);
-        layer.runsTruncated = entry.text.runs.length > 8;
-      }
-    }
-    if (entry.bounds) layer.bounds = entry.bounds;
-    return layer;
-  });
-  const suggestedIds = suggestSlots(doc);
-  return {
-    name: doc.name,
-    width: doc.width,
-    height: doc.height,
-    layers,
-    truncated: doc.entries.length > layerLimit,
-    suggestedSlots: slotSummary(doc, suggestedIds)
-  };
+function inspectTemplate({ cwd, template }) {
+  return inspect({ root: cwd, confine: true, template, limit: 400 });
 }
 async function renderBatch({
   cwd,
@@ -17268,9 +18701,9 @@ async function renderBatch({
     throw new Error("No SKU images were found. Pass `skus` paths or a `skuDir` folder.");
   }
   const stamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  const relativeOut = outDir || path.join("out", "psd-batch", `${sanitizeName(doc.name)}-${stamp}`);
+  const relativeOut = outDir || path2.join("out", "psd-batch", `${sanitizeName(doc.name)}-${stamp}`);
   const absoluteOut = await resolveInWorkspace(cwd, relativeOut, { mustExist: false });
-  await fs.mkdir(absoluteOut, { recursive: true });
+  await fs2.mkdir(absoluteOut, { recursive: true });
   const isPng = format === "png";
   const mime = isPng ? "image/png" : "image/jpeg";
   const extension = isPng ? "png" : "jpg";
@@ -17283,11 +18716,11 @@ async function renderBatch({
   const files = [];
   const zipEntries = {};
   for (const file of skuFiles) {
-    const image = await loadImage(file);
+    const image = await loadImage2(file);
     const content = measureContent(image);
-    const base = path.basename(file, path.extname(file));
-    const adjust = toAdjustment(adjustments[path.basename(file)] ?? adjustments[base]);
-    const canvas = createCanvas2(doc.width, doc.height);
+    const base = path2.basename(file, path2.extname(file));
+    const adjust = toAdjustment(adjustments[path2.basename(file)] ?? adjustments[base]);
+    const canvas = createCanvas3(doc.width, doc.height);
     const ctx = canvas.getContext("2d");
     if (!isPng) {
       ctx.fillStyle = "#ffffff";
@@ -17296,19 +18729,19 @@ async function renderBatch({
     drawScene(ctx, doc.scene, image, content, settings, adjust);
     const buffer = canvas.toBuffer(mime, isPng ? void 0 : Math.round(quality));
     const name = uniqueName(used, sanitizeName(base), extension);
-    await fs.writeFile(path.join(absoluteOut, name), buffer);
+    await fs2.writeFile(path2.join(absoluteOut, name), buffer);
     files.push(name);
     if (zip) zipEntries[name] = new Uint8Array(buffer);
   }
   let zipPath;
   if (zip) {
     const data = zipSync(zipEntries, { level: 0 });
-    zipPath = path.join(absoluteOut, `${sanitizeName(doc.name)}-${files.length}.zip`);
-    await fs.writeFile(zipPath, data);
+    zipPath = path2.join(absoluteOut, `${sanitizeName(doc.name)}-${files.length}.zip`);
+    await fs2.writeFile(zipPath, data);
   }
   return {
     count: files.length,
-    outDir: path.relative(cwd, absoluteOut) || ".",
+    outDir: path2.relative(cwd, absoluteOut) || ".",
     files: files.slice(0, 50),
     truncated: files.length > 50,
     slots: doc.scene.slots.map((slot) => ({
@@ -17319,7 +18752,7 @@ async function renderBatch({
     suppressed: doc.scene.suppressed.slice(0, 50),
     suppressedCount: doc.scene.suppressed.length,
     suppressedTruncated: doc.scene.suppressed.length > 50,
-    ...zipPath ? { zip: path.relative(cwd, zipPath) } : {}
+    ...zipPath ? { zip: path2.relative(cwd, zipPath) } : {}
   };
 }
 async function resolveSessionCwd(ctx, exec) {
@@ -17336,7 +18769,7 @@ function registerTools(ctx) {
   disposers.push(
     ctx.tools.register({
       name: "psd_inspect",
-      description: "Inspect a PSD/PSB main-image template inside the session workspace. Returns its size, the layer tree (names, depth, visibility, bounds, ids), product slots the studio would auto-detect, and \u2014 for text layers \u2014 the copy plus per-run font styles (family, weight, size, color). Use this before psd_batch_render when you need to choose slot layers or check what a text layer says.",
+      description: "Inspect a PSD/PSB template inside the session workspace. Returns its size, the layer tree (id, name, full path, depth, visibility, bounds), product slots the studio would auto-detect, fonts the text layers use (and which are missing), and for text layers the copy, per-run font styles (family, weight, size in pt, color) and pxPerPt. Address layers in psd_render by id or path. Call this first.",
       parameters: {
         type: "object",
         additionalProperties: false,
@@ -17365,7 +18798,9 @@ function registerTools(ctx) {
                 additionalProperties: false,
                 required: ["name", "kind", "depth", "visible"],
                 properties: {
+                  id: { type: "string" },
                   name: { type: "string" },
+                  path: { type: "string" },
                   kind: { type: "string" },
                   depth: { type: "integer" },
                   visible: { type: "boolean" },
@@ -17392,7 +18827,9 @@ function registerTools(ctx) {
                     }
                   },
                   runCount: { type: "integer" },
-                  runsTruncated: { type: "boolean" }
+                  runsTruncated: { type: "boolean" },
+                  align: { type: "string" },
+                  pxPerPt: { type: "number" }
                 }
               }
             },
@@ -17404,18 +18841,22 @@ function registerTools(ctx) {
                 required: ["name", "leafId", "bounds"],
                 properties: {
                   name: { type: "string" },
+                  path: { type: "string" },
                   leafId: { type: "string" },
                   bounds: { type: "array", items: { type: "integer" } }
                 }
               }
-            }
+            },
+            fonts: { type: "array", items: { type: "string" } },
+            missingFonts: { type: "array", items: { type: "string" } }
           }
         },
         render: (_args, value) => [
           {
             type: "text",
             text: `${value.name}: ${value.width}\xD7${value.height}, ${value.layers.length} listed layers.
-Auto slots: ${value.suggestedSlots.map((slot) => `${slot.name} [${slot.bounds.join(",")}]`).join(" | ") || "none"}${describeTextLayers(value.layers)}`
+Auto slots: ${value.suggestedSlots.map((slot) => `${slot.name} [${slot.bounds.join(",")}]`).join(" | ") || "none"}${value.missingFonts && value.missingFonts.length ? `
+Missing fonts: ${value.missingFonts.join(", ")}` : ""}${describeTextLayers(value.layers)}`
           }
         ]
       },
@@ -17551,6 +18992,7 @@ ZIP: ${value.zip}` : ""}`
       isConcurrencySafe: () => false
     })
   );
+  disposers.push(...registerEngineTools(ctx, resolveSessionCwd));
   return () => {
     for (const dispose of disposers) dispose();
   };
