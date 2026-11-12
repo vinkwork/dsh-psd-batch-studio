@@ -171,6 +171,28 @@ async function main() {
       /inside the workspace/,
     )
 
+    // A link planted where an output file goes must not lead out of the workspace.
+    const outside = await fs.mkdtemp(path.join(os.tmpdir(), 'psd-studio-outside-'))
+    await fs.mkdir(path.join(workspace, 'trap'))
+    await fs.symlink(path.join(outside, 'x.jpg'), path.join(workspace, 'trap', 'x.jpg'))
+    const trapped = await call(
+      legacy.tools.get('psd_render'),
+      { template: 'tpl.psd', outDir: 'trap', jobs: [{ name: 'x' }] },
+      sessionAt(workspace),
+    )
+    assert.equal(trapped.failed, 1)
+    assert.match(trapped.jobs[0].error, /outside the workspace/)
+    await assert.rejects(fs.access(path.join(outside, 'x.jpg')))
+    await fs.rm(outside, { recursive: true, force: true })
+
+    // An explicit slot that does not exist fails the job instead of rendering.
+    const badSlot = await call(
+      legacy.tools.get('psd_render'),
+      { template: 'tpl.psd', outDir: 'jobs', jobs: [{ product: 'sku.png', slots: ['主图/产品位', '不存在'] }] },
+      sessionAt(workspace),
+    )
+    assert.match(badSlot.jobs[0].error, /not found/)
+
     const viewed = await call(
       legacy.tools.get('psd_view'),
       { image: 'jobs/a.jpg', crop: [0, 300, 200, 400], scale: 2, gridStep: 50, rects: [{ rect: [20, 340, 180, 380], label: 'price' }] },

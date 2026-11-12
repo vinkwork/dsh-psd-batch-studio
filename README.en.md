@@ -128,7 +128,7 @@ plugin_manager install_bundle, target = /absolute/path/to/dsh-psd-batch-studio
 ```
 
 After installation, refresh the Harness page. A **PSD Batch Studio** icon
-appears in the sidebar, and the agent gains the two tools below.
+appears in the sidebar, and the agent gains the five tools listed under Agent tools.
 
 ### Build artifacts
 

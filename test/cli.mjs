@@ -69,6 +69,13 @@ try {
   assert.equal(checked.status, 0, checked.stderr)
   assert.ok(JSON.parse(checked.stdout).rows.length === 1)
 
+  // Free-text names keep their dots; a default output folder is never reused.
+  const dotted = { template: 't.psd', format: 'png', jobs: [{ name: '售价19.9元' }] }
+  const first = JSON.parse(run(dir, ['render', '-'], JSON.stringify(dotted)).stdout)
+  const second = JSON.parse(run(dir, ['render', '-'], JSON.stringify(dotted)).stdout)
+  assert.equal(first.jobs[0].file, '售价19.9元.png')
+  assert.notEqual(first.outDir, second.outDir, 'each batch writes to its own folder')
+
   assert.equal(run(dir, ['inspect', 'missing.psd']).status, 1)
   console.log('cli test passed')
 } finally {

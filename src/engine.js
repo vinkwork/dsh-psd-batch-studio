@@ -32,12 +32,22 @@ import {
 } from './core/psd.js'
 import { applyTextOverrides, cloneDoc, mergeOverrideLists, pxPerPtOf, fontFamilyOf, readFontPostScriptName } from './core/text.js'
 import { drawScene, measureContent, productBox, DEFAULT_SETTINGS, DEFAULT_ADJUST } from './core/fit.js'
-import { sanitizeName, uniqueName } from './core/export.js'
+import { uniqueName } from './core/export.js'
 import { renderView } from './core/view.js'
 import { calibrateText, inkBounds } from './core/calibrate.js'
 
 setCanvasFactory((width, height) => createCanvas(width, height))
 initializeCanvas((width, height) => createCanvas(width, height))
+
+/** A file stem from free text: keeps dots ("19.9元"), drops path and control characters. */
+function safeStem(value, fallback) {
+  const stem = String(value ?? '')
+    .replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_')
+    .replace(/^\.+/, '')
+    .trim()
+    .slice(0, 120)
+  return stem || fallback
+}
 
 const FONT_EXTENSIONS = new Set(['.ttf', '.otf', '.ttc', '.otc', '.woff', '.woff2'])
 const FORMATS = new Set(['jpg', 'png', 'webp'])
@@ -429,16 +439,31 @@ export async function render({
   const fontReport = fonts ? await registerFonts({ root, confine, fonts }) : null
   const doc = await loadTemplate(absolute)
 
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
-  const relativeOut = outDir || path.join('out', `${sanitizeName(doc.name.replace(/\.[^.]+$/, ''))}-${stamp}`)
-  const absoluteOut = await resolvePath(root, relativeOut, { mustExist: false, confine })
-  await fs.mkdir(absoluteOut, { recursive: true })
+  let absoluteOut
+  if (outDir) {
+    absoluteOut = await resolvePath(root, outDir, { mustExist: false, confine })
+    await fs.mkdir(absoluteOut, { recursive: true })
+  } else {
+    // Each batch gets its own folder: a rerun never overwrites an earlier one.
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+    const base = path.join('out', `${safeStem(doc.name.replace(/\.[^.]+$/, ''), 'template')}-${stamp}`)
+    for (let attempt = 1; ; attempt += 1) {
+      absoluteOut = await resolvePath(root, attempt === 1 ? base : `${base}-${attempt}`, { mustExist: false, confine })
+      try {
+        await fs.mkdir(path.dirname(absoluteOut), { recursive: true })
+        await fs.mkdir(absoluteOut)
+        break
+      } catch (error) {
+        if (error.code !== 'EEXIST') throw error
+      }
+    }
+  }
 
   const used = new Set()
   const results = []
   for (let index = 0; index < jobs.length; index += 1) {
     const job = mergeJob(defaults, jobs[index])
-    const stem = sanitizeName(job.name != null && String(job.name).trim() ? String(job.name) : `job-${index + 1}`)
+    const stem = safeStem(job.name, `job-${index + 1}`)
     const file = uniqueName(used, stem, fmt)
     const result = { index, name: String(job.name ?? stem), file, ok: false }
     results.push(result)
@@ -511,7 +536,8 @@ export async function render({
         ctx.fillRect(0, 0, doc.width, doc.height)
       }
       drawScene(ctx, scene, image, content, settings, adjust)
-      await fs.writeFile(path.join(absoluteOut, file), encode(canvas, fmt, quality))
+      const target = await resolvePath(root, path.join(absoluteOut, file), { mustExist: false, confine })
+      await fs.writeFile(target, encode(canvas, fmt, quality))
 
       result.ok = true
       if (textReport.length) result.text = textReport

@@ -96,7 +96,7 @@ npm install
 plugin_manager install_bundle, target = /绝对路径/dsh-psd-batch-studio
 ```
 
-安装后刷新 Harness 页面：侧边栏出现「主图批量替换」图标，agent 侧出现两个工具。
+安装后刷新 Harness 页面：侧边栏出现「主图批量替换」图标，agent 侧出现五个工具（见下文「Agent 工具」）。
 
 `client.js` / `server.js` 已随仓库提交，安装不需要先构建；改源码后执行 `npm run build`。
 
