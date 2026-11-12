@@ -48,15 +48,22 @@ out/0715-main/*.jpg（可选 ZIP）
 - **批量适配**：一次导入多张 PNG/JPG/WebP 抠图，自动裁掉透明边，按
   完整放入 / 按高度 / 按宽度 / 铺满裁切适配，并支持对齐和占比。
 - **画布微调**：拖动商品、拖角点缩放、数值调偏移/缩放/角度，可一键同步到全部 SKU。
+- **文字替换**：价格条、活动文案等文字层可以整批或按 SKU 重写，按 PSD 里的样式段用真实字形重绘
+  （不是贴图）；可换字体、字号（pt 或 `sizePx` 像素）、颜色、字距、对齐、行距，面板里也能改，导入字体后预览与导出一致。
+- **逐段样式**：一条文案里可以混排（中文黑体 + 数字衬线红、不同字号），按 `{len, family, weight, size/sizePx, color, tracking}` 分段。
+- **字体注册**：导入字体文件即注册（文件名、PostScript 名、对应的系统字体名三个别名），模板缺字体时明确告警，不静默回退。
+- **元素置入**：往模板里加赠品小图、道具等图片层，可设位置、缩放、旋转、不透明度、混合模式，画在最上层，或背景之上、商品位之下。
+- **工程存档**：商品位、文字改动、元素、字体注册表存成 JSON，换机器或隔天继续。
 - **导出**：按模板原始分辨率输出 JPG/PNG，每个 SKU 一张，可打包 ZIP。
-- **Agent 工具**：`psd_inspect`、`psd_batch_render`，同一套内核在 Host 侧批量跑。
+- **Agent 工具**：`psd_inspect`、`psd_batch_render`、`psd_edit`，同一套内核在 Host 侧批量跑。
+- **命令行 / 任意宿主**：`bin/psd.mjs` 提供 `preflight`、`draft`、`render`、`view`、`check`、`tool`，不装 dsh 也能跑；配合工作目录约定和 `AGENTS.md`，Claude Code、Codex、dsh 里的 agent 都能按同一套流程无人值守出图。
 - **本地优先**：PSD 解析和合成都在本机完成（页面内或 Host 进程），没有网络请求、没有埋点、不上传素材。
 
 ## 环境要求
 
 - DeepSeek Harness（带插件管理器），dsh `0.2.0-rc.2` 及以上（`dsh.engines.dsh >= 0.2.0-rc.2`）。
   - 桌面版 0.2.0-rc.2（内置 dsh 0.2.0-rc.2、pnpm 11.7.0）实机验证：从 GitHub 安装、冷启动激活、
-    面板渲染、两个 agent 工具注册，并在真实 PSD 上跑通。
+    面板渲染、三个 agent 工具（`psd_inspect`、`psd_batch_render`、`psd_edit`）注册，并在真实 PSD 上跑通。
   - dsh `0.2.1-rc.5` 和 `0.2.2-rc.1`：用对应版本的 `@deepseek-ai/dsh-tools` 校验工具注册和 schema。
     这两个版本提供 `workingDirectory` 服务，工具优先用它定位会话工作区；0.2.0 没有这个服务，
     改用会话自身的工作目录。
@@ -96,7 +103,7 @@ npm install
 plugin_manager install_bundle, target = /绝对路径/dsh-psd-batch-studio
 ```
 
-安装后刷新 Harness 页面：侧边栏出现「主图批量替换」图标，agent 侧出现两个工具。
+安装后刷新 Harness 页面：侧边栏出现「主图批量替换」图标，agent 侧出现下面三个工具。
 
 `client.js` / `server.js` 已随仓库提交，安装不需要先构建；改源码后执行 `npm run build`。
 
@@ -109,12 +116,54 @@ plugin_manager install_bundle, target = /绝对路径/dsh-psd-batch-studio
 5. 调适配方式、对齐、占比、偏移、缩放、角度；「同步到全部」把当前微调套到所有 SKU。
 6. 选 JPG/PNG，整批导出，可顺带打 ZIP。
 
+## 命令行（任意宿主 / 不需要 dsh）
+
+同一套合成内核也能直接当命令行工具用，装不了 dsh 的环境（Claude Code、Codex、CI、手动终端）走这条。
+
+```bash
+npm i -g dsh-psd-batch-studio     # 或者在本仓库里 npm i && npm run build
+psd-batch help
+```
+
+按「分类 / 案例名」组织工作目录（详见 [docs/agent-workflow.md](docs/agent-workflow.md)）：
+
+```
+你的项目/
+├── 模板/示范案例/模版.psb        ← 只读
+├── 规则/示范案例/模版.rules.json  ← draft 起草，设计师确认
+├── 需求表/示范案例/需求表.xlsx     ← 空白样板见 examples/sheet-template.xlsx
+├── 产品图/示范案例/ · 赠品图/ · 说明图/ · 字体包/
+└── 输出/示范案例/…               ← 自动生成，不覆盖旧结果
+```
+
+```bash
+psd-batch preflight --case 示范案例          # 预检：缺图、命名对不上、缺字体
+psd-batch draft     --case 示范案例          # 只看模板，起草 rules.json
+psd-batch render    --case 示范案例 --limit 2   # 先出 2 张样张
+psd-batch render    --case 示范案例          # 批量
+psd-batch check     --case 示范案例          # 文字重绘对照（字号/位置偏差）
+psd-batch view --case 示范案例 --image 输出/示范案例/x.jpg --crop 0,0,700,400 --scale 2
+```
+
+常用参数：`--template` / `--rules` / `--sheet` 指向别的案例的文件，`--format png`，
+`--skus 100212974650,100212974638` 只重做指定 SKU，`--strict-fonts` 缺字体直接失败。
+`psd-batch tool <name>` 用 JSON 参数调用 dsh 的四个工具（`psd_inspect` / `psd_batch_render` /
+`psd_edit` / `psd_apply_sheet`），方便在别的 agent 里复用同一份 schema。
+
+**字体**：模板只存字体名不存字体文件。仓库 `assets/fonts/` 附了模板用到的开源字体
+（MiSans、GlowSansSC），苹果系统的「苹方」因为不可再分发没有入库，需要时自己放进 `字体包/`。
+缺字体时命令会告警并回退，`--strict-fonts` 可以改成直接失败。
+
+**示例**：`examples/sheet-template.xlsx` 是需求表空白模板，`examples/demo.rules.json` 是规则文件样例。
+
 ## Agent 工具
 
 | 工具 | 作用 |
 | --- | --- |
-| `psd_inspect` | 返回模板尺寸、图层树（名称/层级/可见性/边界/图层 id）、自动识别的商品槽位；文字层额外返回文案和逐段字体样式（字体/字重/字号/颜色）。 |
-| `psd_batch_render` | 把一批 SKU 套进模板，输出 JPG/PNG（可选 ZIP）到工作区；结果里的 `suppressed` 列出随槽位一起隐藏的同组重叠图层。 |
+| `psd_inspect` | 返回模板尺寸、图层树（名称/层级/可见性/边界/图层 id/完整路径）、自动识别的商品槽位；优先 `product_slot` / `商品位` / `产品位`；文字层额外返回文案、对齐和逐段字体样式。 |
+| `psd_batch_render` | 把一批 SKU 套进模板，输出 JPG/PNG/WebP（可选 ZIP）到工作区；支持 `text` / `textBySku`、`elements`+`anchor`/`fit`、`visibility`、`fontDir`、`strictFonts`、`filenameTemplate`、`manifest`。`useSessionEdits: false` 时不读 `psd_edit` 残留。 |
+| `psd_edit` | 渲染前改模板：`text`、`element` / `remelement`（`anchor` + `fit=contain` 可自动落位）、`fonts`、`save_project` / `load_project`、`status`、`reset`、`undo` / `diff`。 |
+| `psd_apply_sheet` | 需求表 + `mapping.csv` + `template.rules.json` → 预检 → 按 SKU 展开文案/赠品/icon → 渲染 → 校验报告。缺图/多义匹配不会静默猜测。 |
 
 调用示例：
 
@@ -133,13 +182,44 @@ plugin_manager install_bundle, target = /绝对路径/dsh-psd-batch-studio
 }
 ```
 
-两个工具的路径都相对当前会话工作目录解析，并拒绝越界路径。`psd_batch_render` 默认 JPG、质量 92，
-返回输出目录和前 50 个文件名。
+四个工具的路径都相对当前会话工作目录解析，并拒绝越界路径（写入路径按真实路径校验，包括输出目录、每个导出文件和 ZIP，符号链接不能指到工作区外）。`psd_batch_render` 默认 JPG、质量 92，
+返回输出目录和前 50 个文件名。业务出图请用 `psd_apply_sheet`（规则放在模板旁的 JSON，不改代码）。
 
 槽位所在的组里，其它「可见且与槽位重叠 ≥25%」的图层会随槽位一起隐藏（旧商品图、没对齐的
 影子层最常见），否则新 SKU 会在旧商品的像素上叠加出「两个商品」。被隐藏的图层会在结果里以
 `suppressed` 列出；刻意的压在商品上的装饰请放到其他组里。近乎完全重叠且大小一致的堆叠副本
 （阴影/高光）仍走原有槽位簇逻辑，槽位适配框不受影响。
+
+### 文字替换
+
+文字层默认用 PSD 里的栅格像素；`text` / `textBySku` 会按 PSD 里的样式段用真实字形重绘：
+
+```json
+{
+  "template": "templates/summer-main.psd",
+  "skuDir": "skus/0715",
+  "fontDir": "fonts/618字体包",
+  "text": [
+    { "layer": "活动标题", "value": "618 大促" }
+  ],
+  "textBySku": {
+    "sku-001": [{ "layer": "价格数字", "value": "¥16.80",
+                  "runs": [{ "len": 3, "family": "DIN Alternate", "weight": 700 }, { "len": 3 }] }],
+    "sku-002": [{ "layer": "价格数字", "value": "¥19.90" }]
+  }
+}
+```
+
+- `layer` 写图层名或 leaf id；`value` 换文案（每个字继承原来的样式，最常用的「换价格」零配置）；
+  `runs` 从第一个字起按 `len` 依次改字体/字重/字号/颜色/字距，没写的属性和没覆盖到的字沿用原样式，
+  `size` 用 pt，与 `psd_inspect` 返回的逐段样式一一对应；
+  平铺的 `font`/`weight`/`size`/`color` 则作用于整层。
+- `textBySku` 按 SKU 文件名（带不带扩展名都行）给每个 SKU 单独的文字，同层覆盖 `text`；
+  相同文字组合的 SKU 归为一组共用一个场景，组渲染完立即释放画布，价格各不相同时内存不随 SKU 数增长，只是会慢一些。
+- `fontDir` 注册 ttf/otf/ttc 字体（注册名 = 文件名主干），注册清单回显在 `fontsRegistered`；
+  找不到的字体仍然会画（用回退字体），并在 `textWarnings` 里点名。
+- 面板工作台的「文字替换」区可以改同样的内容：文案输入框回车生效，`{}` 按钮编辑样式段 JSON
+  （与 `text` 参数同一格式），「字体」按钮导入本地字体文件后预览与导出一致。
 
 ## 构建
 
@@ -174,7 +254,10 @@ pnpm 11，两者的 store 不能混用。把 `~/.dsh/profiles/<profile>/node_mod
 
 ## 已知限制
 
-- 文字层使用 PSD 里的栅格像素，暂不支持在工具里改文案/字体。
+- 文字层默认用 PSD 里的栅格像素；可用 `text` / `textBySku` 或 `psd_edit` 活字重写（见「文字替换」）。
+  字号按图层原来的框把 pt 换算成像素，`sizePx` 直接按像素画；极端字号可能需要微调。
+- 未注册的字体会用回退字体渲染：渲染结果的 `textWarnings`、`psd_edit` 的 `warning` 和 `status.missingFonts`
+  都会点名，不会静默。
 - 斜面和浮雕、内阴影为近似或跳过；描边/投影/发光为近似。
 - 一次处理一个模板；「多模板 × 多 SKU」矩阵尚未内置，换模板时 SKU 队列会保留。
 - 几百 MB 的 PSB 需要几百 MB 内存；建议用桌面端或 Host 批量路径。
