@@ -8,17 +8,19 @@
 一个 [DeepSeek Harness](https://github.com/deepseek-ai) 插件，用来批量生产电商商品主图：
 载入 PSD/PSB 主图模板，标记商品槽位，批量放入 SKU 抠图，在画布上微调，最后一键整批导出。
 
-同一套合成内核还提供两个 agent 工具，可以让 agent 在 Host 侧无人值守地跑完整个 SKU 目录。
+同一套内核还是一个给 agent 调用的模板解析与控制引擎，只做四件事：看模板、照指令改、出图、检查。
+它以五个 agent 工具、命令行 `psd-engine` 和 Node API 三种方式提供，不装 Harness 也能用。
 
 > **协议：** 修改版 Apache License 2.0，带附加条件。
 > 允许商用；多租户服务或去除品牌标识需要书面授权。详见 [LICENSE](LICENSE) 与 [LICENSING.md](LICENSING.md)。
 
 ## 适用对象
 
-适合已经有 PSD 主图模板、又需要批量产出变体的电商设计与运营团队。PSD 仍然是唯一事实来源：
-插件只替换商品像素，保留模板里的文字、价格条、角标、赠品卡等装饰层，最后输出成品图。
+适合已经有 PSD 主图模板、又需要批量产出变体的电商设计与运营团队，以及要把出图接进自动化流程的 agent。
+PSD 仍然是唯一事实来源：换商品图、改文字层、开关图层都在模板原有结构上进行，其余图层原样保留。
 
-它**不是** Photoshop 替代品：不负责改文案、修图、管理素材库；它负责“模板 + 抠图 → 成品主图变体”。
+它**不是** Photoshop 替代品：不修图、不管理素材库，也不理解业务规则。
+读需求、决定每张图改什么，由使用者或 agent 完成；引擎负责照着执行并报告结果。
 
 ## 适用场景
 
@@ -28,8 +30,9 @@
 - **多平台/多尺寸**：天猫、京东、抖音、拼多多，或方图、竖图、长图的模板集合；
   换模板不用重搭流程。
 - **设计到运营的交接**：设计师交付 PSD 和槽位规则，运营/代运营/店长自己批量出图，不再排队等设计。
-- **Agent 自动化**：`psd_batch_render` 在工作区里无人值守批量渲染，适合夜间任务、商品库对接、
-  “明早之前出 200 张”这类需求。
+- **Agent 自动化**：agent 把需求整理成作业单，交给 `psd_render` 或 `psd-engine render` 批量出图
+  （逐张改文案、价格、角标、赠品图），再用返回的落点数据和 `psd_view` 自查，适合夜间任务、
+  商品库对接、“明早之前出 200 张”这类需求。只换商品图时用 `psd_batch_render` 更简单。
 - **模板治理**：文案、角标、价格条、活动道具分图层管理，按活动开关；商品位保持稳定。
 
 一次典型运行：
@@ -49,20 +52,26 @@ out/0715-main/*.jpg（可选 ZIP）
   完整放入 / 按高度 / 按宽度 / 铺满裁切适配，并支持对齐和占比。
 - **画布微调**：拖动商品、拖角点缩放、数值调偏移/缩放/角度，可一键同步到全部 SKU。
 - **导出**：按模板原始分辨率输出 JPG/PNG，每个 SKU 一张，可打包 ZIP。
-- **Agent 工具**：`psd_inspect`、`psd_batch_render`，同一套内核在 Host 侧批量跑。
+- **文字重绘**：按新文案用真实字体重绘文字层，可逐段指定字体/字号/颜色、按宽度缩小，
+  位置以 Photoshop 记录的基线为准；`check` 可以对照重绘结果和 PSD 像素的偏差。
+- **作业单出图**：每张图写明改哪些文字、开关哪些图层、商品位放什么、额外图片放进哪个框；
+  结果逐张返回文字和图片的实际落点，失败的不影响其它。
+- **Agent 工具与命令行**：`psd_inspect`、`psd_render`、`psd_view`、`psd_text_check`、`psd_batch_render`；
+  同样的能力也可以用 `psd-engine` 命令行或 Node API 调用。
 - **本地优先**：PSD 解析和合成都在本机完成（页面内或 Host 进程），没有网络请求、没有埋点、不上传素材。
 
 ## 环境要求
 
 - DeepSeek Harness（带插件管理器），dsh `0.2.0-rc.2` 及以上（`dsh.engines.dsh >= 0.2.0-rc.2`）。
-  - 桌面版 0.2.0-rc.2（内置 dsh 0.2.0-rc.2、pnpm 11.7.0）实机验证：从 GitHub 安装、冷启动激活、
-    面板渲染、两个 agent 工具注册，并在真实 PSD 上跑通。
+  - 桌面版 0.2.0-rc.2（内置 dsh 0.2.0-rc.2、pnpm 11.7.0）在 0.2.x 上实机验证过：从 GitHub 安装、
+    冷启动激活、面板渲染、agent 工具注册，并在真实 PSD 上跑通。0.3.0 新增的工具用同版本的
+    `@deepseek-ai/dsh-tools` 校验注册、参数和返回结构。
   - dsh `0.2.1-rc.5` 和 `0.2.2-rc.1`：用对应版本的 `@deepseek-ai/dsh-tools` 校验工具注册和 schema。
     这两个版本提供 `workingDirectory` 服务，工具优先用它定位会话工作区；0.2.0 没有这个服务，
     改用会话自身的工作目录。
   - 0.2.5 的 agent 工具在所有 dsh 版本上都注册不上（[#7](https://github.com/vinkwork/dsh-psd-batch-studio/issues/7)），请勿使用。
-- Node.js 20+（构建和 Host 侧 agent 工具需要）。
-- 安装时需要能访问 npm registry：agent 工具依赖 `@napi-rs/canvas` 的平台预编译包。
+- Node.js 20+（构建、Host 侧 agent 工具和命令行需要）。
+- 安装时需要能访问 npm registry：agent 工具和命令行依赖 `@napi-rs/canvas` 的平台预编译包。
 - 不需要安装 Photoshop。
 
 ## 安装
@@ -73,7 +82,7 @@ out/0715-main/*.jpg（可选 ZIP）
 plugin_manager install_bundle, target = dsh-psd-batch-studio
 ```
 
-固定版本用 `dsh-psd-batch-studio@0.2.6`。
+固定版本写成 `dsh-psd-batch-studio@<版本号>`。
 
 也可以从 GitHub 安装：
 
@@ -100,6 +109,13 @@ plugin_manager install_bundle, target = /绝对路径/dsh-psd-batch-studio
 
 `client.js` / `server.js` 已随仓库提交，安装不需要先构建；改源码后执行 `npm run build`。
 
+只用命令行或 Node API（不装 Harness）：
+
+```bash
+npm install dsh-psd-batch-studio      # 装到你的项目里，之后用 npx psd-engine …
+# 或者用仓库：git clone 后 npm install，再运行 node bin/psd-engine.mjs …
+```
+
 ## 使用工作台
 
 1. 从侧边栏打开「主图批量替换」。
@@ -113,13 +129,13 @@ plugin_manager install_bundle, target = /绝对路径/dsh-psd-batch-studio
 
 | 工具 | 作用 |
 | --- | --- |
-| `psd_inspect` | 返回模板尺寸、图层树（名称/层级/可见性/边界/图层 id）、自动识别的商品槽位；文字层额外返回文案和逐段字体样式（字体/字重/字号/颜色）。 |
+| `psd_inspect` | 返回模板尺寸、图层树（id/名称/完整路径/层级/可见性/边界）、自动识别的商品槽位、模板用到和缺失的字体；文字层额外返回文案、逐段字体样式（字体/字重/字号/颜色）和 `pxPerPt`（pt 与像素的换算）。 |
 | `psd_batch_render` | 把一批 SKU 套进模板，输出 JPG/PNG（可选 ZIP）到工作区；结果里的 `suppressed` 列出随槽位一起隐藏的同组重叠图层。 |
 | `psd_render` | 按「作业单」出图：每个作业写明改哪些文字层（文案、逐段字体/字号/颜色、按宽度缩小）、显示/隐藏哪些图层、商品位放哪张图、额外的图放进哪个图层框或矩形。逐个作业返回文字和图片实际落点，失败的作业不影响其它。 |
 | `psd_view` | 裁剪放大图片，可叠坐标网格和标注框，存成 PNG 供查看细节。 |
 | `psd_text_check` | 用原文案重绘文字层，和 PSD 像素对比，标出字号/位置偏差（多半是缺字体）。 |
 
-调用示例：
+`psd_render` 的参数就是下文「解析与控制引擎」里的作业单。`psd_batch_render` 调用示例：
 
 ```json
 {
@@ -136,8 +152,8 @@ plugin_manager install_bundle, target = /绝对路径/dsh-psd-batch-studio
 }
 ```
 
-所有工具的路径都相对当前会话工作目录解析，并拒绝越界路径。`psd_batch_render` 默认 JPG、质量 92，
-返回输出目录和前 50 个文件名。
+所有工具的路径都相对当前会话工作目录解析，并拒绝越界路径（包括指向工作区外的链接）。
+`psd_batch_render` 和 `psd_render` 默认 JPG、质量 92；不指定输出目录时每批新建一个目录，不会覆盖之前的结果。
 
 槽位所在的组里，其它「可见且与槽位重叠 ≥25%」的图层会随槽位一起隐藏（旧商品图、没对齐的
 影子层最常见），否则新 SKU 会在旧商品的像素上叠加出「两个商品」。被隐藏的图层会在结果里以
@@ -146,8 +162,8 @@ plugin_manager install_bundle, target = /绝对路径/dsh-psd-batch-studio
 
 ## 解析与控制引擎（命令行 / Node API）
 
-引擎只负责「看模板、按指令改、出图、检查」，不理解业务：读需求表、决定哪段文字标红、
-哪档赠品显示，都由调用它的 agent 完成，再写成作业单交给引擎。不装 dsh 也能用：
+这是一个给 agent 调用的模板解析与控制引擎，只做四件事：看模板、照指令改、出图、检查。
+命令行在装了本包的项目里运行（见「安装」）：
 
 ```bash
 npx psd-engine inspect 模板/x.psb --fonts 字体包/          # 图层树、文字逐段样式、pxPerPt、缺失字体
@@ -181,6 +197,9 @@ npx psd-engine check   模板/x.psb --fonts 字体包/          # 文字重绘�
 ```
 
 - 图层用 `inspect` 返回的 `id`、完整 `path`，或唯一的名字指定；重名会报错并列出候选。
+- 指定的商品位（`slots`）或素材文件有一个找不到，这个作业就失败，不会带着模板原图出图。
+- `images[].layer` 可以是图层或图层组（组取内部图层的合并范围），也可以用 `rect` 直接给坐标。
+- 输出文件名就是 `name`（只替换路径非法字符，`19.9元` 这类小数点会保留），同一批里重名自动加 `-2`。
 - `runs` 从第一个字起按顺序覆盖，没写的属性沿用模板原样式；`size` 是 pt，`sizePx` 是像素。
 - `defaults` 合并到每个作业下：文字按图层合并，`show`/`hide`/`images` 追加，其余字段由作业覆盖。
 - 结果里每个作业带 `text[].box`（重绘后实际墨迹范围）和 `original`（模板原范围）、`images[].box`/`target`，
@@ -201,7 +220,8 @@ npm run build
 npm test
 ```
 
-`npm test` 先跑冒烟测试（生成临时 PSD，检查合成、槽位和导出），再跑 Host 契约测试：用 dsh 自己的
+`npm test` 依次跑三组测试：冒烟测试（生成临时 PSD，检查合成、槽位和导出）、Host 契约测试、
+命令行测试（输出 JSON、退出码、输出目录与文件名）。Host 契约测试用 dsh 自己的
 `@deepseek-ai/dsh-tools` 校验器（锁定桌面版内置的 0.2.0-rc.2）注册全部 agent 工具，检查 schema 是否在
 dsh 支持的子集内、`output.render` 是否齐全、真实返回值是否符合输出 schema，以及有无 `workingDirectory`
 服务时的工作区解析。改了工具参数或返回结构后务必跑一遍：schema 不合规时 dsh 会在注册阶段直接拒绝，
@@ -214,14 +234,18 @@ dsh 支持的子集内、`output.render` 是否齐全、真实返回值是否符
 pnpm 11，两者的 store 不能混用。把 `~/.dsh/profiles/<profile>/node_modules` 挪开备份，再在 Harness
 里重新安装即可。以后不要用终端里的 pnpm 往 profile 目录装东西。
 
-**插件装上了，但 agent 里没有 `psd_inspect` / `psd_batch_render`。** 先确认插件版本不是 0.2.5：
+**插件装上了，但 agent 里没有 `psd_inspect` 等工具。** 先确认插件版本不是 0.2.5：
 该版本的工具 schema 不符合 dsh 的要求，在所有 dsh 版本上都注册不上
 （[#7](https://github.com/vinkwork/dsh-psd-batch-studio/issues/7)），请升级。同一个 profile 里
 也不要同时挂两份本插件（例如旧的本地安装加 GitHub 版），它们使用同一个 `psd-batch-studio` 条目。
 
 ## 已知限制
 
-- 文字层使用 PSD 里的栅格像素，暂不支持在工具里改文案/字体。
+- 文字层默认用 PSD 里的栅格像素；只有作业单里改写的文字层才重绘。重绘需要模板用到的字体文件
+  （PSD 只存字体名），缺字体时会用回退字体并在结果的 `missingFonts` 里列出，可用 `fonts` 参数注册字体目录。
+- 工作台面板目前只做商品位替换，文字改写通过 agent 工具或命令行完成。
+- 竖排文字和路径文字没有专门支持；文字层上的描边/投影等图层样式沿用合成器的近似效果。
+  换新模板时建议先跑 `check` 再批量出图。
 - 斜面和浮雕、内阴影为近似或跳过；描边/投影/发光为近似。
 - 一次处理一个模板；「多模板 × 多 SKU」矩阵尚未内置，换模板时 SKU 队列会保留。
 - 几百 MB 的 PSB 需要几百 MB 内存；建议用桌面端或 Host 批量路径。

@@ -152,7 +152,7 @@ async function main() {
             product: 'sku.png',
             slots: ['主图/产品位'],
             text: [{ layer: price.id, value: '¥19.90', runs: [{ len: 4, color: '#ff0000' }, { len: 2, size: 16 }] }],
-            images: [{ source: 'sku.png', rect: [10, 10, 60, 60] }],
+            images: [{ source: 'sku.png', rect: [10, 10, 60, 60] }, { source: 'sku.png', layer: '主图', fit: 'contain' }],
           },
           { name: 'broken', product: 'missing.png' },
         ],
@@ -164,6 +164,7 @@ async function main() {
     assert.equal(jobs.jobs[0].text[0].ok, true)
     assert.equal(jobs.jobs[0].product[0].slot, '产品位')
     assert.deepEqual(jobs.jobs[0].images[0].target, [10, 10, 60, 60])
+    assert.deepEqual(jobs.jobs[0].images[1].target, [100, 80, 300, 320], 'a group target uses the union of its layers')
     assert.match(jobs.jobs[1].error, /does not exist/)
     await fs.access(path.join(workspace, 'jobs', 'a.jpg'))
     await assert.rejects(

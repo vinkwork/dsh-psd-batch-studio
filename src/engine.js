@@ -291,8 +291,20 @@ function rectOf(doc, spec) {
   if (raw && raw.w != null) return { x: Number(raw.x) || 0, y: Number(raw.y) || 0, w: Number(raw.w), h: Number(raw.h) }
   if (spec.layer) {
     const box = layerBounds(doc, spec.layer)
-    if (!box) throw new Error(`Image target layer not found: ${spec.layer}`)
-    return box
+    if (box) return box
+    // A group has no pixels of its own: use the union of the layers inside it.
+    const groups = findEntries(doc, spec.layer).filter((entry) => entry.kind === 'group')
+    if (groups.length > 1) throw new Error(`Image target group name is ambiguous (${groups.length} matches): ${spec.layer}. Use its path or id.`)
+    if (groups.length === 1) {
+      const inside = doc.leaves.filter((leaf) => (leaf.path || []).includes(groups[0].id) && leaf.width > 0 && leaf.height > 0)
+      if (!inside.length) throw new Error(`Image target group has no pixel layers: ${spec.layer}`)
+      const x0 = Math.min(...inside.map((leaf) => leaf.left))
+      const y0 = Math.min(...inside.map((leaf) => leaf.top))
+      const x1 = Math.max(...inside.map((leaf) => leaf.left + leaf.width))
+      const y1 = Math.max(...inside.map((leaf) => leaf.top + leaf.height))
+      return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }
+    }
+    throw new Error(`Image target layer not found: ${spec.layer}`)
   }
   return null
 }
