@@ -6,3 +6,7 @@ out/
 *.psd
 *.psb
 *.tgz
+
+# 苹果系统字体不可再分发（需要时由使用者自备到 assets/fonts/）
+assets/fonts/苹方*
+assets/fonts/PingFang*
