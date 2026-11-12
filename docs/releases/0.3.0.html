@@ -1,0 +1,37 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>0.3.0 版本说明</title>
+<style>body{max-width:820px;margin:0 auto;padding:56px 24px 96px;font:16px/1.75 -apple-system,"PingFang SC",sans-serif;color:#17263a;background:#f6f8fc}
+h2{font-size:20px;margin-top:32px} h3{font-size:16px;color:#6b7c93} code{background:#eef3fb;padding:1px 6px;border-radius:5px}
+pre{background:#fff;border:1px solid #e6ebf4;border-radius:12px;padding:16px;overflow:auto} pre code{background:none}
+a{color:#2563eb}</style></head><body><h2>0.3.0 — 命令行入口 + 规则流水线</h2>
+
+<h3>新增</h3>
+
+<li>**`psd-batch` 命令行**（`bin/psd.mjs`）：`preflight`、`draft`、`render`、`view`、`check`、`tool`。</li>
+<p>  不装 dsh 也能跑，Claude Code / Codex / CI / 终端通用。</p>
+<li>**`src/core/` 九个模块**：`rules`、`mapping`、`sheet`、`text`、`validate`、`view`、`calibrate`、</li>
+<p>  `draft-rules`、`apply-sheet` —— 需求表 + `rules.json` 驱动的批量出图流水线。</p>
+<li>**预检与校验**：缺图、命名对不上、缺字体、多义匹配都会明确报出，不静默猜测；</li>
+<p>  `check` 输出文字重绘的 drift 报告（宽度比 + 偏移像素）。</p>
+<li>**文档**：`docs/agent-workflow.md`（工作目录约定与 agent 操作手册）、`docs/lessons.md`（踩坑记录）、</li>
+<p>  `docs/guide.html`（使用教程）。</p>
+<li>**示例**：`examples/sheet-template.xlsx`（需求表空白模板）、`examples/demo.rules.json`。</li>
+<li>**字体**：`assets/fonts/` 附 MiSans、GlowSansSC（开源可再分发）。苹果系统字体不入库。</li>
+
+<h3>变更</h3>
+
+<li>`package.json`：新增 `bin`（`psd-batch`），`files` 增加 `bin`/`src`/`docs`，版本 0.3.0。</li>
+<li>`.gitignore`：排除业务素材目录、`*.xlsx`（保留 examples）、苹果系统字体。</li>
+<li>`client.js` / `server.js` 重新构建，与源码同步（server.js 682 KiB → 798 KiB）。</li>
+
+<h3>兼容性</h3>
+
+<li>dsh 插件入口与四个工具（`psd_inspect` / `psd_batch_render` / `psd_edit` / `psd_apply_sheet`）</li>
+<p>  接口未变，0.2.x 的安装方式与参数照旧。</p>
+
+<h3>验证</h3>
+
+<pre><code>
+npm ci &amp;&amp; npm run build &amp;&amp; npm test
+# rules ✓  preflight ✓  smoke ✓  dsh-host ✓
+</code></pre></body></html>
