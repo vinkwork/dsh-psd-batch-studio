@@ -9,8 +9,10 @@ A [DeepSeek Harness](https://github.com/deepseek-ai) plugin for producing e-comm
 main images at scale: load a PSD/PSB template, mark the product slots, drop in a
 batch of SKU cut-outs, fine-tune on a canvas, and export every image.
 
-The same compositor also powers two agent tools, so the agent can inspect a
-template and render a whole SKU folder headlessly.
+The same core is also a template parse-and-control engine for agents. It does
+four things: inspect a template, apply explicit edits, render, and check. It is
+available as five agent tools, the `psd-engine` CLI, and a Node API, with or
+without Harness.
 
 > **License:** modified Apache License 2.0 with additional conditions.
 > Commercial use is allowed; operating a multi-tenant service or removing the
@@ -20,13 +22,15 @@ template and render a whole SKU folder headlessly.
 ## Who it is for
 
 E-commerce design and operations teams that already build main images as PSD
-templates — and need to produce many variants without repeating the same
-Photoshop steps. The PSD stays the source of truth; the studio only replaces the
-product pixels, keeps every decoration layer in place, and exports the result.
+templates and need many variants without repeating the same Photoshop steps, and
+agents that put image production into an automated flow. The PSD stays the
+source of truth: product images, text layers and layer visibility are changed
+within the template's own structure, and every other layer stays as it is.
 
-It is **not** a Photoshop replacement: it does not edit text, retouch photos, or
-manage a DAM. It takes a template plus cut-outs and turns them into finished
-main-image variants.
+It is **not** a Photoshop replacement: it does not retouch photos, manage a DAM,
+or understand business rules. Reading requirements and deciding what each image
+should say is up to the user or the agent; the engine carries it out and reports
+what happened.
 
 ## Use cases
 
@@ -40,9 +44,12 @@ main-image variants.
   templates without rebuilding the workflow.
 - **Design-to-operations handoff** — designers publish the approved PSD and slot
   rules; operations, agencies, or store managers run the batch themselves.
-- **Agent-driven production** — `psd_batch_render` runs unattended batches in the
-  workspace for nightly jobs, catalog integrations, or “produce these 200 images
-  before tomorrow” requests.
+- **Agent-driven production** — the agent turns requirements into a job spec,
+  `psd_render` or `psd-engine render` produces the batch (copy, prices, badges,
+  gift images per image), and the agent checks itself with the reported
+  positions and `psd_view`. Good for nightly jobs, catalog integrations, or
+  “produce these 200 images before tomorrow” requests. When only the product
+  image changes, `psd_batch_render` is simpler.
 - **Template governance** — keep copy, badges, price bars, and campaign props on
   separate layers, then toggle them per campaign while the product slot stays
   stable.
@@ -70,8 +77,16 @@ out/0715-main/*.jpg  (+ optional ZIP)
   offset/scale/rotation numerically, and copy one adjustment to the whole batch.
 - **Export** — JPG or PNG at the template resolution, one file per SKU, packed
   into a ZIP when requested.
-- **Agent tools** — `psd_inspect` and `psd_batch_render` expose the same pipeline
-  to the agent for unattended batches.
+- **Text redraw** — rewrite a text layer with real fonts: per-run family, size
+  and colour, shrink to a width, positioned on Photoshop's recorded baseline;
+  `check` measures the redraw against the PSD pixels.
+- **Job-spec rendering** — each image states which text to change, which layers
+  to show or hide, what goes into the product slot and which extra images go
+  into which box; each result reports where text and images actually landed,
+  and one failing job does not stop the rest.
+- **Agent tools and CLI** — `psd_inspect`, `psd_render`, `psd_view`,
+  `psd_text_check`, `psd_batch_render`; the same functions are available from
+  the `psd-engine` CLI and the Node API.
 - **Local-first** — PSD parsing and compositing happen in the browser (or in the
   Host process for agent batches). No network calls, no telemetry, no upload.
 
@@ -80,8 +95,10 @@ out/0715-main/*.jpg  (+ optional ZIP)
 - DeepSeek Harness with the plugin manager, dsh `0.2.0-rc.2` or later
   (`dsh.engines.dsh >= 0.2.0-rc.2`).
   - Verified end to end on the desktop app 0.2.0-rc.2 (bundled dsh 0.2.0-rc.2,
-    pnpm 11.7.0): GitHub install, cold-start activation, the workbench panel,
-    both agent tools registered, and a real PSD batch.
+    pnpm 11.7.0) with 0.2.x: GitHub install, cold-start activation, the
+    workbench panel, agent tool registration, and a real PSD batch. The tools
+    added in 0.3.0 are checked for registration, parameters and results with
+    the same `@deepseek-ai/dsh-tools` version.
   - dsh `0.2.1-rc.5` and `0.2.2-rc.1`: tool registration and schemas checked
     with the matching `@deepseek-ai/dsh-tools`. These releases provide the
     `workingDirectory` service, which the tools prefer for the session
@@ -90,9 +107,9 @@ out/0715-main/*.jpg  (+ optional ZIP)
   - Version 0.2.5's agent tools register on no dsh release
     ([#7](https://github.com/vinkwork/dsh-psd-batch-studio/issues/7)); do not
     use it.
-- Node.js 20+ for building and for the agent tools.
-- npm registry access on install: the agent tools depend on `@napi-rs/canvas`,
-  which ships platform-specific prebuilt binaries.
+- Node.js 20+ for building, the agent tools and the CLI.
+- npm registry access on install: the agent tools and the CLI depend on
+  `@napi-rs/canvas`, which ships platform-specific prebuilt binaries.
 - No Photoshop installation is required.
 
 ## Install
@@ -103,7 +120,7 @@ out/0715-main/*.jpg  (+ optional ZIP)
 plugin_manager install_bundle, target = dsh-psd-batch-studio
 ```
 
-Pin a version with `dsh-psd-batch-studio@0.2.6` if you need a stable snapshot.
+Pin a version with `dsh-psd-batch-studio@<version>` if you need a stable snapshot.
 
 ### From the repository
 
@@ -128,7 +145,14 @@ plugin_manager install_bundle, target = /absolute/path/to/dsh-psd-batch-studio
 ```
 
 After installation, refresh the Harness page. A **PSD Batch Studio** icon
-appears in the sidebar, and the agent gains the two tools below.
+appears in the sidebar, and the agent gains the five tools listed under Agent tools.
+
+### CLI or Node API only (no Harness)
+
+```bash
+npm install dsh-psd-batch-studio      # in your project, then npx psd-engine …
+# or from a clone: npm install, then node bin/psd-engine.mjs …
+```
 
 ### Build artifacts
 
@@ -146,8 +170,9 @@ Run the tests:
 npm test
 ```
 
-`npm test` runs the self-contained smoke test (fixture PSDs in a temp folder:
-compositing, slots, export), then the Host contract test. The contract test
+`npm test` runs three suites: the self-contained smoke test (fixture PSDs in a
+temp folder: compositing, slots, export), the Host contract test, and the CLI
+test (JSON output, exit codes, output folders and file names). The contract test
 registers every agent tool through dsh's own `@deepseek-ai/dsh-tools` checks,
 pinned to 0.2.0-rc.2 (the desktop app's runtime): schemas must stay inside
 dsh's supported subset, `output.render` must exist, real results must match
@@ -164,7 +189,7 @@ and the two stores cannot be mixed. Move
 `~/.dsh/profiles/<profile>/node_modules` aside and reinstall from Harness. Do
 not install into a profile directory with a terminal pnpm.
 
-**The plugin installed, but the agent has no `psd_inspect` / `psd_batch_render`.**
+**The plugin installed, but the agent has no `psd_inspect` or the other tools.**
 Make sure it is not version 0.2.5, whose tool schemas dsh rejects on every
 release ([#7](https://github.com/vinkwork/dsh-psd-batch-studio/issues/7)), and
 upgrade. Do not keep two copies of this plugin in one profile (an old local
@@ -187,10 +212,14 @@ install plus the GitHub one, say): they share the `psd-batch-studio` entry.
 
 | Tool | Purpose |
 | --- | --- |
-| `psd_inspect` | Template size, layer tree (name, depth, visibility, bounds, leaf id), and auto-detected slots. Text layers also report their copy plus per-run styles (family, weight, size, color). |
+| `psd_inspect` | Template size, layer tree (id, name, full path, depth, visibility, bounds), auto-detected slots, and the fonts the template uses or lacks. Text layers also report their copy, per-run styles (family, weight, size, color) and `pxPerPt` (pt-to-pixel ratio). |
 | `psd_batch_render` | Render many SKUs into one template and write JPG/PNG files (optionally a ZIP) inside the workspace. The `suppressed` result lists slot siblings hidden together with the slot. |
+| `psd_render` | Render job specs: per job, which text layers to rewrite (copy, per-run font/size/colour, fit-to-width), which layers to show or hide, which product image goes into the slots, and extra images fitted into a layer's box or a rect. Reports where each text and image actually landed; a failing job does not stop the rest. |
+| `psd_view` | Crop and zoom an image, optionally with a coordinate grid and labelled boxes, saved as PNG for close inspection. |
+| `psd_text_check` | Re-draw text layers with their original copy and compare with the PSD pixels to flag size or position drift (usually a missing font). |
 
-Example request:
+`psd_render` takes the job spec described under the engine section below.
+Example `psd_batch_render` request:
 
 ```json
 {
@@ -207,9 +236,10 @@ Example request:
 }
 ```
 
-Both tools resolve paths relative to the session working directory and refuse
-paths outside it. `psd_batch_render` defaults to JPG at quality 92 and returns
-the output folder plus the first 50 file names.
+All tools resolve paths relative to the session working directory and refuse
+paths outside it, including links that lead outside. `psd_batch_render` and
+`psd_render` default to JPG at quality 92; without an explicit output folder,
+every batch gets a new folder and never overwrites an earlier one.
 
 Visible siblings inside a slot's group that overlap the slot by at least 25% are
 hidden together with the slot (stale product art and misaligned shadow copies
@@ -218,6 +248,54 @@ product's pixels. Suppressed layers are reported in the `suppressed` result, and
 decorations that intentionally sit on top of the product should live in another
 group. Near-identical stacked copies (shadow/highlight) keep using the existing
 slot-cluster logic, and the slot fit rect is never inflated by suppression.
+
+## Parse-and-control engine (CLI / Node API)
+
+A template parse-and-control engine for agents. It does four things: inspect a
+template, apply explicit edits, render, and check. Run the CLI in a project
+where this package is installed (see Install):
+
+```bash
+npx psd-engine inspect templates/x.psb --fonts fonts/   # layer tree, per-run styles, pxPerPt, missing fonts
+npx psd-engine render  jobs.json                        # or `render -` to read stdin
+npx psd-engine view    out/a.jpg --crop 0,1000,700,1280 --scale 2 --grid
+npx psd-engine check   templates/x.psb --fonts fonts/   # text redraw drift
+```
+
+Everything prints JSON. `render` exits 0 when every job succeeded, 2 when some
+failed, 1 on bad input. A job spec:
+
+```json
+{
+  "template": "templates/x.psb",
+  "fonts": ["fonts"],
+  "outDir": "out/1111",
+  "defaults": { "slots": ["main/product"], "hide": ["gifts/old-art"] },
+  "jobs": [
+    {
+      "name": "sku-001",
+      "product": "products/sku-001.png",
+      "text": [
+        { "layer": "e49", "value": "2nd for 0", "runs": [{ "len": 1, "color": "#cc3046" }] },
+        { "layer": "price/value", "value": "29.9", "runs": [{ "len": 2, "size": 24.4 }, { "len": 2, "size": 11 }] },
+        { "layer": "tagline", "value": "Long tagline copy", "fitWidth": 616 }
+      ],
+      "hide": ["badge"],
+      "images": [{ "source": "gifts/puff.png", "layer": "gifts/box", "fit": "contain" }]
+    }
+  ]
+}
+```
+
+- Address layers by the `id` or full `path` from `inspect`, or by a unique name; ambiguous names fail with the candidates.
+- If a listed slot or any source file is missing, that job fails instead of rendering with the template's original art.
+- `images[].layer` may be a layer or a group (a group uses the union of its layers); `rect` gives coordinates directly.
+- The output file name is `name` with only path-unsafe characters replaced (dots such as `19.9` are kept); duplicates in a batch get `-2`, `-3`.
+- `runs` restyle the copy from its first character in order; fields left out keep the template style. `size` is pt, `sizePx` is px.
+- `defaults` is merged under every job: text by layer, `show`/`hide`/`images` appended, other fields replaced by the job.
+- Each job result reports `text[].box` (ink after redraw) next to `original`, and `images[].box` next to `target`, so overflow and overlap can be checked from numbers before looking with `view`.
+
+From Node: `import { inspect, render, view, checkText } from 'dsh-psd-batch-studio/engine'`, same parameters.
 
 ## How it works
 
@@ -229,14 +307,21 @@ slot-cluster logic, and the slot fit rect is never inflated by suppression.
 - A template is split into background runs and product slots, so a SKU image
   lands between the layers below it and the decorations above it.
 - Slot clusters hide stacked copies of the same product and draw the SKU once.
+- Text redraw expands the PSD style runs per character, applies the requested
+  overrides, lays the copy out with real fonts and swaps it in for the layer's
+  raster, so masks, clipping and layer styles still apply.
 - The browser and the Host renderer share `src/core/`; the Host swaps the canvas
   implementation for `@napi-rs/canvas`.
 
 ```text
 src/
-  core/        canvas factory, PSD parsing/compositing, fitting, export
+  core/        canvas factory, PSD parsing/compositing, text redraw, fitting, view, export
   client/      Harness Client UI (React)
-  server.js    Host batch renderer + agent tools
+  engine.js    host-agnostic engine: inspect / render / view / checkText
+  tools.js     dsh tools psd_render, psd_view, psd_text_check
+  server.js    Host entry: psd_inspect, psd_batch_render + engine tools
+bin/
+  psd-engine.mjs  CLI over src/engine.js
 index.js       Host plugin entry (registers the tools)
 client.js      built browser artifact
 server.js      built Host artifact
@@ -244,8 +329,16 @@ server.js      built Host artifact
 
 ## Compatibility and limits
 
-- Text layers are used as rasterized PSD pixels; editing copy/fonts inside the
-  studio is not supported yet.
+- Text layers keep their rasterized PSD pixels unless a job rewrites them.
+  Redraw needs the font files the template uses (a PSD stores only font
+  names); a missing font falls back and is listed in `missingFonts`. Register
+  font folders with `fonts`.
+- The workbench panel (sidebar UI) cannot edit text; rewriting text, placing
+  gift images and the like go through the agent tools or the CLI. The engine
+  itself rewrites text, toggles layers, swaps products and places any image.
+- Vertical text and text on a path are not specially supported; layer styles on
+  text (stroke, shadow) use the compositor's approximations. Run `check` on a
+  new template before a large batch.
 - Bevel/emboss and inner-shadow layer styles are approximated or skipped;
   stroke/shadow/glow are approximations. The compositor is tuned for typical
   e-commerce main-image templates.
