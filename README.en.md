@@ -333,8 +333,9 @@ server.js      built Host artifact
   Redraw needs the font files the template uses (a PSD stores only font
   names); a missing font falls back and is listed in `missingFonts`. Register
   font folders with `fonts`.
-- The workbench panel only replaces products; text rewriting goes through the
-  agent tools or the CLI.
+- The workbench panel (sidebar UI) cannot edit text; rewriting text, placing
+  gift images and the like go through the agent tools or the CLI. The engine
+  itself rewrites text, toggles layers, swaps products and places any image.
 - Vertical text and text on a path are not specially supported; layer styles on
   text (stroke, shadow) use the compositor's approximations. Run `check` on a
   new template before a large batch.
