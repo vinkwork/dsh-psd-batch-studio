@@ -115,6 +115,9 @@ plugin_manager install_bundle, target = /绝对路径/dsh-psd-batch-studio
 | --- | --- |
 | `psd_inspect` | 返回模板尺寸、图层树（名称/层级/可见性/边界/图层 id）、自动识别的商品槽位；文字层额外返回文案和逐段字体样式（字体/字重/字号/颜色）。 |
 | `psd_batch_render` | 把一批 SKU 套进模板，输出 JPG/PNG（可选 ZIP）到工作区；结果里的 `suppressed` 列出随槽位一起隐藏的同组重叠图层。 |
+| `psd_render` | 按「作业单」出图：每个作业写明改哪些文字层（文案、逐段字体/字号/颜色、按宽度缩小）、显示/隐藏哪些图层、商品位放哪张图、额外的图放进哪个图层框或矩形。逐个作业返回文字和图片实际落点，失败的作业不影响其它。 |
+| `psd_view` | 裁剪放大图片，可叠坐标网格和标注框，存成 PNG 供查看细节。 |
+| `psd_text_check` | 用原文案重绘文字层，和 PSD 像素对比，标出字号/位置偏差（多半是缺字体）。 |
 
 调用示例：
 
@@ -133,13 +136,57 @@ plugin_manager install_bundle, target = /绝对路径/dsh-psd-batch-studio
 }
 ```
 
-两个工具的路径都相对当前会话工作目录解析，并拒绝越界路径。`psd_batch_render` 默认 JPG、质量 92，
+所有工具的路径都相对当前会话工作目录解析，并拒绝越界路径。`psd_batch_render` 默认 JPG、质量 92，
 返回输出目录和前 50 个文件名。
 
 槽位所在的组里，其它「可见且与槽位重叠 ≥25%」的图层会随槽位一起隐藏（旧商品图、没对齐的
 影子层最常见），否则新 SKU 会在旧商品的像素上叠加出「两个商品」。被隐藏的图层会在结果里以
 `suppressed` 列出；刻意的压在商品上的装饰请放到其他组里。近乎完全重叠且大小一致的堆叠副本
 （阴影/高光）仍走原有槽位簇逻辑，槽位适配框不受影响。
+
+## 解析与控制引擎（命令行 / Node API）
+
+引擎只负责「看模板、按指令改、出图、检查」，不理解业务：读需求表、决定哪段文字标红、
+哪档赠品显示，都由调用它的 agent 完成，再写成作业单交给引擎。不装 dsh 也能用：
+
+```bash
+npx psd-engine inspect 模板/x.psb --fonts 字体包/          # 图层树、文字逐段样式、pxPerPt、缺失字体
+npx psd-engine render  jobs.json                          # 或 render - 从 stdin 读
+npx psd-engine view    out/a.jpg --crop 0,1000,700,1280 --scale 2 --grid
+npx psd-engine check   模板/x.psb --fonts 字体包/          # 文字重绘偏差
+```
+
+输出都是 JSON；`render` 全部成功退出码 0，有作业失败为 2，参数或文件错误为 1。作业单：
+
+```json
+{
+  "template": "模板/x.psb",
+  "fonts": ["字体包"],
+  "outDir": "out/1111",
+  "defaults": { "slots": ["主图/产品"], "hide": ["赠品/旧赠品图"] },
+  "jobs": [
+    {
+      "name": "100212974650-粉饼4g",
+      "product": "产品图/粉饼4g.png",
+      "text": [
+        { "layer": "e49", "value": "第2件0元", "runs": [{ "len": 1 }, { "len": 1, "color": "#cc3046" }, { "len": 1 }, { "len": 1, "color": "#cc3046" }, { "len": 1 }] },
+        { "layer": "价格/价格数字", "value": "29.9", "runs": [{ "len": 2, "size": 24.4 }, { "len": 2, "size": 11 }] },
+        { "layer": "三级文案/卖点", "value": "控油持妆 细腻柔焦", "fitWidth": 616 }
+      ],
+      "hide": ["icon"],
+      "images": [{ "source": "赠品图/粉扑.png", "layer": "赠品/买即赠/框", "fit": "contain" }]
+    }
+  ]
+}
+```
+
+- 图层用 `inspect` 返回的 `id`、完整 `path`，或唯一的名字指定；重名会报错并列出候选。
+- `runs` 从第一个字起按顺序覆盖，没写的属性沿用模板原样式；`size` 是 pt，`sizePx` 是像素。
+- `defaults` 合并到每个作业下：文字按图层合并，`show`/`hide`/`images` 追加，其余字段由作业覆盖。
+- 结果里每个作业带 `text[].box`（重绘后实际墨迹范围）和 `original`（模板原范围）、`images[].box`/`target`，
+  先用数字判断溢出和压盖，再用 `view` 看图确认。
+
+Node 中：`import { inspect, render, view, checkText } from 'dsh-psd-batch-studio/engine'`，参数同上。
 
 ## 构建
 

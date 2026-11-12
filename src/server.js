@@ -8,61 +8,19 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { createCanvas, loadImage } from '@napi-rs/canvas'
-import { initializeCanvas } from 'ag-psd'
 import { zipSync } from 'fflate'
-import { setCanvasFactory } from './core/canvas.js'
-import { parseTemplate, buildScene, suggestSlots, isEntryVisible, isLeafVisible } from './core/psd.js'
+import { buildScene, suggestSlots, isLeafVisible } from './core/psd.js'
 import { drawScene, measureContent, DEFAULT_SETTINGS, DEFAULT_ADJUST } from './core/fit.js'
 import { sanitizeName, uniqueName } from './core/export.js'
-
-setCanvasFactory((width, height) => createCanvas(width, height))
-initializeCanvas((width, height) => createCanvas(width, height))
+import { resolvePath, loadTemplate, inspect } from './engine.js'
+import { registerEngineTools } from './tools.js'
 
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.bmp'])
 
-const templateCache = new Map()
+const resolveInWorkspace = (cwd, candidate, { mustExist = true } = {}) =>
+  resolvePath(cwd, candidate, { mustExist, confine: true })
 
-async function resolveInWorkspace(cwd, candidate, { mustExist = true } = {}) {
-  if (typeof candidate !== 'string' || candidate.trim() === '') {
-    throw new Error('A non-empty path is required')
-  }
-  const absolute = path.resolve(cwd, candidate)
-  const relative = path.relative(cwd, absolute)
-  if (relative.startsWith('..') || path.isAbsolute(relative)) {
-    throw new Error(`Path must stay inside the session workspace: ${candidate}`)
-  }
-  if (mustExist) {
-    let real
-    try {
-      real = await fs.realpath(absolute)
-    } catch {
-      throw new Error(`Path does not exist: ${candidate}`)
-    }
-    const realRelative = path.relative(cwd, real)
-    if (realRelative.startsWith('..') || path.isAbsolute(realRelative)) {
-      throw new Error(`Path resolves outside the session workspace: ${candidate}`)
-    }
-    return real
-  }
-  return absolute
-}
-
-async function loadTemplateDoc(absolutePath) {
-  const stat = await fs.stat(absolutePath)
-  const cached = templateCache.get(absolutePath)
-  if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) return cached.doc
-
-  const buffer = await fs.readFile(absolutePath)
-  const doc = await parseTemplate({
-    name: path.basename(absolutePath),
-    size: stat.size,
-    arrayBuffer: async () =>
-      buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength),
-  })
-  if (templateCache.size >= 2) templateCache.delete(templateCache.keys().next().value)
-  templateCache.set(absolutePath, { mtimeMs: stat.mtimeMs, size: stat.size, doc })
-  return doc
-}
+const loadTemplateDoc = loadTemplate
 
 function resolveSlots(doc, specs) {
   const ids = []
@@ -93,17 +51,6 @@ function resolveSlots(doc, specs) {
   return ids
 }
 
-function slotSummary(doc, ids) {
-  return ids.map((id) => {
-    const leaf = doc.leaves.find((item) => item.id === id)
-    return {
-      name: leaf.name,
-      leafId: leaf.id,
-      bounds: [leaf.left, leaf.top, leaf.left + leaf.width, leaf.top + leaf.height],
-    }
-  })
-}
-
 function toAdjustment(raw) {
   const adjust = { ...DEFAULT_ADJUST }
   if (!raw || typeof raw !== 'object') return adjust
@@ -114,15 +61,15 @@ function toAdjustment(raw) {
   return adjust
 }
 
-/** One line per text layer (first 12), so the agent sees copy before rendering. */
+/** One line per text layer (first 40), so the agent sees copy before rendering. */
 function describeTextLayers(layers) {
   const lines = layers
     .filter((layer) => layer.textContent != null)
-    .slice(0, 12)
+    .slice(0, 40)
     .map((layer) => {
       const run = (layer.runs || [])[0]
       const font = run ? ` ${run.family || '?'} ${run.size}pt` : ''
-      return `  ${layer.name}: ${JSON.stringify(layer.textContent)}${font}`
+      return `  ${layer.id || ''} ${layer.path || layer.name}: ${JSON.stringify(layer.textContent)}${font}`
     })
   return lines.length ? `\nText layers:\n${lines.join('\n')}` : ''
 }
@@ -144,46 +91,9 @@ async function listSkuFiles(cwd, { skus, skuDir }) {
   return files
 }
 
-/** Inspect a template: dimensions, layer tree, auto-detected product slots. */
-export async function inspectTemplate({ cwd, template }) {
-  const absolute = await resolveInWorkspace(cwd, template)
-  const doc = await loadTemplateDoc(absolute)
-  const layerLimit = 400
-  const layers = doc.entries
-    .filter((entry) => entry.kind === 'group' || entry.leafId)
-    .slice(0, layerLimit)
-    .map((entry) => {
-      const layer = {
-        name: entry.name,
-        kind: entry.kind,
-        depth: entry.depth,
-        visible: isEntryVisible(doc, entry.id),
-      }
-      if (entry.leafId) layer.leafId = entry.leafId
-      if (entry.kind === 'text') layer.text = true
-      if (entry.text) {
-        layer.textContent = entry.text.value
-        layer.runCount = entry.text.runs.length
-        if (entry.text.runs.length) {
-          layer.runs = entry.text.runs
-            .slice(0, 8)
-            .map(({ family, ...run }) => (family ? { ...run, family } : run))
-          layer.runsTruncated = entry.text.runs.length > 8
-        }
-      }
-      if (entry.bounds) layer.bounds = entry.bounds
-      return layer
-    })
-
-  const suggestedIds = suggestSlots(doc)
-  return {
-    name: doc.name,
-    width: doc.width,
-    height: doc.height,
-    layers,
-    truncated: doc.entries.length > layerLimit,
-    suggestedSlots: slotSummary(doc, suggestedIds),
-  }
+/** Inspect a template: dimensions, layer tree, text runs, auto-detected product slots. */
+export function inspectTemplate({ cwd, template }) {
+  return inspect({ root: cwd, confine: true, template, limit: 400 })
 }
 
 /**
@@ -318,7 +228,7 @@ export function registerTools(ctx) {
     ctx.tools.register({
       name: 'psd_inspect',
       description:
-        'Inspect a PSD/PSB main-image template inside the session workspace. Returns its size, the layer tree (names, depth, visibility, bounds, ids), product slots the studio would auto-detect, and — for text layers — the copy plus per-run font styles (family, weight, size, color). Use this before psd_batch_render when you need to choose slot layers or check what a text layer says.',
+        'Inspect a PSD/PSB template inside the session workspace. Returns its size, the layer tree (id, name, full path, depth, visibility, bounds), product slots the studio would auto-detect, fonts the text layers use (and which are missing), and for text layers the copy, per-run font styles (family, weight, size in pt, color) and pxPerPt. Address layers in psd_render by id or path. Call this first.',
       parameters: {
         type: 'object',
         additionalProperties: false,
@@ -347,7 +257,9 @@ export function registerTools(ctx) {
                 additionalProperties: false,
                 required: ['name', 'kind', 'depth', 'visible'],
                 properties: {
+                  id: { type: 'string' },
                   name: { type: 'string' },
+                  path: { type: 'string' },
                   kind: { type: 'string' },
                   depth: { type: 'integer' },
                   visible: { type: 'boolean' },
@@ -375,6 +287,8 @@ export function registerTools(ctx) {
                   },
                   runCount: { type: 'integer' },
                   runsTruncated: { type: 'boolean' },
+                  align: { type: 'string' },
+                  pxPerPt: { type: 'number' },
                 },
               },
             },
@@ -386,11 +300,14 @@ export function registerTools(ctx) {
                 required: ['name', 'leafId', 'bounds'],
                 properties: {
                   name: { type: 'string' },
+                  path: { type: 'string' },
                   leafId: { type: 'string' },
                   bounds: { type: 'array', items: { type: 'integer' } },
                 },
               },
             },
+            fonts: { type: 'array', items: { type: 'string' } },
+            missingFonts: { type: 'array', items: { type: 'string' } },
           },
         },
         render: (_args, value) => [
@@ -399,7 +316,7 @@ export function registerTools(ctx) {
             text: `${value.name}: ${value.width}×${value.height}, ${value.layers.length} listed layers.\nAuto slots: ${
               value.suggestedSlots.map((slot) => `${slot.name} [${slot.bounds.join(',')}]`).join(' | ') ||
               'none'
-            }${describeTextLayers(value.layers)}`,
+            }${value.missingFonts && value.missingFonts.length ? `\nMissing fonts: ${value.missingFonts.join(', ')}` : ''}${describeTextLayers(value.layers)}`,
           },
         ],
       },
@@ -547,6 +464,8 @@ export function registerTools(ctx) {
       isConcurrencySafe: () => false,
     }),
   )
+
+  disposers.push(...registerEngineTools(ctx, resolveSessionCwd))
 
   return () => {
     for (const dispose of disposers) dispose()

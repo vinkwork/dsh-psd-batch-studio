@@ -119,7 +119,7 @@ async function main() {
 
     // --- dsh 0.2.0: no workingDirectory service, the session header wins ----
     const legacy = register()
-    assert.deepEqual([...legacy.tools.keys()].sort(), ['psd_batch_render', 'psd_inspect'])
+    assert.deepEqual([...legacy.tools.keys()].sort(), ['psd_batch_render', 'psd_inspect', 'psd_render', 'psd_text_check', 'psd_view'])
     const inspected = await call(legacy.tools.get('psd_inspect'), { template: 'tpl.psd' }, sessionAt(workspace))
     assert.equal(inspected.width, 400)
     const price = inspected.layers.find((layer) => layer.name === '价格')
@@ -136,6 +136,51 @@ async function main() {
     )
     assert.equal(rendered.count, 1)
     await fs.access(path.join(workspace, 'out', rendered.files[0]))
+
+    // --- job-spec render, view and text check through the host contract ---
+    assert.equal(price.path, '价格')
+    assert.ok(price.pxPerPt > 0)
+    const jobs = await call(
+      legacy.tools.get('psd_render'),
+      {
+        template: 'tpl.psd',
+        outDir: 'jobs',
+        defaults: { hide: ['无字体'] },
+        jobs: [
+          {
+            name: 'a',
+            product: 'sku.png',
+            slots: ['主图/产品位'],
+            text: [{ layer: price.id, value: '¥19.90', runs: [{ len: 4, color: '#ff0000' }, { len: 2, size: 16 }] }],
+            images: [{ source: 'sku.png', rect: [10, 10, 60, 60] }],
+          },
+          { name: 'broken', product: 'missing.png' },
+        ],
+      },
+      sessionAt(workspace),
+    )
+    assert.equal(jobs.count, 1)
+    assert.equal(jobs.failed, 1)
+    assert.equal(jobs.jobs[0].text[0].ok, true)
+    assert.equal(jobs.jobs[0].product[0].slot, '产品位')
+    assert.deepEqual(jobs.jobs[0].images[0].target, [10, 10, 60, 60])
+    assert.match(jobs.jobs[1].error, /does not exist/)
+    await fs.access(path.join(workspace, 'jobs', 'a.jpg'))
+    await assert.rejects(
+      legacy.tools.get('psd_render').execute({ template: 'tpl.psd', outDir: '../escape', jobs: [{}] }, sessionAt(workspace)),
+      /inside the workspace/,
+    )
+
+    const viewed = await call(
+      legacy.tools.get('psd_view'),
+      { image: 'jobs/a.jpg', crop: [0, 300, 200, 400], scale: 2, gridStep: 50, rects: [{ rect: [20, 340, 180, 380], label: 'price' }] },
+      sessionAt(workspace),
+    )
+    assert.equal(viewed.width, 400)
+    await fs.access(path.join(workspace, viewed.file))
+
+    const checked = await call(legacy.tools.get('psd_text_check'), { template: 'tpl.psd' }, sessionAt(workspace))
+    assert.ok(checked.rows.length >= 1)
     legacy.dispose()
 
     // --- dsh >= 0.2.1: the workingDirectory service is preferred ------------

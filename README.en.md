@@ -189,6 +189,9 @@ install plus the GitHub one, say): they share the `psd-batch-studio` entry.
 | --- | --- |
 | `psd_inspect` | Template size, layer tree (name, depth, visibility, bounds, leaf id), and auto-detected slots. Text layers also report their copy plus per-run styles (family, weight, size, color). |
 | `psd_batch_render` | Render many SKUs into one template and write JPG/PNG files (optionally a ZIP) inside the workspace. The `suppressed` result lists slot siblings hidden together with the slot. |
+| `psd_render` | Render job specs: per job, which text layers to rewrite (copy, per-run font/size/colour, fit-to-width), which layers to show or hide, which product image goes into the slots, and extra images fitted into a layer's box or a rect. Reports where each text and image actually landed; a failing job does not stop the rest. |
+| `psd_view` | Crop and zoom an image, optionally with a coordinate grid and labelled boxes, saved as PNG for close inspection. |
+| `psd_text_check` | Re-draw text layers with their original copy and compare with the PSD pixels to flag size or position drift (usually a missing font). |
 
 Example request:
 
@@ -207,7 +210,7 @@ Example request:
 }
 ```
 
-Both tools resolve paths relative to the session working directory and refuse
+All tools resolve paths relative to the session working directory and refuse
 paths outside it. `psd_batch_render` defaults to JPG at quality 92 and returns
 the output folder plus the first 50 file names.
 
@@ -218,6 +221,52 @@ product's pixels. Suppressed layers are reported in the `suppressed` result, and
 decorations that intentionally sit on top of the product should live in another
 group. Near-identical stacked copies (shadow/highlight) keep using the existing
 slot-cluster logic, and the slot fit rect is never inflated by suppression.
+
+## Parse-and-control engine (CLI / Node API)
+
+The engine only looks at templates, applies explicit instructions, renders and
+checks. It has no business rules: reading a requirement sheet, deciding which
+characters are red or which gift tier shows is the calling agent's job, which it
+writes down as a job spec. Works without dsh:
+
+```bash
+npx psd-engine inspect templates/x.psb --fonts fonts/   # layer tree, per-run styles, pxPerPt, missing fonts
+npx psd-engine render  jobs.json                        # or `render -` to read stdin
+npx psd-engine view    out/a.jpg --crop 0,1000,700,1280 --scale 2 --grid
+npx psd-engine check   templates/x.psb --fonts fonts/   # text redraw drift
+```
+
+Everything prints JSON. `render` exits 0 when every job succeeded, 2 when some
+failed, 1 on bad input. A job spec:
+
+```json
+{
+  "template": "templates/x.psb",
+  "fonts": ["fonts"],
+  "outDir": "out/1111",
+  "defaults": { "slots": ["main/product"], "hide": ["gifts/old-art"] },
+  "jobs": [
+    {
+      "name": "sku-001",
+      "product": "products/sku-001.png",
+      "text": [
+        { "layer": "e49", "value": "2nd for 0", "runs": [{ "len": 1, "color": "#cc3046" }] },
+        { "layer": "price/value", "value": "29.9", "runs": [{ "len": 2, "size": 24.4 }, { "len": 2, "size": 11 }] },
+        { "layer": "tagline", "value": "Long tagline copy", "fitWidth": 616 }
+      ],
+      "hide": ["badge"],
+      "images": [{ "source": "gifts/puff.png", "layer": "gifts/box", "fit": "contain" }]
+    }
+  ]
+}
+```
+
+- Address layers by the `id` or full `path` from `inspect`, or by a unique name; ambiguous names fail with the candidates.
+- `runs` restyle the copy from its first character in order; fields left out keep the template style. `size` is pt, `sizePx` is px.
+- `defaults` is merged under every job: text by layer, `show`/`hide`/`images` appended, other fields replaced by the job.
+- Each job result reports `text[].box` (ink after redraw) next to `original`, and `images[].box` next to `target`, so overflow and overlap can be checked from numbers before looking with `view`.
+
+From Node: `import { inspect, render, view, checkText } from 'dsh-psd-batch-studio/engine'`, same parameters.
 
 ## How it works
 
