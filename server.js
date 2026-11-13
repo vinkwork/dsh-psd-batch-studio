@@ -24,107 +24,6 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// node_modules/base64-js/index.js
-var require_base64_js = __commonJS({
-  "node_modules/base64-js/index.js"(exports) {
-    "use strict";
-    exports.byteLength = byteLength;
-    exports.toByteArray = toByteArray;
-    exports.fromByteArray = fromByteArray;
-    var lookup = [];
-    var revLookup = [];
-    var Arr = typeof Uint8Array !== "undefined" ? Uint8Array : Array;
-    var code = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    for (i = 0, len = code.length; i < len; ++i) {
-      lookup[i] = code[i];
-      revLookup[code.charCodeAt(i)] = i;
-    }
-    var i;
-    var len;
-    revLookup["-".charCodeAt(0)] = 62;
-    revLookup["_".charCodeAt(0)] = 63;
-    function getLens(b64) {
-      var len2 = b64.length;
-      if (len2 % 4 > 0) {
-        throw new Error("Invalid string. Length must be a multiple of 4");
-      }
-      var validLen = b64.indexOf("=");
-      if (validLen === -1) validLen = len2;
-      var placeHoldersLen = validLen === len2 ? 0 : 4 - validLen % 4;
-      return [validLen, placeHoldersLen];
-    }
-    function byteLength(b64) {
-      var lens = getLens(b64);
-      var validLen = lens[0];
-      var placeHoldersLen = lens[1];
-      return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
-    }
-    function _byteLength(b64, validLen, placeHoldersLen) {
-      return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
-    }
-    function toByteArray(b64) {
-      var tmp;
-      var lens = getLens(b64);
-      var validLen = lens[0];
-      var placeHoldersLen = lens[1];
-      var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
-      var curByte = 0;
-      var len2 = placeHoldersLen > 0 ? validLen - 4 : validLen;
-      var i2;
-      for (i2 = 0; i2 < len2; i2 += 4) {
-        tmp = revLookup[b64.charCodeAt(i2)] << 18 | revLookup[b64.charCodeAt(i2 + 1)] << 12 | revLookup[b64.charCodeAt(i2 + 2)] << 6 | revLookup[b64.charCodeAt(i2 + 3)];
-        arr[curByte++] = tmp >> 16 & 255;
-        arr[curByte++] = tmp >> 8 & 255;
-        arr[curByte++] = tmp & 255;
-      }
-      if (placeHoldersLen === 2) {
-        tmp = revLookup[b64.charCodeAt(i2)] << 2 | revLookup[b64.charCodeAt(i2 + 1)] >> 4;
-        arr[curByte++] = tmp & 255;
-      }
-      if (placeHoldersLen === 1) {
-        tmp = revLookup[b64.charCodeAt(i2)] << 10 | revLookup[b64.charCodeAt(i2 + 1)] << 4 | revLookup[b64.charCodeAt(i2 + 2)] >> 2;
-        arr[curByte++] = tmp >> 8 & 255;
-        arr[curByte++] = tmp & 255;
-      }
-      return arr;
-    }
-    function tripletToBase64(num) {
-      return lookup[num >> 18 & 63] + lookup[num >> 12 & 63] + lookup[num >> 6 & 63] + lookup[num & 63];
-    }
-    function encodeChunk(uint8, start, end) {
-      var tmp;
-      var output = [];
-      for (var i2 = start; i2 < end; i2 += 3) {
-        tmp = (uint8[i2] << 16 & 16711680) + (uint8[i2 + 1] << 8 & 65280) + (uint8[i2 + 2] & 255);
-        output.push(tripletToBase64(tmp));
-      }
-      return output.join("");
-    }
-    function fromByteArray(uint8) {
-      var tmp;
-      var len2 = uint8.length;
-      var extraBytes = len2 % 3;
-      var parts = [];
-      var maxChunkLength = 16383;
-      for (var i2 = 0, len22 = len2 - extraBytes; i2 < len22; i2 += maxChunkLength) {
-        parts.push(encodeChunk(uint8, i2, i2 + maxChunkLength > len22 ? len22 : i2 + maxChunkLength));
-      }
-      if (extraBytes === 1) {
-        tmp = uint8[len2 - 1];
-        parts.push(
-          lookup[tmp >> 2] + lookup[tmp << 4 & 63] + "=="
-        );
-      } else if (extraBytes === 2) {
-        tmp = (uint8[len2 - 2] << 8) + uint8[len2 - 1];
-        parts.push(
-          lookup[tmp >> 10] + lookup[tmp >> 4 & 63] + lookup[tmp << 2 & 63] + "="
-        );
-      }
-      return parts.join("");
-    }
-  }
-});
-
 // node_modules/pako/lib/zlib/trees.js
 var require_trees = __commonJS({
   "node_modules/pako/lib/zlib/trees.js"(exports, module) {
@@ -973,20 +872,8 @@ var require_deflate = __commonJS({
         s.prev[p] = m >= wsize ? m - wsize : 0;
       } while (--n);
     };
-    var HASH = (s, prev, data) => (prev << s.hash_shift ^ data) & s.hash_mask;
-    var INSERT_STRING = (s, str) => {
-      let h;
-      if (s.legacy_hash) {
-        h = s.ins_h = HASH(s, s.ins_h, s.window[str + MIN_MATCH - 1]);
-      } else {
-        const w = s.window;
-        const value = w[str] | w[str + 1] << 8 | w[str + 2] << 16 | w[str + 3] << 24;
-        h = s.ins_h = Math.imul(value, 66521) + 66521 >>> 16 & s.hash_mask;
-      }
-      const hash_head = s.prev[str & s.w_mask] = s.head[h];
-      s.head[h] = str;
-      return hash_head;
-    };
+    var HASH_ZLIB = (s, prev, data) => (prev << s.hash_shift ^ data) & s.hash_mask;
+    var HASH = HASH_ZLIB;
     var flush_pending = (strm) => {
       const s = strm.state;
       let len = s.pending;
@@ -1104,24 +991,14 @@ var require_deflate = __commonJS({
         }
         n = read_buf(s.strm, s.window, s.strstart + s.lookahead, more);
         s.lookahead += n;
-        if (!s.legacy_hash) {
-          if (s.lookahead + s.insert > MIN_MATCH) {
-            str = s.strstart - s.insert;
-            while (s.insert) {
-              INSERT_STRING(s, str);
-              str++;
-              s.insert--;
-              if (s.lookahead + s.insert <= MIN_MATCH) {
-                break;
-              }
-            }
-          }
-        } else if (s.lookahead + s.insert >= MIN_MATCH) {
+        if (s.lookahead + s.insert >= MIN_MATCH) {
           str = s.strstart - s.insert;
           s.ins_h = s.window[str];
           s.ins_h = HASH(s, s.ins_h, s.window[str + 1]);
           while (s.insert) {
-            INSERT_STRING(s, str);
+            s.ins_h = HASH(s, s.ins_h, s.window[str + MIN_MATCH - 1]);
+            s.prev[str & s.w_mask] = s.head[s.ins_h];
+            s.head[s.ins_h] = str;
             str++;
             s.insert--;
             if (s.lookahead + s.insert < MIN_MATCH) {
@@ -1262,7 +1139,9 @@ var require_deflate = __commonJS({
         }
         hash_head = 0;
         if (s.lookahead >= MIN_MATCH) {
-          hash_head = INSERT_STRING(s, s.strstart);
+          s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH - 1]);
+          hash_head = s.prev[s.strstart & s.w_mask] = s.head[s.ins_h];
+          s.head[s.ins_h] = s.strstart;
         }
         if (hash_head !== 0 && s.strstart - hash_head <= s.w_size - MIN_LOOKAHEAD) {
           s.match_length = longest_match(s, hash_head);
@@ -1274,16 +1153,16 @@ var require_deflate = __commonJS({
             s.match_length--;
             do {
               s.strstart++;
-              hash_head = INSERT_STRING(s, s.strstart);
+              s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH - 1]);
+              hash_head = s.prev[s.strstart & s.w_mask] = s.head[s.ins_h];
+              s.head[s.ins_h] = s.strstart;
             } while (--s.match_length !== 0);
             s.strstart++;
           } else {
             s.strstart += s.match_length;
             s.match_length = 0;
-            if (s.legacy_hash) {
-              s.ins_h = s.window[s.strstart];
-              s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + 1]);
-            }
+            s.ins_h = s.window[s.strstart];
+            s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + 1]);
           }
         } else {
           bflush = _tr_tally(s, 0, s.window[s.strstart]);
@@ -1329,7 +1208,9 @@ var require_deflate = __commonJS({
         }
         hash_head = 0;
         if (s.lookahead >= MIN_MATCH) {
-          hash_head = INSERT_STRING(s, s.strstart);
+          s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH - 1]);
+          hash_head = s.prev[s.strstart & s.w_mask] = s.head[s.ins_h];
+          s.head[s.ins_h] = s.strstart;
         }
         s.prev_length = s.match_length;
         s.prev_match = s.match_start;
@@ -1347,7 +1228,9 @@ var require_deflate = __commonJS({
           s.prev_length -= 2;
           do {
             if (++s.strstart <= max_insert) {
-              hash_head = INSERT_STRING(s, s.strstart);
+              s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH - 1]);
+              hash_head = s.prev[s.strstart & s.w_mask] = s.head[s.ins_h];
+              s.head[s.ins_h] = s.strstart;
             }
           } while (--s.prev_length !== 0);
           s.match_available = 0;
@@ -1561,7 +1444,6 @@ var require_deflate = __commonJS({
       this.prev = null;
       this.head = null;
       this.ins_h = 0;
-      this.legacy_hash = 0;
       this.hash_size = 0;
       this.hash_bits = 0;
       this.hash_mask = 0;
@@ -1655,7 +1537,7 @@ var require_deflate = __commonJS({
       strm.state.gzhead = head;
       return Z_OK;
     };
-    var deflateInit2 = (strm, level, method, windowBits, memLevel, strategy, legacyHash) => {
+    var deflateInit2 = (strm, level, method, windowBits, memLevel, strategy) => {
       if (!strm) {
         return Z_STREAM_ERROR;
       }
@@ -1685,11 +1567,7 @@ var require_deflate = __commonJS({
       s.w_bits = windowBits;
       s.w_size = 1 << s.w_bits;
       s.w_mask = s.w_size - 1;
-      s.legacy_hash = legacyHash ? 1 : 0;
       s.hash_bits = memLevel + 7;
-      if (!s.legacy_hash && s.hash_bits < 15) {
-        s.hash_bits = 15;
-      }
       s.hash_size = 1 << s.hash_bits;
       s.hash_mask = s.hash_size - 1;
       s.hash_shift = ~~((s.hash_bits + MIN_MATCH - 1) / MIN_MATCH);
@@ -2016,7 +1894,9 @@ var require_deflate = __commonJS({
         let str = s.strstart;
         let n = s.lookahead - (MIN_MATCH - 1);
         do {
-          INSERT_STRING(s, str);
+          s.ins_h = HASH(s, s.ins_h, s.window[str + MIN_MATCH - 1]);
+          s.prev[str & s.w_mask] = s.head[s.ins_h];
+          s.head[s.ins_h] = str;
           str++;
         } while (--n);
         s.strstart = str;
@@ -2102,7 +1982,7 @@ var require_strings = __commonJS({
     for (let q = 0; q < 256; q++) {
       _utf8len[q] = q >= 252 ? 6 : q >= 248 ? 5 : q >= 240 ? 4 : q >= 224 ? 3 : q >= 192 ? 2 : 1;
     }
-    _utf8len[254] = _utf8len[255] = 1;
+    _utf8len[254] = _utf8len[254] = 1;
     module.exports.string2buf = (str) => {
       if (typeof TextEncoder === "function" && TextEncoder.prototype.encode) {
         return new TextEncoder().encode(str);
@@ -2260,17 +2140,15 @@ var require_deflate2 = __commonJS({
       Z_DEFAULT_STRATEGY,
       Z_DEFLATED
     } = require_constants();
-    var defaultOptions = {
-      level: Z_DEFAULT_COMPRESSION,
-      method: Z_DEFLATED,
-      chunkSize: 16384,
-      windowBits: 15,
-      memLevel: 8,
-      strategy: Z_DEFAULT_STRATEGY,
-      legacyHash: true
-    };
     function Deflate(options) {
-      this.options = utils.assign({}, defaultOptions, options || {});
+      this.options = utils.assign({
+        level: Z_DEFAULT_COMPRESSION,
+        method: Z_DEFLATED,
+        chunkSize: 16384,
+        windowBits: 15,
+        memLevel: 8,
+        strategy: Z_DEFAULT_STRATEGY
+      }, options || {});
       let opt = this.options;
       if (opt.raw && opt.windowBits > 0) {
         opt.windowBits = -opt.windowBits;
@@ -2289,8 +2167,7 @@ var require_deflate2 = __commonJS({
         opt.method,
         opt.windowBits,
         opt.memLevel,
-        opt.strategy,
-        opt.legacyHash
+        opt.strategy
       );
       if (status !== Z_OK) {
         throw new Error(msg[status]);
@@ -2706,8 +2583,8 @@ var require_inftrees = __commonJS({
       21,
       21,
       16,
-      199,
-      75
+      72,
+      78
     ]);
     var dbase = new Uint16Array([
       /* Distance codes 0..29 base */
@@ -3168,12 +3045,10 @@ var require_inflate = __commonJS({
       let dist;
       const state = strm.state;
       if (state.window === null) {
-        state.window = new Uint8Array(1 << state.wbits);
-      }
-      if (state.wsize === 0) {
         state.wsize = 1 << state.wbits;
         state.wnext = 0;
         state.whave = 0;
+        state.window = new Uint8Array(state.wsize);
       }
       if (copy >= state.wsize) {
         state.window.set(src.subarray(end - state.wsize, end), 0);
@@ -4235,16 +4110,14 @@ var require_inflate2 = __commonJS({
       Z_NEED_DICT,
       Z_STREAM_ERROR,
       Z_DATA_ERROR,
-      Z_MEM_ERROR,
-      Z_BUF_ERROR
+      Z_MEM_ERROR
     } = require_constants();
-    var defaultOptions = {
-      chunkSize: 1024 * 64,
-      windowBits: 15,
-      to: ""
-    };
     function Inflate(options) {
-      this.options = utils.assign({}, defaultOptions, options || {});
+      this.options = utils.assign({
+        chunkSize: 1024 * 64,
+        windowBits: 15,
+        to: ""
+      }, options || {});
       const opt = this.options;
       if (opt.raw && opt.windowBits >= 0 && opt.windowBits < 16) {
         opt.windowBits = -opt.windowBits;
@@ -4319,7 +4192,7 @@ var require_inflate2 = __commonJS({
             status = Z_NEED_DICT;
           }
         }
-        while (strm.avail_in > 0 && status === Z_STREAM_END && strm.state.wrap & 2 && strm.state.flags !== 0 && strm.input[strm.next_in] !== 0) {
+        while (strm.avail_in > 0 && status === Z_STREAM_END && strm.state.wrap > 0 && data[strm.next_in] !== 0) {
           zlib_inflate.inflateReset(strm);
           status = zlib_inflate.inflate(strm, _flush_mode);
         }
@@ -4334,7 +4207,7 @@ var require_inflate2 = __commonJS({
         }
         last_avail_out = strm.avail_out;
         if (strm.next_out) {
-          if (strm.avail_out === 0 || status === Z_STREAM_END || _flush_mode > 0) {
+          if (strm.avail_out === 0 || status === Z_STREAM_END) {
             if (this.options.to === "string") {
               let next_out_utf8 = strings.utf8border(strm.output, strm.next_out);
               let tail = strm.next_out - next_out_utf8;
@@ -4345,27 +4218,17 @@ var require_inflate2 = __commonJS({
               this.onData(utf8str);
             } else {
               this.onData(strm.output.length === strm.next_out ? strm.output : strm.output.subarray(0, strm.next_out));
-              strm.avail_out = 0;
-              strm.next_out = 0;
             }
           }
         }
-        if ((status === Z_OK || status === Z_BUF_ERROR) && last_avail_out === 0) continue;
+        if (status === Z_OK && last_avail_out === 0) continue;
         if (status === Z_STREAM_END) {
           status = zlib_inflate.inflateEnd(this.strm);
           this.onEnd(status);
           this.ended = true;
           return true;
         }
-        if (strm.avail_in === 0) {
-          if (_flush_mode === Z_FINISH) {
-            status = zlib_inflate.inflateEnd(this.strm);
-            this.onEnd(status === Z_OK ? Z_BUF_ERROR : status);
-            this.ended = true;
-            return false;
-          }
-          break;
-        }
+        if (strm.avail_in === 0) break;
       }
       return true;
     };
@@ -4386,7 +4249,7 @@ var require_inflate2 = __commonJS({
     };
     function inflate(input, options) {
       const inflator = new Inflate(options);
-      inflator.push(input, true);
+      inflator.push(input);
       if (inflator.err) throw inflator.msg || msg[inflator.err];
       return inflator.result;
     }
@@ -4422,16 +4285,1078 @@ var require_pako = __commonJS({
   }
 });
 
+// node_modules/ag-psd/dist/jpeg.js
+var require_jpeg = __commonJS({
+  "node_modules/ag-psd/dist/jpeg.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.decodeJpeg = decodeJpeg;
+    var dctZigZag = new Int32Array([
+      0,
+      1,
+      8,
+      16,
+      9,
+      2,
+      3,
+      10,
+      17,
+      24,
+      32,
+      25,
+      18,
+      11,
+      4,
+      5,
+      12,
+      19,
+      26,
+      33,
+      40,
+      48,
+      41,
+      34,
+      27,
+      20,
+      13,
+      6,
+      7,
+      14,
+      21,
+      28,
+      35,
+      42,
+      49,
+      56,
+      57,
+      50,
+      43,
+      36,
+      29,
+      22,
+      15,
+      23,
+      30,
+      37,
+      44,
+      51,
+      58,
+      59,
+      52,
+      45,
+      38,
+      31,
+      39,
+      46,
+      53,
+      60,
+      61,
+      54,
+      47,
+      55,
+      62,
+      63
+    ]);
+    var dctCos1 = 4017;
+    var dctSin1 = 799;
+    var dctCos3 = 3406;
+    var dctSin3 = 2276;
+    var dctCos6 = 1567;
+    var dctSin6 = 3784;
+    var dctSqrt2 = 5793;
+    var dctSqrt1d2 = 2896;
+    var maxResolutionInMP = 100;
+    var maxMemoryUsageBytes = 64 * 1024 * 1024;
+    var totalBytesAllocated = 0;
+    var memoryLimitBytes = maxMemoryUsageBytes;
+    function requestMemoryAllocation(increaseAmount) {
+      if (!isFinite(increaseAmount) || increaseAmount < 0)
+        throw new Error(`Invalid memory allocation size (${increaseAmount})`);
+      const totalMemoryImpactBytes = totalBytesAllocated + increaseAmount;
+      if (totalMemoryImpactBytes > memoryLimitBytes) {
+        const exceededAmount = Math.ceil((totalMemoryImpactBytes - memoryLimitBytes) / 1024 / 1024);
+        throw new Error(`Max memory limit exceeded by at least ${exceededAmount}MB`);
+      }
+      totalBytesAllocated = totalMemoryImpactBytes;
+    }
+    function buildHuffmanTable(codeLengths, values) {
+      let length = 16;
+      while (length > 0 && !codeLengths[length - 1])
+        length--;
+      const code = [{ children: [], index: 0 }];
+      let k = 0;
+      let p = code[0];
+      for (let i = 0; i < length; i++) {
+        for (let j = 0; j < codeLengths[i]; j++) {
+          p = code.pop();
+          p.children[p.index] = values[k];
+          while (p.index > 0) {
+            if (code.length === 0)
+              throw new Error("Could not recreate Huffman Table");
+            p = code.pop();
+          }
+          p.index++;
+          code.push(p);
+          while (code.length <= i) {
+            const q = { children: [], index: 0 };
+            code.push(q);
+            p.children[p.index] = q.children;
+            p = q;
+          }
+          k++;
+        }
+        if (i + 1 < length) {
+          const q = { children: [], index: 0 };
+          code.push(q);
+          p.children[p.index] = q.children;
+          p = q;
+        }
+      }
+      return code[0].children;
+    }
+    function decodeScan(data, offset, frame, components, resetInterval, spectralStart, spectralEnd, successivePrev, successive) {
+      const mcusPerLine = frame.mcusPerLine;
+      const progressive = frame.progressive;
+      const startOffset = offset;
+      let bitsData = 0;
+      let bitsCount = 0;
+      function readBit() {
+        if (bitsCount > 0) {
+          bitsCount--;
+          return bitsData >> bitsCount & 1;
+        }
+        bitsData = data[offset++];
+        if (bitsData == 255) {
+          const nextByte = data[offset++];
+          if (nextByte)
+            throw new Error(`unexpected marker: ${(bitsData << 8 | nextByte).toString(16)}`);
+        }
+        bitsCount = 7;
+        return bitsData >>> 7;
+      }
+      function decodeHuffman(tree) {
+        if (!tree)
+          throw new Error("Missing Huffman table");
+        let node = tree;
+        while (true) {
+          node = node[readBit()];
+          if (typeof node === "number")
+            return node;
+          if (node === void 0)
+            throw new Error("invalid huffman sequence");
+        }
+      }
+      function receive(length) {
+        let n = 0;
+        while (length > 0) {
+          n = n << 1 | readBit();
+          length--;
+        }
+        return n;
+      }
+      function receiveAndExtend(length) {
+        let n = receive(length);
+        if (n >= 1 << length - 1)
+          return n;
+        return n + (-1 << length) + 1;
+      }
+      function decodeBaseline(component2, zz) {
+        const t = decodeHuffman(component2.huffmanTableDC);
+        const diff = t === 0 ? 0 : receiveAndExtend(t);
+        zz[0] = component2.pred += diff;
+        let k = 1;
+        while (k < 64) {
+          const rs = decodeHuffman(component2.huffmanTableAC);
+          const s = rs & 15;
+          const r = rs >> 4;
+          if (s === 0) {
+            if (r < 15)
+              break;
+            k += 16;
+            continue;
+          }
+          k += r;
+          const z = dctZigZag[k];
+          zz[z] = receiveAndExtend(s);
+          k++;
+        }
+      }
+      function decodeDCFirst(component2, zz) {
+        const t = decodeHuffman(component2.huffmanTableDC);
+        const diff = t === 0 ? 0 : receiveAndExtend(t) << successive;
+        zz[0] = component2.pred += diff;
+      }
+      function decodeDCSuccessive(_component, zz) {
+        zz[0] |= readBit() << successive;
+      }
+      let eobrun = 0;
+      function decodeACFirst(component2, zz) {
+        if (eobrun > 0) {
+          eobrun--;
+          return;
+        }
+        let k = spectralStart, e = spectralEnd;
+        while (k <= e) {
+          const rs = decodeHuffman(component2.huffmanTableAC);
+          const s = rs & 15;
+          const r = rs >> 4;
+          if (s === 0) {
+            if (r < 15) {
+              eobrun = receive(r) + (1 << r) - 1;
+              break;
+            }
+            k += 16;
+            continue;
+          }
+          k += r;
+          const z = dctZigZag[k];
+          zz[z] = receiveAndExtend(s) * (1 << successive);
+          k++;
+        }
+      }
+      let successiveACState = 0;
+      let successiveACNextValue = 0;
+      function decodeACSuccessive(component2, zz) {
+        let k = spectralStart;
+        let e = spectralEnd;
+        let r = 0;
+        while (k <= e) {
+          const z = dctZigZag[k];
+          const direction = zz[z] < 0 ? -1 : 1;
+          switch (successiveACState) {
+            case 0:
+              const rs = decodeHuffman(component2.huffmanTableAC);
+              const s = rs & 15;
+              r = rs >> 4;
+              if (s === 0) {
+                if (r < 15) {
+                  eobrun = receive(r) + (1 << r);
+                  successiveACState = 4;
+                } else {
+                  r = 16;
+                  successiveACState = 1;
+                }
+              } else {
+                if (s !== 1)
+                  throw new Error("invalid ACn encoding");
+                successiveACNextValue = receiveAndExtend(s);
+                successiveACState = r ? 2 : 3;
+              }
+              continue;
+            case 1:
+            // skipping r zero items
+            case 2:
+              if (zz[z]) {
+                zz[z] += (readBit() << successive) * direction;
+              } else {
+                r--;
+                if (r === 0)
+                  successiveACState = successiveACState == 2 ? 3 : 0;
+              }
+              break;
+            case 3:
+              if (zz[z]) {
+                zz[z] += (readBit() << successive) * direction;
+              } else {
+                zz[z] = successiveACNextValue << successive;
+                successiveACState = 0;
+              }
+              break;
+            case 4:
+              if (zz[z]) {
+                zz[z] += (readBit() << successive) * direction;
+              }
+              break;
+          }
+          k++;
+        }
+        if (successiveACState === 4) {
+          eobrun--;
+          if (eobrun === 0)
+            successiveACState = 0;
+        }
+      }
+      function decodeMcu(component2, decode, mcu2, row, col) {
+        const mcuRow = mcu2 / mcusPerLine | 0;
+        const mcuCol = mcu2 % mcusPerLine;
+        const blockRow = mcuRow * component2.v + row;
+        const blockCol = mcuCol * component2.h + col;
+        if (component2.blocks[blockRow] === void 0)
+          return;
+        decode(component2, component2.blocks[blockRow][blockCol]);
+      }
+      function decodeBlock(component2, decode, mcu2) {
+        const blockRow = mcu2 / component2.blocksPerLine | 0;
+        const blockCol = mcu2 % component2.blocksPerLine;
+        if (component2.blocks[blockRow] === void 0)
+          return;
+        decode(component2, component2.blocks[blockRow][blockCol]);
+      }
+      const componentsLength = components.length;
+      let component;
+      let decodeFn;
+      if (progressive) {
+        if (spectralStart === 0) {
+          decodeFn = successivePrev === 0 ? decodeDCFirst : decodeDCSuccessive;
+        } else {
+          decodeFn = successivePrev === 0 ? decodeACFirst : decodeACSuccessive;
+        }
+      } else {
+        decodeFn = decodeBaseline;
+      }
+      let mcu = 0;
+      let mcuExpected;
+      if (componentsLength == 1) {
+        mcuExpected = components[0].blocksPerLine * components[0].blocksPerColumn;
+      } else {
+        mcuExpected = mcusPerLine * frame.mcusPerColumn;
+      }
+      if (!isFinite(mcuExpected) || mcuExpected < 0)
+        throw new Error("Invalid number of MCUs");
+      if (!resetInterval)
+        resetInterval = mcuExpected;
+      let h;
+      let v;
+      let marker;
+      while (mcu < mcuExpected) {
+        for (let i = 0; i < componentsLength; i++)
+          components[i].pred = 0;
+        eobrun = 0;
+        if (componentsLength == 1) {
+          component = components[0];
+          for (let n = 0; n < resetInterval; n++) {
+            decodeBlock(component, decodeFn, mcu);
+            mcu++;
+            if (mcu === mcuExpected)
+              break;
+          }
+        } else {
+          for (let n = 0; n < resetInterval; n++) {
+            for (let i = 0; i < componentsLength; i++) {
+              component = components[i];
+              h = component.h;
+              v = component.v;
+              for (let j = 0; j < v; j++) {
+                for (let k = 0; k < h; k++) {
+                  decodeMcu(component, decodeFn, mcu, j, k);
+                }
+              }
+            }
+            mcu++;
+            if (mcu === mcuExpected)
+              break;
+          }
+        }
+        if (mcu === mcuExpected) {
+          do {
+            if (data[offset] === 255) {
+              if (data[offset + 1] !== 0) {
+                break;
+              }
+            }
+            offset += 1;
+          } while (offset < data.length - 2);
+        }
+        bitsCount = 0;
+        marker = data[offset] << 8 | data[offset + 1];
+        if (marker < 65280)
+          throw new Error("marker was not found");
+        if (marker >= 65488 && marker <= 65495) {
+          offset += 2;
+        } else {
+          break;
+        }
+      }
+      return offset - startOffset;
+    }
+    function buildComponentData(component) {
+      const lines = [];
+      const blocksPerLine = component.blocksPerLine;
+      const blocksPerColumn = component.blocksPerColumn;
+      const samplesPerLine = blocksPerLine << 3;
+      const R = new Int32Array(64);
+      const r = new Uint8Array(64);
+      function quantizeAndInverse(zz, dataOut, dataIn) {
+        const qt = component.quantizationTable;
+        if (!qt)
+          throw new Error("Missing quantization table");
+        const p = dataIn;
+        for (let i = 0; i < 64; i++) {
+          p[i] = zz[i] * qt[i];
+        }
+        for (let i = 0; i < 8; ++i) {
+          const row = 8 * i;
+          if (p[1 + row] == 0 && p[2 + row] == 0 && p[3 + row] == 0 && p[4 + row] == 0 && p[5 + row] == 0 && p[6 + row] == 0 && p[7 + row] == 0) {
+            const t2 = dctSqrt2 * p[0 + row] + 512 >> 10;
+            p[0 + row] = t2;
+            p[1 + row] = t2;
+            p[2 + row] = t2;
+            p[3 + row] = t2;
+            p[4 + row] = t2;
+            p[5 + row] = t2;
+            p[6 + row] = t2;
+            p[7 + row] = t2;
+            continue;
+          }
+          let v0 = dctSqrt2 * p[0 + row] + 128 >> 8;
+          let v1 = dctSqrt2 * p[4 + row] + 128 >> 8;
+          let v2 = p[2 + row];
+          let v3 = p[6 + row];
+          let v4 = dctSqrt1d2 * (p[1 + row] - p[7 + row]) + 128 >> 8;
+          let v7 = dctSqrt1d2 * (p[1 + row] + p[7 + row]) + 128 >> 8;
+          let v5 = p[3 + row] << 4;
+          let v6 = p[5 + row] << 4;
+          let t = v0 - v1 + 1 >> 1;
+          v0 = v0 + v1 + 1 >> 1;
+          v1 = t;
+          t = v2 * dctSin6 + v3 * dctCos6 + 128 >> 8;
+          v2 = v2 * dctCos6 - v3 * dctSin6 + 128 >> 8;
+          v3 = t;
+          t = v4 - v6 + 1 >> 1;
+          v4 = v4 + v6 + 1 >> 1;
+          v6 = t;
+          t = v7 + v5 + 1 >> 1;
+          v5 = v7 - v5 + 1 >> 1;
+          v7 = t;
+          t = v0 - v3 + 1 >> 1;
+          v0 = v0 + v3 + 1 >> 1;
+          v3 = t;
+          t = v1 - v2 + 1 >> 1;
+          v1 = v1 + v2 + 1 >> 1;
+          v2 = t;
+          t = v4 * dctSin3 + v7 * dctCos3 + 2048 >> 12;
+          v4 = v4 * dctCos3 - v7 * dctSin3 + 2048 >> 12;
+          v7 = t;
+          t = v5 * dctSin1 + v6 * dctCos1 + 2048 >> 12;
+          v5 = v5 * dctCos1 - v6 * dctSin1 + 2048 >> 12;
+          v6 = t;
+          p[0 + row] = v0 + v7;
+          p[7 + row] = v0 - v7;
+          p[1 + row] = v1 + v6;
+          p[6 + row] = v1 - v6;
+          p[2 + row] = v2 + v5;
+          p[5 + row] = v2 - v5;
+          p[3 + row] = v3 + v4;
+          p[4 + row] = v3 - v4;
+        }
+        for (let i = 0; i < 8; ++i) {
+          const col = i;
+          if (p[1 * 8 + col] == 0 && p[2 * 8 + col] == 0 && p[3 * 8 + col] == 0 && p[4 * 8 + col] == 0 && p[5 * 8 + col] == 0 && p[6 * 8 + col] == 0 && p[7 * 8 + col] == 0) {
+            const t2 = dctSqrt2 * dataIn[i + 0] + 8192 >> 14;
+            p[0 * 8 + col] = t2;
+            p[1 * 8 + col] = t2;
+            p[2 * 8 + col] = t2;
+            p[3 * 8 + col] = t2;
+            p[4 * 8 + col] = t2;
+            p[5 * 8 + col] = t2;
+            p[6 * 8 + col] = t2;
+            p[7 * 8 + col] = t2;
+            continue;
+          }
+          let v0 = dctSqrt2 * p[0 * 8 + col] + 2048 >> 12;
+          let v1 = dctSqrt2 * p[4 * 8 + col] + 2048 >> 12;
+          let v2 = p[2 * 8 + col];
+          let v3 = p[6 * 8 + col];
+          let v4 = dctSqrt1d2 * (p[1 * 8 + col] - p[7 * 8 + col]) + 2048 >> 12;
+          let v7 = dctSqrt1d2 * (p[1 * 8 + col] + p[7 * 8 + col]) + 2048 >> 12;
+          let v5 = p[3 * 8 + col];
+          let v6 = p[5 * 8 + col];
+          let t = v0 - v1 + 1 >> 1;
+          v0 = v0 + v1 + 1 >> 1;
+          v1 = t;
+          t = v2 * dctSin6 + v3 * dctCos6 + 2048 >> 12;
+          v2 = v2 * dctCos6 - v3 * dctSin6 + 2048 >> 12;
+          v3 = t;
+          t = v4 - v6 + 1 >> 1;
+          v4 = v4 + v6 + 1 >> 1;
+          v6 = t;
+          t = v7 + v5 + 1 >> 1;
+          v5 = v7 - v5 + 1 >> 1;
+          v7 = t;
+          t = v0 - v3 + 1 >> 1;
+          v0 = v0 + v3 + 1 >> 1;
+          v3 = t;
+          t = v1 - v2 + 1 >> 1;
+          v1 = v1 + v2 + 1 >> 1;
+          v2 = t;
+          t = v4 * dctSin3 + v7 * dctCos3 + 2048 >> 12;
+          v4 = v4 * dctCos3 - v7 * dctSin3 + 2048 >> 12;
+          v7 = t;
+          t = v5 * dctSin1 + v6 * dctCos1 + 2048 >> 12;
+          v5 = v5 * dctCos1 - v6 * dctSin1 + 2048 >> 12;
+          v6 = t;
+          p[0 * 8 + col] = v0 + v7;
+          p[7 * 8 + col] = v0 - v7;
+          p[1 * 8 + col] = v1 + v6;
+          p[6 * 8 + col] = v1 - v6;
+          p[2 * 8 + col] = v2 + v5;
+          p[5 * 8 + col] = v2 - v5;
+          p[3 * 8 + col] = v3 + v4;
+          p[4 * 8 + col] = v3 - v4;
+        }
+        for (let i = 0; i < 64; ++i) {
+          const sample = 128 + (p[i] + 8 >> 4);
+          dataOut[i] = sample < 0 ? 0 : sample > 255 ? 255 : sample;
+        }
+      }
+      requestMemoryAllocation(samplesPerLine * blocksPerColumn * 8);
+      for (let blockRow = 0; blockRow < blocksPerColumn; blockRow++) {
+        const scanLine = blockRow << 3;
+        for (let i = 0; i < 8; i++)
+          lines.push(new Uint8Array(samplesPerLine));
+        for (let blockCol = 0; blockCol < blocksPerLine; blockCol++) {
+          quantizeAndInverse(component.blocks[blockRow][blockCol], r, R);
+          let offset = 0;
+          const sample = blockCol << 3;
+          for (let j = 0; j < 8; j++) {
+            const line = lines[scanLine + j];
+            for (let i = 0; i < 8; i++)
+              line[sample + i] = r[offset++];
+          }
+        }
+      }
+      return lines;
+    }
+    function clampTo8bit(a) {
+      return a < 0 ? 0 : a > 255 ? 255 : a;
+    }
+    function parse(data) {
+      const self = {
+        width: 0,
+        height: 0,
+        adobe: void 0,
+        components: [],
+        exifBuffer: void 0,
+        jfif: void 0
+      };
+      const maxResolutionInPixels = maxResolutionInMP * 1e3 * 1e3;
+      let offset = 0;
+      function readUint16() {
+        const value = data[offset] << 8 | data[offset + 1];
+        offset += 2;
+        return value;
+      }
+      function readDataBlock() {
+        const length = readUint16();
+        const array = data.subarray(offset, offset + length - 2);
+        offset += array.length;
+        return array;
+      }
+      function prepareComponents(frame2) {
+        let maxH = 0, maxV = 0;
+        for (let componentId in frame2.components) {
+          if (frame2.components.hasOwnProperty(componentId)) {
+            const component = frame2.components[componentId];
+            if (maxH < component.h)
+              maxH = component.h;
+            if (maxV < component.v)
+              maxV = component.v;
+          }
+        }
+        const mcusPerLine = Math.ceil(frame2.samplesPerLine / 8 / maxH);
+        const mcusPerColumn = Math.ceil(frame2.scanLines / 8 / maxV);
+        for (let componentId in frame2.components) {
+          if (frame2.components.hasOwnProperty(componentId)) {
+            const component = frame2.components[componentId];
+            const blocksPerLine = Math.ceil(Math.ceil(frame2.samplesPerLine / 8) * component.h / maxH);
+            const blocksPerColumn = Math.ceil(Math.ceil(frame2.scanLines / 8) * component.v / maxV);
+            const blocksPerLineForMcu = mcusPerLine * component.h;
+            const blocksPerColumnForMcu = mcusPerColumn * component.v;
+            const blocksToAllocate = blocksPerColumnForMcu * blocksPerLineForMcu;
+            const blocks = [];
+            requestMemoryAllocation(blocksToAllocate * 256);
+            for (let i = 0; i < blocksPerColumnForMcu; i++) {
+              const row = [];
+              for (let j = 0; j < blocksPerLineForMcu; j++) {
+                row.push(new Int32Array(64));
+              }
+              blocks.push(row);
+            }
+            component.blocksPerLine = blocksPerLine;
+            component.blocksPerColumn = blocksPerColumn;
+            component.blocks = blocks;
+          }
+        }
+        frame2.maxH = maxH;
+        frame2.maxV = maxV;
+        frame2.mcusPerLine = mcusPerLine;
+        frame2.mcusPerColumn = mcusPerColumn;
+      }
+      let jfif = null;
+      let adobe = null;
+      let frame = void 0;
+      let resetInterval = 0;
+      let quantizationTables = [];
+      let frames = [];
+      let huffmanTablesAC = [];
+      let huffmanTablesDC = [];
+      let fileMarker = readUint16();
+      let malformedDataOffset = -1;
+      if (fileMarker != 65496) {
+        throw new Error("SOI not found");
+      }
+      fileMarker = readUint16();
+      while (fileMarker != 65497) {
+        switch (fileMarker) {
+          case 65280:
+            break;
+          case 65504:
+          // APP0 (Application Specific)
+          case 65505:
+          // APP1
+          case 65506:
+          // APP2
+          case 65507:
+          // APP3
+          case 65508:
+          // APP4
+          case 65509:
+          // APP5
+          case 65510:
+          // APP6
+          case 65511:
+          // APP7
+          case 65512:
+          // APP8
+          case 65513:
+          // APP9
+          case 65514:
+          // APP10
+          case 65515:
+          // APP11
+          case 65516:
+          // APP12
+          case 65517:
+          // APP13
+          case 65518:
+          // APP14
+          case 65519:
+          // APP15
+          case 65534: {
+            const appData = readDataBlock();
+            if (fileMarker === 65534) {
+            }
+            if (fileMarker === 65504) {
+              if (appData[0] === 74 && appData[1] === 70 && appData[2] === 73 && appData[3] === 70 && appData[4] === 0) {
+                jfif = {
+                  version: { major: appData[5], minor: appData[6] },
+                  densityUnits: appData[7],
+                  xDensity: appData[8] << 8 | appData[9],
+                  yDensity: appData[10] << 8 | appData[11],
+                  thumbWidth: appData[12],
+                  thumbHeight: appData[13],
+                  thumbData: appData.subarray(14, 14 + 3 * appData[12] * appData[13])
+                };
+              }
+            }
+            if (fileMarker === 65505) {
+              if (appData[0] === 69 && appData[1] === 120 && appData[2] === 105 && appData[3] === 102 && appData[4] === 0) {
+                self.exifBuffer = appData.subarray(5, appData.length);
+              }
+            }
+            if (fileMarker === 65518) {
+              if (appData[0] === 65 && appData[1] === 100 && appData[2] === 111 && appData[3] === 98 && appData[4] === 101 && appData[5] === 0) {
+                adobe = {
+                  version: appData[6],
+                  flags0: appData[7] << 8 | appData[8],
+                  flags1: appData[9] << 8 | appData[10],
+                  transformCode: appData[11]
+                };
+              }
+            }
+            break;
+          }
+          case 65499: {
+            const quantizationTablesLength = readUint16();
+            const quantizationTablesEnd = quantizationTablesLength + offset - 2;
+            while (offset < quantizationTablesEnd) {
+              const quantizationTableSpec = data[offset++];
+              requestMemoryAllocation(64 * 4);
+              const tableData = new Int32Array(64);
+              if (quantizationTableSpec >> 4 === 0) {
+                for (let j = 0; j < 64; j++) {
+                  const z = dctZigZag[j];
+                  tableData[z] = data[offset++];
+                }
+              } else if (quantizationTableSpec >> 4 === 1) {
+                for (let j = 0; j < 64; j++) {
+                  const z = dctZigZag[j];
+                  tableData[z] = readUint16();
+                }
+              } else
+                throw new Error("DQT: invalid table spec");
+              quantizationTables[quantizationTableSpec & 15] = tableData;
+            }
+            break;
+          }
+          case 65472:
+          // SOF0 (Start of Frame, Baseline DCT)
+          case 65473:
+          // SOF1 (Start of Frame, Extended DCT)
+          case 65474: {
+            readUint16();
+            frame = {
+              extended: fileMarker === 65473,
+              progressive: fileMarker === 65474,
+              precision: data[offset++],
+              scanLines: readUint16(),
+              samplesPerLine: readUint16(),
+              components: {},
+              componentsOrder: [],
+              maxH: 0,
+              maxV: 0,
+              mcusPerLine: 0,
+              mcusPerColumn: 0
+            };
+            const pixelsInFrame = frame.scanLines * frame.samplesPerLine;
+            if (pixelsInFrame > maxResolutionInPixels) {
+              const exceededAmount = Math.ceil((pixelsInFrame - maxResolutionInPixels) / 1e6);
+              throw new Error(`maxResolutionInMP limit exceeded by ${exceededAmount}MP`);
+            }
+            const componentsCount = data[offset++];
+            if (!componentsCount)
+              throw new Error("SOF: no components in frame");
+            for (let i = 0; i < componentsCount; i++) {
+              const componentId = data[offset];
+              const h = data[offset + 1] >> 4;
+              const v = data[offset + 1] & 15;
+              if (h < 1 || h > 4 || v < 1 || v > 4)
+                throw new Error(`SOF: invalid sampling factors (${h}x${v})`);
+              const qId = data[offset + 2];
+              frame.componentsOrder.push(componentId);
+              frame.components[componentId] = {
+                h,
+                v,
+                quantizationIdx: qId,
+                blocksPerColumn: 0,
+                blocksPerLine: 0,
+                blocks: [],
+                pred: 0
+              };
+              offset += 3;
+            }
+            prepareComponents(frame);
+            frames.push(frame);
+            break;
+          }
+          case 65476: {
+            const huffmanLength = readUint16();
+            for (let i = 2; i < huffmanLength; ) {
+              const huffmanTableSpec = data[offset++];
+              const codeLengths = new Uint8Array(16);
+              let codeLengthSum = 0;
+              for (let j = 0; j < 16; j++, offset++) {
+                codeLengthSum += codeLengths[j] = data[offset];
+              }
+              requestMemoryAllocation(16 + codeLengthSum);
+              const huffmanValues = new Uint8Array(codeLengthSum);
+              for (let j = 0; j < codeLengthSum; j++, offset++) {
+                huffmanValues[j] = data[offset];
+              }
+              i += 17 + codeLengthSum;
+              const index = huffmanTableSpec & 15;
+              const table = huffmanTableSpec >> 4 === 0 ? huffmanTablesDC : huffmanTablesAC;
+              table[index] = buildHuffmanTable(codeLengths, huffmanValues);
+            }
+            break;
+          }
+          case 65501:
+            readUint16();
+            resetInterval = readUint16();
+            break;
+          case 65500:
+            readUint16();
+            readUint16();
+            break;
+          case 65498: {
+            if (!frame)
+              throw new Error("SOS: scan before frame header (SOF)");
+            readUint16();
+            const selectorsCount = data[offset++];
+            const components = [];
+            for (let i = 0; i < selectorsCount; i++) {
+              const componentId = data[offset++];
+              const component = frame.components[componentId];
+              if (!component)
+                throw new Error(`SOS: component ${componentId} not found in frame`);
+              const tableSpec = data[offset++];
+              component.huffmanTableDC = huffmanTablesDC[tableSpec >> 4];
+              component.huffmanTableAC = huffmanTablesAC[tableSpec & 15];
+              components.push(component);
+            }
+            const spectralStart = data[offset++];
+            const spectralEnd = data[offset++];
+            const successiveApproximation = data[offset++];
+            const processed = decodeScan(data, offset, frame, components, resetInterval, spectralStart, spectralEnd, successiveApproximation >> 4, successiveApproximation & 15);
+            offset += processed;
+            break;
+          }
+          case 65535:
+            if (data[offset] !== 255) {
+              offset--;
+            }
+            break;
+          default: {
+            if (data[offset - 3] == 255 && data[offset - 2] >= 192 && data[offset - 2] <= 254) {
+              offset -= 3;
+              break;
+            } else if (fileMarker === 224 || fileMarker == 225) {
+              if (malformedDataOffset !== -1) {
+                throw new Error(`first unknown JPEG marker at offset ${malformedDataOffset.toString(16)}, second unknown JPEG marker ${fileMarker.toString(16)} at offset ${(offset - 1).toString(16)}`);
+              }
+              malformedDataOffset = offset - 1;
+              const nextOffset = readUint16();
+              if (data[offset + nextOffset - 2] === 255) {
+                offset += nextOffset - 2;
+                break;
+              }
+            }
+            throw new Error("unknown JPEG marker " + fileMarker.toString(16));
+          }
+        }
+        fileMarker = readUint16();
+      }
+      if (frames.length != 1)
+        throw new Error("only single frame JPEGs supported");
+      for (let i = 0; i < frames.length; i++) {
+        const cp = frames[i].components;
+        for (const key of Object.keys(cp)) {
+          const component = cp[+key];
+          const table = quantizationTables[component.quantizationIdx];
+          if (!table)
+            throw new Error(`Missing quantization table ${component.quantizationIdx}`);
+          component.quantizationTable = table;
+        }
+      }
+      self.width = frame.samplesPerLine;
+      self.height = frame.scanLines;
+      self.jfif = jfif;
+      self.adobe = adobe;
+      self.components = [];
+      for (let i = 0; i < frame.componentsOrder.length; i++) {
+        const component = frame.components[frame.componentsOrder[i]];
+        self.components.push({
+          lines: buildComponentData(component),
+          scaleX: component.h / frame.maxH,
+          scaleY: component.v / frame.maxV
+        });
+      }
+      return self;
+    }
+    function getData(decoded) {
+      let offset = 0;
+      let colorTransform = false;
+      const width = decoded.width;
+      const height = decoded.height;
+      const dataLength = width * height * decoded.components.length;
+      requestMemoryAllocation(dataLength);
+      const data = new Uint8Array(dataLength);
+      switch (decoded.components.length) {
+        case 1: {
+          const component1 = decoded.components[0];
+          for (let y = 0; y < height; y++) {
+            const component1Line = component1.lines[0 | y * component1.scaleY];
+            for (let x = 0; x < width; x++) {
+              const Y = component1Line[0 | x * component1.scaleX];
+              data[offset++] = Y;
+            }
+          }
+          break;
+        }
+        case 2: {
+          const component1 = decoded.components[0];
+          const component2 = decoded.components[1];
+          for (let y = 0; y < height; y++) {
+            const component1Line = component1.lines[0 | y * component1.scaleY];
+            const component2Line = component2.lines[0 | y * component2.scaleY];
+            for (let x = 0; x < width; x++) {
+              const Y1 = component1Line[0 | x * component1.scaleX];
+              data[offset++] = Y1;
+              const Y2 = component2Line[0 | x * component2.scaleX];
+              data[offset++] = Y2;
+            }
+          }
+          break;
+        }
+        case 3: {
+          colorTransform = decoded.jfif ? true : decoded.adobe ? !!decoded.adobe.transformCode : true;
+          const component1 = decoded.components[0];
+          const component2 = decoded.components[1];
+          const component3 = decoded.components[2];
+          for (let y = 0; y < height; y++) {
+            const component1Line = component1.lines[0 | y * component1.scaleY];
+            const component2Line = component2.lines[0 | y * component2.scaleY];
+            const component3Line = component3.lines[0 | y * component3.scaleY];
+            for (let x = 0; x < width; x++) {
+              let Y, Cb, Cr, R, G, B;
+              if (!colorTransform) {
+                R = component1Line[0 | x * component1.scaleX];
+                G = component2Line[0 | x * component2.scaleX];
+                B = component3Line[0 | x * component3.scaleX];
+              } else {
+                Y = component1Line[0 | x * component1.scaleX];
+                Cb = component2Line[0 | x * component2.scaleX];
+                Cr = component3Line[0 | x * component3.scaleX];
+                R = clampTo8bit(Y + 1.402 * (Cr - 128));
+                G = clampTo8bit(Y - 0.3441363 * (Cb - 128) - 0.71413636 * (Cr - 128));
+                B = clampTo8bit(Y + 1.772 * (Cb - 128));
+              }
+              data[offset++] = R;
+              data[offset++] = G;
+              data[offset++] = B;
+            }
+          }
+          break;
+        }
+        case 4: {
+          if (!decoded.adobe)
+            throw new Error("Unsupported color mode (4 components)");
+          colorTransform = false;
+          if (decoded.adobe && decoded.adobe.transformCode)
+            colorTransform = true;
+          const component1 = decoded.components[0];
+          const component2 = decoded.components[1];
+          const component3 = decoded.components[2];
+          const component4 = decoded.components[3];
+          for (let y = 0; y < height; y++) {
+            const component1Line = component1.lines[0 | y * component1.scaleY];
+            const component2Line = component2.lines[0 | y * component2.scaleY];
+            const component3Line = component3.lines[0 | y * component3.scaleY];
+            const component4Line = component4.lines[0 | y * component4.scaleY];
+            for (let x = 0; x < width; x++) {
+              let Y, Cb, Cr, K, C, M, Ye;
+              if (!colorTransform) {
+                C = component1Line[0 | x * component1.scaleX];
+                M = component2Line[0 | x * component2.scaleX];
+                Ye = component3Line[0 | x * component3.scaleX];
+                K = component4Line[0 | x * component4.scaleX];
+              } else {
+                Y = component1Line[0 | x * component1.scaleX];
+                Cb = component2Line[0 | x * component2.scaleX];
+                Cr = component3Line[0 | x * component3.scaleX];
+                K = component4Line[0 | x * component4.scaleX];
+                C = 255 - clampTo8bit(Y + 1.402 * (Cr - 128));
+                M = 255 - clampTo8bit(Y - 0.3441363 * (Cb - 128) - 0.71413636 * (Cr - 128));
+                Ye = 255 - clampTo8bit(Y + 1.772 * (Cb - 128));
+              }
+              data[offset++] = 255 - C;
+              data[offset++] = 255 - M;
+              data[offset++] = 255 - Ye;
+              data[offset++] = 255 - K;
+            }
+          }
+          break;
+        }
+        default:
+          throw new Error("Unsupported color mode");
+      }
+      return data;
+    }
+    function decodeJpeg(encoded, createImageData, memoryLimit) {
+      totalBytesAllocated = 0;
+      memoryLimitBytes = memoryLimit === void 0 ? maxMemoryUsageBytes : Math.min(maxMemoryUsageBytes, Math.max(0, memoryLimit));
+      if (encoded.length === 0)
+        throw new Error("Empty jpeg buffer");
+      const decoded = parse(encoded);
+      requestMemoryAllocation(decoded.width * decoded.height * 4);
+      const data = getData(decoded);
+      const imageData = createImageData(decoded.width, decoded.height);
+      const width = imageData.width;
+      const height = imageData.height;
+      const imageDataArray = imageData.data;
+      let i = 0;
+      let j = 0;
+      switch (decoded.components.length) {
+        case 1:
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              const Y = data[i++];
+              imageDataArray[j++] = Y;
+              imageDataArray[j++] = Y;
+              imageDataArray[j++] = Y;
+              imageDataArray[j++] = 255;
+            }
+          }
+          break;
+        case 2:
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              const Y = data[i++];
+              const A = data[i++];
+              imageDataArray[j++] = Y;
+              imageDataArray[j++] = Y;
+              imageDataArray[j++] = Y;
+              imageDataArray[j++] = A;
+            }
+          }
+          break;
+        case 3:
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              const R = data[i++];
+              const G = data[i++];
+              const B = data[i++];
+              imageDataArray[j++] = R;
+              imageDataArray[j++] = G;
+              imageDataArray[j++] = B;
+              imageDataArray[j++] = 255;
+            }
+          }
+          break;
+        case 4:
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              const C = data[i++];
+              const M = data[i++];
+              const Y = data[i++];
+              const K = data[i++];
+              const R = 255 - clampTo8bit(C * (1 - K / 255) + K);
+              const G = 255 - clampTo8bit(M * (1 - K / 255) + K);
+              const B = 255 - clampTo8bit(Y * (1 - K / 255) + K);
+              imageDataArray[j++] = R;
+              imageDataArray[j++] = G;
+              imageDataArray[j++] = B;
+              imageDataArray[j++] = 255;
+            }
+          }
+          break;
+        default:
+          throw new Error("Unsupported color mode");
+      }
+      return imageData;
+    }
+  }
+});
+
 // node_modules/ag-psd/dist/helpers.js
 var require_helpers = __commonJS({
   "node_modules/ag-psd/dist/helpers.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.initializeCanvas = exports.createImageData = exports.createCanvasFromData = exports.createCanvas = exports.writeDataZipWithoutPrediction = exports.writeDataRLE = exports.writeDataRaw = exports.decodeBitmap = exports.imageDataToCanvas = exports.resetImageData = exports.hasAlpha = exports.clamp = exports.offsetForChannel = exports.Compression = exports.ChannelID = exports.MaskParams = exports.LayerMaskFlags = exports.ColorSpace = exports.createEnum = exports.revMap = exports.largeAdditionalInfoKeys = exports.layerColors = exports.toBlendMode = exports.fromBlendMode = exports.RAW_IMAGE_DATA = exports.MOCK_HANDLERS = void 0;
-    var base64_js_1 = require_base64_js();
+    exports.createImageData = exports.createCanvas = exports.MaskParams = exports.LayerMaskFlags = exports.ColorSpace = exports.largeAdditionalInfoKeys = exports.largeAdditionalInfoKeysObserved = exports.layerColors = exports.toBlendMode = exports.fromBlendMode = exports.MOCK_HANDLERS = void 0;
+    exports.revMap = revMap;
+    exports.createEnum = createEnum;
+    exports.offsetForChannel = offsetForChannel;
+    exports.normalizeLabAB = normalizeLabAB;
+    exports.denormalizeLabAB = denormalizeLabAB;
+    exports.clamp = clamp;
+    exports.hasAlpha = hasAlpha;
+    exports.cmykToRgbValues = cmykToRgbValues;
+    exports.rgbToCmykValues = rgbToCmykValues;
+    exports.resetImageData = resetImageData;
+    exports.imageDataToCanvas = imageDataToCanvas;
+    exports.decodeBitmap = decodeBitmap;
+    exports.writeDataRaw = writeDataRaw;
+    exports.writeDataRLE = writeDataRLE;
+    exports.planarToBytes = planarToBytes;
+    exports.writeDataRLEBytes = writeDataRLEBytes;
+    exports.writeDataZipWithPrediction = writeDataZipWithPrediction;
+    exports.writeDataZipWithoutPrediction = writeDataZipWithoutPrediction;
+    exports.createCanvasFromData = createCanvasFromData;
+    exports.initializeCanvas = initializeCanvas2;
     var pako_1 = require_pako();
+    var jpeg_1 = require_jpeg();
     exports.MOCK_HANDLERS = false;
-    exports.RAW_IMAGE_DATA = false;
     exports.fromBlendMode = {};
     exports.toBlendMode = {
       "pass": "pass through",
@@ -4463,9 +5388,7 @@ var require_helpers = __commonJS({
       "colr": "color",
       "lum ": "luminosity"
     };
-    Object.keys(exports.toBlendMode).forEach(function(key) {
-      return exports.fromBlendMode[exports.toBlendMode[key]] = key;
-    });
+    Object.keys(exports.toBlendMode).forEach((key) => exports.fromBlendMode[exports.toBlendMode[key]] = key);
     exports.layerColors = [
       "none",
       "red",
@@ -4474,8 +5397,13 @@ var require_helpers = __commonJS({
       "green",
       "blue",
       "violet",
-      "gray"
+      "gray",
+      "seafoam",
+      "indigo",
+      "magenta",
+      "fuchsia"
     ];
+    exports.largeAdditionalInfoKeysObserved = ["lnk3", "lnkE", "pths", "extd", "extn", "FELS", "artd"];
     exports.largeAdditionalInfoKeys = [
       // from documentation
       "LMsk",
@@ -4492,32 +5420,35 @@ var require_helpers = __commonJS({
       "FXid",
       "PxSD",
       // from guessing
-      "cinf"
+      "cinf",
+      ...exports.largeAdditionalInfoKeysObserved
     ];
     function revMap(map) {
-      var result = {};
-      Object.keys(map).forEach(function(key) {
-        return result[map[key]] = key;
-      });
+      const result = {};
+      Object.keys(map).forEach((key) => result[map[key]] = key);
       return result;
     }
-    exports.revMap = revMap;
     function createEnum(prefix, def, map) {
-      var rev2 = revMap(map);
-      var decode = function(val) {
-        var value = val.split(".")[1];
-        if (value && !rev2[value])
-          throw new Error("Unrecognized value for enum: '".concat(val, "'"));
+      const rev2 = revMap(map);
+      const decode = (val) => {
+        const value = val.split(".")[1];
+        if (value && !rev2[value]) {
+          if (Object.prototype.hasOwnProperty.call(map, value))
+            return value;
+          const spaced = value.replace(/([A-Z])/g, " $1").toLowerCase();
+          if (Object.prototype.hasOwnProperty.call(map, spaced))
+            return spaced;
+          throw new Error(`Unrecognized value for enum: '${val}'`);
+        }
         return rev2[value] || def;
       };
-      var encode = function(val) {
+      const encode = (val) => {
         if (val && !map[val])
-          throw new Error("Invalid value for enum: '".concat(val, "'"));
-        return "".concat(prefix, ".").concat(map[val] || map[def]);
+          throw new Error(`Invalid value for enum: '${val}'`);
+        return `${prefix}.${val ? map[val] : map[def]}`;
       };
       return { decode, encode };
     }
-    exports.createEnum = createEnum;
     var ColorSpace;
     (function(ColorSpace2) {
       ColorSpace2[ColorSpace2["RGB"] = 0] = "RGB";
@@ -4525,7 +5456,7 @@ var require_helpers = __commonJS({
       ColorSpace2[ColorSpace2["CMYK"] = 2] = "CMYK";
       ColorSpace2[ColorSpace2["Lab"] = 7] = "Lab";
       ColorSpace2[ColorSpace2["Grayscale"] = 8] = "Grayscale";
-    })(ColorSpace = exports.ColorSpace || (exports.ColorSpace = {}));
+    })(ColorSpace || (exports.ColorSpace = ColorSpace = {}));
     var LayerMaskFlags;
     (function(LayerMaskFlags2) {
       LayerMaskFlags2[LayerMaskFlags2["PositionRelativeToLayer"] = 1] = "PositionRelativeToLayer";
@@ -4533,31 +5464,14 @@ var require_helpers = __commonJS({
       LayerMaskFlags2[LayerMaskFlags2["InvertLayerMaskWhenBlending"] = 4] = "InvertLayerMaskWhenBlending";
       LayerMaskFlags2[LayerMaskFlags2["LayerMaskFromRenderingOtherData"] = 8] = "LayerMaskFromRenderingOtherData";
       LayerMaskFlags2[LayerMaskFlags2["MaskHasParametersAppliedToIt"] = 16] = "MaskHasParametersAppliedToIt";
-    })(LayerMaskFlags = exports.LayerMaskFlags || (exports.LayerMaskFlags = {}));
+    })(LayerMaskFlags || (exports.LayerMaskFlags = LayerMaskFlags = {}));
     var MaskParams;
     (function(MaskParams2) {
       MaskParams2[MaskParams2["UserMaskDensity"] = 1] = "UserMaskDensity";
       MaskParams2[MaskParams2["UserMaskFeather"] = 2] = "UserMaskFeather";
       MaskParams2[MaskParams2["VectorMaskDensity"] = 4] = "VectorMaskDensity";
       MaskParams2[MaskParams2["VectorMaskFeather"] = 8] = "VectorMaskFeather";
-    })(MaskParams = exports.MaskParams || (exports.MaskParams = {}));
-    var ChannelID;
-    (function(ChannelID2) {
-      ChannelID2[ChannelID2["Color0"] = 0] = "Color0";
-      ChannelID2[ChannelID2["Color1"] = 1] = "Color1";
-      ChannelID2[ChannelID2["Color2"] = 2] = "Color2";
-      ChannelID2[ChannelID2["Color3"] = 3] = "Color3";
-      ChannelID2[ChannelID2["Transparency"] = -1] = "Transparency";
-      ChannelID2[ChannelID2["UserMask"] = -2] = "UserMask";
-      ChannelID2[ChannelID2["RealUserMask"] = -3] = "RealUserMask";
-    })(ChannelID = exports.ChannelID || (exports.ChannelID = {}));
-    var Compression;
-    (function(Compression2) {
-      Compression2[Compression2["RawData"] = 0] = "RawData";
-      Compression2[Compression2["RleCompressed"] = 1] = "RleCompressed";
-      Compression2[Compression2["ZipWithoutPrediction"] = 2] = "ZipWithoutPrediction";
-      Compression2[Compression2["ZipWithPrediction"] = 3] = "ZipWithPrediction";
-    })(Compression = exports.Compression || (exports.Compression = {}));
+    })(MaskParams || (exports.MaskParams = MaskParams = {}));
     function offsetForChannel(channelId, cmyk) {
       switch (channelId) {
         case 0:
@@ -4574,51 +5488,170 @@ var require_helpers = __commonJS({
           return channelId + 1;
       }
     }
-    exports.offsetForChannel = offsetForChannel;
+    function normalizeLabAB(value, scale = 1) {
+      return value < 0 ? value / (128 * scale) : value / (127 * scale);
+    }
+    function denormalizeLabAB(value, scale = 1) {
+      return value < 0 ? value * (128 * scale) : value * (127 * scale);
+    }
     function clamp(value, min, max) {
       return value < min ? min : value > max ? max : value;
     }
-    exports.clamp = clamp;
     function hasAlpha(data) {
-      var size = data.width * data.height * 4;
-      for (var i = 3; i < size; i += 4) {
-        if (data.data[i] !== 255) {
+      const size = data.width * data.height * 4;
+      const max = data.data instanceof Float32Array ? 1 : data.data instanceof Uint16Array ? 65535 : 255;
+      for (let i = 3; i < size; i += 4) {
+        if (data.data[i] !== max) {
           return true;
         }
       }
       return false;
     }
-    exports.hasAlpha = hasAlpha;
-    function resetImageData(_a2) {
-      var data = _a2.data;
-      var alpha = data instanceof Float32Array ? 1 : data instanceof Uint16Array ? 65535 : 255;
-      for (var p = 0, size = data.length | 0; p < size; p = p + 4 | 0) {
+    function cmykToRgbValues(c, m, y, k, out) {
+      out[0] = 255 + c * (-4.387332384609988 * c + 54.48615194189176 * m + 18.82290502165302 * y + 212.25662451639585 * k - 285.2331026137004) + m * (1.7149763477362134 * m - 5.6096736904047315 * y - 17.873870861415444 * k - 5.497006427196366) + y * (-2.5217340131683033 * y - 21.248923337353073 * k + 17.5119270841813) + k * (-21.86122147463605 * k - 189.48180835922747);
+      out[1] = 255 + c * (8.841041422036149 * c + 60.118027045597366 * m + 6.871425592049007 * y + 31.159100130055922 * k - 79.2970844816548) + m * (-15.310361306967817 * m + 17.575251261109482 * y + 131.35250912493976 * k - 190.9453302588951) + y * (4.444339102852739 * y + 9.8632861493405 * k - 24.86741582555878) + k * (-20.737325471181034 * k - 187.80453709719578);
+      out[2] = 255 + c * (0.8842522430003296 * c + 8.078677503112928 * m + 30.89978309703729 * y - 0.23883238689178934 * k - 14.183576799673286) + m * (10.49593273432072 * m + 63.02378494754052 * y + 50.606957656360734 * k - 112.23884253719248) + y * (0.03296041114873217 * y + 115.60384449646641 * k - 193.58209356861505) + k * (-22.33816807309886 * k - 180.12613974708367);
+    }
+    var clamp01 = (v) => v < 0 ? 0 : v > 1 ? 1 : v;
+    function solveCmy(r, g, b, k, x) {
+      const f = [0, 0, 0], f2 = [0, 0, 0], e = [0, 0, 0];
+      const J = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+      const h = 1e-4;
+      for (let iteration = 0; iteration < 20; iteration++) {
+        cmykToRgbValues(x[0], x[1], x[2], k, f);
+        e[0] = f[0] - r;
+        e[1] = f[1] - g;
+        e[2] = f[2] - b;
+        if (e[0] * e[0] + e[1] * e[1] + e[2] * e[2] < 1e-6)
+          break;
+        for (let j = 0; j < 3; j++) {
+          const s = x[j];
+          x[j] = s + h;
+          cmykToRgbValues(x[0], x[1], x[2], k, f2);
+          x[j] = s;
+          for (let i = 0; i < 3; i++)
+            J[i][j] = (f2[i] - f[i]) / h;
+        }
+        const [[a, b_, c], [d, e_, f_], [g_, h_, i_]] = J;
+        const det = a * (e_ * i_ - f_ * h_) - b_ * (d * i_ - f_ * g_) + c * (d * h_ - e_ * g_);
+        if (Math.abs(det) < 1e-12)
+          break;
+        const inverse = [
+          [e_ * i_ - f_ * h_, c * h_ - b_ * i_, b_ * f_ - c * e_],
+          [f_ * g_ - d * i_, a * i_ - c * g_, c * d - a * f_],
+          [d * h_ - e_ * g_, b_ * g_ - a * h_, a * e_ - b_ * d]
+        ];
+        let changed = 0;
+        for (let j = 0; j < 3; j++) {
+          const delta = -(inverse[j][0] * e[0] + inverse[j][1] * e[1] + inverse[j][2] * e[2]) / det;
+          const value = clamp01(x[j] + delta);
+          changed += Math.abs(value - x[j]);
+          x[j] = value;
+        }
+        if (changed < 1e-9)
+          break;
+      }
+      cmykToRgbValues(x[0], x[1], x[2], k, f);
+      return (f[0] - r) * (f[0] - r) + (f[1] - g) * (f[1] - g) + (f[2] - b) * (f[2] - b);
+    }
+    function rgbToCmykExact(r, g, b, out) {
+      const max = Math.max(r, g, b) / 255;
+      const blackGeneration = Math.pow(clamp01((1 - max - 0.2) / 0.8), 1.3);
+      const x = [0, 0, 0];
+      let bestScore = Infinity, bestError = Infinity;
+      const tryBlack = (k) => {
+        x[0] = clamp01(1 - r / 255 - k);
+        x[1] = clamp01(1 - g / 255 - k);
+        x[2] = clamp01(1 - b / 255 - k);
+        const error = solveCmy(r, g, b, k, x);
+        const score = Math.max(error, 0.1) + Math.abs(k - blackGeneration) * 0.01;
+        if (score < bestScore) {
+          bestScore = score;
+          bestError = error;
+          out[0] = x[0];
+          out[1] = x[1];
+          out[2] = x[2];
+          out[3] = k;
+        }
+      };
+      tryBlack(blackGeneration);
+      if (bestError > 0.1) {
+        for (let i = 0; i <= 10; i++)
+          tryBlack(i / 10);
+      }
+      if (bestError > 0.1) {
+        const k = out[3];
+        for (let i = -5; i <= 5; i++)
+          tryBlack(clamp01(k + i / 100));
+      }
+    }
+    var cmykLutSize = 33;
+    var cmykLut;
+    function getCmykLut() {
+      if (!cmykLut) {
+        const n = cmykLutSize;
+        const lut = new Float32Array(n * n * n * 4);
+        const out = [0, 0, 0, 0];
+        for (let r = 0, o = 0; r < n; r++) {
+          for (let g = 0; g < n; g++) {
+            for (let b = 0; b < n; b++, o += 4) {
+              rgbToCmykExact(r * 255 / (n - 1), g * 255 / (n - 1), b * 255 / (n - 1), out);
+              lut[o] = out[0];
+              lut[o + 1] = out[1];
+              lut[o + 2] = out[2];
+              lut[o + 3] = out[3];
+            }
+          }
+        }
+        cmykLut = lut;
+      }
+      return cmykLut;
+    }
+    function rgbToCmykValues(r, g, b, out) {
+      const lut = getCmykLut();
+      const n1 = cmykLutSize - 1;
+      const fr = clamp01(r) * n1, fg = clamp01(g) * n1, fb = clamp01(b) * n1;
+      const r0 = Math.min(n1 - 1, Math.floor(fr)), g0 = Math.min(n1 - 1, Math.floor(fg)), b0 = Math.min(n1 - 1, Math.floor(fb));
+      const dr = fr - r0, dg = fg - g0, db = fb - b0;
+      out[0] = out[1] = out[2] = out[3] = 0;
+      for (let i = 0; i < 8; i++) {
+        const ir = i >> 2, ig = i >> 1 & 1, ib = i & 1;
+        const w = (ir ? dr : 1 - dr) * (ig ? dg : 1 - dg) * (ib ? db : 1 - db);
+        const o = (((r0 + ir) * cmykLutSize + g0 + ig) * cmykLutSize + b0 + ib) * 4;
+        out[0] += w * lut[o];
+        out[1] += w * lut[o + 1];
+        out[2] += w * lut[o + 2];
+        out[3] += w * lut[o + 3];
+      }
+    }
+    function resetImageData({ data }) {
+      const alpha = data instanceof Float32Array ? 1 : data instanceof Uint16Array ? 65535 : 255;
+      for (let p = 0, size = data.length | 0; p < size; p = p + 4 | 0) {
         data[p + 0] = 0;
         data[p + 1] = 0;
         data[p + 2] = 0;
         data[p + 3] = alpha;
       }
     }
-    exports.resetImageData = resetImageData;
     function imageDataToCanvas(pixelData) {
-      var canvas = (0, exports.createCanvas)(pixelData.width, pixelData.height);
-      var imageData;
+      const canvas = (0, exports.createCanvas)(pixelData.width, pixelData.height);
+      let imageData;
       if (pixelData.data instanceof Uint8ClampedArray) {
         imageData = pixelData;
       } else {
         imageData = (0, exports.createImageData)(pixelData.width, pixelData.height);
-        var src = pixelData.data;
-        var dst = imageData.data;
+        const src = pixelData.data;
+        const dst = imageData.data;
         if (src instanceof Float32Array) {
-          for (var i = 0, size = src.length; i < size; i += 4) {
+          for (let i = 0, size = src.length; i < size; i += 4) {
             dst[i + 0] = Math.round(Math.pow(src[i + 0], 1 / 2.2) * 255);
             dst[i + 1] = Math.round(Math.pow(src[i + 1], 1 / 2.2) * 255);
             dst[i + 2] = Math.round(Math.pow(src[i + 2], 1 / 2.2) * 255);
             dst[i + 3] = Math.round(src[i + 3] * 255);
           }
         } else {
-          var shift = src instanceof Uint16Array ? 8 : 0;
-          for (var i = 0, size = src.length; i < size; i++) {
+          const shift = src instanceof Uint16Array ? 8 : 0;
+          for (let i = 0, size = src.length; i < size; i++) {
             dst[i] = src[i] >>> shift;
           }
         }
@@ -4626,15 +5659,14 @@ var require_helpers = __commonJS({
       canvas.getContext("2d").putImageData(imageData, 0, 0);
       return canvas;
     }
-    exports.imageDataToCanvas = imageDataToCanvas;
     function decodeBitmap(input, output, width, height) {
       if (!(input instanceof Uint8Array || input instanceof Uint8ClampedArray))
         throw new Error("Invalid bit depth");
-      for (var y = 0, p = 0, o = 0; y < height; y++) {
-        for (var x = 0; x < width; ) {
-          var b = input[o++];
-          for (var i = 0; i < 8 && x < width; i++, x++, p += 4) {
-            var v = b & 128 ? 0 : 255;
+      for (let y = 0, p = 0, o = 0; y < height; y++) {
+        for (let x = 0; x < width; ) {
+          let b = input[o++];
+          for (let i = 0; i < 8 && x < width; i++, x++, p += 4) {
+            const v = b & 128 ? 0 : 255;
             b = b << 1;
             output[p + 0] = v;
             output[p + 1] = v;
@@ -4644,41 +5676,37 @@ var require_helpers = __commonJS({
         }
       }
     }
-    exports.decodeBitmap = decodeBitmap;
     function writeDataRaw(data, offset, width, height) {
       if (!width || !height)
         return void 0;
-      var array = new Uint8Array(width * height);
-      for (var i = 0; i < array.length; i++) {
+      const array = new Uint8Array(width * height);
+      for (let i = 0; i < array.length; i++) {
         array[i] = data.data[i * 4 + offset];
       }
       return array;
     }
-    exports.writeDataRaw = writeDataRaw;
-    function writeDataRLE(buffer, _a2, offsets, large) {
-      var data = _a2.data, width = _a2.width, height = _a2.height;
+    function writeDataRLE(buffer, { data, width, height }, offsets, large) {
       if (!width || !height)
-        return void 0;
-      var stride = 4 * width | 0;
-      var ol = 0;
-      var o = offsets.length * (large ? 4 : 2) * height | 0;
-      for (var _i = 0, offsets_1 = offsets; _i < offsets_1.length; _i++) {
-        var offset = offsets_1[_i];
-        for (var y = 0, p = offset | 0; y < height; y++) {
-          var strideStart = y * stride | 0;
-          var strideEnd = strideStart + stride | 0;
-          var lastIndex = strideEnd + offset - 4 | 0;
-          var lastIndex2 = lastIndex - 4 | 0;
-          var startOffset = o;
+        return buffer.subarray(0, 0);
+      const stride = 4 * width | 0;
+      let ol = 0;
+      let o = offsets.length * (large ? 4 : 2) * height | 0;
+      for (const offset of offsets) {
+        for (let y = 0, p = offset | 0; y < height; y++) {
+          const strideStart = y * stride | 0;
+          const strideEnd = strideStart + stride | 0;
+          const lastIndex = strideEnd + offset - 4 | 0;
+          const lastIndex2 = lastIndex - 4 | 0;
+          const startOffset = o;
           for (p = strideStart + offset | 0; p < strideEnd; p = p + 4 | 0) {
             if (p < lastIndex2) {
-              var value1 = data[p];
+              let value1 = data[p];
               p = p + 4 | 0;
-              var value2 = data[p];
+              let value2 = data[p];
               p = p + 4 | 0;
-              var value3 = data[p];
+              let value3 = data[p];
               if (value1 === value2 && value1 === value3) {
-                var count = 3;
+                let count = 3;
                 while (count < 128 && p < lastIndex && data[p + 4 | 0] === value1) {
                   count = count + 1 | 0;
                   p = p + 4 | 0;
@@ -4686,9 +5714,9 @@ var require_helpers = __commonJS({
                 buffer[o++] = 1 - count;
                 buffer[o++] = value1;
               } else {
-                var countIndex = o;
-                var writeLast = true;
-                var count = 1;
+                const countIndex = o;
+                let writeLast = true;
+                let count = 1;
                 buffer[o++] = 0;
                 buffer[o++] = value1;
                 while (p < lastIndex && count < 128) {
@@ -4730,38 +5758,124 @@ var require_helpers = __commonJS({
               buffer[o++] = data[p];
             }
           }
-          var length_1 = o - startOffset;
+          if (o > buffer.length)
+            throw new Error(`RLE buffer too small (${buffer.length})`);
+          const length = o - startOffset;
           if (large) {
-            buffer[ol++] = length_1 >> 24 & 255;
-            buffer[ol++] = length_1 >> 16 & 255;
+            buffer[ol++] = length >> 24 & 255;
+            buffer[ol++] = length >> 16 & 255;
           }
-          buffer[ol++] = length_1 >> 8 & 255;
-          buffer[ol++] = length_1 & 255;
+          buffer[ol++] = length >> 8 & 255;
+          buffer[ol++] = length & 255;
         }
       }
-      return buffer.slice(0, o);
+      return buffer.subarray(0, o);
     }
-    exports.writeDataRLE = writeDataRLE;
-    function writeDataZipWithoutPrediction(_a2, offsets) {
-      var data = _a2.data, width = _a2.width, height = _a2.height;
-      var size = width * height;
-      var channel = new Uint8Array(size);
-      var buffers = [];
-      var totalLength = 0;
-      for (var _i = 0, offsets_2 = offsets; _i < offsets_2.length; _i++) {
-        var offset = offsets_2[_i];
-        for (var i = 0, o = offset; i < size; i++, o += 4) {
+    function planarToBytes(values) {
+      if (values instanceof Uint8Array)
+        return values;
+      const bytes = new Uint8Array(values.byteLength);
+      const view = new DataView(bytes.buffer);
+      if (values instanceof Uint16Array) {
+        for (let i = 0; i < values.length; i++)
+          view.setUint16(i * 2, values[i], false);
+      } else {
+        for (let i = 0; i < values.length; i++)
+          view.setFloat32(i * 4, values[i], false);
+      }
+      return bytes;
+    }
+    function writeDataRLEBytes(bytes, rowBytes, height, large) {
+      const countSize = large ? 4 : 2;
+      const buffer = new Uint8Array(height * (countSize + rowBytes + Math.ceil(rowBytes / 128)));
+      let o = countSize * height;
+      for (let y = 0; y < height; y++) {
+        const start = o;
+        const rowStart = y * rowBytes;
+        const rowEnd = rowStart + rowBytes;
+        let i = rowStart;
+        while (i < rowEnd) {
+          let run = 1;
+          while (i + run < rowEnd && run < 128 && bytes[i + run] === bytes[i])
+            run++;
+          if (run > 1) {
+            buffer[o++] = 257 - run;
+            buffer[o++] = bytes[i];
+            i += run;
+          } else {
+            const countIndex = o++;
+            let count = 0;
+            while (i < rowEnd && count < 128) {
+              if (i + 2 < rowEnd && bytes[i] === bytes[i + 1] && bytes[i] === bytes[i + 2])
+                break;
+              buffer[o++] = bytes[i++];
+              count++;
+            }
+            buffer[countIndex] = count - 1;
+          }
+        }
+        const length = o - start;
+        for (let j = 0; j < countSize; j++) {
+          buffer[y * countSize + j] = length >>> (countSize - j - 1) * 8 & 255;
+        }
+      }
+      return buffer.subarray(0, o);
+    }
+    function writeDataZipWithPrediction(values, width, height) {
+      let bytes;
+      if (values instanceof Uint8Array) {
+        bytes = new Uint8Array(width * height);
+        for (let y = 0, i = 0; y < height; y++) {
+          for (let x = 0, prev = 0; x < width; x++, i++) {
+            bytes[i] = values[i] - prev;
+            prev = values[i];
+          }
+        }
+      } else if (values instanceof Uint16Array) {
+        bytes = new Uint8Array(width * height * 2);
+        for (let y = 0, i = 0; y < height; y++) {
+          for (let x = 0, prev = 0; x < width; x++, i++) {
+            const delta = values[i] - prev & 65535;
+            bytes[i * 2] = delta >> 8;
+            bytes[i * 2 + 1] = delta & 255;
+            prev = values[i];
+          }
+        }
+      } else {
+        const rowBytes = width * 4;
+        const source = planarToBytes(values);
+        bytes = new Uint8Array(rowBytes * height);
+        for (let y = 0; y < height; y++) {
+          const row = y * rowBytes;
+          for (let x = 0; x < width; x++) {
+            for (let b = 0; b < 4; b++) {
+              bytes[row + b * width + x] = source[row + x * 4 + b];
+            }
+          }
+          for (let x = rowBytes - 1; x > 0; x--) {
+            bytes[row + x] -= bytes[row + x - 1];
+          }
+        }
+      }
+      return (0, pako_1.deflate)(bytes);
+    }
+    function writeDataZipWithoutPrediction({ data, width, height }, offsets) {
+      const size = width * height;
+      const channel = new Uint8Array(size);
+      const buffers = [];
+      let totalLength = 0;
+      for (const offset of offsets) {
+        for (let i = 0, o = offset; i < size; i++, o += 4) {
           channel[i] = data[o];
         }
-        var buffer = (0, pako_1.deflate)(channel);
+        const buffer = (0, pako_1.deflate)(channel);
         buffers.push(buffer);
         totalLength += buffer.byteLength;
       }
       if (buffers.length > 0) {
-        var buffer = new Uint8Array(totalLength);
-        var offset = 0;
-        for (var _b2 = 0, buffers_1 = buffers; _b2 < buffers_1.length; _b2++) {
-          var b = buffers_1[_b2];
+        const buffer = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const b of buffers) {
           buffer.set(b, offset);
           offset += b.byteLength;
         }
@@ -4770,45 +5884,145 @@ var require_helpers = __commonJS({
         return buffers[0];
       }
     }
-    exports.writeDataZipWithoutPrediction = writeDataZipWithoutPrediction;
-    var createCanvas3 = function() {
+    function createCanvasFromData(data, reader) {
+      const canvas = (0, exports.createCanvas)(100, 100);
+      try {
+        const context = canvas.getContext("2d");
+        const imageData = (0, jpeg_1.decodeJpeg)(data, (w, h) => context.createImageData(w, h), reader.totalMemoryLimit);
+        canvas.width = imageData.width;
+        canvas.height = imageData.height;
+        context.putImageData(imageData, 0, 0);
+        if (reader.totalMemoryLimit !== void 0)
+          reader.totalMemoryLimit -= imageData.width * imageData.height * 4;
+      } catch (e) {
+        reader.log("JPEG decompression error", e.message);
+      }
+      return canvas;
+    }
+    var createCanvas3 = () => {
       throw new Error("Canvas not initialized, use initializeCanvas method to set up createCanvas method");
     };
     exports.createCanvas = createCanvas3;
-    var createCanvasFromData = function() {
-      throw new Error("Canvas not initialized, use initializeCanvas method to set up createCanvasFromData method");
-    };
-    exports.createCanvasFromData = createCanvasFromData;
     var tempCanvas = void 0;
-    var createImageData = function(width, height) {
+    var createImageData = (width, height) => {
       if (!tempCanvas)
         tempCanvas = (0, exports.createCanvas)(1, 1);
       return tempCanvas.getContext("2d").createImageData(width, height);
     };
     exports.createImageData = createImageData;
     if (typeof document !== "undefined") {
-      exports.createCanvas = function(width, height) {
-        var canvas = document.createElement("canvas");
+      exports.createCanvas = (width, height) => {
+        const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
         return canvas;
       };
-      exports.createCanvasFromData = function(data) {
-        var image = new Image();
-        image.src = "data:image/jpeg;base64," + (0, base64_js_1.fromByteArray)(data);
-        var canvas = document.createElement("canvas");
-        canvas.width = image.width;
-        canvas.height = image.height;
-        canvas.getContext("2d").drawImage(image, 0, 0);
-        return canvas;
-      };
     }
-    function initializeCanvas2(createCanvasMethod, createCanvasFromDataMethod, createImageDataMethod) {
+    function initializeCanvas2(createCanvasMethod, createImageDataMethod) {
       exports.createCanvas = createCanvasMethod;
-      exports.createCanvasFromData = createCanvasFromDataMethod || exports.createCanvasFromData;
       exports.createImageData = createImageDataMethod || exports.createImageData;
     }
-    exports.initializeCanvas = initializeCanvas2;
+  }
+});
+
+// node_modules/base64-js/index.js
+var require_base64_js = __commonJS({
+  "node_modules/base64-js/index.js"(exports) {
+    "use strict";
+    exports.byteLength = byteLength;
+    exports.toByteArray = toByteArray;
+    exports.fromByteArray = fromByteArray;
+    var lookup = [];
+    var revLookup = [];
+    var Arr = typeof Uint8Array !== "undefined" ? Uint8Array : Array;
+    var code = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    for (i = 0, len = code.length; i < len; ++i) {
+      lookup[i] = code[i];
+      revLookup[code.charCodeAt(i)] = i;
+    }
+    var i;
+    var len;
+    revLookup["-".charCodeAt(0)] = 62;
+    revLookup["_".charCodeAt(0)] = 63;
+    function getLens(b64) {
+      var len2 = b64.length;
+      if (len2 % 4 > 0) {
+        throw new Error("Invalid string. Length must be a multiple of 4");
+      }
+      var validLen = b64.indexOf("=");
+      if (validLen === -1) validLen = len2;
+      var placeHoldersLen = validLen === len2 ? 0 : 4 - validLen % 4;
+      return [validLen, placeHoldersLen];
+    }
+    function byteLength(b64) {
+      var lens = getLens(b64);
+      var validLen = lens[0];
+      var placeHoldersLen = lens[1];
+      return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
+    }
+    function _byteLength(b64, validLen, placeHoldersLen) {
+      return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
+    }
+    function toByteArray(b64) {
+      var tmp;
+      var lens = getLens(b64);
+      var validLen = lens[0];
+      var placeHoldersLen = lens[1];
+      var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
+      var curByte = 0;
+      var len2 = placeHoldersLen > 0 ? validLen - 4 : validLen;
+      var i2;
+      for (i2 = 0; i2 < len2; i2 += 4) {
+        tmp = revLookup[b64.charCodeAt(i2)] << 18 | revLookup[b64.charCodeAt(i2 + 1)] << 12 | revLookup[b64.charCodeAt(i2 + 2)] << 6 | revLookup[b64.charCodeAt(i2 + 3)];
+        arr[curByte++] = tmp >> 16 & 255;
+        arr[curByte++] = tmp >> 8 & 255;
+        arr[curByte++] = tmp & 255;
+      }
+      if (placeHoldersLen === 2) {
+        tmp = revLookup[b64.charCodeAt(i2)] << 2 | revLookup[b64.charCodeAt(i2 + 1)] >> 4;
+        arr[curByte++] = tmp & 255;
+      }
+      if (placeHoldersLen === 1) {
+        tmp = revLookup[b64.charCodeAt(i2)] << 10 | revLookup[b64.charCodeAt(i2 + 1)] << 4 | revLookup[b64.charCodeAt(i2 + 2)] >> 2;
+        arr[curByte++] = tmp >> 8 & 255;
+        arr[curByte++] = tmp & 255;
+      }
+      return arr;
+    }
+    function tripletToBase64(num) {
+      return lookup[num >> 18 & 63] + lookup[num >> 12 & 63] + lookup[num >> 6 & 63] + lookup[num & 63];
+    }
+    function encodeChunk(uint8, start, end) {
+      var tmp;
+      var output = [];
+      for (var i2 = start; i2 < end; i2 += 3) {
+        tmp = (uint8[i2] << 16 & 16711680) + (uint8[i2 + 1] << 8 & 65280) + (uint8[i2 + 2] & 255);
+        output.push(tripletToBase64(tmp));
+      }
+      return output.join("");
+    }
+    function fromByteArray(uint8) {
+      var tmp;
+      var len2 = uint8.length;
+      var extraBytes = len2 % 3;
+      var parts = [];
+      var maxChunkLength = 16383;
+      for (var i2 = 0, len22 = len2 - extraBytes; i2 < len22; i2 += maxChunkLength) {
+        parts.push(encodeChunk(uint8, i2, i2 + maxChunkLength > len22 ? len22 : i2 + maxChunkLength));
+      }
+      if (extraBytes === 1) {
+        tmp = uint8[len2 - 1];
+        parts.push(
+          lookup[tmp >> 2] + lookup[tmp << 4 & 63] + "=="
+        );
+      } else if (extraBytes === 2) {
+        tmp = (uint8[len2 - 2] << 8) + uint8[len2 - 1];
+        parts.push(
+          lookup[tmp >> 10] + lookup[tmp >> 4 & 63] + lookup[tmp << 2 & 63] + "="
+        );
+      }
+      return parts.join("");
+    }
   }
 });
 
@@ -4817,7 +6031,10 @@ var require_utf8 = __commonJS({
   "node_modules/ag-psd/dist/utf8.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.decodeString = exports.encodeString = exports.encodeStringTo = exports.stringLengthInBytes = void 0;
+    exports.stringLengthInBytes = stringLengthInBytes;
+    exports.encodeStringTo = encodeStringTo;
+    exports.encodeString = encodeString;
+    exports.decodeString = decodeString;
     function charLengthInBytes(code) {
       if ((code & 4294967168) === 0) {
         return 1;
@@ -4829,27 +6046,40 @@ var require_utf8 = __commonJS({
         return 4;
       }
     }
+    function codePointAt(value, i) {
+      const code = value.charCodeAt(i);
+      if (code < 55296 || code > 57343)
+        return code;
+      if (code <= 56319 && i + 1 < value.length) {
+        const extra = value.charCodeAt(i + 1);
+        if (extra >= 56320 && extra <= 57343) {
+          return ((code & 1023) << 10) + (extra & 1023) + 65536;
+        }
+      }
+      return 65533;
+    }
     function stringLengthInBytes(value) {
-      var result = 0;
-      for (var i = 0; i < value.length; i++) {
-        var code = value.charCodeAt(i);
-        if (code >= 55296 && code <= 56319) {
-          if (i + 1 < value.length) {
-            var extra = value.charCodeAt(i + 1);
-            if ((extra & 64512) === 56320) {
-              i++;
-              result += charLengthInBytes(((code & 1023) << 10) + (extra & 1023) + 65536);
-            }
-          }
+      let result = 0;
+      for (let i = 0; i < value.length; i++) {
+        const code = value.charCodeAt(i);
+        if (code < 128) {
+          result += 1;
+        } else if (code < 2048) {
+          result += 2;
         } else {
-          result += charLengthInBytes(code);
+          const scalar = codePointAt(value, i);
+          if (scalar > 65535) {
+            result += 4;
+            i++;
+          } else {
+            result += 3;
+          }
         }
       }
       return result;
     }
-    exports.stringLengthInBytes = stringLengthInBytes;
     function writeCharacter(buffer, offset, code) {
-      var length = charLengthInBytes(code);
+      const length = charLengthInBytes(code);
       switch (length) {
         case 1:
           buffer[offset] = code;
@@ -4873,81 +6103,30 @@ var require_utf8 = __commonJS({
       return length;
     }
     function encodeStringTo(buffer, offset, value) {
-      for (var i = 0; i < value.length; i++) {
-        var code = value.charCodeAt(i);
-        if (code >= 55296 && code <= 56319) {
-          if (i + 1 < value.length) {
-            var extra = value.charCodeAt(i + 1);
-            if ((extra & 64512) === 56320) {
-              i++;
-              var fullCode = ((code & 1023) << 10) + (extra & 1023) + 65536;
-              offset += writeCharacter(buffer, offset, fullCode);
-            }
-          }
+      for (let i = 0; i < value.length; i++) {
+        const code = value.charCodeAt(i);
+        if (code < 128) {
+          buffer[offset++] = code;
         } else {
-          offset += writeCharacter(buffer, offset, code);
+          const scalar = codePointAt(value, i);
+          if (scalar > 65535)
+            i++;
+          offset += writeCharacter(buffer, offset, scalar);
         }
       }
       return offset;
     }
-    exports.encodeStringTo = encodeStringTo;
     function encodeString(value) {
       if (value.length > 1e3 && typeof TextEncoder !== "undefined") {
         return new TextEncoder().encode(value);
       }
-      var buffer = new Uint8Array(stringLengthInBytes(value));
+      const buffer = new Uint8Array(stringLengthInBytes(value));
       encodeStringTo(buffer, 0, value);
       return buffer;
     }
-    exports.encodeString = encodeString;
-    function continuationByte(buffer, index) {
-      if (index >= buffer.length) {
-        throw Error("Invalid byte index");
-      }
-      var continuationByte2 = buffer[index];
-      if ((continuationByte2 & 192) === 128) {
-        return continuationByte2 & 63;
-      } else {
-        throw Error("Invalid continuation byte");
-      }
-    }
     function decodeString(value) {
-      if (value.byteLength > 1e3 && typeof TextDecoder !== "undefined") {
-        return new TextDecoder().decode(value);
-      }
-      var result = [];
-      for (var i = 0; i < value.length; ) {
-        var byte1 = value[i++];
-        var code = void 0;
-        if ((byte1 & 128) === 0) {
-          code = byte1;
-        } else if ((byte1 & 224) === 192) {
-          var byte2 = continuationByte(value, i++);
-          code = (byte1 & 31) << 6 | byte2;
-          if (code < 128) {
-            throw Error("Invalid continuation byte");
-          }
-        } else if ((byte1 & 240) === 224) {
-          var byte2 = continuationByte(value, i++);
-          var byte3 = continuationByte(value, i++);
-          code = (byte1 & 15) << 12 | byte2 << 6 | byte3;
-          if (code < 2048) {
-            throw Error("Invalid continuation byte");
-          }
-          if (code >= 55296 && code <= 57343) {
-            throw Error("Lone surrogate U+".concat(code.toString(16).toUpperCase(), " is not a scalar value"));
-          }
-        } else if ((byte1 & 248) === 240) {
-          var byte2 = continuationByte(value, i++);
-          var byte3 = continuationByte(value, i++);
-          var byte4 = continuationByte(value, i++);
-          code = (byte1 & 15) << 18 | byte2 << 12 | byte3 << 6 | byte4;
-          if (code < 65536 || code > 1114111) {
-            throw Error("Invalid continuation byte");
-          }
-        } else {
-          throw Error("Invalid UTF-8 detected");
-        }
+      const result = [];
+      function pushCodePoint(code) {
         if (code > 65535) {
           code -= 65536;
           result.push(String.fromCharCode(code >>> 10 & 1023 | 55296));
@@ -4955,9 +6134,64 @@ var require_utf8 = __commonJS({
         }
         result.push(String.fromCharCode(code));
       }
+      let codePoint = 0;
+      let bytesSeen = 0;
+      let bytesNeeded = 0;
+      let lowerBoundary = 128;
+      let upperBoundary = 191;
+      for (let i = 0; i < value.length; i++) {
+        const byte = value[i];
+        if (bytesNeeded === 0) {
+          if (byte <= 127) {
+            pushCodePoint(byte);
+          } else if (byte >= 194 && byte <= 223) {
+            bytesNeeded = 1;
+            codePoint = byte & 31;
+          } else if (byte >= 224 && byte <= 239) {
+            if (byte === 224)
+              lowerBoundary = 160;
+            if (byte === 237)
+              upperBoundary = 159;
+            bytesNeeded = 2;
+            codePoint = byte & 15;
+          } else if (byte >= 240 && byte <= 244) {
+            if (byte === 240)
+              lowerBoundary = 144;
+            if (byte === 244)
+              upperBoundary = 143;
+            bytesNeeded = 3;
+            codePoint = byte & 7;
+          } else {
+            pushCodePoint(65533);
+          }
+          continue;
+        }
+        if (byte < lowerBoundary || byte > upperBoundary) {
+          codePoint = 0;
+          bytesNeeded = 0;
+          bytesSeen = 0;
+          lowerBoundary = 128;
+          upperBoundary = 191;
+          pushCodePoint(65533);
+          i--;
+          continue;
+        }
+        lowerBoundary = 128;
+        upperBoundary = 191;
+        codePoint = codePoint << 6 | byte & 63;
+        bytesSeen++;
+        if (bytesSeen !== bytesNeeded)
+          continue;
+        pushCodePoint(codePoint);
+        codePoint = 0;
+        bytesNeeded = 0;
+        bytesSeen = 0;
+      }
+      if (bytesNeeded !== 0) {
+        pushCodePoint(65533);
+      }
       return result.join("");
     }
-    exports.decodeString = decodeString;
   }
 });
 
@@ -4965,28 +6199,57 @@ var require_utf8 = __commonJS({
 var require_descriptor = __commonJS({
   "node_modules/ag-psd/dist/descriptor.js"(exports) {
     "use strict";
-    var __assign = exports && exports.__assign || function() {
-      __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-          s = arguments[i];
-          for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
+    var __rest = exports && exports.__rest || function(s, e) {
+      var t = {};
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+      if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+          if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+            t[p[i]] = s[p[i]];
         }
-        return t;
-      };
-      return __assign.apply(this, arguments);
+      return t;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.ESliceOrigin = exports.ESliceVertAlign = exports.ESliceHorzAlign = exports.ESliceType = exports.FrFl = exports.FStl = exports.ClrS = exports.gradientInterpolationMethodType = exports.stdTrackID = exports.animInterpStyleEnum = exports.GrdT = exports.IGSr = exports.BETE = exports.BESs = exports.bvlT = exports.BESl = exports.BlnM = exports.warpStyle = exports.Annt = exports.Ornt = exports.textGridding = exports.frac = exports.unitsValue = exports.unitsPercentF = exports.unitsPercent = exports.unitsAngle = exports.parseUnitsToNumber = exports.parseUnitsOrNumber = exports.parseUnits = exports.parsePercentOrAngle = exports.parsePercent = exports.parseAngle = exports.serializeColor = exports.parseColor = exports.serializeVectorContent = exports.parseVectorContent = exports.serializeTrackList = exports.parseTrackList = exports.parseEffects = exports.serializeEffects = exports.boundsToDescBounds = exports.descBoundsToBounds = exports.xyToHorzVrtc = exports.horzVrtcToXY = exports.writeVersionAndDescriptor = exports.readVersionAndDescriptor = exports.writeDescriptorStructure = exports.readDescriptorStructure = exports.readAsciiStringOrClassId = exports.setLogErrors = void 0;
-    exports.presetKindType = exports.prjM = exports.FlMd = exports.IntC = exports.IntE = exports.Drct = exports.WndM = exports.CntE = exports.FlCl = exports.ExtR = exports.ExtT = exports.DfsM = exports.blurType = exports.Lns = exports.MztT = exports.Chnl = exports.Dstr = exports.ZZTy = exports.Wvtp = exports.SphM = exports.RplS = exports.Cnvr = exports.UndA = exports.DspM = exports.SmBQ = exports.SmBM = exports.BlrQ = exports.BlrM = exports.strokeStyleLineAlignment = exports.strokeStyleLineJoinType = exports.strokeStyleLineCapType = exports.ESliceBGColorType = void 0;
+    exports.FlCl = exports.ExtR = exports.ExtT = exports.DfsM = exports.blurType = exports.Lns = exports.MztT = exports.Chnl = exports.Dstr = exports.ZZTy = exports.Wvtp = exports.SphM = exports.RplS = exports.Cnvr = exports.UndA = exports.DspM = exports.SmBQ = exports.SmBM = exports.BlrQ = exports.BlrM = exports.strokeStyleLineAlignment = exports.strokeStyleLineJoinType = exports.strokeStyleLineCapType = exports.ESliceBGColorType = exports.ESliceOrigin = exports.ESliceVertAlign = exports.ESliceHorzAlign = exports.ESliceType = exports.FrFl = exports.FStl = exports.ClrS = exports.Clry = exports.gradientInterpolationMethodType = exports.stdTrackID = exports.animInterpStyleEnum = exports.GrdT = exports.IGSr = exports.BETE = exports.BESs = exports.bvlT = exports.BESl = exports.BlnM = exports.warpStyle = exports.Annt = exports.Ornt = exports.textGridding = exports.outputSettingsRoot = exports.layerStateRoot = exports.cameraRawFilterKeyTypes = exports.cameraRawFilterClassID = void 0;
+    exports.patternColorHandling = exports.presetKindType = exports.prjM = exports.FlMd = exports.IntC = exports.IntE = exports.Drct = exports.WndM = exports.CntE = void 0;
+    exports.readAsciiStringOrClassId = readAsciiStringOrClassId;
+    exports.writeAsciiStringOrClassId = writeAsciiStringOrClassId;
+    exports.readDescriptorStructure = readDescriptorStructure;
+    exports.writeDescriptorStructure = writeDescriptorStructure;
+    exports.pathSelectionStateToReference = pathSelectionStateToReference;
+    exports.writeClassStructure = writeClassStructure;
+    exports.readVersionAndDescriptor = readVersionAndDescriptor;
+    exports.writeVersionAndDescriptor = writeVersionAndDescriptor;
+    exports.horzVrtcToXY = horzVrtcToXY;
+    exports.xyToHorzVrtc = xyToHorzVrtc;
+    exports.descBoundsToBounds = descBoundsToBounds;
+    exports.boundsToDescBounds = boundsToDescBounds;
+    exports.serializeEffects = serializeEffects;
+    exports.parseEffects = parseEffects;
+    exports.parseTrackList = parseTrackList;
+    exports.serializeTrackList = serializeTrackList;
+    exports.parseVectorContent = parseVectorContent;
+    exports.serializeVectorContent = serializeVectorContent;
+    exports.parseColor = parseColor;
+    exports.serializeColor = serializeColor;
+    exports.parseAngle = parseAngle;
+    exports.parsePercent = parsePercent;
+    exports.parsePercentOrAngle = parsePercentOrAngle;
+    exports.parseUnits = parseUnits;
+    exports.parseUnitsOrNumber = parseUnitsOrNumber;
+    exports.parseUnitsToNumber = parseUnitsToNumber;
+    exports.unitsAngle = unitsAngle;
+    exports.unitsPercent = unitsPercent;
+    exports.unitsPercentF = unitsPercentF;
+    exports.unitsValue = unitsValue;
+    exports.frac = frac;
     var helpers_1 = require_helpers();
     var psdReader_1 = require_psdReader();
     var psdWriter_1 = require_psdWriter();
     function revMap(map) {
-      var result = {};
-      Object.keys(map).forEach(function(key) {
-        return result[map[key]] = key;
-      });
+      const result = {};
+      Object.keys(map).forEach((key) => result[map[key]] = key);
       return result;
     }
     var unitsMap = {
@@ -5003,21 +6266,17 @@ var require_descriptor = __commonJS({
       "RrCm": "Centimeters"
     };
     var unitsMapRev = revMap(unitsMap);
-    var logErrors = false;
-    function setLogErrors(value) {
-      logErrors = value;
-    }
-    exports.setLogErrors = setLogErrors;
     function makeType(name, classID) {
       return { name, classID };
     }
     var nullType = makeType("", "null");
+    var USE_CHINESE = false;
     var fieldToExtType = {
       strokeStyleContent: makeType("", "solidColorLayer"),
-      // printProofSetup: makeType('校样设置', 'proofSetup'), // TESTING
-      printProofSetup: makeType("Proof Setup", "proofSetup"),
+      printProofSetup: makeType(USE_CHINESE ? "\u6821\u6837\u8BBE\u7F6E" : "Proof Setup", "proofSetup"),
+      Grad: makeType(USE_CHINESE ? "\u6E10\u53D8" : "Gradient", "Grdn"),
+      Trnf: makeType(USE_CHINESE ? "\u53D8\u6362" : "Transform", "Trnf"),
       patternFill: makeType("", "patternFill"),
-      Grad: makeType("Gradient", "Grdn"),
       ebbl: makeType("", "ebbl"),
       SoFi: makeType("", "SoFi"),
       GrFl: makeType("", "GrFl"),
@@ -5052,14 +6311,18 @@ var require_descriptor = __commonJS({
       psVersion: nullType,
       docDefaultNewArtboardBackgroundColor: makeType("", "RGBC"),
       artboardRect: makeType("", "classFloatRect"),
+      framedGroupRect: makeType("", "classFloatRect"),
       keyOriginRRectRadii: makeType("", "radii"),
       keyOriginBoxCorners: nullType,
       rectangleCornerA: makeType("", "Pnt "),
       rectangleCornerB: makeType("", "Pnt "),
       rectangleCornerC: makeType("", "Pnt "),
       rectangleCornerD: makeType("", "Pnt "),
+      keyOriginPolyPreviousTightBoxCorners: nullType,
+      keyOriginPolyTrueRectCorners: nullType,
+      keyOriginLineStart: makeType("", "Pnt "),
+      keyOriginLineEnd: makeType("", "Pnt "),
       compInfo: nullType,
-      Trnf: makeType("Transform", "Trnf"),
       quiltWarp: makeType("", "quiltWarp"),
       generatorSettings: nullType,
       crema: nullType,
@@ -5094,13 +6357,24 @@ var require_descriptor = __commonJS({
       customShape: makeType("", "customShape"),
       origFXRefPoint: nullType,
       FXRefPoint: nullType,
-      ClMg: makeType("", "ClMg")
+      vectorMask: nullType,
+      layerSpecific: nullType,
+      LSpc: nullType,
+      textLayerSettings: makeType("", "warp"),
+      placedLayerSettings: nullType,
+      IMsk: nullType,
+      VMsk: nullType,
+      TxtC: nullType,
+      ClMg: makeType("", "ClMg"),
+      interpretation: makeType("", "footageInterpretation"),
+      bgColor: makeType("", "NativeQuad")
     };
     var fieldToArrayExtType = {
       "Crv ": makeType("", "CrPt"),
       Clrs: makeType("", "Clrt"),
       Trns: makeType("", "TrnS"),
       keyDescriptorList: nullType,
+      keyRootDescriptorList: nullType,
       solidFillMulti: makeType("", "SoFi"),
       gradientFillMulti: makeType("", "GrFl"),
       dropShadowMulti: makeType("", "DrSh"),
@@ -5127,7 +6401,10 @@ var require_descriptor = __commonJS({
       ShrP: makeType("", "Pnt "),
       layerSettings: nullType,
       list: nullType,
-      Adjs: makeType("", "CrvA")
+      Adjs: makeType("", "CrvA"),
+      vertices: makeType("", "Pnt "),
+      warpedVertices: makeType("", "Pnt "),
+      quads: makeType("", "quadIndices")
     };
     var typeToField = {
       "TEXT": [
@@ -5137,6 +6414,11 @@ var require_descriptor = __commonJS({
         "Idnt",
         "blackAndWhitePresetFileName",
         "LUT3DFileName",
+        "exportOption",
+        "scaleSettings",
+        "BackgroundImagePath",
+        "ImageSubfolderName",
+        "SavedIteratedName",
         "presetFileName",
         "curvesPresetFileName",
         "mixerPresetFileName",
@@ -5157,7 +6439,9 @@ var require_descriptor = __commonJS({
         "KnNm",
         "FPth",
         "comment",
-        "originalPath"
+        "originalPath",
+        "Bk  ",
+        "pathUnicodeName"
       ],
       "tdta": [
         "EngineData",
@@ -5165,7 +6449,8 @@ var require_descriptor = __commonJS({
         "indexArray",
         "originalVertexArray",
         "deformedVertexArray",
-        "LqMe"
+        "LqMe",
+        "bookKey"
       ],
       "long": [
         "TextIndex",
@@ -5177,6 +6462,32 @@ var require_descriptor = __commonJS({
         "LaID",
         "Vrsn",
         "Cnt ",
+        "bookID",
+        "cropRectBottom",
+        "cropRectLeft",
+        "cropRectRight",
+        "cropRectTop",
+        // save for web output settings
+        "Version",
+        "BackgroundColorBlue",
+        "BackgroundColorGreen",
+        "BackgroundColorRed",
+        "BackgroundColorState",
+        "AttributeCase",
+        "Encoding",
+        "DuplicateFileNameBehavior",
+        "ImageMapLocation",
+        "ImageMapType",
+        "Indent",
+        "LineEndings",
+        "SpacersEmptyCells",
+        "SpacersHorizontal",
+        "SpacersVertical",
+        "StylesFormat",
+        "TDWidthHeight",
+        "TagCase",
+        "ColorPolicy",
+        "MetadataPolicy",
         "Brgh",
         "Cntr",
         "means",
@@ -5268,7 +6579,15 @@ var require_descriptor = __commonJS({
         "Ang3",
         "Ang4",
         "lastAppliedComp",
-        "capturedInfo"
+        "capturedInfo",
+        "pixelSourceType",
+        "framedGroupType",
+        "keyOriginPolySides",
+        "keyOriginLineArrConc",
+        "noisePreSeed",
+        "associatedLayer",
+        "placedLayerCompID",
+        "VAlign"
       ],
       "enum": [
         "textGridding",
@@ -5333,7 +6652,12 @@ var require_descriptor = __commonJS({
         "SphM",
         "SmBQ",
         "placedLayerOCIOConversion",
-        "gradientsInterpolationMethod"
+        "gradientsInterpolationMethod",
+        "pathSymmetryMode",
+        "interpretAlpha",
+        "knockout",
+        "TxPT",
+        "TxPR"
       ],
       "bool": [
         "PstS",
@@ -5401,7 +6725,18 @@ var require_descriptor = __commonJS({
         "moreAccurate",
         "GpuY",
         "LIWy",
-        "Cnty"
+        "Cnty",
+        "Lnkd",
+        "showAlteredVideo",
+        "lightingOn",
+        "LockPPI",
+        "keyOriginLineArrowSt",
+        "keyOriginLineArrowEnd",
+        "Expn",
+        "substitutesUsed",
+        "blendClipped",
+        "blendInterior",
+        "TxMP"
       ],
       "doub": [
         "warpValue",
@@ -5410,6 +6745,7 @@ var require_descriptor = __commonJS({
         "Intr",
         "Wdth",
         "Hght",
+        "Gmm ",
         "strokeStyleMiterLimit",
         "strokeStyleResolution",
         "layerTime",
@@ -5437,7 +6773,20 @@ var require_descriptor = __commonJS({
         "PuY0",
         "PuY1",
         "PuY2",
-        "PuY3"
+        "PuY3",
+        "stylization",
+        "cleanliness",
+        "brushScale",
+        "microBrush",
+        "specularity",
+        "PreferredResolution",
+        "FrGL",
+        "keyOriginLineWeight",
+        "keyOriginLineArrWdth",
+        "keyOriginLineArrLngth",
+        "keyOriginPolyPixelHSF",
+        "keyOriginPolyCornerRadius",
+        "gradientAspectRatio"
       ],
       "UntF": [
         "sdwO",
@@ -5468,7 +6817,9 @@ var require_descriptor = __commonJS({
         "bottomLeft",
         "bottomRight",
         "ClNs",
-        "Shrp"
+        "Shrp",
+        "fillOpacity",
+        "keyOriginPolyStarRatio"
       ],
       "VlLs": [
         "Crv ",
@@ -5477,6 +6828,7 @@ var require_descriptor = __commonJS({
         "Mxm ",
         "Trns",
         "pathList",
+        "keyRootDescriptorList",
         "strokeStyleLineDashSet",
         "FrLs",
         "slices",
@@ -5519,11 +6871,18 @@ var require_descriptor = __commonJS({
         "layerSettings",
         "list",
         "compList",
-        "Adjs"
+        "Adjs",
+        "vertices",
+        "warpedVertices",
+        "quads",
+        "indices",
+        "Mpng",
+        "textLayerSettingsWarpRect"
       ],
       "ObAr": ["meshPoints", "quiltSliceX", "quiltSliceY"],
       "obj ": ["null", "Chnl"],
-      "Pth ": ["DspF"]
+      "Pth ": ["DspF"],
+      "alis": ["alis"]
     };
     var channels = [
       "Rd  ",
@@ -5539,14 +6898,57 @@ var require_descriptor = __commonJS({
       "A   ",
       "B   "
     ];
+    var doubleColorClasses = ["Grsc", "LbCl", "GRYC", "LABC"];
+    exports.cameraRawFilterClassID = "Adobe Camera Raw Filter";
+    exports.cameraRawFilterKeyTypes = {
+      CrVe: "TEXT",
+      PrVN: "long",
+      PrVe: "long",
+      WBal: "enum",
+      Ex12: "doub",
+      ShpR: "doub",
+      "Crv ": "VlLs",
+      CrvR: "VlLs",
+      CrvG: "VlLs",
+      CrvB: "VlLs"
+    };
+    function guessOSType(value) {
+      if (typeof value === "boolean")
+        return "bool";
+      if (typeof value === "number" && !Number.isInteger(value))
+        return "doub";
+      if (Array.isArray(value))
+        return "VlLs";
+      if (value && typeof value === "object") {
+        if (typeof value._classID === "string")
+          return "Objc";
+        if (typeof value.classID === "string")
+          return "type";
+        if (typeof value.low === "number" && typeof value.high === "number")
+          return "comp";
+        if (typeof value.units === "string" && typeof value.value === "number")
+          return "UntF";
+      }
+      return void 0;
+    }
     var fieldToArrayType = {
       "Mnm ": "long",
       "Mxm ": "long",
+      HtmlFileNameComponents: "long",
+      // save for web output settings
+      SavingFileNameComponents: "long",
+      SliceFileNameComponents: "long",
+      Inpt: "long",
+      // levels filter
+      Otpt: "long",
+      // levels filter
       FrLs: "long",
       strokeStyleLineDashSet: "UntF",
       Trnf: "doub",
       nonAffineTransform: "doub",
       keyDescriptorList: "Objc",
+      keyRootDescriptorList: "Objc",
+      pathList: "Objc",
       gradientFillMulti: "Objc",
       solidFillMulti: "Objc",
       frameFXMulti: "Objc",
@@ -5577,37 +6979,26 @@ var require_descriptor = __commonJS({
       channelDenoise: "Objc",
       Mtrx: "long",
       compList: "long",
-      Chnl: "enum"
+      textLayerSettingsWarpRect: "doub",
+      Chnl: "enum",
+      indices: "long",
+      Mpng: "long"
     };
     var fieldToType = {};
-    for (_i = 0, _a2 = Object.keys(typeToField); _i < _a2.length; _i++) {
-      type = _a2[_i];
-      for (_b2 = 0, _c = typeToField[type]; _b2 < _c.length; _b2++) {
-        field = _c[_b2];
+    for (const type of Object.keys(typeToField)) {
+      for (const field of typeToField[type]) {
         fieldToType[field] = type;
       }
     }
-    var type;
-    var field;
-    var _b2;
-    var _c;
-    var _i;
-    var _a2;
-    for (_d = 0, _e = Object.keys(fieldToExtType); _d < _e.length; _d++) {
-      field = _e[_d];
+    for (const field of Object.keys(fieldToExtType)) {
       if (!fieldToType[field])
         fieldToType[field] = "Objc";
     }
-    var field;
-    var _d;
-    var _e;
-    for (_f = 0, _g = Object.keys(fieldToArrayExtType); _f < _g.length; _f++) {
-      field = _g[_f];
+    for (const field of Object.keys(fieldToArrayExtType)) {
       fieldToArrayType[field] = "Objc";
     }
-    var field;
-    var _f;
-    var _g;
+    var pixelSourceOriginRoot = "PixelSource.origin";
+    exports.layerStateRoot = "layerState";
     function getTypeByKey(key, value, root, parent) {
       if (key === "presetKind") {
         return typeof value === "string" ? "enum" : "long";
@@ -5622,7 +7013,7 @@ var require_descriptor = __commonJS({
         return typeof value === "string" ? "enum" : "long";
       } else if (key === "AntA") {
         return typeof value === "string" ? "enum" : "bool";
-      } else if ((key === "Hrzn" || key === "Vrtc") && (parent.Type === "keyType.Pstn" || parent._classID === "Ofst")) {
+      } else if ((key === "Hrzn" || key === "Vrtc") && (parent.Type === "keyType.Pstn" || parent._classID === "Ofst" || root === pixelSourceOriginRoot)) {
         return "long";
       } else if (key === "Hrzn" || key === "Vrtc" || key === "Top " || key === "Left" || key === "Btom" || key === "Rght") {
         if (root === "slices")
@@ -5634,110 +7025,134 @@ var require_descriptor = __commonJS({
         return root === "artd" ? "long" : "doub";
       } else if (key === "Trnf") {
         return Array.isArray(value) ? "VlLs" : "Objc";
+      } else if (key === "alpha" && root === "slices") {
+        return "long";
+      } else if ((key === "Inpt" || key === "Otpt") && parent._classID === "HsbP") {
+        return "enum";
+      } else if ((key === "Inpt" || key === "Otpt") && parent._classID === "LvlA") {
+        return "VlLs";
+      } else if (key === "Intr" && typeof value === "boolean") {
+        return "bool";
+      } else if (key === "PgPs") {
+        return "enum";
+      } else if (key === "LghD" && parent._classID === "oilPaint") {
+        return "long";
       } else {
         return fieldToType[key];
       }
     }
     function readAsciiStringOrClassId(reader) {
-      var length = (0, psdReader_1.readInt32)(reader);
+      const length = (0, psdReader_1.readInt32)(reader);
       return (0, psdReader_1.readAsciiString)(reader, length || 4);
     }
-    exports.readAsciiStringOrClassId = readAsciiStringOrClassId;
     function writeAsciiStringOrClassId(writer, value) {
-      if (value.length === 4 && value !== "warp" && value !== "time" && value !== "hold" && value !== "list") {
+      if (value.length === 4 && value !== "warp" && value !== "time" && value !== "hold" && value !== "list" && value !== "json") {
         (0, psdWriter_1.writeInt32)(writer, 0);
         (0, psdWriter_1.writeSignature)(writer, value);
       } else {
         (0, psdWriter_1.writeInt32)(writer, value.length);
-        for (var i = 0; i < value.length; i++) {
+        for (let i = 0; i < value.length; i++) {
           (0, psdWriter_1.writeUint8)(writer, value.charCodeAt(i));
         }
       }
     }
     function readDescriptorStructure(reader, includeClass) {
-      var struct = readClassStructure(reader);
-      var object = includeClass ? { _name: struct.name, _classID: struct.classID } : {};
-      var itemsCount = (0, psdReader_1.readUint32)(reader);
-      for (var i = 0; i < itemsCount; i++) {
-        var key = readAsciiStringOrClassId(reader);
-        var type2 = (0, psdReader_1.readSignature)(reader);
-        var data = readOSType(reader, type2, includeClass);
+      const struct = readClassStructure(reader);
+      const object = includeClass ? { _name: struct.name, _classID: struct.classID } : {};
+      const itemsCount = (0, psdReader_1.readUint32)(reader);
+      for (let i = 0; i < itemsCount; i++) {
+        const key = readAsciiStringOrClassId(reader);
+        const type = (0, psdReader_1.readSignature)(reader);
+        const data = readOSType(reader, type, includeClass);
         object[key] = data;
       }
       return object;
     }
-    exports.readDescriptorStructure = readDescriptorStructure;
+    exports.outputSettingsRoot = "outputSettings";
     function writeDescriptorStructure(writer, name, classId, value, root) {
-      if (logErrors && !classId)
-        console.log("Missing classId for: ", name, classId, value);
+      var _a2;
+      if (writer.logMissingFeatures && !classId)
+        writer.log("Missing classId for: ", name, classId, value);
       (0, psdWriter_1.writeUnicodeStringWithPadding)(writer, name);
-      writeAsciiStringOrClassId(writer, classId);
-      var keys = Object.keys(value);
-      var keyCount = keys.length;
-      if ("_name" in value)
-        keyCount--;
-      if ("_classID" in value)
-        keyCount--;
-      (0, psdWriter_1.writeUint32)(writer, keyCount);
-      for (var _i2 = 0, keys_1 = keys; _i2 < keys_1.length; _i2++) {
-        var key = keys_1[_i2];
-        if (key === "_name" || key === "_classID")
-          continue;
-        var type2 = getTypeByKey(key, value[key], root, value);
-        var extType = fieldToExtType[key];
+      if (root === exports.outputSettingsRoot && classId === "null") {
+        (0, psdWriter_1.writeInt32)(writer, 4);
+        (0, psdWriter_1.writeSignature)(writer, classId);
+      } else {
+        writeAsciiStringOrClassId(writer, classId);
+      }
+      const allKeys = Object.keys(value);
+      const keys = allKeys.filter((key) => key !== "_name" && key !== "_classID" && value[key] !== void 0);
+      (0, psdWriter_1.writeUint32)(writer, keys.length);
+      for (const key of keys) {
+        let type = getTypeByKey(key, value[key], root, value);
+        let childRoot = root;
+        let extType = fieldToExtType[key];
+        if (classId === exports.cameraRawFilterClassID) {
+          type = (_a2 = exports.cameraRawFilterKeyTypes[key]) !== null && _a2 !== void 0 ? _a2 : "long";
+          childRoot = exports.cameraRawFilterClassID;
+        }
         if (key === "bounds" && root === "text") {
           extType = makeType("", "bounds");
         } else if (key === "origin") {
-          type2 = root === "slices" ? "enum" : "Objc";
+          type = root === "slices" ? "enum" : "Objc";
+          if (classId === "PixelSource") {
+            extType = nullType;
+            childRoot = pixelSourceOriginRoot;
+          }
+        } else if (key === "Ofst" && root === exports.layerStateRoot && typeof value[key].Hrzn === "number") {
+          extType = nullType;
+          childRoot = pixelSourceOriginRoot;
         } else if ((key === "Cyn " || key === "Mgnt" || key === "Ylw " || key === "Blck") && value._classID === "CMYC") {
-          type2 = "doub";
+          type = "doub";
         } else if (/^PN[a-z][a-z]$/.test(key)) {
-          type2 = "TEXT";
+          type = "TEXT";
         } else if (/^PT[a-z][a-z]$/.test(key)) {
-          type2 = "long";
+          type = "long";
         } else if (/^PF[a-z][a-z]$/.test(key)) {
-          type2 = "doub";
+          type = "doub";
         } else if ((key === "Rds " || key === "Thsh") && typeof value[key] === "number" && value._classID === "SmrB") {
-          type2 = "doub";
+          type = "doub";
         } else if (key === "ClSz" || key === "Rds " || key === "Amnt") {
-          type2 = typeof value[key] === "number" ? "long" : "UntF";
+          type = typeof value[key] === "number" ? "long" : "UntF";
         } else if ((key === "sdwM" || key === "hglM") && typeof value[key] === "string") {
-          type2 = "enum";
+          type = "enum";
         } else if (key === "blur" && typeof value[key] === "string") {
-          type2 = "enum";
+          type = "enum";
         } else if (key === "Hght" && typeof value[key] === "number" && value._classID === "Embs") {
-          type2 = "long";
+          type = "long";
         } else if (key === "Angl" && typeof value[key] === "number" && (value._classID === "Embs" || value._classID === "smartSharpen" || value._classID === "Twrl" || value._classID === "MtnB")) {
-          type2 = "long";
+          type = "long";
         } else if (key === "Angl" && typeof value[key] === "number") {
-          type2 = "doub";
+          type = "doub";
         } else if (key === "bounds" && root === "slices") {
-          type2 = "Objc";
+          type = "Objc";
           extType = makeType("", "Rct1");
         } else if (key === "Scl ") {
           if (typeof value[key] === "object" && "Hrzn" in value[key]) {
-            type2 = "Objc";
+            type = "Objc";
             extType = nullType;
           } else if (typeof value[key] === "number") {
-            type2 = "long";
+            type = "long";
           } else {
-            type2 = "UntF";
+            type = "UntF";
           }
         } else if (key === "audioClipGroupList" && keys.length === 1) {
-          type2 = "VlLs";
+          type = "VlLs";
         } else if ((key === "Strt" || key === "Brgh") && "H   " in value) {
-          type2 = "doub";
+          type = "doub";
         } else if (key === "Wdth" && typeof value[key] === "object") {
-          type2 = "UntF";
+          type = "UntF";
         } else if (key === "Ofst" && typeof value[key] === "number") {
-          type2 = "long";
+          type = "long";
         } else if (key === "Strt" && typeof value[key] === "object") {
-          type2 = "Objc";
+          type = "Objc";
           extType = nullType;
         } else if (channels.indexOf(key) !== -1) {
-          type2 = classId === "RGBC" && root !== "artd" ? "doub" : "long";
+          type = classId === "RGBC" && root !== "artd" || doubleColorClasses.indexOf(classId) !== -1 ? "doub" : "long";
         } else if (key === "profile") {
-          type2 = classId === "printOutput" ? "TEXT" : "tdta";
+          type = classId === "printOutput" || classId === "proofSetup" ? "TEXT" : "tdta";
+        } else if (key === "alis" && typeof value[key] === "string") {
+          type = /[^\x00-\xff]/.test(value[key]) ? "TEXT" : "alis";
         } else if (key === "strokeStyleContent") {
           if (value[key]["Clr "]) {
             extType = makeType("", "solidColorLayer");
@@ -5746,7 +7161,7 @@ var require_descriptor = __commonJS({
           } else if (value[key].Ptrn) {
             extType = makeType("", "patternLayer");
           } else {
-            logErrors && console.log("Invalid strokeStyleContent value", value[key]);
+            writer.logMissingFeatures && writer.log("Invalid strokeStyleContent value", value[key]);
           }
         } else if (key === "bounds" && root === "quiltWarp") {
           extType = makeType("", "classFloatRect");
@@ -5754,17 +7169,24 @@ var require_descriptor = __commonJS({
         if (extType && extType.classID === "RGBC") {
           if ("H   " in value[key])
             extType = { classID: "HSBC", name: "" };
+          else if ("Cyn " in value[key])
+            extType = { classID: "CMYC", name: "" };
+          else if ("Lmnc" in value[key])
+            extType = { classID: "LbCl", name: "" };
+          else if ("Gry " in value[key])
+            extType = { classID: "Grsc", name: "" };
         }
+        if (!type)
+          type = guessOSType(value[key]);
         writeAsciiStringOrClassId(writer, key);
-        (0, psdWriter_1.writeSignature)(writer, type2 || "long");
-        writeOSType(writer, type2 || "long", value[key], key, extType, root);
-        if (logErrors && !type2)
-          console.log("Missing descriptor field type for: '".concat(key, "' in"), value);
+        (0, psdWriter_1.writeSignature)(writer, type || "long");
+        writeOSType(writer, type || "long", value[key], key, extType, childRoot);
+        if (writer.logMissingFeatures && !type)
+          writer.log(`Missing descriptor field type for: '${key}' in`, value);
       }
     }
-    exports.writeDescriptorStructure = writeDescriptorStructure;
-    function readOSType(reader, type2, includeClass) {
-      switch (type2) {
+    function readOSType(reader, type, includeClass) {
+      switch (type) {
         case "obj ":
           return readReferenceStructure(reader);
         case "Objc":
@@ -5772,10 +7194,10 @@ var require_descriptor = __commonJS({
         case "GlbO":
           return readDescriptorStructure(reader, includeClass);
         case "VlLs": {
-          var length_1 = (0, psdReader_1.readInt32)(reader);
-          var items = [];
-          for (var i = 0; i < length_1; i++) {
-            var itemType = (0, psdReader_1.readSignature)(reader);
+          const length = (0, psdReader_1.readInt32)(reader);
+          const items = [];
+          for (let i = 0; i < length; i++) {
+            const itemType = (0, psdReader_1.readSignature)(reader);
             items.push(readOSType(reader, itemType, includeClass));
           }
           return items;
@@ -5783,31 +7205,31 @@ var require_descriptor = __commonJS({
         case "doub":
           return (0, psdReader_1.readFloat64)(reader);
         case "UntF": {
-          var units = (0, psdReader_1.readSignature)(reader);
-          var value = (0, psdReader_1.readFloat64)(reader);
+          const units = (0, psdReader_1.readSignature)(reader);
+          const value = (0, psdReader_1.readFloat64)(reader);
           if (!unitsMap[units])
-            throw new Error("Invalid units: ".concat(units));
+            throw new Error(`Invalid units: ${units}`);
           return { units: unitsMap[units], value };
         }
         case "UnFl": {
-          var units = (0, psdReader_1.readSignature)(reader);
-          var value = (0, psdReader_1.readFloat32)(reader);
+          const units = (0, psdReader_1.readSignature)(reader);
+          const value = (0, psdReader_1.readFloat32)(reader);
           if (!unitsMap[units])
-            throw new Error("Invalid units: ".concat(units));
+            throw new Error(`Invalid units: ${units}`);
           return { units: unitsMap[units], value };
         }
         case "TEXT":
           return (0, psdReader_1.readUnicodeString)(reader);
         case "enum": {
-          var enumType = readAsciiStringOrClassId(reader);
-          var value = readAsciiStringOrClassId(reader);
-          return "".concat(enumType, ".").concat(value);
+          const enumType = readAsciiStringOrClassId(reader);
+          const value = readAsciiStringOrClassId(reader);
+          return `${enumType}.${value}`;
         }
         case "long":
           return (0, psdReader_1.readInt32)(reader);
         case "comp": {
-          var low = (0, psdReader_1.readUint32)(reader);
-          var high = (0, psdReader_1.readUint32)(reader);
+          const high = (0, psdReader_1.readUint32)(reader);
+          const low = (0, psdReader_1.readUint32)(reader);
           return { low, high };
         }
         case "bool":
@@ -5817,26 +7239,28 @@ var require_descriptor = __commonJS({
         case "GlbC":
           return readClassStructure(reader);
         case "alis": {
-          var length_2 = (0, psdReader_1.readInt32)(reader);
-          return (0, psdReader_1.readAsciiString)(reader, length_2);
+          const length = (0, psdReader_1.readInt32)(reader);
+          return (0, psdReader_1.readAsciiString)(reader, length);
         }
         case "tdta": {
-          var length_3 = (0, psdReader_1.readInt32)(reader);
-          return (0, psdReader_1.readBytes)(reader, length_3);
+          const length = (0, psdReader_1.readInt32)(reader);
+          if (length > reader.view.byteLength - reader.offset)
+            throw new Error(`Invalid tdta length: ${length}`);
+          return (0, psdReader_1.readBytes)(reader, length);
         }
         case "ObAr": {
           (0, psdReader_1.readInt32)(reader);
           (0, psdReader_1.readUnicodeString)(reader);
           readAsciiStringOrClassId(reader);
-          var length_4 = (0, psdReader_1.readInt32)(reader);
-          var items = [];
-          for (var i = 0; i < length_4; i++) {
-            var type1 = readAsciiStringOrClassId(reader);
+          const length = (0, psdReader_1.readInt32)(reader);
+          const items = [];
+          for (let i = 0; i < length; i++) {
+            const type1 = readAsciiStringOrClassId(reader);
             (0, psdReader_1.readSignature)(reader);
             (0, psdReader_1.readSignature)(reader);
-            var valuesCount = (0, psdReader_1.readInt32)(reader);
-            var values = [];
-            for (var j = 0; j < valuesCount; j++) {
+            const valuesCount = (0, psdReader_1.readInt32)(reader);
+            const values = [];
+            for (let j = 0; j < valuesCount; j++) {
               values.push((0, psdReader_1.readFloat64)(reader));
             }
             items.push({ type: type1, values });
@@ -5845,14 +7269,14 @@ var require_descriptor = __commonJS({
         }
         case "Pth ": {
           (0, psdReader_1.readInt32)(reader);
-          var sig = (0, psdReader_1.readSignature)(reader);
+          const sig = (0, psdReader_1.readSignature)(reader);
           (0, psdReader_1.readInt32LE)(reader);
-          var charsCount = (0, psdReader_1.readInt32LE)(reader);
-          var path2 = (0, psdReader_1.readUnicodeStringWithLengthLE)(reader, charsCount);
+          const charsCount = (0, psdReader_1.readInt32LE)(reader);
+          const path2 = (0, psdReader_1.readUnicodeStringWithLengthLE)(reader, charsCount);
           return { sig, path: path2 };
         }
         default:
-          throw new Error("Invalid TySh descriptor OSType: ".concat(type2, " at ").concat(reader.offset.toString(16)));
+          throw new Error(`Invalid TySh descriptor OSType: ${type} at ${reader.offset.toString(16)}`);
       }
     }
     var ObArTypes = {
@@ -5860,8 +7284,9 @@ var require_descriptor = __commonJS({
       quiltSliceX: "UntF",
       quiltSliceY: "UntF"
     };
-    function writeOSType(writer, type2, value, key, extType, root) {
-      switch (type2) {
+    function writeOSType(writer, type, value, key, extType, root) {
+      var _a2;
+      switch (type) {
         case "obj ":
           writeReferenceStructure(writer, key, value);
           break;
@@ -5869,40 +7294,40 @@ var require_descriptor = __commonJS({
         // Descriptor
         case "GlbO": {
           if (typeof value !== "object")
-            throw new Error("Invalid struct value: ".concat(JSON.stringify(value), ", key: ").concat(key));
-          if (!extType)
-            throw new Error("Missing ext type for: '".concat(key, "' (").concat(JSON.stringify(value), ")"));
-          var name_1 = value._name || extType.name;
-          var classID = value._classID || extType.classID;
-          writeDescriptorStructure(writer, name_1, classID, value, root);
+            throw new Error(`Invalid struct value: ${JSON.stringify(value)}, key: ${key}`);
+          if (!extType && !value._classID)
+            throw new Error(`Missing ext type for: '${key}' (${JSON.stringify(value)})`);
+          const name = value._name || (extType === null || extType === void 0 ? void 0 : extType.name) || "";
+          const classID = value._classID || extType.classID;
+          writeDescriptorStructure(writer, name, classID, value, root);
           break;
         }
         case "VlLs":
           if (!Array.isArray(value))
-            throw new Error("Invalid list value: ".concat(JSON.stringify(value), ", key: ").concat(key));
+            throw new Error(`Invalid list value: ${JSON.stringify(value)}, key: ${key}`);
           (0, psdWriter_1.writeInt32)(writer, value.length);
-          for (var i = 0; i < value.length; i++) {
-            var type_1 = fieldToArrayType[key];
-            (0, psdWriter_1.writeSignature)(writer, type_1 || "long");
-            writeOSType(writer, type_1 || "long", value[i], "".concat(key, "[]"), fieldToArrayExtType[key], root);
-            if (logErrors && !type_1)
-              console.log("Missing descriptor array type for: '".concat(key, "' in"), value);
+          for (let i = 0; i < value.length; i++) {
+            const type2 = root === exports.cameraRawFilterClassID ? "long" : (_a2 = fieldToArrayType[key]) !== null && _a2 !== void 0 ? _a2 : guessOSType(value[i]);
+            (0, psdWriter_1.writeSignature)(writer, type2 || "long");
+            writeOSType(writer, type2 || "long", value[i], `${key}[]`, fieldToArrayExtType[key], root);
+            if (writer.logMissingFeatures && !type2)
+              writer.log(`Missing descriptor array type for: '${key}' in`, value);
           }
           break;
         case "doub":
           if (typeof value !== "number")
-            throw new Error("Invalid number value: ".concat(JSON.stringify(value), ", key: ").concat(key));
+            throw new Error(`Invalid number value: ${JSON.stringify(value)}, key: ${key}`);
           (0, psdWriter_1.writeFloat64)(writer, value);
           break;
         case "UntF":
           if (!unitsMapRev[value.units])
-            throw new Error("Invalid units: ".concat(value.units, " in ").concat(key));
+            throw new Error(`Invalid units: ${value.units} in ${key}`);
           (0, psdWriter_1.writeSignature)(writer, unitsMapRev[value.units]);
           (0, psdWriter_1.writeFloat64)(writer, value.value);
           break;
         case "UnFl":
           if (!unitsMapRev[value.units])
-            throw new Error("Invalid units: ".concat(value.units, " in ").concat(key));
+            throw new Error(`Invalid units: ${value.units} in ${key}`);
           (0, psdWriter_1.writeSignature)(writer, unitsMapRev[value.units]);
           (0, psdWriter_1.writeFloat32)(writer, value.value);
           break;
@@ -5911,29 +7336,45 @@ var require_descriptor = __commonJS({
           break;
         case "enum": {
           if (typeof value !== "string")
-            throw new Error("Invalid enum value: ".concat(JSON.stringify(value), ", key: ").concat(key));
-          var _a3 = value.split("."), _type = _a3[0], val = _a3[1];
+            throw new Error(`Invalid enum value: ${JSON.stringify(value)}, key: ${key}`);
+          const [_type, val] = value.split(".");
           writeAsciiStringOrClassId(writer, _type);
           writeAsciiStringOrClassId(writer, val);
           break;
         }
         case "long":
           if (typeof value !== "number")
-            throw new Error("Invalid integer value: ".concat(JSON.stringify(value), ", key: ").concat(key));
-          (0, psdWriter_1.writeInt32)(writer, value);
+            throw new Error(`Invalid integer value: ${JSON.stringify(value)}, key: ${key}`);
+          (0, psdWriter_1.writeInt32)(writer, Math.round(value));
           break;
-        // case 'comp': // Large Integer
-        // 	writeLargeInteger(reader);
+        case "comp":
+          if (!value || typeof value !== "object")
+            throw new Error(`Invalid large integer value: ${JSON.stringify(value)}, key: ${key}`);
+          (0, psdWriter_1.writeUint32)(writer, value.high >>> 0);
+          (0, psdWriter_1.writeUint32)(writer, value.low >>> 0);
+          break;
         case "bool":
           if (typeof value !== "boolean")
-            throw new Error("Invalid boolean value: ".concat(JSON.stringify(value), ", key: ").concat(key));
+            throw new Error(`Invalid boolean value: ${JSON.stringify(value)}, key: ${key}`);
           (0, psdWriter_1.writeUint8)(writer, value ? 1 : 0);
           break;
-        // case 'type': // Class
-        // case 'GlbC': // Class
-        // 	writeClassStructure(reader);
-        // case 'alis': // Alias
-        // 	writeAliasStructure(reader);
+        case "type":
+        // Class
+        case "GlbC":
+          if (!value || typeof value !== "object")
+            throw new Error(`Invalid class value: ${JSON.stringify(value)}, key: ${key}`);
+          (0, psdWriter_1.writeUnicodeStringWithPadding)(writer, value.name || "");
+          writeAsciiStringOrClassId(writer, value.classID);
+          break;
+        case "alis": {
+          if (typeof value !== "string")
+            throw new Error(`Invalid alias value: ${JSON.stringify(value)}, key: ${key}`);
+          (0, psdWriter_1.writeInt32)(writer, value.length);
+          for (let i = 0; i < value.length; i++) {
+            (0, psdWriter_1.writeUint8)(writer, value.charCodeAt(i) & 255);
+          }
+          break;
+        }
         case "tdta":
           (0, psdWriter_1.writeInt32)(writer, value.byteLength);
           (0, psdWriter_1.writeBytes)(writer, value);
@@ -5941,152 +7382,168 @@ var require_descriptor = __commonJS({
         case "ObAr": {
           (0, psdWriter_1.writeInt32)(writer, 16);
           (0, psdWriter_1.writeUnicodeStringWithPadding)(writer, "");
-          var type_2 = ObArTypes[key];
-          if (!type_2)
-            throw new Error("Not implemented ObArType for: ".concat(key));
-          writeAsciiStringOrClassId(writer, type_2);
+          const type2 = ObArTypes[key];
+          if (!type2)
+            throw new Error(`Not implemented ObArType for: ${key}`);
+          writeAsciiStringOrClassId(writer, type2);
           (0, psdWriter_1.writeInt32)(writer, value.length);
-          for (var i = 0; i < value.length; i++) {
+          for (let i = 0; i < value.length; i++) {
             writeAsciiStringOrClassId(writer, value[i].type);
             (0, psdWriter_1.writeSignature)(writer, "UnFl");
             (0, psdWriter_1.writeSignature)(writer, "#Pxl");
             (0, psdWriter_1.writeInt32)(writer, value[i].values.length);
-            for (var j = 0; j < value[i].values.length; j++) {
+            for (let j = 0; j < value[i].values.length; j++) {
               (0, psdWriter_1.writeFloat64)(writer, value[i].values[j]);
             }
           }
           break;
         }
         case "Pth ": {
-          var length_5 = 4 + 4 + 4 + value.path.length * 2;
-          (0, psdWriter_1.writeInt32)(writer, length_5);
+          const path2 = value.path + "\0";
+          const length = 4 + 4 + 4 + path2.length * 2;
+          (0, psdWriter_1.writeInt32)(writer, length);
           (0, psdWriter_1.writeSignature)(writer, value.sig);
-          (0, psdWriter_1.writeInt32LE)(writer, length_5);
-          (0, psdWriter_1.writeInt32LE)(writer, value.path.length);
-          (0, psdWriter_1.writeUnicodeStringWithoutLengthLE)(writer, value.path);
+          (0, psdWriter_1.writeInt32LE)(writer, length);
+          (0, psdWriter_1.writeInt32LE)(writer, path2.length);
+          (0, psdWriter_1.writeUnicodeStringWithoutLengthLE)(writer, path2);
           break;
         }
         default:
-          throw new Error("Not implemented descriptor OSType: ".concat(type2));
+          throw new Error(`Not implemented descriptor OSType: ${type}`);
       }
     }
+    var referenceTypes = ["prop", "Clss", "Enmr", "rele", "Idnt", "indx", "name"];
+    function isReferenceItem(value) {
+      return !!value && typeof value === "object" && referenceTypes.indexOf(value.type) !== -1;
+    }
     function readReferenceStructure(reader) {
-      var itemsCount = (0, psdReader_1.readInt32)(reader);
-      var items = [];
-      for (var i = 0; i < itemsCount; i++) {
-        var type2 = (0, psdReader_1.readSignature)(reader);
-        switch (type2) {
-          case "prop": {
+      const itemsCount = (0, psdReader_1.readInt32)(reader);
+      const items = [];
+      for (let i = 0; i < itemsCount; i++) {
+        const type = (0, psdReader_1.readSignature)(reader);
+        switch (type) {
+          case "prop":
             readClassStructure(reader);
-            var keyID = readAsciiStringOrClassId(reader);
-            items.push(keyID);
+            items.push(readAsciiStringOrClassId(reader));
             break;
-          }
           case "Clss":
             items.push(readClassStructure(reader));
             break;
           case "Enmr": {
             readClassStructure(reader);
-            var typeID = readAsciiStringOrClassId(reader);
-            var value = readAsciiStringOrClassId(reader);
-            items.push("".concat(typeID, ".").concat(value));
+            const typeID = readAsciiStringOrClassId(reader);
+            const enumValue = readAsciiStringOrClassId(reader);
+            items.push(`${typeID}.${enumValue}`);
             break;
           }
-          case "rele": {
+          case "rele":
             readClassStructure(reader);
             items.push((0, psdReader_1.readUint32)(reader));
             break;
-          }
           case "Idnt":
-            items.push((0, psdReader_1.readInt32)(reader));
-            break;
+          // Identifier
           case "indx":
             items.push((0, psdReader_1.readInt32)(reader));
             break;
-          case "name": {
+          case "name":
             readClassStructure(reader);
             items.push((0, psdReader_1.readUnicodeString)(reader));
             break;
-          }
           default:
-            throw new Error("Invalid descriptor reference type: ".concat(type2));
+            throw new Error(`Invalid descriptor reference type: ${type}`);
         }
       }
       return items;
     }
-    function writeReferenceStructure(writer, _key, items) {
-      (0, psdWriter_1.writeInt32)(writer, items.length);
-      for (var i = 0; i < items.length; i++) {
-        var value = items[i];
-        var type2 = "unknown";
-        if (typeof value === "string") {
-          if (/^[a-z ]+\.[a-z ]+$/i.test(value)) {
-            type2 = "Enmr";
-          } else {
-            type2 = "name";
-          }
+    function guessReferenceItem(value) {
+      if (typeof value === "string") {
+        const match = /^([a-z ]{4}|[a-z]{5,})\.([a-z ]+)$/i.exec(value);
+        if (match) {
+          return { type: "Enmr", _name: "", _classID: match[1], typeID: match[1], enumValue: match[2] };
+        } else {
+          return { type: "name", _name: "", _classID: "Lyr ", value };
         }
-        (0, psdWriter_1.writeSignature)(writer, type2);
-        switch (type2) {
-          // case 'prop': // Property
-          // case 'Clss': // Class
-          case "Enmr": {
-            var _a3 = value.split("."), typeID = _a3[0], enumValue = _a3[1];
-            writeClassStructure(writer, "\0", typeID);
-            writeAsciiStringOrClassId(writer, typeID);
-            writeAsciiStringOrClassId(writer, enumValue);
+      } else if (typeof value === "number") {
+        return { type: "Idnt", value };
+      } else if (value && typeof value === "object" && typeof value.classID === "string") {
+        return { type: "Clss", _name: value.name || "", _classID: value.classID };
+      } else {
+        throw new Error(`Invalid descriptor reference value: ${JSON.stringify(value)}`);
+      }
+    }
+    function pathSelectionStateToReference(items) {
+      return items.map((value) => {
+        const item = guessReferenceItem(value);
+        if (item.type === "Enmr")
+          item._classID = "Path";
+        return item;
+      });
+    }
+    function writeReferenceStructure(writer, _key, items) {
+      if (!Array.isArray(items))
+        throw new Error(`Invalid reference value: ${JSON.stringify(items)}, key: ${_key}`);
+      (0, psdWriter_1.writeInt32)(writer, items.length);
+      for (const value of items) {
+        const item = isReferenceItem(value) ? value : guessReferenceItem(value);
+        (0, psdWriter_1.writeSignature)(writer, item.type);
+        switch (item.type) {
+          case "prop":
+            writeClassStructure(writer, item._name || "", item._classID);
+            writeAsciiStringOrClassId(writer, item.keyID);
             break;
-          }
-          // case 'rele': // Offset
-          // case 'Idnt': // Identifier
-          // case 'indx': // Index
-          case "name": {
-            writeClassStructure(writer, "\0", "Lyr ");
-            (0, psdWriter_1.writeUnicodeString)(writer, value + "\0");
+          case "Clss":
+            writeClassStructure(writer, item._name || "", item._classID);
             break;
-          }
+          case "Enmr":
+            writeClassStructure(writer, item._name || "", item._classID);
+            writeAsciiStringOrClassId(writer, item.typeID);
+            writeAsciiStringOrClassId(writer, item.enumValue);
+            break;
+          case "rele":
+            writeClassStructure(writer, item._name || "", item._classID);
+            (0, psdWriter_1.writeUint32)(writer, item.value);
+            break;
+          case "Idnt":
+          // Identifier
+          case "indx":
+            (0, psdWriter_1.writeInt32)(writer, item.value);
+            break;
+          case "name":
+            writeClassStructure(writer, item._name || "", item._classID);
+            (0, psdWriter_1.writeUnicodeStringWithPadding)(writer, `${item.value}`);
+            break;
           default:
-            throw new Error("Invalid descriptor reference type: ".concat(type2));
+            throw new Error(`Invalid descriptor reference type: ${item.type}`);
         }
       }
       return items;
     }
     function readClassStructure(reader) {
-      var name = (0, psdReader_1.readUnicodeString)(reader);
-      var classID = readAsciiStringOrClassId(reader);
+      const name = (0, psdReader_1.readUnicodeString)(reader);
+      const classID = readAsciiStringOrClassId(reader);
       return { name, classID };
     }
     function writeClassStructure(writer, name, classID) {
-      (0, psdWriter_1.writeUnicodeString)(writer, name);
+      (0, psdWriter_1.writeUnicodeStringWithPadding)(writer, name);
       writeAsciiStringOrClassId(writer, classID);
     }
-    function readVersionAndDescriptor(reader, includeClass) {
-      if (includeClass === void 0) {
-        includeClass = false;
-      }
-      var version = (0, psdReader_1.readUint32)(reader);
+    function readVersionAndDescriptor(reader, includeClass = false) {
+      const version = (0, psdReader_1.readUint32)(reader);
       if (version !== 16)
-        throw new Error("Invalid descriptor version: ".concat(version));
-      var desc = readDescriptorStructure(reader, includeClass);
+        throw new Error(`Invalid descriptor version: ${version}`);
+      const desc = readDescriptorStructure(reader, includeClass);
       return desc;
     }
-    exports.readVersionAndDescriptor = readVersionAndDescriptor;
-    function writeVersionAndDescriptor(writer, name, classID, descriptor, root) {
-      if (root === void 0) {
-        root = "";
-      }
+    function writeVersionAndDescriptor(writer, name, classID, descriptor, root = "") {
       (0, psdWriter_1.writeUint32)(writer, 16);
       writeDescriptorStructure(writer, name, classID, descriptor, root);
     }
-    exports.writeVersionAndDescriptor = writeVersionAndDescriptor;
     function horzVrtcToXY(hv) {
       return { x: hv.Hrzn, y: hv.Vrtc };
     }
-    exports.horzVrtcToXY = horzVrtcToXY;
     function xyToHorzVrtc(xy) {
       return { Hrzn: xy.x, Vrtc: xy.y };
     }
-    exports.xyToHorzVrtc = xyToHorzVrtc;
     function descBoundsToBounds(desc) {
       return {
         top: parseUnits(desc["Top "]),
@@ -6095,22 +7552,23 @@ var require_descriptor = __commonJS({
         bottom: parseUnits(desc.Btom)
       };
     }
-    exports.descBoundsToBounds = descBoundsToBounds;
     function boundsToDescBounds(bounds) {
-      var _a3;
-      return _a3 = {
-        Left: unitsValue(bounds.left, "bounds.left")
-      }, _a3["Top "] = unitsValue(bounds.top, "bounds.top"), _a3.Rght = unitsValue(bounds.right, "bounds.right"), _a3.Btom = unitsValue(bounds.bottom, "bounds.bottom"), _a3;
+      return {
+        Left: unitsValue(bounds.left, "bounds.left"),
+        ["Top "]: unitsValue(bounds.top, "bounds.top"),
+        Rght: unitsValue(bounds.right, "bounds.right"),
+        Btom: unitsValue(bounds.bottom, "bounds.bottom")
+      };
     }
-    exports.boundsToDescBounds = boundsToDescBounds;
     function parseFxObject(fx) {
-      var stroke = {
+      const stroke = {
         enabled: !!fx.enab,
         position: exports.FStl.decode(fx.Styl),
         fillType: exports.FrFl.decode(fx.PntT),
         blendMode: exports.BlnM.decode(fx["Md  "]),
         opacity: parsePercent(fx.Opct),
-        size: parseUnits(fx["Sz  "])
+        size: parseUnitsOrNumber(fx["Sz  "])
+        // stored as number (pixels) in old versions
       };
       if (fx.present !== void 0)
         stroke.present = fx.present;
@@ -6127,7 +7585,7 @@ var require_descriptor = __commonJS({
       return stroke;
     }
     function serializeFxObject(stroke) {
-      var FrFX = {};
+      let FrFX = {};
       FrFX.enab = !!stroke.enabled;
       if (stroke.present !== void 0)
         FrFX.present = !!stroke.present;
@@ -6141,83 +7599,68 @@ var require_descriptor = __commonJS({
       if (stroke.color)
         FrFX["Clr "] = serializeColor(stroke.color);
       if (stroke.gradient)
-        FrFX = __assign(__assign({}, FrFX), serializeGradientContent(stroke.gradient));
+        FrFX = Object.assign(Object.assign({}, FrFX), serializeGradientContent(stroke.gradient));
       if (stroke.pattern)
-        FrFX = __assign(__assign({}, FrFX), serializePatternContent(stroke.pattern));
+        FrFX = Object.assign(Object.assign({}, FrFX), serializePatternContent(stroke.pattern));
       if (stroke.overprint !== void 0)
         FrFX.overprint = !!stroke.overprint;
       return FrFX;
     }
-    function serializeEffects(e, log, multi) {
-      var _a3, _b3, _c2;
-      var info = multi ? {
-        "Scl ": unitsPercentF((_a3 = e.scale) !== null && _a3 !== void 0 ? _a3 : 1),
+    function serializeEffects(e, writer, multi) {
+      var _a2, _b2, _c;
+      const info = multi ? {
+        "Scl ": unitsPercentF((_a2 = e.scale) !== null && _a2 !== void 0 ? _a2 : 1),
         masterFXSwitch: !e.disabled
       } : {
         masterFXSwitch: !e.disabled,
-        "Scl ": unitsPercentF((_b3 = e.scale) !== null && _b3 !== void 0 ? _b3 : 1)
+        "Scl ": unitsPercentF((_b2 = e.scale) !== null && _b2 !== void 0 ? _b2 : 1)
       };
-      var arrayKeys = ["dropShadow", "innerShadow", "solidFill", "gradientOverlay", "stroke"];
-      for (var _i2 = 0, arrayKeys_1 = arrayKeys; _i2 < arrayKeys_1.length; _i2++) {
-        var key = arrayKeys_1[_i2];
+      const arrayKeys = ["dropShadow", "innerShadow", "solidFill", "gradientOverlay", "stroke"];
+      for (const key of arrayKeys) {
         if (e[key] && !Array.isArray(e[key]))
-          throw new Error("".concat(key, " should be an array"));
+          throw new Error(`${key} should be an array`);
       }
-      var useMulti = function(arr) {
-        return !!arr && arr.length > 1 && multi;
-      };
-      var useSingle = function(arr) {
-        return !!arr && arr.length >= 1 && (!multi || arr.length === 1);
-      };
+      const useMulti = (arr) => !!arr && arr.length > 1 && multi;
+      const useSingle = (arr) => !!arr && arr.length >= 1 && (!multi || arr.length === 1);
       if (useSingle(e.dropShadow))
-        info.DrSh = serializeEffectObject(e.dropShadow[0], "dropShadow", log);
+        info.DrSh = serializeEffectObject(e.dropShadow[0], "dropShadow", writer);
       if (useMulti(e.dropShadow))
-        info.dropShadowMulti = e.dropShadow.map(function(i) {
-          return serializeEffectObject(i, "dropShadow", log);
-        });
+        info.dropShadowMulti = e.dropShadow.map((i) => serializeEffectObject(i, "dropShadow", writer));
       if (useSingle(e.innerShadow))
-        info.IrSh = serializeEffectObject(e.innerShadow[0], "innerShadow", log);
+        info.IrSh = serializeEffectObject(e.innerShadow[0], "innerShadow", writer);
       if (useMulti(e.innerShadow))
-        info.innerShadowMulti = e.innerShadow.map(function(i) {
-          return serializeEffectObject(i, "innerShadow", log);
-        });
+        info.innerShadowMulti = e.innerShadow.map((i) => serializeEffectObject(i, "innerShadow", writer));
       if (e.outerGlow)
-        info.OrGl = serializeEffectObject(e.outerGlow, "outerGlow", log);
+        info.OrGl = serializeEffectObject(e.outerGlow, "outerGlow", writer);
       if (useMulti(e.solidFill))
-        info.solidFillMulti = e.solidFill.map(function(i) {
-          return serializeEffectObject(i, "solidFill", log);
-        });
+        info.solidFillMulti = e.solidFill.map((i) => serializeEffectObject(i, "solidFill", writer));
       if (useMulti(e.gradientOverlay))
-        info.gradientFillMulti = e.gradientOverlay.map(function(i) {
-          return serializeEffectObject(i, "gradientOverlay", log);
-        });
+        info.gradientFillMulti = e.gradientOverlay.map((i) => serializeEffectObject(i, "gradientOverlay", writer));
       if (useMulti(e.stroke))
-        info.frameFXMulti = e.stroke.map(function(i) {
-          return serializeFxObject(i);
-        });
+        info.frameFXMulti = e.stroke.map((i) => serializeFxObject(i));
       if (e.innerGlow)
-        info.IrGl = serializeEffectObject(e.innerGlow, "innerGlow", log);
+        info.IrGl = serializeEffectObject(e.innerGlow, "innerGlow", writer);
       if (e.bevel)
-        info.ebbl = serializeEffectObject(e.bevel, "bevel", log);
+        info.ebbl = serializeEffectObject(e.bevel, "bevel", writer);
       if (useSingle(e.solidFill))
-        info.SoFi = serializeEffectObject(e.solidFill[0], "solidFill", log);
+        info.SoFi = serializeEffectObject(e.solidFill[0], "solidFill", writer);
       if (e.patternOverlay)
-        info.patternFill = serializeEffectObject(e.patternOverlay, "patternOverlay", log);
+        info.patternFill = serializeEffectObject(e.patternOverlay, "patternOverlay", writer);
       if (useSingle(e.gradientOverlay))
-        info.GrFl = serializeEffectObject(e.gradientOverlay[0], "gradientOverlay", log);
+        info.GrFl = serializeEffectObject(e.gradientOverlay[0], "gradientOverlay", writer);
       if (e.satin)
-        info.ChFX = serializeEffectObject(e.satin, "satin", log);
+        info.ChFX = serializeEffectObject(e.satin, "satin", writer);
       if (useSingle(e.stroke))
-        info.FrFX = serializeFxObject((_c2 = e.stroke) === null || _c2 === void 0 ? void 0 : _c2[0]);
+        info.FrFX = serializeFxObject((_c = e.stroke) === null || _c === void 0 ? void 0 : _c[0]);
       if (multi) {
         info.numModifyingFX = 0;
-        for (var _d2 = 0, _e2 = Object.keys(e); _d2 < _e2.length; _d2++) {
-          var key = _e2[_d2];
-          var value = e[key];
+        for (const key of Object.keys(e)) {
+          const value = e[key];
+          if (value == null || typeof value !== "object")
+            continue;
           if (Array.isArray(value)) {
-            for (var _f2 = 0, value_1 = value; _f2 < value_1.length; _f2++) {
-              var effect = value_1[_f2];
-              if (effect.enabled)
+            for (const effect of value) {
+              if (effect === null || effect === void 0 ? void 0 : effect.enabled)
                 info.numModifyingFX++;
             }
           } else if (value.enabled) {
@@ -6227,63 +7670,54 @@ var require_descriptor = __commonJS({
       }
       return info;
     }
-    exports.serializeEffects = serializeEffects;
-    function parseEffects(info, log) {
-      var effects = {};
-      if (!info.masterFXSwitch)
+    function parseEffects(info, reader) {
+      const effects = {};
+      const _a2 = info, { _name, _classID, "Scl ": scale, masterFXSwitch, DrSh, dropShadowMulti, IrSh, innerShadowMulti, OrGl, IrGl, ebbl, SoFi, solidFillMulti, patternFill, GrFl, gradientFillMulti, ChFX, FrFX, frameFXMulti, numModifyingFX } = _a2, rest = __rest(_a2, ["_name", "_classID", "Scl ", "masterFXSwitch", "DrSh", "dropShadowMulti", "IrSh", "innerShadowMulti", "OrGl", "IrGl", "ebbl", "SoFi", "solidFillMulti", "patternFill", "GrFl", "gradientFillMulti", "ChFX", "FrFX", "frameFXMulti", "numModifyingFX"]);
+      if (!masterFXSwitch)
         effects.disabled = true;
-      if (info["Scl "])
-        effects.scale = parsePercent(info["Scl "]);
-      if (info.DrSh)
-        effects.dropShadow = [parseEffectObject(info.DrSh, log)];
-      if (info.dropShadowMulti)
-        effects.dropShadow = info.dropShadowMulti.map(function(i) {
-          return parseEffectObject(i, log);
-        });
-      if (info.IrSh)
-        effects.innerShadow = [parseEffectObject(info.IrSh, log)];
-      if (info.innerShadowMulti)
-        effects.innerShadow = info.innerShadowMulti.map(function(i) {
-          return parseEffectObject(i, log);
-        });
-      if (info.OrGl)
-        effects.outerGlow = parseEffectObject(info.OrGl, log);
-      if (info.IrGl)
-        effects.innerGlow = parseEffectObject(info.IrGl, log);
-      if (info.ebbl)
-        effects.bevel = parseEffectObject(info.ebbl, log);
-      if (info.SoFi)
-        effects.solidFill = [parseEffectObject(info.SoFi, log)];
-      if (info.solidFillMulti)
-        effects.solidFill = info.solidFillMulti.map(function(i) {
-          return parseEffectObject(i, log);
-        });
-      if (info.patternFill)
-        effects.patternOverlay = parseEffectObject(info.patternFill, log);
-      if (info.GrFl)
-        effects.gradientOverlay = [parseEffectObject(info.GrFl, log)];
-      if (info.gradientFillMulti)
-        effects.gradientOverlay = info.gradientFillMulti.map(function(i) {
-          return parseEffectObject(i, log);
-        });
-      if (info.ChFX)
-        effects.satin = parseEffectObject(info.ChFX, log);
-      if (info.FrFX)
-        effects.stroke = [parseFxObject(info.FrFX)];
-      if (info.frameFXMulti)
-        effects.stroke = info.frameFXMulti.map(function(i) {
-          return parseFxObject(i);
-        });
+      if (scale)
+        effects.scale = parsePercent(scale);
+      if (DrSh)
+        effects.dropShadow = [parseEffectObject(DrSh, reader)];
+      if (dropShadowMulti)
+        effects.dropShadow = dropShadowMulti.map((i) => parseEffectObject(i, reader));
+      if (IrSh)
+        effects.innerShadow = [parseEffectObject(IrSh, reader)];
+      if (innerShadowMulti)
+        effects.innerShadow = innerShadowMulti.map((i) => parseEffectObject(i, reader));
+      if (OrGl)
+        effects.outerGlow = parseEffectObject(OrGl, reader);
+      if (IrGl)
+        effects.innerGlow = parseEffectObject(IrGl, reader);
+      if (ebbl)
+        effects.bevel = parseEffectObject(ebbl, reader, "bevel");
+      if (SoFi)
+        effects.solidFill = [parseEffectObject(SoFi, reader)];
+      if (solidFillMulti)
+        effects.solidFill = solidFillMulti.map((i) => parseEffectObject(i, reader));
+      if (patternFill)
+        effects.patternOverlay = parseEffectObject(patternFill, reader);
+      if (GrFl)
+        effects.gradientOverlay = [parseEffectObject(GrFl, reader)];
+      if (gradientFillMulti)
+        effects.gradientOverlay = gradientFillMulti.map((i) => parseEffectObject(i, reader));
+      if (ChFX)
+        effects.satin = parseEffectObject(ChFX, reader);
+      if (FrFX)
+        effects.stroke = [parseFxObject(FrFX)];
+      if (frameFXMulti)
+        effects.stroke = frameFXMulti.map((i) => parseFxObject(i));
+      if (reader.logMissingFeatures && Object.keys(rest).length)
+        reader.log("Unhandled effect keys:", rest);
       return effects;
     }
-    exports.parseEffects = parseEffects;
-    function parseKeyList(keyList, logMissingFeatures) {
-      var keys = [];
-      for (var j = 0; j < keyList.length; j++) {
-        var key = keyList[j];
-        var _a3 = key.time, denominator = _a3.denominator, numerator = _a3.numerator, selected = key.selected, animKey = key.animKey;
-        var time = { numerator, denominator };
-        var interpolation = exports.animInterpStyleEnum.decode(key.animInterpStyle);
+    function parseKeyList(keyList, reader) {
+      const keys = [];
+      for (let j = 0; j < keyList.length; j++) {
+        const key = keyList[j];
+        const { time: { denominator, numerator }, selected, animKey } = key;
+        const time = { numerator, denominator };
+        const interpolation = exports.animInterpStyleEnum.decode(key.animInterpStyle);
         switch (animKey.Type) {
           case "keyType.Opct":
             keys.push({ interpolation, time, selected, type: "opacity", value: parsePercent(animKey.Opct) });
@@ -6304,10 +7738,10 @@ var require_descriptor = __commonJS({
             });
             break;
           case "keyType.sheetStyle": {
-            var key_1 = { interpolation, time, selected, type: "style" };
+            const key2 = { interpolation, time, selected, type: "style" };
             if (animKey.sheetStyle.Lefx)
-              key_1.style = parseEffects(animKey.sheetStyle.Lefx, logMissingFeatures);
-            keys.push(key_1);
+              key2.style = parseEffects(animKey.sheetStyle.Lefx, reader);
+            keys.push(key2);
             break;
           }
           case "keyType.globalLighting": {
@@ -6322,18 +7756,18 @@ var require_descriptor = __commonJS({
             break;
           }
           default:
-            throw new Error("Unsupported keyType value");
+            throw new Error(`Unsupported keyType value`);
         }
       }
       return keys;
     }
-    function serializeKeyList(keys) {
-      var keyList = [];
-      for (var j = 0; j < keys.length; j++) {
-        var key = keys[j];
-        var time = key.time, _a3 = key.selected, selected = _a3 === void 0 ? false : _a3, interpolation = key.interpolation;
-        var animInterpStyle = exports.animInterpStyleEnum.encode(interpolation);
-        var animKey = void 0;
+    function serializeKeyList(keys, writer) {
+      const keyList = [];
+      for (let j = 0; j < keys.length; j++) {
+        const key = keys[j];
+        const { time, selected = false, interpolation } = key;
+        const animInterpStyle = exports.animInterpStyleEnum.encode(interpolation);
+        let animKey;
         switch (key.type) {
           case "opacity":
             animKey = { Type: "keyType.Opct", Opct: unitsPercent(key.value) };
@@ -6347,60 +7781,57 @@ var require_descriptor = __commonJS({
           case "style":
             animKey = { Type: "keyType.sheetStyle", sheetStyle: { Vrsn: 1, blendOptions: {} } };
             if (key.style)
-              animKey.sheetStyle = { Vrsn: 1, Lefx: serializeEffects(key.style, false, false), blendOptions: {} };
+              animKey.sheetStyle = { Vrsn: 1, Lefx: serializeEffects(key.style, writer, false), blendOptions: {} };
             break;
           case "globalLighting": {
             animKey = { Type: "keyType.globalLighting", gblA: key.globalAngle, globalAltitude: key.globalAltitude };
             break;
           }
           default:
-            throw new Error("Unsupported keyType value");
+            throw new Error(`Unsupported keyType value`);
         }
         keyList.push({ Vrsn: 1, animInterpStyle, time, animKey, selected });
       }
       return keyList;
     }
-    function parseTrackList(trackList, logMissingFeatures) {
-      var tracks = [];
-      for (var i = 0; i < trackList.length; i++) {
-        var tr = trackList[i];
-        var track = {
+    function parseTrackList(trackList, reader) {
+      const tracks = [];
+      for (let i = 0; i < trackList.length; i++) {
+        const tr = trackList[i];
+        const track = {
           type: exports.stdTrackID.decode(tr.trackID),
           enabled: tr.enab,
-          keys: parseKeyList(tr.keyList, logMissingFeatures)
+          keys: parseKeyList(tr.keyList, reader)
         };
         if (tr.effectParams) {
           track.effectParams = {
             fillCanvas: tr.effectParams.fillCanvas,
             zoomOrigin: tr.effectParams.zoomOrigin,
-            keys: parseKeyList(tr.effectParams.keyList, logMissingFeatures)
+            keys: parseKeyList(tr.effectParams.keyList, reader)
           };
         }
         tracks.push(track);
       }
       return tracks;
     }
-    exports.parseTrackList = parseTrackList;
-    function serializeTrackList(tracks) {
-      var trackList = [];
-      for (var i = 0; i < tracks.length; i++) {
-        var t = tracks[i];
-        trackList.push(__assign(__assign({ trackID: exports.stdTrackID.encode(t.type), Vrsn: 1, enab: !!t.enabled, Effc: !!t.effectParams }, t.effectParams ? {
+    function serializeTrackList(tracks, writer) {
+      const trackList = [];
+      for (let i = 0; i < tracks.length; i++) {
+        const t = tracks[i];
+        trackList.push(Object.assign(Object.assign({ trackID: exports.stdTrackID.encode(t.type), Vrsn: 1, enab: !!t.enabled, Effc: !!t.effectParams }, t.effectParams ? {
           effectParams: {
-            keyList: serializeKeyList(t.keys),
+            keyList: serializeKeyList(t.effectParams.keys, writer),
             fillCanvas: t.effectParams.fillCanvas,
             zoomOrigin: t.effectParams.zoomOrigin
           }
-        } : {}), { keyList: serializeKeyList(t.keys) }));
+        } : {}), { keyList: serializeKeyList(t.keys, writer) }));
       }
       return trackList;
     }
-    exports.serializeTrackList = serializeTrackList;
-    function parseEffectObject(obj, reportErrors) {
-      var result = {};
-      for (var _i2 = 0, _a3 = Object.keys(obj); _i2 < _a3.length; _i2++) {
-        var key = _a3[_i2];
-        var val = obj[key];
+    function parseEffectObject(obj, reader, objName) {
+      const result = {};
+      for (const key of Object.keys(obj)) {
+        const val = obj[key];
         switch (key) {
           case "enab":
             result.enabled = !!val;
@@ -6463,6 +7894,8 @@ var require_descriptor = __commonJS({
             result.type = exports.GrdT.decode(val);
             break;
           case "gs99":
+          // gradient overlay
+          case "gradientsInterpolationMethod":
             result.interpolationMethod = exports.gradientInterpolationMethodType.decode(val);
             break;
           case "Opct":
@@ -6514,20 +7947,24 @@ var require_descriptor = __commonJS({
             result.pattern = { name: val["Nm  "], id: val.Idnt };
             break;
           case "phase":
-            result.phase = { x: val.Hrzn, y: val.Vrtc };
+            result.phase = parsePhase(val);
             break;
           case "Ofst":
             result.offset = { x: parsePercent(val.Hrzn), y: parsePercent(val.Vrtc) };
             break;
           case "MpgS":
-          case "TrnS":
-            result.contour = {
+          case "TrnS": {
+            const contour = {
               name: val["Nm  "],
-              curve: val["Crv "].map(function(p) {
-                return { x: p.Hrzn, y: p.Vrtc };
-              })
+              curve: val["Crv "].map((p) => p.Cnty !== void 0 ? { x: p.Hrzn, y: p.Vrtc, curved: p.Cnty } : { x: p.Hrzn, y: p.Vrtc })
             };
+            if (objName === "bevel" && key === "MpgS") {
+              result.shapeContour = contour;
+            } else {
+              result.contour = contour;
+            }
             break;
+          }
           case "Grad":
             result.gradient = parseGradient(val);
             break;
@@ -6543,17 +7980,21 @@ var require_descriptor = __commonJS({
           case "_classID":
             break;
           default:
-            reportErrors && console.log("Invalid effect key: '".concat(key, "', value:"), val);
+            reader.logMissingFeatures && reader.log(`Invalid effect key: '${key}', value:`, val);
         }
       }
       return result;
     }
-    function serializeEffectObject(obj, objName, reportErrors) {
-      var result = {};
-      for (var _i2 = 0, _a3 = Object.keys(obj); _i2 < _a3.length; _i2++) {
-        var objKey = _a3[_i2];
-        var key = objKey;
-        var val = obj[key];
+    function serializeEffectObject(obj, objName, writer) {
+      const result = {
+        enab: false
+      };
+      if (objName === "dropShadow") {
+        result.TrnS = { "Nm  ": "", "Crv ": [] };
+      }
+      for (const objKey of Object.keys(obj)) {
+        const key = objKey;
+        const val = obj[key];
         switch (key) {
           case "enabled":
             result.enab = !!val;
@@ -6617,7 +8058,7 @@ var require_descriptor = __commonJS({
             result.Type = exports.GrdT.encode(val);
             break;
           case "interpolationMethod":
-            result.gs99 = exports.gradientInterpolationMethodType.encode(val);
+            result[objName === "outerGlow" || objName === "innerGlow" ? "gradientsInterpolationMethod" : "gs99"] = exports.gradientInterpolationMethodType.encode(val);
             break;
           case "opacity":
             result.Opct = unitsPercent(val);
@@ -6629,7 +8070,7 @@ var require_descriptor = __commonJS({
             result.sdwO = unitsPercent(val);
             break;
           case "angle":
-            if (objName === "gradientOverlay" || objName === "patternFill") {
+            if (objName === "gradientOverlay" || objName === "patternOverlay") {
               result.Angl = unitsAngle(val);
             } else {
               result.lagl = unitsAngle(val);
@@ -6672,17 +8113,14 @@ var require_descriptor = __commonJS({
             result.phase = { Hrzn: val.x, Vrtc: val.y };
             break;
           case "offset":
-            result.Ofst = { Hrzn: unitsPercent(val.x), Vrtc: unitsPercent(val.y) };
+            result.Ofst = { Hrzn: unitsPercentF(val.x), Vrtc: unitsPercentF(val.y) };
             break;
-          case "contour": {
-            result[objName === "satin" ? "MpgS" : "TrnS"] = {
-              "Nm  ": val.name,
-              "Crv ": val.curve.map(function(p) {
-                return { Hrzn: p.x, Vrtc: p.y };
-              })
-            };
+          case "contour":
+            result[objName === "satin" ? "MpgS" : "TrnS"] = serializeContour(val);
             break;
-          }
+          case "shapeContour":
+            result.MpgS = serializeContour(val);
+            break;
           case "gradient":
             result.Grad = serializeGradient(val);
             break;
@@ -6695,32 +8133,45 @@ var require_descriptor = __commonJS({
             result[key] = val;
             break;
           default:
-            reportErrors && console.log("Invalid effect key: '".concat(key, "', value:"), val);
+            writer.logMissingFeatures && writer.log(`Invalid effect key: '${key}', value:`, val);
         }
       }
       return result;
     }
+    function serializeContour(contour) {
+      return {
+        "Nm  ": contour.name,
+        "Crv ": contour.curve.map((p) => p.curved !== void 0 ? { Hrzn: p.x, Vrtc: p.y, Cnty: !!p.curved } : { Hrzn: p.x, Vrtc: p.y })
+      };
+    }
     function parseGradient(grad) {
       if (grad.GrdF === "GrdF.CstS") {
-        var samples_1 = grad.Intr || 4096;
+        const samples = 4096;
         return {
           type: "solid",
           name: grad["Nm  "],
           smoothness: grad.Intr / 4096,
-          colorStops: grad.Clrs.map(function(s) {
-            return {
-              color: parseColor(s["Clr "]),
-              location: s.Lctn / samples_1,
+          colorStops: grad.Clrs.map((s) => {
+            const stop = {
+              color: s["Clr "] ? parseColor(s["Clr "]) : { r: 0, g: 0, b: 0 },
+              location: s.Lctn / samples,
               midpoint: s.Mdpn / 100
             };
+            if (s.Type) {
+              try {
+                const type = exports.Clry.decode(s.Type);
+                if (type !== "user")
+                  stop.type = type;
+              } catch (_a2) {
+              }
+            }
+            return stop;
           }),
-          opacityStops: grad.Trns.map(function(s) {
-            return {
-              opacity: parsePercent(s.Opct),
-              location: s.Lctn / samples_1,
-              midpoint: s.Mdpn / 100
-            };
-          })
+          opacityStops: grad.Trns.map((s) => ({
+            opacity: parsePercent(s.Opct),
+            location: s.Lctn / samples,
+            midpoint: s.Mdpn / 100
+          }))
         };
       } else {
         return {
@@ -6731,38 +8182,34 @@ var require_descriptor = __commonJS({
           randomSeed: grad.RndS,
           restrictColors: !!grad.VctC,
           addTransparency: !!grad.ShTr,
-          min: grad["Mnm "].map(function(x) {
-            return x / 100;
-          }),
-          max: grad["Mxm "].map(function(x) {
-            return x / 100;
-          })
+          min: grad["Mnm "].map((x) => x / 100),
+          max: grad["Mxm "].map((x) => x / 100)
         };
       }
     }
     function serializeGradient(grad) {
-      var _a3, _b3;
+      var _a2, _b2;
       if (grad.type === "solid") {
-        var samples_2 = Math.round(((_a3 = grad.smoothness) !== null && _a3 !== void 0 ? _a3 : 1) * 4096);
+        const samples = 4096;
         return {
           "Nm  ": grad.name || "",
           GrdF: "GrdF.CstS",
-          Intr: samples_2,
-          Clrs: grad.colorStops.map(function(s) {
-            var _a4;
+          Intr: Math.round(((_a2 = grad.smoothness) !== null && _a2 !== void 0 ? _a2 : 1) * 4096),
+          Clrs: grad.colorStops.map((s) => {
+            var _a3, _b3;
             return {
               "Clr ": serializeColor(s.color),
-              Type: "Clry.UsrS",
-              Lctn: Math.round(s.location * samples_2),
-              Mdpn: Math.round(((_a4 = s.midpoint) !== null && _a4 !== void 0 ? _a4 : 0.5) * 100)
+              Type: exports.Clry.encode((_a3 = s.type) !== null && _a3 !== void 0 ? _a3 : "user"),
+              Lctn: Math.round(s.location * samples),
+              Mdpn: Math.round(((_b3 = s.midpoint) !== null && _b3 !== void 0 ? _b3 : 0.5) * 100)
             };
           }),
-          Trns: grad.opacityStops.map(function(s) {
-            var _a4;
+          Trns: grad.opacityStops.map((s) => {
+            var _a3;
             return {
-              Opct: unitsPercent(s.opacity),
-              Lctn: Math.round(s.location * samples_2),
-              Mdpn: Math.round(((_a4 = s.midpoint) !== null && _a4 !== void 0 ? _a4 : 0.5) * 100)
+              Opct: unitsPercentF(s.opacity),
+              Lctn: Math.round(s.location * samples),
+              Mdpn: Math.round(((_a3 = s.midpoint) !== null && _a3 !== void 0 ? _a3 : 0.5) * 100)
             };
           })
         };
@@ -6774,18 +8221,14 @@ var require_descriptor = __commonJS({
           VctC: !!grad.restrictColors,
           ClrS: exports.ClrS.encode(grad.colorModel),
           RndS: grad.randomSeed || 0,
-          Smth: Math.round(((_b3 = grad.roughness) !== null && _b3 !== void 0 ? _b3 : 1) * 4096),
-          "Mnm ": (grad.min || [0, 0, 0, 0]).map(function(x) {
-            return x * 100;
-          }),
-          "Mxm ": (grad.max || [1, 1, 1, 1]).map(function(x) {
-            return x * 100;
-          })
+          Smth: Math.round(((_b2 = grad.roughness) !== null && _b2 !== void 0 ? _b2 : 1) * 4096),
+          "Mnm ": (grad.min || [0, 0, 0, 0]).map((x) => Math.round(x * 100)),
+          "Mxm ": (grad.max || [1, 1, 1, 1]).map((x) => Math.round(x * 100))
         };
       }
     }
     function parseGradientContent(descriptor) {
-      var result = parseGradient(descriptor.Grad);
+      const result = parseGradient(descriptor.Grad);
       result.style = exports.GrdT.decode(descriptor.Type);
       if (descriptor.Dthr !== void 0)
         result.dither = descriptor.Dthr;
@@ -6805,66 +8248,91 @@ var require_descriptor = __commonJS({
           y: parsePercent(descriptor.Ofst.Vrtc)
         };
       }
+      if (descriptor.gradientAspectRatio !== void 0)
+        result.aspectRatio = descriptor.gradientAspectRatio;
+      if (descriptor.noisePreSeed !== void 0)
+        result.noisePreSeed = descriptor.noisePreSeed;
       return result;
     }
+    function parsePhase({ Hrzn, Vrtc }) {
+      return {
+        x: typeof Hrzn === "number" ? Hrzn : Hrzn.value,
+        y: typeof Vrtc === "number" ? Vrtc : Vrtc.value
+      };
+    }
     function parsePatternContent(descriptor) {
-      var result = {
+      const result = {
         name: descriptor.Ptrn["Nm  "],
         id: descriptor.Ptrn.Idnt
       };
+      if (descriptor.Algn !== void 0)
+        result.align = descriptor.Algn;
       if (descriptor.Lnkd !== void 0)
         result.linked = descriptor.Lnkd;
       if (descriptor.phase !== void 0)
-        result.phase = { x: descriptor.phase.Hrzn, y: descriptor.phase.Vrtc };
+        result.phase = parsePhase(descriptor.phase);
+      if (descriptor["Scl "] !== void 0)
+        result.scale = parsePercent(descriptor["Scl "]);
+      if (descriptor.Angl !== void 0)
+        result.angle = parseAngle(descriptor.Angl);
       return result;
     }
     function parseVectorContent(descriptor) {
       if ("Grad" in descriptor) {
         return parseGradientContent(descriptor);
       } else if ("Ptrn" in descriptor) {
-        return __assign({ type: "pattern" }, parsePatternContent(descriptor));
+        return Object.assign({ type: "pattern" }, parsePatternContent(descriptor));
       } else if ("Clr " in descriptor) {
         return { type: "color", color: parseColor(descriptor["Clr "]) };
       } else {
         throw new Error("Invalid vector content");
       }
     }
-    exports.parseVectorContent = parseVectorContent;
     function serializeGradientContent(content) {
-      var result = {};
+      const result = {};
       if (content.dither !== void 0)
         result.Dthr = content.dither;
       if (content.interpolationMethod !== void 0)
         result.gradientsInterpolationMethod = exports.gradientInterpolationMethodType.encode(content.interpolationMethod);
       if (content.reverse !== void 0)
         result.Rvrs = content.reverse;
+      if (content.aspectRatio !== void 0)
+        result.gradientAspectRatio = content.aspectRatio;
       if (content.angle !== void 0)
         result.Angl = unitsAngle(content.angle);
       result.Type = exports.GrdT.encode(content.style);
       if (content.align !== void 0)
         result.Algn = content.align;
       if (content.scale !== void 0)
-        result["Scl "] = unitsPercent(content.scale);
+        result["Scl "] = unitsPercentF(content.scale);
       if (content.offset) {
         result.Ofst = {
-          Hrzn: unitsPercent(content.offset.x),
-          Vrtc: unitsPercent(content.offset.y)
+          Hrzn: unitsPercentF(content.offset.x),
+          Vrtc: unitsPercentF(content.offset.y)
         };
       }
+      if (content.noisePreSeed !== void 0)
+        result.noisePreSeed = content.noisePreSeed;
       result.Grad = serializeGradient(content);
       return result;
     }
     function serializePatternContent(content) {
-      var result = {
+      const result = {
         Ptrn: {
           "Nm  ": content.name || "",
           Idnt: content.id || ""
         }
       };
+      if (content.align !== void 0)
+        result.Algn = !!content.align;
       if (content.linked !== void 0)
         result.Lnkd = !!content.linked;
       if (content.phase !== void 0)
         result.phase = { Hrzn: content.phase.x, Vrtc: content.phase.y };
+      if (content.scale !== void 0)
+        result["Scl "] = unitsPercentF(content.scale);
+      if (content.angle !== void 0)
+        result.Angl = unitsAngle(content.angle);
       return result;
     }
     function serializeVectorContent(content) {
@@ -6876,26 +8344,90 @@ var require_descriptor = __commonJS({
         return { key: "GdFl", descriptor: serializeGradientContent(content) };
       }
     }
-    exports.serializeVectorContent = serializeVectorContent;
+    var colorConversions = {
+      // key: [descriptor -> color, color -> descriptor]
+      "H   ": [(x) => x / 360, (x) => x * 360],
+      // angle
+      Strt: [(x) => x / 100, (x) => x * 100],
+      Brgh: [(x) => x / 100, (x) => x * 100],
+      "Cyn ": [(x) => x * 255 / 100, (x) => x * 100 / 255],
+      Mgnt: [(x) => x * 255 / 100, (x) => x * 100 / 255],
+      "Ylw ": [(x) => x * 255 / 100, (x) => x * 100 / 255],
+      Blck: [(x) => x * 255 / 100, (x) => x * 100 / 255],
+      "Gry ": [(x) => x * 255 / 100, (x) => x * 100 / 255],
+      Lmnc: [(x) => x / 100, (x) => x * 100],
+      "A   ": [helpers_1.normalizeLabAB, helpers_1.denormalizeLabAB],
+      "B   ": [helpers_1.normalizeLabAB, helpers_1.denormalizeLabAB]
+    };
+    function colorToDescriptorValue(key, value) {
+      const conversion = colorConversions[key];
+      if (!conversion)
+        return value;
+      const [from, to] = conversion;
+      const result = to(value);
+      if (!isFinite(result))
+        return result;
+      for (let precision = 1; precision < 17; precision++) {
+        const candidate = +result.toPrecision(precision);
+        if (from(candidate) === value)
+          return candidate;
+      }
+      return result;
+    }
+    function isBookColor(color) {
+      return color._classID === "BkCl" || "Bk  " in color || "bookID" in color;
+    }
     function parseColor(color) {
+      var _a2, _b2, _c;
+      const result = parseColorValues(color);
+      if (isBookColor(color)) {
+        const book = color;
+        const key = book.bookKey;
+        result.book = {
+          book: (_a2 = book["Bk  "]) !== null && _a2 !== void 0 ? _a2 : "",
+          name: (_b2 = book["Nm  "]) !== null && _b2 !== void 0 ? _b2 : "",
+          bookID: (_c = book.bookID) !== null && _c !== void 0 ? _c : 0,
+          bookKey: typeof key === "string" ? key : key ? String.fromCharCode(...Array.from(key)) : ""
+        };
+      }
+      return result;
+    }
+    function parseColorValues(color) {
       if ("H   " in color) {
-        return { h: parsePercentOrAngle(color["H   "]), s: color.Strt, b: color.Brgh };
+        return { h: parsePercentOrAngle(color["H   "]), s: color.Strt / 100, b: color.Brgh / 100 };
       } else if ("Rd  " in color) {
         return { r: color["Rd  "], g: color["Grn "], b: color["Bl  "] };
       } else if ("Cyn " in color) {
-        return { c: color["Cyn "], m: color.Mgnt, y: color["Ylw "], k: color.Blck };
+        return {
+          c: color["Cyn "] * 255 / 100,
+          m: color.Mgnt * 255 / 100,
+          y: color["Ylw "] * 255 / 100,
+          k: color.Blck * 255 / 100
+        };
       } else if ("Gry " in color) {
-        return { k: color["Gry "] };
+        return { k: color["Gry "] * 255 / 100 };
       } else if ("Lmnc" in color) {
-        return { l: color.Lmnc, a: color["A   "], b: color["B   "] };
+        return { l: color.Lmnc / 100, a: (0, helpers_1.normalizeLabAB)(color["A   "]), b: (0, helpers_1.normalizeLabAB)(color["B   "]) };
       } else if ("redFloat" in color) {
         return { fr: color.redFloat, fg: color.greenFloat, fb: color.blueFloat };
+      } else if (isBookColor(color)) {
+        return { r: 0, g: 0, b: 0 };
       } else {
         throw new Error("Unsupported color descriptor");
       }
     }
-    exports.parseColor = parseColor;
     function serializeColor(color) {
+      const result = serializeColorValues(color);
+      if (color === null || color === void 0 ? void 0 : color.book) {
+        const { book, name, bookID, bookKey } = color.book;
+        const key = new Uint8Array(bookKey.length);
+        for (let i = 0; i < key.length; i++)
+          key[i] = bookKey.charCodeAt(i) & 255;
+        Object.assign(result, { "Bk  ": book, "Nm  ": name, bookID, bookKey: key });
+      }
+      return result;
+    }
+    function serializeColorValues(color) {
       if (!color) {
         return { _name: "", _classID: "RGBC", "Rd  ": 0, "Grn ": 0, "Bl  ": 0 };
       } else if ("r" in color) {
@@ -6903,34 +8435,50 @@ var require_descriptor = __commonJS({
       } else if ("fr" in color) {
         return { _name: "", _classID: "RGBC", redFloat: color.fr, greenFloat: color.fg, blueFloat: color.fb };
       } else if ("h" in color) {
-        return { _name: "", _classID: "HSBC", "H   ": unitsAngle(color.h * 360), Strt: color.s || 0, Brgh: color.b || 0 };
+        return {
+          _name: "",
+          _classID: "HSBC",
+          "H   ": unitsAngle(colorToDescriptorValue("H   ", color.h || 0)),
+          Strt: colorToDescriptorValue("Strt", color.s || 0),
+          Brgh: colorToDescriptorValue("Brgh", color.b || 0)
+        };
       } else if ("c" in color) {
-        return { _name: "", _classID: "CMYC", "Cyn ": color.c || 0, Mgnt: color.m || 0, "Ylw ": color.y || 0, Blck: color.k || 0 };
+        return {
+          _name: "",
+          _classID: "CMYC",
+          "Cyn ": colorToDescriptorValue("Cyn ", color.c || 0),
+          Mgnt: colorToDescriptorValue("Mgnt", color.m || 0),
+          "Ylw ": colorToDescriptorValue("Ylw ", color.y || 0),
+          Blck: colorToDescriptorValue("Blck", color.k || 0)
+        };
       } else if ("l" in color) {
-        return { _name: "", _classID: "LABC", Lmnc: color.l || 0, "A   ": color.a || 0, "B   ": color.b || 0 };
+        return {
+          _name: "",
+          _classID: "LbCl",
+          Lmnc: colorToDescriptorValue("Lmnc", color.l || 0),
+          "A   ": colorToDescriptorValue("A   ", color.a || 0),
+          "B   ": colorToDescriptorValue("B   ", color.b || 0)
+        };
       } else if ("k" in color) {
-        return { _name: "", _classID: "GRYC", "Gry ": color.k };
+        return { _name: "", _classID: "Grsc", "Gry ": colorToDescriptorValue("Gry ", color.k || 0) };
       } else {
         throw new Error("Invalid color value");
       }
     }
-    exports.serializeColor = serializeColor;
     function parseAngle(x) {
       if (x === void 0)
         return 0;
       if (x.units !== "Angle")
-        throw new Error("Invalid units: ".concat(x.units));
+        throw new Error(`Invalid units: ${x.units}`);
       return x.value;
     }
-    exports.parseAngle = parseAngle;
     function parsePercent(x) {
       if (x === void 0)
         return 1;
       if (x.units !== "Percent")
-        throw new Error("Invalid units: ".concat(x.units));
+        throw new Error(`Invalid units: ${x.units}`);
       return x.value / 100;
     }
-    exports.parsePercent = parsePercent;
     function parsePercentOrAngle(x) {
       if (x === void 0)
         return 1;
@@ -6938,64 +8486,49 @@ var require_descriptor = __commonJS({
         return x.value / 100;
       if (x.units === "Angle")
         return x.value / 360;
-      throw new Error("Invalid units: ".concat(x.units));
+      throw new Error(`Invalid units: ${x.units}`);
     }
-    exports.parsePercentOrAngle = parsePercentOrAngle;
-    function parseUnits(_a3) {
-      var units = _a3.units, value = _a3.value;
-      if (units !== "Pixels" && units !== "Millimeters" && units !== "Points" && units !== "None" && units !== "Picas" && units !== "Inches" && units !== "Centimeters" && units !== "Density") {
-        throw new Error("Invalid units: ".concat(JSON.stringify({ units, value })));
+    function parseUnits({ units, value }) {
+      if (units !== "Pixels" && units !== "Millimeters" && units !== "Points" && units !== "None" && units !== "Picas" && units !== "Inches" && units !== "Centimeters" && units !== "Density" && units !== "Distance") {
+        throw new Error(`Invalid units: ${JSON.stringify({ units, value })}`);
       }
       return { value, units };
     }
-    exports.parseUnits = parseUnits;
-    function parseUnitsOrNumber(value, units) {
-      if (units === void 0) {
-        units = "Pixels";
-      }
+    function parseUnitsOrNumber(value, units = "Pixels") {
       if (typeof value === "number")
         return { value, units };
       return parseUnits(value);
     }
-    exports.parseUnitsOrNumber = parseUnitsOrNumber;
-    function parseUnitsToNumber(_a3, expectedUnits) {
-      var units = _a3.units, value = _a3.value;
+    function parseUnitsToNumber({ units, value }, expectedUnits) {
       if (units !== expectedUnits)
-        throw new Error("Invalid units: ".concat(JSON.stringify({ units, value })));
+        throw new Error(`Invalid units: ${JSON.stringify({ units, value })}`);
       return value;
     }
-    exports.parseUnitsToNumber = parseUnitsToNumber;
     function unitsAngle(value) {
       return { units: "Angle", value: value || 0 };
     }
-    exports.unitsAngle = unitsAngle;
     function unitsPercent(value) {
       return { units: "Percent", value: Math.round((value || 0) * 100) };
     }
-    exports.unitsPercent = unitsPercent;
     function unitsPercentF(value) {
       return { units: "Percent", value: (value || 0) * 100 };
     }
-    exports.unitsPercentF = unitsPercentF;
     function unitsValue(x, key) {
       if (x == null)
         return { units: "Pixels", value: 0 };
       if (typeof x !== "object")
-        throw new Error("Invalid value: ".concat(JSON.stringify(x), " (key: ").concat(key, ") (should have value and units)"));
-      var units = x.units, value = x.value;
+        throw new Error(`Invalid value: ${JSON.stringify(x)} (key: ${key}) (should have value and units)`);
+      const { units, value } = x;
       if (typeof value !== "number")
-        throw new Error("Invalid value in ".concat(JSON.stringify(x), " (key: ").concat(key, ")"));
-      if (units !== "Pixels" && units !== "Millimeters" && units !== "Points" && units !== "None" && units !== "Picas" && units !== "Inches" && units !== "Centimeters" && units !== "Density") {
-        throw new Error("Invalid units in ".concat(JSON.stringify(x), " (key: ").concat(key, ")"));
+        throw new Error(`Invalid value in ${JSON.stringify(x)} (key: ${key})`);
+      if (units !== "Pixels" && units !== "Millimeters" && units !== "Points" && units !== "None" && units !== "Picas" && units !== "Inches" && units !== "Centimeters" && units !== "Density" && units !== "Distance") {
+        throw new Error(`Invalid units in ${JSON.stringify(x)} (key: ${key})`);
       }
       return { units, value };
     }
-    exports.unitsValue = unitsValue;
-    function frac(_a3) {
-      var numerator = _a3.numerator, denominator = _a3.denominator;
+    function frac({ numerator, denominator }) {
       return { numerator, denominator };
     }
-    exports.frac = frac;
     exports.textGridding = (0, helpers_1.createEnum)("textGridding", "none", {
       none: "None",
       round: "Rnd "
@@ -7064,8 +8597,10 @@ var require_descriptor = __commonJS({
       // used in ABR
       "linear height": "linearHeight",
       "height": "Hght",
-      "subtraction": "Sbtr"
+      "subtraction": "Sbtr",
       // 2nd version of subtract ?
+      "pass through": "passThrough"
+      // only used in layer comps and animation frames
     });
     exports.BESl = (0, helpers_1.createEnum)("BESl", "inner bevel", {
       "inner bevel": "InrB",
@@ -7111,9 +8646,15 @@ var require_descriptor = __commonJS({
     });
     exports.gradientInterpolationMethodType = (0, helpers_1.createEnum)("gradientInterpolationMethodType", "perceptual", {
       perceptual: "Perc",
-      linear: "Lnr",
+      linear: "Lnr ",
       classic: "Gcls",
       smooth: "Smoo"
+      // TODO: stripes
+    });
+    exports.Clry = (0, helpers_1.createEnum)("Clry", "user", {
+      user: "UsrS",
+      foreground: "FrgC",
+      background: "BckC"
     });
     exports.ClrS = (0, helpers_1.createEnum)("ClrS", "rgb", {
       rgb: "RGBC",
@@ -7166,7 +8707,7 @@ var require_descriptor = __commonJS({
       center: "strokeStyleAlignCenter",
       outside: "strokeStyleAlignOutside"
     });
-    exports.BlrM = (0, helpers_1.createEnum)("BlrM", "ispinmage", {
+    exports.BlrM = (0, helpers_1.createEnum)("BlrM", "spin", {
       spin: "Spn ",
       zoom: "Zm  "
     });
@@ -7279,7 +8820,7 @@ var require_descriptor = __commonJS({
       blast: "Blst",
       stagger: "Stgr"
     });
-    exports.Drct = (0, helpers_1.createEnum)("Drct", "from the right", {
+    exports.Drct = (0, helpers_1.createEnum)("Drct", "right", {
       left: "Left",
       right: "Rght"
     });
@@ -7302,9 +8843,14 @@ var require_descriptor = __commonJS({
       "auto": "auto",
       "full spherical": "fusP"
     });
-    exports.presetKindType = (0, helpers_1.createEnum)("presetKindType", "presetKindCustom", {
+    exports.presetKindType = (0, helpers_1.createEnum)("presetKindType", "custom", {
       custom: "presetKindCustom",
       default: "presetKindDefault"
+    });
+    exports.patternColorHandling = (0, helpers_1.createEnum)("", "convert", {
+      "convert": "conv",
+      "avoid conversion": "avod",
+      "luminance only": "lumi"
     });
   }
 });
@@ -7313,20 +8859,11 @@ var require_descriptor = __commonJS({
 var require_imageResources = __commonJS({
   "node_modules/ag-psd/dist/imageResources.js"(exports) {
     "use strict";
-    var __assign = exports && exports.__assign || function() {
-      __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-          s = arguments[i];
-          for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-        }
-        return t;
-      };
-      return __assign.apply(this, arguments);
-    };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.resourceHandlersMap = exports.resourceHandlers = void 0;
+    exports.shouldReadResource = shouldReadResource;
     var base64_js_1 = require_base64_js();
+    var additionalInfo_1 = require_additionalInfo();
     var psdReader_1 = require_psdReader();
     var psdWriter_1 = require_psdWriter();
     var helpers_1 = require_helpers();
@@ -7334,63 +8871,123 @@ var require_imageResources = __commonJS({
     var descriptor_1 = require_descriptor();
     exports.resourceHandlers = [];
     exports.resourceHandlersMap = {};
-    function addHandler(key, has, read, write) {
-      var handler = { key, has, read, write };
+    function fieldsCheckedBy(has) {
+      const fields = [];
+      const target = new Proxy({}, {
+        get(_, field) {
+          if (typeof field === "string" && !fields.includes(field))
+            fields.push(field);
+          return void 0;
+        }
+      });
+      try {
+        has(target);
+      } catch (_a2) {
+      }
+      return fields;
+    }
+    var requiredFields = /* @__PURE__ */ new Set(["layersGroup", "layerGroupsEnabledId", "alphaChannelNames", "transparencyIndex"]);
+    function addHandler(key, has, read, write, options = {}) {
+      var _a2, _b2;
+      const fields = (_a2 = options.fields) !== null && _a2 !== void 0 ? _a2 : fieldsCheckedBy(has);
+      const required = fields.some((field) => requiredFields.has(field));
+      const handler = { key, keyCount: (_b2 = options.keyCount) !== null && _b2 !== void 0 ? _b2 : 1, has, read, write, name: options.name, fields, required };
       exports.resourceHandlers.push(handler);
-      exports.resourceHandlersMap[handler.key] = handler;
+      for (let i = 0; i < handler.keyCount; i++)
+        exports.resourceHandlersMap[handler.key + i] = handler;
+    }
+    function shouldReadResource(handler, whitelist) {
+      return !whitelist || handler.required || whitelist.size > 0 && handler.fields.some((field) => whitelist.has(field));
     }
     var LOG_MOCK_HANDLERS = false;
     var RESOLUTION_UNITS = [void 0, "PPI", "PPCM"];
     var MEASUREMENT_UNITS = [void 0, "Inches", "Centimeters", "Points", "Picas", "Columns"];
     var hex = "0123456789abcdef";
     function charToNibble(code) {
-      return code <= 57 ? code - 48 : code - 87;
+      if (code <= 57)
+        return code - 48;
+      if (code >= 97)
+        return code - 87;
+      return code - 55;
     }
     function byteAt(value, index) {
       return charToNibble(value.charCodeAt(index)) << 4 | charToNibble(value.charCodeAt(index + 1));
     }
     function readUtf8String(reader, length) {
-      var buffer = (0, psdReader_1.readBytes)(reader, length);
-      return (0, utf8_1.decodeString)(buffer);
+      const buffer = (0, psdReader_1.readBytes)(reader, length);
+      return (0, psdReader_1.decodeUtf8)(reader, buffer);
     }
     function writeUtf8String(writer, value) {
-      var buffer = (0, utf8_1.encodeString)(value);
+      const buffer = (0, utf8_1.encodeString)(value);
       (0, psdWriter_1.writeBytes)(writer, buffer);
     }
-    helpers_1.MOCK_HANDLERS && addHandler(
+    function readEncodedString(reader) {
+      const length = (0, psdReader_1.readUint8)(reader);
+      const buffer = (0, psdReader_1.readBytes)(reader, length);
+      return decodeEncodedString(reader, buffer);
+    }
+    function decodeEncodedString(reader, buffer) {
+      let notAscii = false;
+      for (let i = 0; i < buffer.byteLength; i++) {
+        if (buffer[i] & 128) {
+          notAscii = true;
+          break;
+        }
+      }
+      if (notAscii) {
+        for (const decoder of [(0, psdReader_1.getGbkStrictDecoder)(reader), (0, psdReader_1.getUtf8StrictDecoder)(reader)]) {
+          if (decoder) {
+            try {
+              return decoder.decode(buffer);
+            } catch (_a2) {
+            }
+          }
+        }
+      }
+      return (0, psdReader_1.decodeUtf8)(reader, buffer);
+    }
+    function toShortAsciiString(value) {
+      let ascii = "";
+      for (let i = 0; i < value.length; ) {
+        const code = value.codePointAt(i);
+        ascii += code > 127 ? "?" : String.fromCharCode(code);
+        i += code > 65535 ? 2 : 1;
+      }
+      return ascii.length > 255 ? ascii.substring(0, 255) : ascii;
+    }
+    function writeEncodedString(writer, value) {
+      const buffer = (0, utf8_1.encodeString)(toShortAsciiString(value));
+      (0, psdWriter_1.writeUint8)(writer, buffer.byteLength);
+      (0, psdWriter_1.writeBytes)(writer, buffer);
+    }
+    addHandler(
       1028,
       // IPTC-NAA record
-      function(target) {
-        return target._ir1028 !== void 0;
+      // IPTC-NAA record
+      (target) => target.iptcData !== void 0,
+      (reader, target, left) => {
+        target.iptcData = (0, psdReader_1.readBytes)(reader, left());
       },
-      function(reader, target, left) {
-        LOG_MOCK_HANDLERS && console.log("image resource 1028", left());
-        target._ir1028 = (0, psdReader_1.readBytes)(reader, left());
-      },
-      function(writer, target) {
-        (0, psdWriter_1.writeBytes)(writer, target._ir1028);
+      (writer, target) => {
+        (0, psdWriter_1.writeBytes)(writer, target.iptcData);
       }
     );
-    addHandler(1061, function(target) {
-      return target.captionDigest !== void 0;
-    }, function(reader, target) {
-      var captionDigest = "";
-      for (var i = 0; i < 16; i++) {
-        var byte = (0, psdReader_1.readUint8)(reader);
+    addHandler(1061, (target) => target.captionDigest !== void 0, (reader, target) => {
+      let captionDigest = "";
+      for (let i = 0; i < 16; i++) {
+        const byte = (0, psdReader_1.readUint8)(reader);
         captionDigest += hex[byte >> 4];
         captionDigest += hex[byte & 15];
       }
       target.captionDigest = captionDigest;
-    }, function(writer, target) {
-      for (var i = 0; i < 16; i++) {
+    }, (writer, target) => {
+      for (let i = 0; i < 16; i++) {
         (0, psdWriter_1.writeUint8)(writer, byteAt(target.captionDigest, i * 2));
       }
     });
-    addHandler(1060, function(target) {
-      return target.xmpMetadata !== void 0;
-    }, function(reader, target, left) {
+    addHandler(1060, (target) => target.xmpMetadata !== void 0, (reader, target, left) => {
       target.xmpMetadata = readUtf8String(reader, left());
-    }, function(writer, target) {
+    }, (writer, target) => {
       writeUtf8String(writer, target.xmpMetadata);
     });
     var Inte = (0, helpers_1.createEnum)("Inte", "perceptual", {
@@ -7399,18 +8996,30 @@ var require_imageResources = __commonJS({
       "relative colorimetric": "Clrm",
       "absolute colorimetric": "AClr"
     });
-    addHandler(1082, function(target) {
-      return target.printInformation !== void 0;
-    }, function(reader, target) {
+    addHandler(
+      1085,
+      // Windows DEVMODE. Variable OS specific info for Windows.
+      // Windows DEVMODE. Variable OS specific info for Windows.
+      (target) => target.windowsDevMode !== void 0,
+      (reader, target, left) => {
+        target.windowsDevMode = (0, psdReader_1.readBytes)(reader, left());
+      },
+      (writer, target) => {
+        (0, psdWriter_1.writeBytes)(writer, target.windowsDevMode);
+      }
+    );
+    addHandler(1082, (target) => target.printInformation !== void 0, (reader, target) => {
       var _a2, _b2;
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
       target.printInformation = {
         printerName: desc.printerName || "",
         renderingIntent: Inte.decode((_a2 = desc.Inte) !== null && _a2 !== void 0 ? _a2 : "Inte.Img ")
       };
-      var info = target.printInformation;
+      const info = target.printInformation;
       if (desc.PstS !== void 0)
         info.printerManagesColors = desc.PstS;
+      if (desc.ClrS === "ClrS.Grys")
+        info.printerProfileColorSpace = "grayscale";
       if (desc["Nm  "] !== void 0)
         info.printerProfile = desc["Nm  "];
       if (desc.MpBl !== void 0)
@@ -7431,20 +9040,20 @@ var require_imageResources = __commonJS({
           };
         }
       }
-    }, function(writer, target) {
-      var _a2, _b2;
-      var info = target.printInformation;
-      var desc = {};
+    }, (writer, target) => {
+      const info = target.printInformation;
+      const desc = {};
       if (info.printerManagesColors) {
         desc.PstS = true;
       } else {
         if (info.hardProof !== void 0)
           desc.hardProof = !!info.hardProof;
-        desc.ClrS = "ClrS.RGBC";
-        desc["Nm  "] = (_a2 = info.printerProfile) !== null && _a2 !== void 0 ? _a2 : "CIE RGB";
+        desc.ClrS = info.printerProfileColorSpace === "grayscale" ? "ClrS.Grys" : "ClrS.RGBC";
+        if (info.printerProfile !== void 0)
+          desc["Nm  "] = info.printerProfile;
       }
       desc.Inte = Inte.encode(info.renderingIntent);
-      if (!info.printerManagesColors)
+      if (!info.printerManagesColors && info.blackPointCompensation !== void 0)
         desc.MpBl = !!info.blackPointCompensation;
       desc.printSixteenBit = !!info.printSixteenBit;
       desc.printerName = info.printerName || "";
@@ -7455,36 +9064,90 @@ var require_imageResources = __commonJS({
           MpBl: !!info.proofSetup.blackPointCompensation,
           paperWhite: !!info.proofSetup.paperWhite
         };
-      } else {
+      } else if (info.proofSetup) {
         desc.printProofSetup = {
-          Bltn: ((_b2 = info.proofSetup) === null || _b2 === void 0 ? void 0 : _b2.builtin) ? "builtinProof.".concat(info.proofSetup.builtin) : "builtinProof.proofCMYK"
+          Bltn: `builtinProof.${info.proofSetup.builtin || "proofCMYK"}`
         };
       }
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "printOutput", desc);
     });
-    helpers_1.MOCK_HANDLERS && addHandler(
+    addHandler(
       1083,
       // Print style
-      function(target) {
-        return target._ir1083 !== void 0;
+      // Print style
+      (target) => target.printStyle !== void 0,
+      (reader, target) => {
+        const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+        target.printStyle = {
+          caption: desc.Cptn,
+          calibrationBars: desc.Clbr,
+          registrationMarks: desc.RgsM,
+          cornerCropMarks: desc.CrnC,
+          centerCropMarks: desc.CntC,
+          labels: desc.Lbls,
+          negative: desc.Ngtv,
+          emulsionDown: desc.EmlD,
+          interpolate: desc.Intr,
+          backgroundColor: (0, descriptor_1.parseColor)(desc.Bckg),
+          border: (0, descriptor_1.parseUnits)(desc.BrdT),
+          bleed: (0, descriptor_1.parseUnits)(desc["Bld "]),
+          resolution: (0, descriptor_1.parseUnits)(desc.Rslt),
+          vectorData: desc.vectorData,
+          pagePosition: desc.PgPs === "PgPs.PgPC" ? "centered" : desc.PgPs,
+          left: (0, descriptor_1.parseUnits)(desc.Left),
+          top: (0, descriptor_1.parseUnits)(desc["Top "]),
+          scale: (0, descriptor_1.parsePercent)(desc["Scl "])
+        };
+        if (desc.cropWhenPrinting !== void 0) {
+          target.printStyle.cropWhenPrinting = desc.cropWhenPrinting;
+          target.printStyle.cropRect = {
+            top: desc.cropRectTop || 0,
+            left: desc.cropRectLeft || 0,
+            bottom: desc.cropRectBottom || 0,
+            right: desc.cropRectRight || 0
+          };
+        }
       },
-      function(reader, target, left) {
-        LOG_MOCK_HANDLERS && console.log("image resource 1083", left());
-        target._ir1083 = (0, psdReader_1.readBytes)(reader, left());
-      },
-      function(writer, target) {
-        (0, psdWriter_1.writeBytes)(writer, target._ir1083);
+      (writer, target) => {
+        var _a2, _b2, _c, _d, _e, _f, _g, _h, _j, _k;
+        const style = target.printStyle;
+        const desc = {
+          Cptn: !!style.caption,
+          Clbr: !!style.calibrationBars,
+          RgsM: !!style.registrationMarks,
+          CrnC: !!style.cornerCropMarks,
+          CntC: !!style.centerCropMarks,
+          Lbls: !!style.labels,
+          Ngtv: !!style.negative,
+          EmlD: !!style.emulsionDown,
+          Intr: !!style.interpolate,
+          Bckg: (0, descriptor_1.serializeColor)(style.backgroundColor || { r: 255, g: 255, b: 255 }),
+          BrdT: (0, descriptor_1.unitsValue)(style.border || { units: "Distance", value: 0 }, "border"),
+          "Bld ": (0, descriptor_1.unitsValue)(style.bleed || { units: "Distance", value: 0 }, "bleed"),
+          Rslt: (0, descriptor_1.unitsValue)(style.resolution || { units: "Pixels", value: 72 }, "resolution"),
+          vectorData: (_a2 = style.vectorData) !== null && _a2 !== void 0 ? _a2 : true,
+          PgPs: !style.pagePosition || style.pagePosition === "centered" ? "PgPs.PgPC" : style.pagePosition,
+          Left: (0, descriptor_1.unitsValue)(style.left || { units: "Distance", value: 0 }, "left"),
+          "Top ": (0, descriptor_1.unitsValue)(style.top || { units: "Distance", value: 0 }, "top"),
+          "Scl ": (0, descriptor_1.unitsPercentF)((_b2 = style.scale) !== null && _b2 !== void 0 ? _b2 : 1)
+        };
+        if (style.cropWhenPrinting !== void 0 || style.cropRect) {
+          desc.cropWhenPrinting = !!style.cropWhenPrinting;
+          desc.cropRectBottom = (_d = (_c = style.cropRect) === null || _c === void 0 ? void 0 : _c.bottom) !== null && _d !== void 0 ? _d : 0;
+          desc.cropRectLeft = (_f = (_e = style.cropRect) === null || _e === void 0 ? void 0 : _e.left) !== null && _f !== void 0 ? _f : 0;
+          desc.cropRectRight = (_h = (_g = style.cropRect) === null || _g === void 0 ? void 0 : _g.right) !== null && _h !== void 0 ? _h : 0;
+          desc.cropRectTop = (_k = (_j = style.cropRect) === null || _j === void 0 ? void 0 : _j.top) !== null && _k !== void 0 ? _k : 0;
+        }
+        (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "printOutputOptions", desc);
       }
     );
-    addHandler(1005, function(target) {
-      return target.resolutionInfo !== void 0;
-    }, function(reader, target) {
-      var horizontalResolution = (0, psdReader_1.readFixedPoint32)(reader);
-      var horizontalResolutionUnit = (0, psdReader_1.readUint16)(reader);
-      var widthUnit = (0, psdReader_1.readUint16)(reader);
-      var verticalResolution = (0, psdReader_1.readFixedPoint32)(reader);
-      var verticalResolutionUnit = (0, psdReader_1.readUint16)(reader);
-      var heightUnit = (0, psdReader_1.readUint16)(reader);
+    addHandler(1005, (target) => target.resolutionInfo !== void 0, (reader, target) => {
+      const horizontalResolution = (0, psdReader_1.readFixedPoint32)(reader);
+      const horizontalResolutionUnit = (0, psdReader_1.readUint16)(reader);
+      const widthUnit = (0, psdReader_1.readUint16)(reader);
+      const verticalResolution = (0, psdReader_1.readFixedPoint32)(reader);
+      const verticalResolutionUnit = (0, psdReader_1.readUint16)(reader);
+      const heightUnit = (0, psdReader_1.readUint16)(reader);
       target.resolutionInfo = {
         horizontalResolution,
         horizontalResolutionUnit: RESOLUTION_UNITS[horizontalResolutionUnit] || "PPI",
@@ -7493,8 +9156,8 @@ var require_imageResources = __commonJS({
         verticalResolutionUnit: RESOLUTION_UNITS[verticalResolutionUnit] || "PPI",
         heightUnit: MEASUREMENT_UNITS[heightUnit] || "Inches"
       };
-    }, function(writer, target) {
-      var info = target.resolutionInfo;
+    }, (writer, target) => {
+      const info = target.resolutionInfo;
       (0, psdWriter_1.writeFixedPoint32)(writer, info.horizontalResolution || 0);
       (0, psdWriter_1.writeUint16)(writer, Math.max(1, RESOLUTION_UNITS.indexOf(info.horizontalResolutionUnit)));
       (0, psdWriter_1.writeUint16)(writer, Math.max(1, MEASUREMENT_UNITS.indexOf(info.widthUnit)));
@@ -7503,94 +9166,130 @@ var require_imageResources = __commonJS({
       (0, psdWriter_1.writeUint16)(writer, Math.max(1, MEASUREMENT_UNITS.indexOf(info.heightUnit)));
     });
     var printScaleStyles = ["centered", "size to fit", "user defined"];
-    addHandler(1062, function(target) {
-      return target.printScale !== void 0;
-    }, function(reader, target) {
+    addHandler(1062, (target) => target.printScale !== void 0, (reader, target) => {
       target.printScale = {
         style: printScaleStyles[(0, psdReader_1.readInt16)(reader)],
         x: (0, psdReader_1.readFloat32)(reader),
         y: (0, psdReader_1.readFloat32)(reader),
         scale: (0, psdReader_1.readFloat32)(reader)
       };
-    }, function(writer, target) {
-      var _a2 = target.printScale, style = _a2.style, x = _a2.x, y = _a2.y, scale = _a2.scale;
+    }, (writer, target) => {
+      const { style, x, y, scale } = target.printScale;
       (0, psdWriter_1.writeInt16)(writer, Math.max(0, printScaleStyles.indexOf(style)));
       (0, psdWriter_1.writeFloat32)(writer, x || 0);
       (0, psdWriter_1.writeFloat32)(writer, y || 0);
       (0, psdWriter_1.writeFloat32)(writer, scale || 0);
     });
-    addHandler(1006, function(target) {
-      return target.alphaChannelNames !== void 0;
-    }, function(reader, target, left) {
-      target.alphaChannelNames = [];
-      while (left() > 0) {
-        var value = (0, psdReader_1.readPascalString)(reader, 1);
-        target.alphaChannelNames.push(value);
+    addHandler(1006, (target) => target.alphaChannelNames !== void 0, (reader, target, left) => {
+      if (!target.alphaChannelNames) {
+        target.alphaChannelNames = [];
+        while (left() > 0) {
+          const value = readEncodedString(reader);
+          target.alphaChannelNames.push(value);
+        }
+      } else {
+        (0, psdReader_1.skipBytes)(reader, left());
       }
-    }, function(writer, target) {
-      for (var _i = 0, _a2 = target.alphaChannelNames; _i < _a2.length; _i++) {
-        var name_1 = _a2[_i];
-        (0, psdWriter_1.writePascalString)(writer, name_1, 1);
+    }, (writer, target) => {
+      for (const name of target.alphaChannelNames) {
+        writeEncodedString(writer, name);
       }
     });
-    addHandler(1045, function(target) {
-      return target.alphaChannelNames !== void 0;
-    }, function(reader, target, left) {
+    addHandler(1045, (target) => target.alphaChannelNames !== void 0, (reader, target, left) => {
       target.alphaChannelNames = [];
       while (left() > 0) {
         target.alphaChannelNames.push((0, psdReader_1.readUnicodeString)(reader));
       }
-    }, function(writer, target) {
-      for (var _i = 0, _a2 = target.alphaChannelNames; _i < _a2.length; _i++) {
-        var name_2 = _a2[_i];
-        (0, psdWriter_1.writeUnicodeStringWithPadding)(writer, name_2);
+    }, (writer, target) => {
+      for (const name of target.alphaChannelNames) {
+        (0, psdWriter_1.writeUnicodeStringWithPadding)(writer, name);
       }
     });
-    helpers_1.MOCK_HANDLERS && addHandler(1077, function(target) {
-      return target._ir1077 !== void 0;
-    }, function(reader, target, left) {
-      LOG_MOCK_HANDLERS && console.log("image resource 1077", left());
-      target._ir1077 = (0, psdReader_1.readBytes)(reader, left());
-    }, function(writer, target) {
-      (0, psdWriter_1.writeBytes)(writer, target._ir1077);
-    });
-    addHandler(1053, function(target) {
-      return target.alphaIdentifiers !== void 0;
-    }, function(reader, target, left) {
+    var displayInfoKinds = ["selected", "protected", "spot"];
+    var supportedColorSpaces = [
+      0,
+      1,
+      2,
+      7,
+      8
+      /* ColorSpace.Grayscale */
+    ];
+    function readDisplayInfo(reader) {
+      const info = { opacity: 0, kind: "selected" };
+      const colorSpace = reader.view.getUint16(reader.offset);
+      if (supportedColorSpaces.indexOf(colorSpace) !== -1) {
+        info.color = (0, psdReader_1.readColor)(reader);
+      } else {
+        (0, psdReader_1.skipBytes)(reader, 2);
+        info.rawColor = { colorSpace, values: [(0, psdReader_1.readUint16)(reader), (0, psdReader_1.readUint16)(reader), (0, psdReader_1.readUint16)(reader), (0, psdReader_1.readUint16)(reader)] };
+      }
+      info.opacity = (0, psdReader_1.readUint16)(reader) / 100;
+      const kind = displayInfoKinds[(0, psdReader_1.readUint8)(reader)];
+      if (!kind)
+        throw new Error("Invalid display info kind");
+      info.kind = kind;
+      return info;
+    }
+    addHandler(
+      1007,
+      // Display info (obsolete, replaced by 1077), written back as 1077
+      () => false,
+      (reader, target, left) => {
+        const info = [];
+        while (left() >= 14) {
+          info.push(readDisplayInfo(reader));
+          (0, psdReader_1.skipBytes)(reader, 1);
+        }
+        if (!target.alphaChannelDisplayInfo)
+          target.alphaChannelDisplayInfo = info;
+      },
+      () => {
+      },
+      { fields: ["alphaChannelDisplayInfo"] }
+    );
+    addHandler(
+      1077,
+      // Display info (alpha and spot channels)
+      // Display info (alpha and spot channels)
+      (target) => target.alphaChannelDisplayInfo !== void 0,
+      (reader, target, left) => {
+        const version = (0, psdReader_1.readUint32)(reader);
+        if (version !== 1)
+          throw new Error(`Invalid display info version: ${version}`);
+        target.alphaChannelDisplayInfo = [];
+        while (left() >= 13) {
+          target.alphaChannelDisplayInfo.push(readDisplayInfo(reader));
+        }
+      },
+      (writer, target) => {
+        (0, psdWriter_1.writeUint32)(writer, 1);
+        for (const info of target.alphaChannelDisplayInfo) {
+          if (!info.color && info.rawColor) {
+            (0, psdWriter_1.writeUint16)(writer, info.rawColor.colorSpace);
+            for (let i = 0; i < 4; i++)
+              (0, psdWriter_1.writeUint16)(writer, info.rawColor.values[i] | 0);
+          } else {
+            (0, psdWriter_1.writeColor)(writer, info.color || { r: 255, g: 0, b: 0 });
+          }
+          (0, psdWriter_1.writeUint16)(writer, Math.round((0, helpers_1.clamp)(info.opacity, 0, 1) * 100));
+          (0, psdWriter_1.writeUint8)(writer, Math.max(0, displayInfoKinds.indexOf(info.kind)));
+        }
+      }
+    );
+    addHandler(1053, (target) => target.alphaIdentifiers !== void 0, (reader, target, left) => {
       target.alphaIdentifiers = [];
       while (left() >= 4) {
         target.alphaIdentifiers.push((0, psdReader_1.readUint32)(reader));
       }
-    }, function(writer, target) {
-      for (var _i = 0, _a2 = target.alphaIdentifiers; _i < _a2.length; _i++) {
-        var id = _a2[_i];
+    }, (writer, target) => {
+      for (const id of target.alphaIdentifiers) {
         (0, psdWriter_1.writeUint32)(writer, id);
       }
     });
-    addHandler(1010, function(target) {
-      return target.backgroundColor !== void 0;
-    }, function(reader, target) {
-      return target.backgroundColor = (0, psdReader_1.readColor)(reader);
-    }, function(writer, target) {
-      return (0, psdWriter_1.writeColor)(writer, target.backgroundColor);
-    });
-    addHandler(1037, function(target) {
-      return target.globalAngle !== void 0;
-    }, function(reader, target) {
-      return target.globalAngle = (0, psdReader_1.readInt32)(reader);
-    }, function(writer, target) {
-      return (0, psdWriter_1.writeInt32)(writer, target.globalAngle);
-    });
-    addHandler(1049, function(target) {
-      return target.globalAltitude !== void 0;
-    }, function(reader, target) {
-      return target.globalAltitude = (0, psdReader_1.readUint32)(reader);
-    }, function(writer, target) {
-      return (0, psdWriter_1.writeUint32)(writer, target.globalAltitude);
-    });
-    addHandler(1011, function(target) {
-      return target.printFlags !== void 0;
-    }, function(reader, target) {
+    addHandler(1010, (target) => target.backgroundColor !== void 0, (reader, target) => target.backgroundColor = (0, psdReader_1.readColor)(reader), (writer, target) => (0, psdWriter_1.writeColor)(writer, target.backgroundColor));
+    addHandler(1037, (target) => target.globalAngle !== void 0, (reader, target) => target.globalAngle = (0, psdReader_1.readInt32)(reader), (writer, target) => (0, psdWriter_1.writeInt32)(writer, target.globalAngle));
+    addHandler(1049, (target) => target.globalAltitude !== void 0, (reader, target) => target.globalAltitude = (0, psdReader_1.readUint32)(reader), (writer, target) => (0, psdWriter_1.writeUint32)(writer, target.globalAltitude));
+    addHandler(1011, (target) => target.printFlags !== void 0, (reader, target, left) => {
       target.printFlags = {
         labels: !!(0, psdReader_1.readUint8)(reader),
         cropMarks: !!(0, psdReader_1.readUint8)(reader),
@@ -7600,10 +9299,10 @@ var require_imageResources = __commonJS({
         flip: !!(0, psdReader_1.readUint8)(reader),
         interpolate: !!(0, psdReader_1.readUint8)(reader),
         caption: !!(0, psdReader_1.readUint8)(reader),
-        printFlags: !!(0, psdReader_1.readUint8)(reader)
+        printFlags: left() ? !!(0, psdReader_1.readUint8)(reader) : false
       };
-    }, function(writer, target) {
-      var flags = target.printFlags;
+    }, (writer, target) => {
+      const flags = target.printFlags;
       (0, psdWriter_1.writeUint8)(writer, flags.labels ? 1 : 0);
       (0, psdWriter_1.writeUint8)(writer, flags.cropMarks ? 1 : 0);
       (0, psdWriter_1.writeUint8)(writer, flags.colorBars ? 1 : 0);
@@ -7614,208 +9313,430 @@ var require_imageResources = __commonJS({
       (0, psdWriter_1.writeUint8)(writer, flags.caption ? 1 : 0);
       (0, psdWriter_1.writeUint8)(writer, flags.printFlags ? 1 : 0);
     });
-    helpers_1.MOCK_HANDLERS && addHandler(
+    addHandler(
+      1034,
+      // Copyright flag
+      // Copyright flag
+      (target) => target.copyrighted !== void 0,
+      (reader, target) => {
+        target.copyrighted = !!(0, psdReader_1.readUint8)(reader);
+      },
+      (writer, target) => {
+        (0, psdWriter_1.writeUint8)(writer, target.copyrighted ? 1 : 0);
+      }
+    );
+    addHandler(
+      1035,
+      // URL
+      // URL
+      (target) => target.url !== void 0,
+      (reader, target, left) => {
+        target.url = (0, psdReader_1.readAsciiString)(reader, left());
+      },
+      (writer, target) => {
+        (0, psdWriter_1.writeAsciiString)(writer, target.url);
+      }
+    );
+    addHandler(
       1e4,
-      // Print flags
-      function(target) {
-        return target._ir10000 !== void 0;
+      // Print flags information
+      // Print flags information
+      (target) => target.printFlagsInfo !== void 0,
+      (reader, target) => {
+        const version = (0, psdReader_1.readUint16)(reader);
+        if (version !== 1)
+          throw new Error(`Invalid print flags information version: ${version}`);
+        const centerCropMarks = !!(0, psdReader_1.readUint8)(reader);
+        (0, psdReader_1.skipBytes)(reader, 1);
+        const bleedWidth = (0, psdReader_1.readUint32)(reader);
+        const bleedWidthScale = (0, psdReader_1.readUint16)(reader);
+        target.printFlagsInfo = { centerCropMarks, bleedWidth, bleedWidthScale };
       },
-      function(reader, target, left) {
-        LOG_MOCK_HANDLERS && console.log("image resource 10000", left());
-        target._ir10000 = (0, psdReader_1.readBytes)(reader, left());
-      },
-      function(writer, target) {
-        (0, psdWriter_1.writeBytes)(writer, target._ir10000);
+      (writer, target) => {
+        const info = target.printFlagsInfo;
+        (0, psdWriter_1.writeUint16)(writer, 1);
+        (0, psdWriter_1.writeUint8)(writer, info.centerCropMarks ? 1 : 0);
+        (0, psdWriter_1.writeUint8)(writer, 0);
+        (0, psdWriter_1.writeUint32)(writer, info.bleedWidth | 0);
+        (0, psdWriter_1.writeUint16)(writer, info.bleedWidthScale | 0);
       }
     );
-    helpers_1.MOCK_HANDLERS && addHandler(
+    addHandler(
+      1046,
+      // Indexed color table count
+      // Indexed color table count
+      (target) => target.indexedColorCount !== void 0,
+      (reader, target) => {
+        target.indexedColorCount = (0, psdReader_1.readUint16)(reader);
+      },
+      (writer, target) => {
+        (0, psdWriter_1.writeUint16)(writer, target.indexedColorCount);
+      }
+    );
+    addHandler(
+      1047,
+      // Transparency index
+      // Transparency index
+      (target) => target.transparencyIndex !== void 0,
+      (reader, target) => {
+        target.transparencyIndex = (0, psdReader_1.readUint16)(reader);
+      },
+      (writer, target) => {
+        (0, psdWriter_1.writeUint16)(writer, target.transparencyIndex);
+      }
+    );
+    var halftoneFrequencyUnits = ["lines/inch", "lines/cm"];
+    var halftoneShapes = ["round", "ellipse", "line", "square", "cross", void 0, "diamond"];
+    function readHalftoneScreens(reader, left) {
+      const screens = [];
+      while (left() >= 18) {
+        const frequency = (0, psdReader_1.readFixedPoint32)(reader);
+        const frequencyUnits = halftoneFrequencyUnits[(0, psdReader_1.readUint16)(reader) - 1];
+        if (!frequencyUnits)
+          throw new Error("Invalid halftone screen frequency units");
+        const angle = (0, psdReader_1.readFixedPoint32)(reader);
+        const shape = halftoneShapes[(0, psdReader_1.readInt16)(reader)];
+        if (!shape)
+          throw new Error("Invalid halftone screen shape");
+        (0, psdReader_1.skipBytes)(reader, 4);
+        const accurateScreens = !!(0, psdReader_1.readUint8)(reader);
+        const printerDefaultScreens = !!(0, psdReader_1.readUint8)(reader);
+        screens.push({ frequency, frequencyUnits, angle, shape, accurateScreens, printerDefaultScreens });
+      }
+      return screens;
+    }
+    function writeHalftoneScreens(writer, screens) {
+      for (const screen of screens) {
+        (0, psdWriter_1.writeFixedPoint32)(writer, screen.frequency);
+        (0, psdWriter_1.writeUint16)(writer, Math.max(0, halftoneFrequencyUnits.indexOf(screen.frequencyUnits)) + 1);
+        (0, psdWriter_1.writeFixedPoint32)(writer, screen.angle);
+        (0, psdWriter_1.writeInt16)(writer, Math.max(0, halftoneShapes.indexOf(screen.shape)));
+        (0, psdWriter_1.writeZeros)(writer, 4);
+        (0, psdWriter_1.writeUint8)(writer, screen.accurateScreens ? 1 : 0);
+        (0, psdWriter_1.writeUint8)(writer, screen.printerDefaultScreens ? 1 : 0);
+      }
+    }
+    addHandler(
+      1012,
+      // Grayscale and multichannel halftoning information
+      // Grayscale and multichannel halftoning information
+      (target) => target.grayscaleHalftoneScreens !== void 0,
+      (reader, target, left) => target.grayscaleHalftoneScreens = readHalftoneScreens(reader, left),
+      (writer, target) => writeHalftoneScreens(writer, target.grayscaleHalftoneScreens)
+    );
+    addHandler(
       1013,
-      // Color halftoning
-      function(target) {
-        return target._ir1013 !== void 0;
+      // Color halftoning information
+      // Color halftoning information
+      (target) => target.colorHalftoneScreens !== void 0,
+      (reader, target, left) => target.colorHalftoneScreens = readHalftoneScreens(reader, left),
+      (writer, target) => writeHalftoneScreens(writer, target.colorHalftoneScreens)
+    );
+    function readTransferFunctions(reader, left) {
+      const functions = [];
+      while (left() >= 28) {
+        const curve = [];
+        for (let i = 0; i < 13; i++)
+          curve.push((0, psdReader_1.readInt16)(reader));
+        const override = !!(0, psdReader_1.readUint16)(reader);
+        functions.push({ curve, override });
+      }
+      return functions;
+    }
+    function writeTransferFunctions(writer, functions) {
+      var _a2;
+      for (const f of functions) {
+        for (let i = 0; i < 13; i++)
+          (0, psdWriter_1.writeInt16)(writer, (_a2 = f.curve[i]) !== null && _a2 !== void 0 ? _a2 : -1);
+        (0, psdWriter_1.writeUint16)(writer, f.override ? 1 : 0);
+      }
+    }
+    addHandler(
+      1014,
+      // Duotone halftoning information
+      // Duotone halftoning information
+      (target) => target.duotoneHalftoneScreens !== void 0,
+      (reader, target, left) => target.duotoneHalftoneScreens = readHalftoneScreens(reader, left),
+      (writer, target) => writeHalftoneScreens(writer, target.duotoneHalftoneScreens)
+    );
+    addHandler(
+      1017,
+      // Duotone transfer functions
+      // Duotone transfer functions
+      (target) => target.duotoneTransferFunctions !== void 0,
+      (reader, target, left) => target.duotoneTransferFunctions = readTransferFunctions(reader, left),
+      (writer, target) => writeTransferFunctions(writer, target.duotoneTransferFunctions)
+    );
+    addHandler(
+      1018,
+      // Duotone image information
+      // Duotone image information
+      (target) => target.duotoneImageInformation !== void 0,
+      (reader, target, left) => target.duotoneImageInformation = (0, psdReader_1.readBytes)(reader, left()),
+      (writer, target) => (0, psdWriter_1.writeBytes)(writer, target.duotoneImageInformation)
+    );
+    addHandler(
+      1066,
+      // Alternate duotone colors
+      // Alternate duotone colors
+      (target) => target.alternateDuotoneColors !== void 0,
+      (reader, target, left) => {
+        if ((0, psdReader_1.readUint16)(reader) !== 1)
+          throw new Error("Invalid alternate duotone colors version");
+        const colors = [];
+        const count = (0, psdReader_1.readUint16)(reader);
+        for (let i = 0; i < count && left() >= 10; i++)
+          colors.push((0, psdReader_1.readColor)(reader));
+        const labCount = (0, psdReader_1.readUint16)(reader);
+        if (labCount * 3 > left())
+          throw new Error("Invalid alternate duotone colors Lab table size");
+        const labColors = (0, psdReader_1.readBytes)(reader, labCount * 3);
+        target.alternateDuotoneColors = { colors, labColors };
       },
-      function(reader, target, left) {
-        LOG_MOCK_HANDLERS && console.log("image resource 1013", left());
-        target._ir1013 = (0, psdReader_1.readBytes)(reader, left());
-      },
-      function(writer, target) {
-        (0, psdWriter_1.writeBytes)(writer, target._ir1013);
+      (writer, target) => {
+        const { colors, labColors } = target.alternateDuotoneColors;
+        (0, psdWriter_1.writeUint16)(writer, 1);
+        (0, psdWriter_1.writeUint16)(writer, colors.length);
+        for (const color of colors)
+          (0, psdWriter_1.writeColor)(writer, color);
+        (0, psdWriter_1.writeUint16)(writer, Math.floor(labColors.byteLength / 3));
+        (0, psdWriter_1.writeBytes)(writer, labColors.subarray(0, Math.floor(labColors.byteLength / 3) * 3));
       }
     );
-    helpers_1.MOCK_HANDLERS && addHandler(
+    addHandler(
+      1015,
+      // Grayscale and multichannel transfer function
+      // Grayscale and multichannel transfer function
+      (target) => target.grayscaleTransferFunctions !== void 0,
+      (reader, target, left) => target.grayscaleTransferFunctions = readTransferFunctions(reader, left),
+      (writer, target) => writeTransferFunctions(writer, target.grayscaleTransferFunctions)
+    );
+    addHandler(
       1016,
       // Color transfer functions
-      function(target) {
-        return target._ir1016 !== void 0;
-      },
-      function(reader, target, left) {
-        LOG_MOCK_HANDLERS && console.log("image resource 1016", left());
-        target._ir1016 = (0, psdReader_1.readBytes)(reader, left());
-      },
-      function(writer, target) {
-        (0, psdWriter_1.writeBytes)(writer, target._ir1016);
-      }
+      // Color transfer functions
+      (target) => target.colorTransferFunctions !== void 0,
+      (reader, target, left) => target.colorTransferFunctions = readTransferFunctions(reader, left),
+      (writer, target) => writeTransferFunctions(writer, target.colorTransferFunctions)
     );
     addHandler(
       1080,
       // Count Information
-      function(target) {
-        return target.countInformation !== void 0;
+      // Count Information
+      (target) => target.countInformation !== void 0,
+      (reader, target) => {
+        const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+        target.countInformation = desc.countGroupList.map((g) => ({
+          color: { r: g["Rd  "], g: g["Grn "], b: g["Bl  "] },
+          name: g["Nm  "],
+          size: g["Rds "],
+          fontSize: g.fontSize,
+          visible: g.Vsbl,
+          points: g.countObjectList.map((p) => ({ x: p["X   "], y: p["Y   "] }))
+        }));
       },
-      function(reader, target) {
-        var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-        target.countInformation = desc.countGroupList.map(function(g) {
-          return {
-            color: { r: g["Rd  "], g: g["Grn "], b: g["Bl  "] },
-            name: g["Nm  "],
-            size: g["Rds "],
-            fontSize: g.fontSize,
-            visible: g.Vsbl,
-            points: g.countObjectList.map(function(p) {
-              return { x: p["X   "], y: p["Y   "] };
-            })
-          };
-        });
-      },
-      function(writer, target) {
-        var desc = {
+      (writer, target) => {
+        const desc = {
           Vrsn: 1,
-          countGroupList: target.countInformation.map(function(g) {
-            return {
-              "Rd  ": g.color.r,
-              "Grn ": g.color.g,
-              "Bl  ": g.color.b,
-              "Nm  ": g.name,
-              "Rds ": g.size,
-              fontSize: g.fontSize,
-              Vsbl: g.visible,
-              countObjectList: g.points.map(function(p) {
-                return { "X   ": p.x, "Y   ": p.y };
-              })
-            };
-          })
+          countGroupList: target.countInformation.map((g) => ({
+            "Rd  ": g.color.r,
+            "Grn ": g.color.g,
+            "Bl  ": g.color.b,
+            "Nm  ": g.name,
+            "Rds ": g.size,
+            fontSize: g.fontSize,
+            Vsbl: g.visible,
+            countObjectList: g.points.map((p) => ({ "X   ": p.x, "Y   ": p.y }))
+          }))
         };
         (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "Cnt ", desc);
       }
     );
-    addHandler(1024, function(target) {
-      return target.layerState !== void 0;
-    }, function(reader, target) {
-      return target.layerState = (0, psdReader_1.readUint16)(reader);
-    }, function(writer, target) {
-      return (0, psdWriter_1.writeUint16)(writer, target.layerState);
-    });
-    addHandler(1026, function(target) {
-      return target.layersGroup !== void 0;
-    }, function(reader, target, left) {
+    addHandler(1024, (target) => target.layerState !== void 0, (reader, target) => target.layerState = (0, psdReader_1.readUint16)(reader), (writer, target) => (0, psdWriter_1.writeUint16)(writer, target.layerState));
+    addHandler(1026, (target) => target.layersGroup !== void 0, (reader, target, left) => {
       target.layersGroup = [];
       while (left() > 0) {
         target.layersGroup.push((0, psdReader_1.readUint16)(reader));
       }
-    }, function(writer, target) {
-      for (var _i = 0, _a2 = target.layersGroup; _i < _a2.length; _i++) {
-        var g = _a2[_i];
+    }, (writer, target) => {
+      for (const g of target.layersGroup) {
         (0, psdWriter_1.writeUint16)(writer, g);
       }
     });
-    addHandler(1072, function(target) {
-      return target.layerGroupsEnabledId !== void 0;
-    }, function(reader, target, left) {
+    addHandler(1072, (target) => target.layerGroupsEnabledId !== void 0, (reader, target, left) => {
       target.layerGroupsEnabledId = [];
       while (left() > 0) {
         target.layerGroupsEnabledId.push((0, psdReader_1.readUint8)(reader));
       }
-    }, function(writer, target) {
-      for (var _i = 0, _a2 = target.layerGroupsEnabledId; _i < _a2.length; _i++) {
-        var id = _a2[_i];
+    }, (writer, target) => {
+      for (const id of target.layerGroupsEnabledId) {
         (0, psdWriter_1.writeUint8)(writer, id);
       }
     });
-    addHandler(1069, function(target) {
-      return target.layerSelectionIds !== void 0;
-    }, function(reader, target) {
-      var count = (0, psdReader_1.readUint16)(reader);
+    addHandler(1069, (target) => target.layerSelectionIds !== void 0, (reader, target) => {
+      let count = (0, psdReader_1.readUint16)(reader);
       target.layerSelectionIds = [];
       while (count--) {
         target.layerSelectionIds.push((0, psdReader_1.readUint32)(reader));
       }
-    }, function(writer, target) {
+    }, (writer, target) => {
       (0, psdWriter_1.writeUint16)(writer, target.layerSelectionIds.length);
-      for (var _i = 0, _a2 = target.layerSelectionIds; _i < _a2.length; _i++) {
-        var id = _a2[_i];
+      for (const id of target.layerSelectionIds) {
         (0, psdWriter_1.writeUint32)(writer, id);
       }
     });
-    addHandler(1032, function(target) {
-      return target.gridAndGuidesInformation !== void 0;
-    }, function(reader, target) {
-      var version = (0, psdReader_1.readUint32)(reader);
-      var horizontal = (0, psdReader_1.readUint32)(reader);
-      var vertical = (0, psdReader_1.readUint32)(reader);
-      var count = (0, psdReader_1.readUint32)(reader);
+    addHandler(1032, (target) => target.gridAndGuidesInformation !== void 0, (reader, target) => {
+      var _a2;
+      const version = (0, psdReader_1.readUint32)(reader);
+      const horizontal = (0, psdReader_1.readUint32)(reader);
+      const vertical = (0, psdReader_1.readUint32)(reader);
+      const count = (0, psdReader_1.readUint32)(reader);
       if (version !== 1)
-        throw new Error("Invalid 1032 resource version: ".concat(version));
-      target.gridAndGuidesInformation = {
-        grid: { horizontal, vertical },
-        guides: []
-      };
-      for (var i = 0; i < count; i++) {
-        target.gridAndGuidesInformation.guides.push({
-          location: (0, psdReader_1.readUint32)(reader) / 32,
+        throw new Error(`Invalid 1032 resource version: ${version}`);
+      const previous = (_a2 = target.gridAndGuidesInformation) === null || _a2 === void 0 ? void 0 : _a2.guides;
+      const guides = [];
+      for (let i = 0; i < count; i++) {
+        const guide = {
+          location: (0, psdReader_1.readInt32)(reader) / 32,
           direction: (0, psdReader_1.readUint8)(reader) ? "horizontal" : "vertical"
-        });
+        };
+        if ((previous === null || previous === void 0 ? void 0 : previous.length) === count && previous[i].color)
+          guide.color = previous[i].color;
+        if ((previous === null || previous === void 0 ? void 0 : previous.length) === count && previous[i].id)
+          guide.id = previous[i].id;
+        guides.push(guide);
       }
-    }, function(writer, target) {
-      var info = target.gridAndGuidesInformation;
-      var grid = info.grid || { horizontal: 18 * 32, vertical: 18 * 32 };
-      var guides = info.guides || [];
+      target.gridAndGuidesInformation = { grid: { horizontal, vertical }, guides };
+    }, (writer, target) => {
+      const info = target.gridAndGuidesInformation;
+      const grid = info.grid || { horizontal: 18 * 32, vertical: 18 * 32 };
+      const guides = info.guides || [];
       (0, psdWriter_1.writeUint32)(writer, 1);
-      (0, psdWriter_1.writeUint32)(writer, grid.horizontal);
-      (0, psdWriter_1.writeUint32)(writer, grid.vertical);
+      (0, psdWriter_1.writeUint32)(writer, Math.round(grid.horizontal));
+      (0, psdWriter_1.writeUint32)(writer, Math.round(grid.vertical));
       (0, psdWriter_1.writeUint32)(writer, guides.length);
-      for (var _i = 0, guides_1 = guides; _i < guides_1.length; _i++) {
-        var g = guides_1[_i];
-        (0, psdWriter_1.writeUint32)(writer, g.location * 32);
+      for (const g of guides) {
+        (0, psdWriter_1.writeInt32)(writer, Math.round(g.location * 32));
         (0, psdWriter_1.writeUint8)(writer, g.direction === "horizontal" ? 1 : 0);
       }
     });
+    var defaultGuideColor = { r: 74, g: 255, b: 255 };
+    addHandler(
+      1092,
+      // Grid and guides information with guide colors (same as 1032 with color of each guide)
+      // Grid and guides information with guide colors (same as 1032 with color of each guide)
+      (target) => target.gridAndGuidesInformation !== void 0,
+      (reader, target) => {
+        var _a2;
+        const version = (0, psdReader_1.readUint32)(reader);
+        if (version !== 2)
+          throw new Error(`Invalid 1092 resource version: ${version}`);
+        const horizontal = (0, psdReader_1.readUint32)(reader);
+        const vertical = (0, psdReader_1.readUint32)(reader);
+        const count = (0, psdReader_1.readUint32)(reader);
+        const guides = [];
+        for (let i = 0; i < count; i++) {
+          const location = (0, psdReader_1.readInt32)(reader) / 32;
+          const direction = (0, psdReader_1.readUint8)(reader) ? "horizontal" : "vertical";
+          (0, psdReader_1.skipBytes)(reader, 1);
+          const color = { r: (0, psdReader_1.readUint8)(reader), g: (0, psdReader_1.readUint8)(reader), b: (0, psdReader_1.readUint8)(reader) };
+          guides.push({ location, direction, color });
+        }
+        const existing = (_a2 = target.gridAndGuidesInformation) === null || _a2 === void 0 ? void 0 : _a2.guides;
+        if (existing && existing.length === count) {
+          existing.forEach((guide, i) => guide.color = guides[i].color);
+        } else {
+          target.gridAndGuidesInformation = { grid: { horizontal, vertical }, guides };
+        }
+      },
+      (writer, target) => {
+        const info = target.gridAndGuidesInformation;
+        const grid = info.grid || { horizontal: 18 * 32, vertical: 18 * 32 };
+        const guides = info.guides || [];
+        (0, psdWriter_1.writeUint32)(writer, 2);
+        (0, psdWriter_1.writeUint32)(writer, Math.round(grid.horizontal));
+        (0, psdWriter_1.writeUint32)(writer, Math.round(grid.vertical));
+        (0, psdWriter_1.writeUint32)(writer, guides.length);
+        for (const g of guides) {
+          const color = g.color || defaultGuideColor;
+          (0, psdWriter_1.writeInt32)(writer, Math.round(g.location * 32));
+          (0, psdWriter_1.writeUint8)(writer, g.direction === "horizontal" ? 1 : 0);
+          (0, psdWriter_1.writeUint8)(writer, 0);
+          (0, psdWriter_1.writeUint8)(writer, Math.round(color.r));
+          (0, psdWriter_1.writeUint8)(writer, Math.round(color.g));
+          (0, psdWriter_1.writeUint8)(writer, Math.round(color.b));
+        }
+      }
+    );
+    var emptyGuid = "00000000-0000-0000-0000-000000000000";
+    addHandler(
+      1097,
+      // Guide ids
+      // Guide ids
+      (target) => !!target.gridAndGuidesInformation && (target.gridAndGuidesInformation.guides || []).every((g) => g.id),
+      (reader, target) => {
+        var _a2;
+        const count = (0, psdReader_1.readUint32)(reader);
+        const ids = [];
+        for (let i = 0; i < count; i++) {
+          ids.push((0, psdReader_1.readAsciiString)(reader, (0, psdReader_1.readUint32)(reader)));
+          (0, psdReader_1.readUint32)(reader);
+          (0, psdReader_1.readAsciiString)(reader, (0, psdReader_1.readUint32)(reader));
+        }
+        const guides = (_a2 = target.gridAndGuidesInformation) === null || _a2 === void 0 ? void 0 : _a2.guides;
+        if (guides && guides.length === count)
+          guides.forEach((guide, i) => guide.id = ids[i]);
+      },
+      (writer, target) => {
+        const guides = target.gridAndGuidesInformation.guides || [];
+        (0, psdWriter_1.writeUint32)(writer, guides.length);
+        for (const g of guides) {
+          (0, psdWriter_1.writeUint32)(writer, g.id.length);
+          (0, psdWriter_1.writeAsciiString)(writer, g.id);
+          (0, psdWriter_1.writeUint32)(writer, 0);
+          (0, psdWriter_1.writeUint32)(writer, emptyGuid.length);
+          (0, psdWriter_1.writeAsciiString)(writer, emptyGuid);
+        }
+      }
+    );
     addHandler(
       1065,
       // Layer Comps
-      function(target) {
-        return target.layerComps !== void 0;
-      },
-      function(reader, target) {
-        var desc = (0, descriptor_1.readVersionAndDescriptor)(reader, true);
+      // Layer Comps
+      (target) => target.layerComps !== void 0,
+      (reader, target) => {
+        const desc = (0, descriptor_1.readVersionAndDescriptor)(reader, true);
         target.layerComps = { list: [] };
-        for (var _i = 0, _a2 = desc.list; _i < _a2.length; _i++) {
-          var item = _a2[_i];
+        for (const item of desc.list) {
           target.layerComps.list.push({
             id: item.compID,
             name: item["Nm  "],
             capturedInfo: item.capturedInfo
           });
-          if ("comment" in item)
+          if (item.comment !== void 0)
             target.layerComps.list[target.layerComps.list.length - 1].comment = item.comment;
+          if (item.Expn !== void 0)
+            target.layerComps.list[target.layerComps.list.length - 1].expanded = item.Expn;
         }
-        if ("lastAppliedComp" in desc)
+        if (desc.lastAppliedComp !== void 0)
           target.layerComps.lastApplied = desc.lastAppliedComp;
       },
-      function(writer, target) {
-        var layerComps = target.layerComps;
-        var desc = { list: [] };
-        for (var _i = 0, _a2 = layerComps.list; _i < _a2.length; _i++) {
-          var item = _a2[_i];
-          var t = {};
+      (writer, target) => {
+        const layerComps = target.layerComps;
+        const desc = { list: [] };
+        for (const item of layerComps.list) {
+          const t = {};
           t._classID = "Comp";
           t["Nm  "] = item.name;
-          if ("comment" in item)
+          if (item.comment !== void 0)
             t.comment = item.comment;
           t.compID = item.id;
           t.capturedInfo = item.capturedInfo;
+          if (item.expanded !== void 0)
+            t.Expn = !!item.expanded;
           desc.list.push(t);
         }
-        if ("lastApplied" in layerComps)
+        if (layerComps.lastApplied !== void 0)
           desc.lastAppliedComp = layerComps.lastApplied;
         (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "CompList", desc);
       }
@@ -7823,14 +9744,13 @@ var require_imageResources = __commonJS({
     helpers_1.MOCK_HANDLERS && addHandler(
       1092,
       // ???
-      function(target) {
-        return target._ir1092 !== void 0;
-      },
-      function(reader, target, left) {
+      // ???
+      (target) => target._ir1092 !== void 0,
+      (reader, target, left) => {
         LOG_MOCK_HANDLERS && console.log("image resource 1092", left());
         target._ir1092 = (0, psdReader_1.readBytes)(reader, left());
       },
-      function(writer, target) {
+      (writer, target) => {
         (0, psdWriter_1.writeBytes)(writer, target._ir1092);
       }
     );
@@ -7863,11 +9783,10 @@ var require_imageResources = __commonJS({
     addHandler(
       1078,
       // Onion Skins
-      function(target) {
-        return target.onionSkins !== void 0;
-      },
-      function(reader, target) {
-        var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+      // Onion Skins
+      (target) => target.onionSkins !== void 0,
+      (reader, target) => {
+        const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
         target.onionSkins = {
           enabled: desc.enab,
           framesBefore: desc.numBefore,
@@ -7878,16 +9797,16 @@ var require_imageResources = __commonJS({
           blendMode: onionSkinsBlendModes[desc.BlnM] || "normal"
         };
       },
-      function(writer, target) {
-        var onionSkins = target.onionSkins;
-        var desc = {
+      (writer, target) => {
+        const onionSkins = target.onionSkins;
+        const desc = {
           Vrsn: 1,
           enab: onionSkins.enabled,
           numBefore: onionSkins.framesBefore,
           numAfter: onionSkins.framesAfter,
           Spcn: onionSkins.frameSpacing,
-          minOpacity: onionSkins.minOpacity * 100 | 0,
-          maxOpacity: onionSkins.maxOpacity * 100 | 0,
+          minOpacity: Math.round(onionSkins.minOpacity * 100),
+          maxOpacity: Math.round(onionSkins.maxOpacity * 100),
           BlnM: Math.max(0, onionSkinsBlendModes.indexOf(onionSkins.blendMode))
         };
         (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
@@ -7896,12 +9815,11 @@ var require_imageResources = __commonJS({
     addHandler(
       1075,
       // Timeline Information
-      function(target) {
-        return target.timelineInformation !== void 0;
-      },
-      function(reader, target) {
+      // Timeline Information
+      (target) => target.timelineInformation !== void 0,
+      (reader, target) => {
         var _a2, _b2;
-        var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+        const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
         target.timelineInformation = {
           enabled: desc.enab,
           frameStep: (0, descriptor_1.frac)(desc.frameStep),
@@ -7912,42 +9830,37 @@ var require_imageResources = __commonJS({
           workOutTime: (0, descriptor_1.frac)(desc.workOutTime),
           repeats: desc.LCnt,
           hasMotion: desc.hasMotion,
-          globalTracks: (0, descriptor_1.parseTrackList)(desc.globalTrackList, !!reader.logMissingFeatures)
+          globalTracks: (0, descriptor_1.parseTrackList)(desc.globalTrackList, reader)
         };
         if ((_b2 = (_a2 = desc.audioClipGroupList) === null || _a2 === void 0 ? void 0 : _a2.audioClipGroupList) === null || _b2 === void 0 ? void 0 : _b2.length) {
-          target.timelineInformation.audioClipGroups = desc.audioClipGroupList.audioClipGroupList.map(function(g) {
-            return {
-              id: g.groupID,
-              muted: g.muted,
-              audioClips: g.audioClipList.map(function(_a3) {
-                var clipID = _a3.clipID, timeScope = _a3.timeScope, muted = _a3.muted, audioLevel = _a3.audioLevel, frameReader = _a3.frameReader;
-                return {
-                  id: clipID,
-                  start: (0, descriptor_1.frac)(timeScope.Strt),
-                  duration: (0, descriptor_1.frac)(timeScope.duration),
-                  inTime: (0, descriptor_1.frac)(timeScope.inTime),
-                  outTime: (0, descriptor_1.frac)(timeScope.outTime),
-                  muted,
-                  audioLevel,
-                  frameReader: {
-                    type: frameReader.frameReaderType,
-                    mediaDescriptor: frameReader.mediaDescriptor,
-                    link: {
-                      name: frameReader["Lnk "]["Nm  "],
-                      fullPath: frameReader["Lnk "].fullPath,
-                      relativePath: frameReader["Lnk "].relPath
-                    }
-                  }
-                };
-              })
-            };
-          });
+          target.timelineInformation.audioClipGroups = desc.audioClipGroupList.audioClipGroupList.map((g) => ({
+            id: g.groupID,
+            muted: g.muted,
+            audioClips: g.audioClipList.map(({ clipID, timeScope, muted, audioLevel, frameReader }) => ({
+              id: clipID,
+              start: (0, descriptor_1.frac)(timeScope.Strt),
+              duration: (0, descriptor_1.frac)(timeScope.duration),
+              inTime: (0, descriptor_1.frac)(timeScope.inTime),
+              outTime: (0, descriptor_1.frac)(timeScope.outTime),
+              muted,
+              audioLevel,
+              frameReader: {
+                type: frameReader.frameReaderType,
+                mediaDescriptor: frameReader.mediaDescriptor,
+                link: {
+                  name: frameReader["Lnk "]["Nm  "],
+                  fullPath: frameReader["Lnk "].fullPath,
+                  relativePath: frameReader["Lnk "].relPath
+                }
+              }
+            }))
+          }));
         }
       },
-      function(writer, target) {
+      (writer, target) => {
         var _a2;
-        var timeline = target.timelineInformation;
-        var desc = {
+        const timeline = target.timelineInformation;
+        const desc = {
           Vrsn: 1,
           enab: timeline.enabled,
           frameStep: timeline.frameStep,
@@ -7957,39 +9870,35 @@ var require_imageResources = __commonJS({
           workInTime: timeline.workInTime,
           workOutTime: timeline.workOutTime,
           LCnt: timeline.repeats,
-          globalTrackList: (0, descriptor_1.serializeTrackList)(timeline.globalTracks),
+          globalTrackList: (0, descriptor_1.serializeTrackList)(timeline.globalTracks, writer),
           audioClipGroupList: {
-            audioClipGroupList: (_a2 = timeline.audioClipGroups) === null || _a2 === void 0 ? void 0 : _a2.map(function(a) {
-              return {
-                groupID: a.id,
-                muted: a.muted,
-                audioClipList: a.audioClips.map(function(c) {
-                  return {
-                    clipID: c.id,
-                    timeScope: {
-                      Vrsn: 1,
-                      Strt: c.start,
-                      duration: c.duration,
-                      inTime: c.inTime,
-                      outTime: c.outTime
-                    },
-                    frameReader: {
-                      frameReaderType: c.frameReader.type,
-                      descVersion: 1,
-                      "Lnk ": {
-                        descVersion: 1,
-                        "Nm  ": c.frameReader.link.name,
-                        fullPath: c.frameReader.link.fullPath,
-                        relPath: c.frameReader.link.relativePath
-                      },
-                      mediaDescriptor: c.frameReader.mediaDescriptor
-                    },
-                    muted: c.muted,
-                    audioLevel: c.audioLevel
-                  };
-                })
-              };
-            })
+            audioClipGroupList: ((_a2 = timeline.audioClipGroups) !== null && _a2 !== void 0 ? _a2 : []).map((a) => ({
+              groupID: a.id,
+              muted: a.muted,
+              audioClipList: a.audioClips.map((c) => ({
+                clipID: c.id,
+                timeScope: {
+                  Vrsn: 1,
+                  Strt: c.start,
+                  duration: c.duration,
+                  inTime: c.inTime,
+                  outTime: c.outTime
+                },
+                frameReader: {
+                  frameReaderType: c.frameReader.type,
+                  descVersion: 1,
+                  "Lnk ": {
+                    descVersion: 1,
+                    "Nm  ": c.frameReader.link.name,
+                    fullPath: c.frameReader.link.fullPath,
+                    relPath: c.frameReader.link.relativePath
+                  },
+                  mediaDescriptor: c.frameReader.mediaDescriptor
+                },
+                muted: c.muted,
+                audioLevel: c.audioLevel
+              }))
+            }))
           },
           hasMotion: timeline.hasMotion
         };
@@ -7999,38 +9908,33 @@ var require_imageResources = __commonJS({
     addHandler(
       1076,
       // Sheet Disclosure
-      function(target) {
-        return target.sheetDisclosure !== void 0;
-      },
-      function(reader, target) {
-        var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+      // Sheet Disclosure
+      (target) => target.sheetDisclosure !== void 0,
+      (reader, target) => {
+        const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
         target.sheetDisclosure = {};
         if (desc.sheetTimelineOptions) {
-          target.sheetDisclosure.sheetTimelineOptions = desc.sheetTimelineOptions.map(function(o) {
-            return {
-              sheetID: o.sheetID,
-              sheetDisclosed: o.sheetDisclosed,
-              lightsDisclosed: o.lightsDisclosed,
-              meshesDisclosed: o.meshesDisclosed,
-              materialsDisclosed: o.materialsDisclosed
-            };
-          });
+          target.sheetDisclosure.sheetTimelineOptions = desc.sheetTimelineOptions.map((o) => ({
+            sheetID: o.sheetID,
+            sheetDisclosed: o.sheetDisclosed,
+            lightsDisclosed: o.lightsDisclosed,
+            meshesDisclosed: o.meshesDisclosed,
+            materialsDisclosed: o.materialsDisclosed
+          }));
         }
       },
-      function(writer, target) {
-        var disclosure = target.sheetDisclosure;
-        var desc = { Vrsn: 1 };
+      (writer, target) => {
+        const disclosure = target.sheetDisclosure;
+        const desc = { Vrsn: 1 };
         if (disclosure.sheetTimelineOptions) {
-          desc.sheetTimelineOptions = disclosure.sheetTimelineOptions.map(function(d) {
-            return {
-              Vrsn: 2,
-              sheetID: d.sheetID,
-              sheetDisclosed: d.sheetDisclosed,
-              lightsDisclosed: d.lightsDisclosed,
-              meshesDisclosed: d.meshesDisclosed,
-              materialsDisclosed: d.materialsDisclosed
-            };
-          });
+          desc.sheetTimelineOptions = disclosure.sheetTimelineOptions.map((d) => ({
+            Vrsn: 2,
+            sheetID: d.sheetID,
+            sheetDisclosed: d.sheetDisclosed,
+            lightsDisclosed: d.lightsDisclosed,
+            meshesDisclosed: d.meshesDisclosed,
+            materialsDisclosed: d.materialsDisclosed
+          }));
         }
         (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
       }
@@ -8038,25 +9942,24 @@ var require_imageResources = __commonJS({
     addHandler(
       1054,
       // URL List
-      function(target) {
-        return target.urlsList !== void 0;
-      },
-      function(reader, target) {
-        var count = (0, psdReader_1.readUint32)(reader);
+      // URL List
+      (target) => target.urlsList !== void 0,
+      (reader, target) => {
+        const count = (0, psdReader_1.readUint32)(reader);
         target.urlsList = [];
-        for (var i = 0; i < count; i++) {
-          var long = (0, psdReader_1.readSignature)(reader);
+        for (let i = 0; i < count; i++) {
+          const long = (0, psdReader_1.readSignature)(reader);
           if (long !== "slic" && reader.throwForMissingFeatures)
             throw new Error("Unknown long");
-          var id = (0, psdReader_1.readUint32)(reader);
-          var url = (0, psdReader_1.readUnicodeString)(reader);
+          const id = (0, psdReader_1.readUint32)(reader);
+          const url = (0, psdReader_1.readUnicodeString)(reader);
           target.urlsList.push({ id, url, ref: "slice" });
         }
       },
-      function(writer, target) {
-        var list = target.urlsList;
+      (writer, target) => {
+        const list = target.urlsList;
         (0, psdWriter_1.writeUint32)(writer, list.length);
-        for (var i = 0; i < list.length; i++) {
+        for (let i = 0; i < list.length; i++) {
           (0, psdWriter_1.writeSignature)(writer, "slic");
           (0, psdWriter_1.writeUint32)(writer, list[i].id);
           (0, psdWriter_1.writeUnicodeString)(writer, list[i].url);
@@ -8078,53 +9981,53 @@ var require_imageResources = __commonJS({
     addHandler(
       1050,
       // Slices
-      function(target) {
-        return target.slices ? target.slices.length : 0;
-      },
-      function(reader, target) {
-        var version = (0, psdReader_1.readUint32)(reader);
+      // Slices
+      (target) => target.slices ? target.slices.length : 0,
+      (reader, target, leftBytes) => {
+        var _a2;
+        const version = (0, psdReader_1.readUint32)(reader);
         if (version === 6) {
           if (!target.slices)
             target.slices = [];
-          var top_1 = (0, psdReader_1.readInt32)(reader);
-          var left = (0, psdReader_1.readInt32)(reader);
-          var bottom = (0, psdReader_1.readInt32)(reader);
-          var right = (0, psdReader_1.readInt32)(reader);
-          var groupName = (0, psdReader_1.readUnicodeString)(reader);
-          var count = (0, psdReader_1.readUint32)(reader);
-          target.slices.push({ bounds: { top: top_1, left, bottom, right }, groupName, slices: [] });
-          var slices_1 = target.slices[target.slices.length - 1].slices;
-          for (var i = 0; i < count; i++) {
-            var id = (0, psdReader_1.readUint32)(reader);
-            var groupId = (0, psdReader_1.readUint32)(reader);
-            var origin_1 = clamped(sliceOrigins, (0, psdReader_1.readUint32)(reader));
-            var associatedLayerId = origin_1 == "layer" ? (0, psdReader_1.readUint32)(reader) : 0;
-            var name_3 = (0, psdReader_1.readUnicodeString)(reader);
-            var type = clamped(sliceTypes, (0, psdReader_1.readUint32)(reader));
-            var left_1 = (0, psdReader_1.readInt32)(reader);
-            var top_2 = (0, psdReader_1.readInt32)(reader);
-            var right_1 = (0, psdReader_1.readInt32)(reader);
-            var bottom_1 = (0, psdReader_1.readInt32)(reader);
-            var url = (0, psdReader_1.readUnicodeString)(reader);
-            var target_1 = (0, psdReader_1.readUnicodeString)(reader);
-            var message = (0, psdReader_1.readUnicodeString)(reader);
-            var altTag = (0, psdReader_1.readUnicodeString)(reader);
-            var cellTextIsHTML = !!(0, psdReader_1.readUint8)(reader);
-            var cellText = (0, psdReader_1.readUnicodeString)(reader);
-            var horizontalAlignment = clamped(sliceAlignments, (0, psdReader_1.readUint32)(reader));
-            var verticalAlignment = clamped(sliceAlignments, (0, psdReader_1.readUint32)(reader));
-            var a = (0, psdReader_1.readUint8)(reader);
-            var r = (0, psdReader_1.readUint8)(reader);
-            var g = (0, psdReader_1.readUint8)(reader);
-            var b = (0, psdReader_1.readUint8)(reader);
-            var backgroundColorType = a + r + g + b === 0 ? "none" : a === 0 ? "matte" : "color";
-            slices_1.push({
+          const top = (0, psdReader_1.readInt32)(reader);
+          const left = (0, psdReader_1.readInt32)(reader);
+          const bottom = (0, psdReader_1.readInt32)(reader);
+          const right = (0, psdReader_1.readInt32)(reader);
+          const groupName = (0, psdReader_1.readUnicodeString)(reader);
+          const count = (0, psdReader_1.readUint32)(reader);
+          target.slices.push({ bounds: { top, left, bottom, right }, groupName, slices: [] });
+          const slices = target.slices[target.slices.length - 1].slices;
+          for (let i = 0; i < count; i++) {
+            const id = (0, psdReader_1.readUint32)(reader);
+            const groupId = (0, psdReader_1.readUint32)(reader);
+            const origin = clamped(sliceOrigins, (0, psdReader_1.readUint32)(reader));
+            const associatedLayerId = origin == "layer" ? (0, psdReader_1.readUint32)(reader) : 0;
+            const name = (0, psdReader_1.readUnicodeString)(reader);
+            const type = clamped(sliceTypes, (0, psdReader_1.readUint32)(reader));
+            const left2 = (0, psdReader_1.readInt32)(reader);
+            const top2 = (0, psdReader_1.readInt32)(reader);
+            const right2 = (0, psdReader_1.readInt32)(reader);
+            const bottom2 = (0, psdReader_1.readInt32)(reader);
+            const url = (0, psdReader_1.readUnicodeString)(reader);
+            const target2 = (0, psdReader_1.readUnicodeString)(reader);
+            const message = (0, psdReader_1.readUnicodeString)(reader);
+            const altTag = (0, psdReader_1.readUnicodeString)(reader);
+            const cellTextIsHTML = !!(0, psdReader_1.readUint8)(reader);
+            const cellText = (0, psdReader_1.readUnicodeString)(reader);
+            const horizontalAlignment = clamped(sliceAlignments, (0, psdReader_1.readUint32)(reader));
+            const verticalAlignment = clamped(sliceAlignments, (0, psdReader_1.readUint32)(reader));
+            const a = (0, psdReader_1.readUint8)(reader);
+            const r = (0, psdReader_1.readUint8)(reader);
+            const g = (0, psdReader_1.readUint8)(reader);
+            const b = (0, psdReader_1.readUint8)(reader);
+            const backgroundColorType = a + r + g + b === 0 ? "none" : a === 0 ? "matte" : "color";
+            slices.push({
               id,
               groupId,
-              origin: origin_1,
+              origin,
               associatedLayerId,
-              name: name_3,
-              target: target_1,
+              name,
+              target: target2,
               message,
               altTag,
               cellTextIsHTML,
@@ -8133,40 +10036,46 @@ var require_imageResources = __commonJS({
               verticalAlignment,
               type,
               url,
-              bounds: { top: top_2, left: left_1, bottom: bottom_1, right: right_1 },
+              bounds: { top: top2, left: left2, bottom: bottom2, right: right2 },
               backgroundColorType,
               backgroundColor: { r, g, b, a }
             });
           }
-          var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-          desc.slices.forEach(function(d) {
-            var slice = slices_1.find(function(s) {
-              return d.sliceID == s.id;
-            });
-            if (slice) {
-              slice.topOutset = d.topOutset;
-              slice.leftOutset = d.leftOutset;
-              slice.bottomOutset = d.bottomOutset;
-              slice.rightOutset = d.rightOutset;
+          if (leftBytes()) {
+            const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+            const slicesById = /* @__PURE__ */ new Map();
+            for (const s of slices) {
+              if (!slicesById.has(s.id))
+                slicesById.set(s.id, s);
             }
-          });
+            desc.slices.forEach((d) => {
+              const slice = slicesById.get(d.sliceID);
+              if (slice) {
+                slice.topOutset = d.topOutset;
+                slice.leftOutset = d.leftOutset;
+                slice.bottomOutset = d.bottomOutset;
+                slice.rightOutset = d.rightOutset;
+              }
+            });
+          }
         } else if (version === 7 || version === 8) {
-          var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+          const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
           if (!target.slices)
             target.slices = [];
           target.slices.push({
-            groupName: desc.baseName,
+            groupName: (_a2 = desc.baseName) !== null && _a2 !== void 0 ? _a2 : "",
             bounds: boundsFromBounds(desc.bounds),
-            slices: desc.slices.map(function(s) {
-              return __assign(__assign({}, s["Nm  "] ? { name: s["Nm  "] } : {}), { id: s.sliceID, groupId: s.groupID, associatedLayerId: 0, origin: descriptor_1.ESliceOrigin.decode(s.origin), type: descriptor_1.ESliceType.decode(s.Type), bounds: boundsFromBounds(s.bounds), url: s.url, target: s.null, message: s.Msge, altTag: s.altTag, cellTextIsHTML: s.cellTextIsHTML, cellText: s.cellText, horizontalAlignment: descriptor_1.ESliceHorzAlign.decode(s.horzAlign), verticalAlignment: descriptor_1.ESliceVertAlign.decode(s.vertAlign), backgroundColorType: descriptor_1.ESliceBGColorType.decode(s.bgColorType), backgroundColor: s.bgColor ? { r: s.bgColor["Rd  "], g: s.bgColor["Grn "], b: s.bgColor["Bl  "], a: s.bgColor.alpha } : { r: 0, g: 0, b: 0, a: 0 }, topOutset: s.topOutset || 0, leftOutset: s.leftOutset || 0, bottomOutset: s.bottomOutset || 0, rightOutset: s.rightOutset || 0 });
+            slices: desc.slices.map((s) => {
+              var _a3;
+              return Object.assign(Object.assign({}, s["Nm  "] ? { name: s["Nm  "] } : {}), { id: s.sliceID, groupId: s.groupID, associatedLayerId: (_a3 = s.associatedLayer) !== null && _a3 !== void 0 ? _a3 : 0, origin: descriptor_1.ESliceOrigin.decode(s.origin), type: descriptor_1.ESliceType.decode(s.Type), bounds: boundsFromBounds(s.bounds), url: s.url, target: s.null, message: s.Msge, altTag: s.altTag, cellTextIsHTML: s.cellTextIsHTML, cellText: s.cellText, horizontalAlignment: descriptor_1.ESliceHorzAlign.decode(s.horzAlign), verticalAlignment: descriptor_1.ESliceVertAlign.decode(s.vertAlign), backgroundColorType: descriptor_1.ESliceBGColorType.decode(s.bgColorType), backgroundColor: s.bgColor ? { r: s.bgColor["Rd  "], g: s.bgColor["Grn "], b: s.bgColor["Bl  "], a: s.bgColor.alpha } : { r: 0, g: 0, b: 0, a: 0 }, topOutset: s.topOutset || 0, leftOutset: s.leftOutset || 0, bottomOutset: s.bottomOutset || 0, rightOutset: s.rightOutset || 0 });
             })
           });
         } else {
-          throw new Error("Invalid slices version (".concat(version, ")"));
+          throw new Error(`Invalid slices version (${version})`);
         }
       },
-      function(writer, target, index) {
-        var _a2 = target.slices[index], bounds = _a2.bounds, groupName = _a2.groupName, slices = _a2.slices;
+      (writer, target, index) => {
+        const { bounds, groupName, slices } = target.slices[index];
         (0, psdWriter_1.writeUint32)(writer, 6);
         (0, psdWriter_1.writeInt32)(writer, bounds.top);
         (0, psdWriter_1.writeInt32)(writer, bounds.left);
@@ -8174,9 +10083,9 @@ var require_imageResources = __commonJS({
         (0, psdWriter_1.writeInt32)(writer, bounds.right);
         (0, psdWriter_1.writeUnicodeString)(writer, groupName);
         (0, psdWriter_1.writeUint32)(writer, slices.length);
-        for (var i = 0; i < slices.length; i++) {
-          var slice = slices[i];
-          var _b2 = slice.backgroundColor, a = _b2.a, r = _b2.r, g = _b2.g, b = _b2.b;
+        for (let i = 0; i < slices.length; i++) {
+          const slice = slices[i];
+          let { a, r, g, b } = slice.backgroundColor;
           if (slice.backgroundColorType === "none") {
             a = r = g = b = 0;
           } else if (slice.backgroundColorType === "matte") {
@@ -8207,98 +10116,207 @@ var require_imageResources = __commonJS({
           (0, psdWriter_1.writeUint8)(writer, g);
           (0, psdWriter_1.writeUint8)(writer, b);
         }
-        var desc = {
+        const desc = {
           bounds: boundsToBounds(bounds),
           slices: []
         };
-        slices.forEach(function(s) {
-          var slice2 = __assign(__assign({ sliceID: s.id, groupID: s.groupId, origin: descriptor_1.ESliceOrigin.encode(s.origin), Type: descriptor_1.ESliceType.encode(s.type), bounds: boundsToBounds(s.bounds) }, s.name ? { "Nm  ": s.name } : {}), { url: s.url, null: s.target, Msge: s.message, altTag: s.altTag, cellTextIsHTML: s.cellTextIsHTML, cellText: s.cellText, horzAlign: descriptor_1.ESliceHorzAlign.encode(s.horizontalAlignment), vertAlign: descriptor_1.ESliceVertAlign.encode(s.verticalAlignment), bgColorType: descriptor_1.ESliceBGColorType.encode(s.backgroundColorType) });
+        slices.forEach((s) => {
+          const slice = Object.assign(Object.assign({ sliceID: s.id, groupID: s.groupId, origin: descriptor_1.ESliceOrigin.encode(s.origin), Type: descriptor_1.ESliceType.encode(s.type), bounds: boundsToBounds(s.bounds) }, s.name ? { "Nm  ": s.name } : {}), { url: s.url, null: s.target, Msge: s.message, altTag: s.altTag, cellTextIsHTML: s.cellTextIsHTML, cellText: s.cellText, horzAlign: descriptor_1.ESliceHorzAlign.encode(s.horizontalAlignment), vertAlign: descriptor_1.ESliceVertAlign.encode(s.verticalAlignment), bgColorType: descriptor_1.ESliceBGColorType.encode(s.backgroundColorType) });
           if (s.backgroundColorType === "color") {
-            var _a3 = s.backgroundColor, r2 = _a3.r, g2 = _a3.g, b2 = _a3.b, a2 = _a3.a;
-            slice2.bgColor = { "Rd  ": r2, "Grn ": g2, "Bl  ": b2, alpha: a2 };
+            const { r, g, b, a } = s.backgroundColor;
+            slice.bgColor = { "Rd  ": r, "Grn ": g, "Bl  ": b, alpha: a };
           }
-          slice2.topOutset = s.topOutset || 0;
-          slice2.leftOutset = s.leftOutset || 0;
-          slice2.bottomOutset = s.bottomOutset || 0;
-          slice2.rightOutset = s.rightOutset || 0;
-          desc.slices.push(slice2);
+          slice.topOutset = s.topOutset || 0;
+          slice.leftOutset = s.leftOutset || 0;
+          slice.bottomOutset = s.bottomOutset || 0;
+          slice.rightOutset = s.rightOutset || 0;
+          desc.slices.push(slice);
         });
         (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc, "slices");
       }
     );
-    addHandler(1064, function(target) {
-      return target.pixelAspectRatio !== void 0;
-    }, function(reader, target) {
+    addHandler(1064, (target) => target.pixelAspectRatio !== void 0, (reader, target) => {
       if ((0, psdReader_1.readUint32)(reader) > 2)
         throw new Error("Invalid pixelAspectRatio version");
       target.pixelAspectRatio = { aspect: (0, psdReader_1.readFloat64)(reader) };
-    }, function(writer, target) {
+    }, (writer, target) => {
       (0, psdWriter_1.writeUint32)(writer, 2);
       (0, psdWriter_1.writeFloat64)(writer, target.pixelAspectRatio.aspect);
     });
-    addHandler(1041, function(target) {
-      return target.iccUntaggedProfile !== void 0;
-    }, function(reader, target) {
+    addHandler(1041, (target) => target.iccUntaggedProfile !== void 0, (reader, target) => {
       target.iccUntaggedProfile = !!(0, psdReader_1.readUint8)(reader);
-    }, function(writer, target) {
+    }, (writer, target) => {
       (0, psdWriter_1.writeUint8)(writer, target.iccUntaggedProfile ? 1 : 0);
     });
-    helpers_1.MOCK_HANDLERS && addHandler(
+    addHandler(
       1039,
       // ICC Profile
-      function(target) {
-        return target._ir1039 !== void 0;
+      // ICC Profile
+      (target) => target.iccProfile !== void 0,
+      (reader, target, left) => {
+        target.iccProfile = (0, psdReader_1.readBytes)(reader, left());
       },
-      function(reader, target, left) {
-        LOG_MOCK_HANDLERS && console.log("image resource 1039", left());
-        target._ir1039 = (0, psdReader_1.readBytes)(reader, left());
-      },
-      function(writer, target) {
-        (0, psdWriter_1.writeBytes)(writer, target._ir1039);
+      (writer, target) => {
+        (0, psdWriter_1.writeBytes)(writer, target.iccProfile);
       }
     );
-    addHandler(1044, function(target) {
-      return target.idsSeedNumber !== void 0;
-    }, function(reader, target) {
-      return target.idsSeedNumber = (0, psdReader_1.readUint32)(reader);
-    }, function(writer, target) {
-      return (0, psdWriter_1.writeUint32)(writer, target.idsSeedNumber);
-    });
-    addHandler(1036, function(target) {
-      return target.thumbnail !== void 0 || target.thumbnailRaw !== void 0;
-    }, function(reader, target, left) {
-      var format = (0, psdReader_1.readUint32)(reader);
-      var width = (0, psdReader_1.readUint32)(reader);
-      var height = (0, psdReader_1.readUint32)(reader);
+    addHandler(1044, (target) => target.idsSeedNumber !== void 0, (reader, target) => target.idsSeedNumber = (0, psdReader_1.readUint32)(reader), (writer, target) => (0, psdWriter_1.writeUint32)(writer, target.idsSeedNumber));
+    addHandler(
+      1038,
+      // Color samplers (Photoshop 5.0, replaced by 1073 in CS3)
+      // Color samplers (Photoshop 5.0, replaced by 1073 in CS3)
+      (target) => target.colorSamplers !== void 0 && !target.colorSamplers.some((s) => s.depth !== void 0),
+      (reader, target, left) => {
+        var _a2;
+        const version = (0, psdReader_1.readUint32)(reader);
+        if (version !== 1)
+          throw new Error(`Invalid color samplers version: ${version}`);
+        if ((_a2 = target.colorSamplers) === null || _a2 === void 0 ? void 0 : _a2.some((s) => s.depth !== void 0))
+          return (0, psdReader_1.skipBytes)(reader, left());
+        const count = (0, psdReader_1.readUint32)(reader);
+        target.colorSamplers = [];
+        for (let i = 0; i < count && left() >= 10; i++) {
+          const y = (0, psdReader_1.readInt32)(reader) / 16;
+          const x = (0, psdReader_1.readInt32)(reader) / 16;
+          const colorSpace = (0, psdReader_1.readInt16)(reader);
+          target.colorSamplers.push({ x, y, colorSpace });
+        }
+      },
+      (writer, target) => {
+        (0, psdWriter_1.writeUint32)(writer, 1);
+        (0, psdWriter_1.writeUint32)(writer, target.colorSamplers.length);
+        for (const sampler of target.colorSamplers) {
+          (0, psdWriter_1.writeInt32)(writer, Math.round(sampler.y * 16));
+          (0, psdWriter_1.writeInt32)(writer, Math.round(sampler.x * 16));
+          (0, psdWriter_1.writeInt16)(writer, sampler.colorSpace);
+        }
+      }
+    );
+    addHandler(
+      1073,
+      // Color samplers (Photoshop CS3)
+      // Color samplers (Photoshop CS3)
+      (target) => target.colorSamplers !== void 0 && target.colorSamplers.some((s) => s.depth !== void 0),
+      (reader, target, left) => {
+        const version = (0, psdReader_1.readUint32)(reader);
+        if (version < 1 || version > 3)
+          throw new Error(`Invalid color samplers version: ${version}`);
+        const count = (0, psdReader_1.readUint32)(reader);
+        target.colorSamplers = [];
+        for (let i = 0; i < count && left() >= 10; i++) {
+          const samplerVersion = version === 3 ? (0, psdReader_1.readUint32)(reader) : version;
+          const y = samplerVersion === 1 ? (0, psdReader_1.readInt32)(reader) / 16 : (0, psdReader_1.readFloat32)(reader);
+          const x = samplerVersion === 1 ? (0, psdReader_1.readInt32)(reader) / 16 : (0, psdReader_1.readFloat32)(reader);
+          const colorSpace = (0, psdReader_1.readInt16)(reader);
+          const depth = version >= 2 ? (0, psdReader_1.readInt16)(reader) : 1;
+          target.colorSamplers.push({ x, y, colorSpace, depth });
+        }
+      },
+      (writer, target) => {
+        var _a2;
+        (0, psdWriter_1.writeUint32)(writer, 3);
+        (0, psdWriter_1.writeUint32)(writer, target.colorSamplers.length);
+        for (const sampler of target.colorSamplers) {
+          (0, psdWriter_1.writeUint32)(writer, 1);
+          (0, psdWriter_1.writeInt32)(writer, Math.round(sampler.y * 16));
+          (0, psdWriter_1.writeInt32)(writer, Math.round(sampler.x * 16));
+          (0, psdWriter_1.writeInt16)(writer, sampler.colorSpace);
+          (0, psdWriter_1.writeInt16)(writer, (_a2 = sampler.depth) !== null && _a2 !== void 0 ? _a2 : 1);
+        }
+      }
+    );
+    addHandler(
+      1022,
+      // Quick Mask information
+      // Quick Mask information
+      (target) => target.quickMaskInfo !== void 0,
+      (reader, target) => {
+        const channelId = (0, psdReader_1.readUint16)(reader);
+        const initiallyEmpty = !!(0, psdReader_1.readUint8)(reader);
+        target.quickMaskInfo = { channelId, initiallyEmpty };
+      },
+      (writer, target) => {
+        (0, psdWriter_1.writeUint16)(writer, target.quickMaskInfo.channelId);
+        (0, psdWriter_1.writeUint8)(writer, target.quickMaskInfo.initiallyEmpty ? 1 : 0);
+      }
+    );
+    addHandler(
+      1074,
+      // Measurement scale
+      // Measurement scale
+      (target) => target.measurementScale !== void 0,
+      (reader, target, left) => {
+        target.measurementScale = (0, psdReader_1.readBytes)(reader, left());
+      },
+      (writer, target) => {
+        (0, psdWriter_1.writeBytes)(writer, target.measurementScale);
+      }
+    );
+    addHandler(
+      1042,
+      // Effects visible (only present when effects are hidden)
+      // Effects visible (only present when effects are hidden)
+      (target) => target.effectsVisible !== void 0,
+      (reader, target) => {
+        target.effectsVisible = !!(0, psdReader_1.readUint8)(reader);
+      },
+      (writer, target) => {
+        (0, psdWriter_1.writeUint8)(writer, target.effectsVisible ? 1 : 0);
+      }
+    );
+    addHandler(1036, (target) => target.thumbnail !== void 0 || target.thumbnailRaw !== void 0, (reader, target, left) => {
+      const format = (0, psdReader_1.readUint32)(reader);
+      const width = (0, psdReader_1.readUint32)(reader);
+      const height = (0, psdReader_1.readUint32)(reader);
+      const widthBytes = (0, psdReader_1.readUint32)(reader);
       (0, psdReader_1.readUint32)(reader);
       (0, psdReader_1.readUint32)(reader);
-      (0, psdReader_1.readUint32)(reader);
-      var bitsPerPixel = (0, psdReader_1.readUint16)(reader);
-      var planes = (0, psdReader_1.readUint16)(reader);
-      if (format !== 1 || bitsPerPixel !== 24 || planes !== 1) {
-        reader.logMissingFeatures && reader.log("Invalid thumbnail data (format: ".concat(format, ", bitsPerPixel: ").concat(bitsPerPixel, ", planes: ").concat(planes, ")"));
+      const bitsPerPixel = (0, psdReader_1.readUint16)(reader);
+      (0, psdReader_1.readUint16)(reader);
+      if (format === 0 && bitsPerPixel === 24 && widthBytes >= width * 3 && widthBytes * height <= left()) {
+        if (reader.useRawThumbnail) {
+          reader.logMissingFeatures && reader.log("Raw thumbnail data is not supported with useRawThumbnail option");
+          (0, psdReader_1.skipBytes)(reader, left());
+          return;
+        }
+        const data2 = (0, psdReader_1.readBytes)(reader, widthBytes * height);
+        const imageData = (0, helpers_1.createImageData)(width, height);
+        for (let y = 0, dst = 0; y < height; y++) {
+          for (let x = 0, src = y * widthBytes; x < width; x++, src += 3, dst += 4) {
+            imageData.data[dst + 0] = data2[src + 0];
+            imageData.data[dst + 1] = data2[src + 1];
+            imageData.data[dst + 2] = data2[src + 2];
+            imageData.data[dst + 3] = 255;
+          }
+        }
+        target.thumbnail = (0, helpers_1.imageDataToCanvas)(imageData);
         (0, psdReader_1.skipBytes)(reader, left());
         return;
       }
-      var size = left();
-      var data = (0, psdReader_1.readBytes)(reader, size);
+      if (format !== 1 || bitsPerPixel !== 24) {
+        reader.logMissingFeatures && reader.log(`Invalid thumbnail data (format: ${format}, bitsPerPixel: ${bitsPerPixel})`);
+        (0, psdReader_1.skipBytes)(reader, left());
+        return;
+      }
+      const size = left();
+      const data = (0, psdReader_1.readBytes)(reader, size);
       if (reader.useRawThumbnail) {
         target.thumbnailRaw = { width, height, data };
       } else if (data.byteLength) {
-        target.thumbnail = (0, helpers_1.createCanvasFromData)(data);
+        target.thumbnail = (0, helpers_1.createCanvasFromData)(data, reader);
       }
-    }, function(writer, target) {
+    }, (writer, target) => {
       var _a2;
-      var width = 0;
-      var height = 0;
-      var data = new Uint8Array(0);
+      let width = 0;
+      let height = 0;
+      let data = new Uint8Array(0);
       if (target.thumbnailRaw) {
         width = target.thumbnailRaw.width;
         height = target.thumbnailRaw.height;
         data = target.thumbnailRaw.data;
       } else {
         try {
-          var dataUrl = (_a2 = target.thumbnail.toDataURL("image/jpeg", 1)) === null || _a2 === void 0 ? void 0 : _a2.substring("data:image/jpeg;base64,".length);
+          const dataUrl = (_a2 = target.thumbnail.toDataURL("image/jpeg", 1)) === null || _a2 === void 0 ? void 0 : _a2.substring("data:image/jpeg;base64,".length);
           if (dataUrl) {
             data = (0, base64_js_1.toByteArray)(dataUrl);
             width = target.thumbnail.width;
@@ -8307,11 +10325,11 @@ var require_imageResources = __commonJS({
         } catch (_b2) {
         }
       }
-      var bitsPerPixel = 24;
-      var widthBytes = Math.floor((width * bitsPerPixel + 31) / 32) * 4;
-      var planes = 1;
-      var totalSize = widthBytes * height * planes;
-      var sizeAfterCompression = data.length;
+      const bitsPerPixel = 24;
+      const widthBytes = Math.floor((width * bitsPerPixel + 31) / 32) * 4;
+      const planes = 1;
+      const totalSize = widthBytes * height * planes;
+      const sizeAfterCompression = data.length;
       (0, psdWriter_1.writeUint32)(writer, 1);
       (0, psdWriter_1.writeUint32)(writer, width);
       (0, psdWriter_1.writeUint32)(writer, height);
@@ -8322,10 +10340,8 @@ var require_imageResources = __commonJS({
       (0, psdWriter_1.writeUint16)(writer, planes);
       (0, psdWriter_1.writeBytes)(writer, data);
     });
-    addHandler(1057, function(target) {
-      return target.versionInfo !== void 0;
-    }, function(reader, target, left) {
-      var version = (0, psdReader_1.readUint32)(reader);
+    addHandler(1057, (target) => target.versionInfo !== void 0, (reader, target, left) => {
+      const version = (0, psdReader_1.readUint32)(reader);
       if (version !== 1)
         throw new Error("Invalid versionInfo version");
       target.versionInfo = {
@@ -8335,146 +10351,253 @@ var require_imageResources = __commonJS({
         fileVersion: (0, psdReader_1.readUint32)(reader)
       };
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var versionInfo = target.versionInfo;
+    }, (writer, target) => {
+      const versionInfo = target.versionInfo;
       (0, psdWriter_1.writeUint32)(writer, 1);
       (0, psdWriter_1.writeUint8)(writer, versionInfo.hasRealMergedData ? 1 : 0);
       (0, psdWriter_1.writeUnicodeString)(writer, versionInfo.writerName);
       (0, psdWriter_1.writeUnicodeString)(writer, versionInfo.readerName);
       (0, psdWriter_1.writeUint32)(writer, versionInfo.fileVersion);
     });
-    helpers_1.MOCK_HANDLERS && addHandler(
+    addHandler(
       1058,
-      // EXIF data 1.
-      function(target) {
-        return target._ir1058 !== void 0;
+      // EXIF data 1
+      // EXIF data 1
+      (target) => target.exifData !== void 0,
+      (reader, target, left) => {
+        target.exifData = (0, psdReader_1.readBytes)(reader, left());
       },
-      function(reader, target, left) {
-        LOG_MOCK_HANDLERS && console.log("image resource 1058", left());
-        target._ir1058 = (0, psdReader_1.readBytes)(reader, left());
-      },
-      function(writer, target) {
-        (0, psdWriter_1.writeBytes)(writer, target._ir1058);
+      (writer, target) => {
+        (0, psdWriter_1.writeBytes)(writer, target.exifData);
       }
     );
-    addHandler(7e3, function(target) {
-      return target.imageReadyVariables !== void 0;
-    }, function(reader, target, left) {
+    addHandler(7e3, (target) => target.imageReadyVariables !== void 0, (reader, target, left) => {
       target.imageReadyVariables = readUtf8String(reader, left());
-    }, function(writer, target) {
+    }, (writer, target) => {
       writeUtf8String(writer, target.imageReadyVariables);
     });
-    addHandler(7001, function(target) {
-      return target.imageReadyDataSets !== void 0;
-    }, function(reader, target, left) {
+    addHandler(7001, (target) => target.imageReadyDataSets !== void 0, (reader, target, left) => {
       target.imageReadyDataSets = readUtf8String(reader, left());
-    }, function(writer, target) {
+    }, (writer, target) => {
       writeUtf8String(writer, target.imageReadyDataSets);
     });
-    addHandler(1088, function(target) {
-      return target.pathSelectionState !== void 0;
-    }, function(reader, target, _left) {
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+    addHandler(1088, (target) => target.pathSelectionState !== void 0, (reader, target, _left) => {
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
       target.pathSelectionState = desc["null"];
-    }, function(writer, target) {
-      var desc = { "null": target.pathSelectionState };
+    }, (writer, target) => {
+      const desc = { "null": (0, descriptor_1.pathSelectionStateToReference)(target.pathSelectionState) };
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
     });
-    helpers_1.MOCK_HANDLERS && addHandler(1025, function(target) {
-      return target._ir1025 !== void 0;
-    }, function(reader, target, left) {
-      LOG_MOCK_HANDLERS && console.log("image resource 1025", left());
-      target._ir1025 = (0, psdReader_1.readBytes)(reader, left());
-    }, function(writer, target) {
-      (0, psdWriter_1.writeBytes)(writer, target._ir1025);
-    });
-    var FrmD = (0, helpers_1.createEnum)("FrmD", "", {
+    addHandler(
+      1025,
+      // Work path
+      // Work path
+      (target) => target.workPath !== void 0,
+      (reader, target, left, { width, height }) => {
+        target.workPath = { paths: [] };
+        (0, additionalInfo_1.readVectorMask)(reader, target.workPath, width, height, left());
+        (0, psdReader_1.skipBytes)(reader, left());
+      },
+      (writer, target, _index, { width, height }) => {
+        (0, additionalInfo_1.writeVectorMask)(writer, target.workPath, width, height);
+      }
+    );
+    var MAX_SAVED_PATHS = 999;
+    addHandler(
+      2e3,
+      // Saved paths (one resource for each path, named after the path)
+      // Saved paths (one resource for each path, named after the path)
+      (target) => target.savedPaths ? Math.min(target.savedPaths.length, MAX_SAVED_PATHS) : 0,
+      (reader, target, left, { signature, id, name, width, height }) => {
+        var _a2, _b2;
+        if (signature !== "8BIM") {
+          reader.logMissingFeatures && reader.log(`Unhandled image resource: ${signature} ${id}`);
+          (0, psdReader_1.skipBytes)(reader, left());
+          return;
+        }
+        const savedPaths = (_a2 = target.savedPaths) !== null && _a2 !== void 0 ? _a2 : target.savedPaths = [];
+        const path2 = { name: decodeEncodedString(reader, name), paths: [] };
+        (0, additionalInfo_1.readVectorMask)(reader, path2, width, height, left());
+        (0, psdReader_1.skipBytes)(reader, left());
+        const keyDescriptorList = (_b2 = target.savedPathsOrigination) === null || _b2 === void 0 ? void 0 : _b2[savedPaths.length];
+        if (keyDescriptorList)
+          path2.vectorOrigination = { keyDescriptorList };
+        savedPaths.push(path2);
+      },
+      (writer, target, index, { width, height }) => {
+        (0, additionalInfo_1.writeVectorMask)(writer, target.savedPaths[index], width, height);
+      },
+      { keyCount: MAX_SAVED_PATHS, name: (target, index) => toShortAsciiString(target.savedPaths[index].name) }
+    );
+    addHandler(
+      3e3,
+      // Origin path info (origination data of saved paths)
+      // Origin path info (origination data of saved paths)
+      (target) => {
+        var _a2;
+        return !!((_a2 = target.savedPaths) === null || _a2 === void 0 ? void 0 : _a2.some((path2) => path2.vectorOrigination));
+      },
+      (reader, target, left) => {
+        const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+        desc.keyRootDescriptorList.forEach((item, i) => {
+          var _a2, _b2;
+          const keyDescriptorList = (0, additionalInfo_1.parseKeyDescriptorList)(item);
+          if (!keyDescriptorList.length)
+            return;
+          const path2 = (_a2 = target.savedPaths) === null || _a2 === void 0 ? void 0 : _a2[i];
+          if (path2) {
+            path2.vectorOrigination = { keyDescriptorList };
+          } else {
+            ((_b2 = target.savedPathsOrigination) !== null && _b2 !== void 0 ? _b2 : target.savedPathsOrigination = [])[i] = keyDescriptorList;
+          }
+        });
+        (0, psdReader_1.skipBytes)(reader, left());
+      },
+      (writer, target) => {
+        const desc = {
+          keyRootDescriptorList: target.savedPaths.slice(0, MAX_SAVED_PATHS).map((path2) => {
+            var _a2, _b2;
+            return (0, additionalInfo_1.serializeKeyDescriptorList)((_b2 = (_a2 = path2.vectorOrigination) === null || _a2 === void 0 ? void 0 : _a2.keyDescriptorList) !== null && _b2 !== void 0 ? _b2 : []);
+          })
+        };
+        (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
+      },
+      { name: () => "OriginDataIRB" }
+    );
+    addHandler(
+      2999,
+      // Clipping path
+      // Clipping path
+      (target) => target.clippingPath !== void 0,
+      (reader, target, left) => {
+        const name = readEncodedString(reader);
+        const flatness = (0, psdReader_1.readFixedPoint32)(reader);
+        (0, psdReader_1.skipBytes)(reader, left());
+        target.clippingPath = { name, flatness };
+      },
+      (writer, target) => {
+        writeEncodedString(writer, target.clippingPath.name);
+        (0, psdWriter_1.writeFixedPoint32)(writer, target.clippingPath.flatness);
+        (0, psdWriter_1.writeUint16)(writer, 1);
+      }
+    );
+    var FrmD = (0, helpers_1.createEnum)("FrmD", "auto", {
       auto: "Auto",
       none: "None",
       dispose: "Disp"
     });
+    function pluginResourceKeys(target) {
+      const keys = [];
+      if (target.outputSettings !== void 0)
+        keys.push("mset");
+      if (target.animations !== void 0)
+        keys.push("mani", "mfri");
+      return keys;
+    }
     addHandler(
       4e3,
-      // Plug-In resource(s)
-      function(target) {
-        return target.animations !== void 0;
-      },
-      function(reader, target, left) {
-        var key = (0, psdReader_1.readSignature)(reader);
-        if (key === "mani") {
+      // Plug-In resource(s), identified by key stored in the data (ids 4000-4999)
+      // Plug-In resource(s), identified by key stored in the data (ids 4000-4999)
+      (target) => pluginResourceKeys(target).length,
+      (reader, target, left) => {
+        const key = (0, psdReader_1.readSignature)(reader);
+        if (key === "mset") {
+          target.outputSettings = (0, descriptor_1.readVersionAndDescriptor)(reader, true);
+          (0, psdReader_1.skipBytes)(reader, left());
+        } else if (key === "mfri") {
+          (0, psdReader_1.skipBytes)(reader, left());
+        } else if (key === "mani") {
           (0, psdReader_1.checkSignature)(reader, "IRFR");
-          (0, psdReader_1.readSection)(reader, 1, function(left2) {
-            var _loop_1 = function() {
+          (0, psdReader_1.readSection)(reader, 1, (left2) => {
+            while (left2() > 0) {
               (0, psdReader_1.checkSignature)(reader, "8BIM");
-              var key_1 = (0, psdReader_1.readSignature)(reader);
-              (0, psdReader_1.readSection)(reader, 1, function(left3) {
-                if (key_1 === "AnDs") {
-                  var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+              const key2 = (0, psdReader_1.readSignature)(reader);
+              (0, psdReader_1.readSection)(reader, 1, (left3) => {
+                if (key2 === "AnDs") {
+                  const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
                   target.animations = {
-                    // desc.AFSt ???
-                    frames: desc.FrIn.map(function(x) {
-                      return {
+                    frames: desc.FrIn.map((x) => {
+                      const frame = {
                         id: x.FrID,
                         delay: (x.FrDl || 0) / 100,
                         dispose: x.FrDs ? FrmD.decode(x.FrDs) : "auto"
                         // missing == auto
-                        // x.FrGA ???
                       };
+                      if (x.FrGA !== void 0)
+                        frame.globalAngle = x.FrGA;
+                      if (x.FrGL !== void 0)
+                        frame.globalAltitude = x.FrGL;
+                      return frame;
                     }),
-                    animations: desc.FSts.map(function(x) {
-                      return {
-                        id: x.FsID,
-                        frames: x.FsFr,
-                        repeats: x.LCnt,
-                        activeFrame: x.AFrm || 0
-                      };
-                    })
+                    animations: desc.FSts.map((x) => ({
+                      id: x.FsID,
+                      frames: x.FsFr,
+                      repeats: x.LCnt,
+                      activeFrame: x.AFrm || 0
+                    }))
                   };
-                } else if (key_1 === "Roll") {
-                  var bytes2 = (0, psdReader_1.readBytes)(reader, left3());
-                  reader.logDevFeatures && reader.log("#4000 Roll", bytes2);
+                  if (desc.AFSt !== void 0)
+                    target.animations.activeAnimation = desc.AFSt;
+                  (0, psdReader_1.skipBytes)(reader, left3());
+                } else if (key2 === "Roll") {
+                  const bytes = (0, psdReader_1.readBytes)(reader, left3());
+                  reader.logDevFeatures && reader.log("#4000 Roll", bytes);
                 } else {
-                  reader.logMissingFeatures && reader.log("Unhandled subsection in #4000", key_1);
+                  reader.logMissingFeatures && reader.log("Unhandled subsection in #4000", key2);
+                  (0, psdReader_1.skipBytes)(reader, left3());
                 }
               });
-            };
-            while (left2() > 0) {
-              _loop_1();
             }
           });
+          (0, psdReader_1.skipBytes)(reader, left());
         } else if (key === "mopt") {
-          var bytes = (0, psdReader_1.readBytes)(reader, left());
+          const bytes = (0, psdReader_1.readBytes)(reader, left());
           reader.logDevFeatures && reader.log("#4000 mopt", bytes);
         } else {
-          reader.logMissingFeatures && reader.log("Unhandled key in #4000:", key);
+          reader.logMissingFeatures && reader.log(`Unhandled plug-in resource key: ${key}`);
+          (0, psdReader_1.skipBytes)(reader, left());
         }
       },
-      function(writer, target) {
-        if (target.animations) {
+      (writer, target, index) => {
+        var _a2, _b2;
+        const key = pluginResourceKeys(target)[index];
+        if (key === "mset") {
+          (0, psdWriter_1.writeSignature)(writer, "mset");
+          (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", target.outputSettings, descriptor_1.outputSettingsRoot);
+        } else if (key === "mfri") {
+          const animations = target.animations;
+          (0, psdWriter_1.writeSignature)(writer, "mfri");
+          (0, psdWriter_1.writeUint32)(writer, 2);
+          (0, psdWriter_1.writeUint32)(writer, 16);
+          (0, psdWriter_1.writeUint32)(writer, animations.frames.length);
+          (0, psdWriter_1.writeUint32)(writer, (_b2 = (_a2 = animations.animations[0]) === null || _a2 === void 0 ? void 0 : _a2.activeFrame) !== null && _b2 !== void 0 ? _b2 : 0);
+          (0, psdWriter_1.writeUint32)(writer, animations.animations.length);
+          (0, psdWriter_1.writeUint32)(writer, 0);
+        } else if (key === "mani") {
           (0, psdWriter_1.writeSignature)(writer, "mani");
           (0, psdWriter_1.writeSignature)(writer, "IRFR");
-          (0, psdWriter_1.writeSection)(writer, 1, function() {
+          (0, psdWriter_1.writeSection)(writer, 1, () => {
             (0, psdWriter_1.writeSignature)(writer, "8BIM");
             (0, psdWriter_1.writeSignature)(writer, "AnDs");
-            (0, psdWriter_1.writeSection)(writer, 1, function() {
-              var desc = {
-                // AFSt: 0, // ???
-                FrIn: [],
-                FSts: []
-              };
-              for (var i = 0; i < target.animations.frames.length; i++) {
-                var f = target.animations.frames[i];
-                var frame = {
+            (0, psdWriter_1.writeSection)(writer, 1, () => {
+              const desc = Object.assign(Object.assign({}, target.animations.activeAnimation !== void 0 ? { AFSt: target.animations.activeAnimation } : {}), { FrIn: [], FSts: [] });
+              for (let i = 0; i < target.animations.frames.length; i++) {
+                const f = target.animations.frames[i];
+                const frame = {
                   FrID: f.id
                 };
                 if (f.delay)
-                  frame.FrDl = f.delay * 100 | 0;
+                  frame.FrDl = Math.round(f.delay * 100);
                 frame.FrDs = FrmD.encode(f.dispose);
+                if (f.globalAngle !== void 0)
+                  frame.FrGA = f.globalAngle;
+                if (f.globalAltitude !== void 0)
+                  frame.FrGL = f.globalAltitude;
                 desc.FrIn.push(frame);
               }
-              for (var i = 0; i < target.animations.animations.length; i++) {
-                var a = target.animations.animations[i];
-                var anim = {
+              for (let i = 0; i < target.animations.animations.length; i++) {
+                const a = target.animations.animations[i];
+                const anim = {
                   FsID: a.id,
                   AFrm: a.activeFrame | 0,
                   FsFr: a.frames,
@@ -8484,54 +10607,15 @@ var require_imageResources = __commonJS({
               }
               (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
             });
+            (0, psdWriter_1.writeSignature)(writer, "8BIM");
+            (0, psdWriter_1.writeSignature)(writer, "Roll");
+            (0, psdWriter_1.writeSection)(writer, 1, () => {
+              (0, psdWriter_1.writeZeros)(writer, 8);
+            });
           });
         }
-      }
-    );
-    helpers_1.MOCK_HANDLERS && addHandler(
-      4001,
-      // Plug-In resource(s)
-      function(target) {
-        return target._ir4001 !== void 0;
       },
-      function(reader, target, left) {
-        if (helpers_1.MOCK_HANDLERS) {
-          LOG_MOCK_HANDLERS && console.log("image resource 4001", left());
-          target._ir4001 = (0, psdReader_1.readBytes)(reader, left());
-          return;
-        }
-        var key = (0, psdReader_1.readSignature)(reader);
-        if (key === "mfri") {
-          var version = (0, psdReader_1.readUint32)(reader);
-          if (version !== 2)
-            throw new Error("Invalid mfri version");
-          var length_1 = (0, psdReader_1.readUint32)(reader);
-          var bytes = (0, psdReader_1.readBytes)(reader, length_1);
-          reader.logDevFeatures && reader.log("mfri", bytes);
-        } else if (key === "mset") {
-          var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-          reader.logDevFeatures && reader.log("mset", desc);
-        } else {
-          reader.logMissingFeatures && reader.log("Unhandled key in #4001", key);
-        }
-      },
-      function(writer, target) {
-        (0, psdWriter_1.writeBytes)(writer, target._ir4001);
-      }
-    );
-    helpers_1.MOCK_HANDLERS && addHandler(
-      4002,
-      // Plug-In resource(s)
-      function(target) {
-        return target._ir4002 !== void 0;
-      },
-      function(reader, target, left) {
-        LOG_MOCK_HANDLERS && console.log("image resource 4002", left());
-        target._ir4002 = (0, psdReader_1.readBytes)(reader, left());
-      },
-      function(writer, target) {
-        (0, psdWriter_1.writeBytes)(writer, target._ir4002);
-      }
+      { keyCount: 1e3 }
     );
   }
 });
@@ -8540,284 +10624,397 @@ var require_imageResources = __commonJS({
 var require_psdReader = __commonJS({
   "node_modules/ag-psd/dist/psdReader.js"(exports) {
     "use strict";
+    var __rest = exports && exports.__rest || function(s, e) {
+      var t = {};
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+      if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+          if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+            t[p[i]] = s[p[i]];
+        }
+      return t;
+    };
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.readPattern = exports.readColor = exports.readSection = exports.readDataRLE = exports.readDataZip = exports.createImageDataBitDepth = exports.readAdditionalLayerInfo = exports.readGlobalLayerMaskInfo = exports.readData = exports.readLayerInfo = exports.readPsd = exports.checkSignature = exports.skipBytes = exports.readAsciiString = exports.readUnicodeStringWithLengthLE = exports.readUnicodeStringWithLength = exports.readUnicodeString = exports.readPascalString = exports.validSignatureAt = exports.readSignature = exports.readBytes = exports.readFixedPointPath32 = exports.readFixedPoint32 = exports.readFloat64 = exports.readFloat32 = exports.readUint32 = exports.readInt32LE = exports.readInt32 = exports.readUint16LE = exports.readUint16 = exports.readInt16 = exports.peekUint8 = exports.readUint8 = exports.warnOrThrow = exports.createReader = exports.supportedColorModes = void 0;
+    exports.supportedColorModes = void 0;
+    exports.getUtf8Decoder = getUtf8Decoder;
+    exports.getUtf8StrictDecoder = getUtf8StrictDecoder;
+    exports.getGbkStrictDecoder = getGbkStrictDecoder;
+    exports.decodeUtf8 = decodeUtf8;
+    exports.createReader = createReader;
+    exports.warnOrThrow = warnOrThrow;
+    exports.readUint8 = readUint8;
+    exports.peekUint8 = peekUint8;
+    exports.readInt16 = readInt16;
+    exports.readUint16 = readUint16;
+    exports.readUint16LE = readUint16LE;
+    exports.readInt32 = readInt32;
+    exports.readInt32LE = readInt32LE;
+    exports.readUint32 = readUint32;
+    exports.readFloat32 = readFloat32;
+    exports.readFloat64 = readFloat64;
+    exports.readFixedPoint32 = readFixedPoint32;
+    exports.readFixedPointPath32 = readFixedPointPath32;
+    exports.readBytes = readBytes;
+    exports.readSignature = readSignature;
+    exports.validSignatureAt = validSignatureAt;
+    exports.readPascalString = readPascalString;
+    exports.readUnicodeString = readUnicodeString;
+    exports.readUnicodeStringWithLength = readUnicodeStringWithLength;
+    exports.readUnicodeStringWithLengthLE = readUnicodeStringWithLengthLE;
+    exports.readAsciiString = readAsciiString;
+    exports.skipBytes = skipBytes;
+    exports.checkSignature = checkSignature;
+    exports.readPsd = readPsd2;
+    exports.readLayerInfo = readLayerInfo;
+    exports.getCompositeImageData = getCompositeImageData;
+    exports.getCompositeCanvas = getCompositeCanvas;
+    exports.getLayerImageData = getLayerImageData;
+    exports.getLayerMaskImageData = getLayerMaskImageData;
+    exports.getLayerRealMaskImageData = getLayerRealMaskImageData;
+    exports.getLayerCanvas = getLayerCanvas;
+    exports.getLayerMaskCanvas = getLayerMaskCanvas;
+    exports.getLayerRealMaskCanvas = getLayerRealMaskCanvas;
+    exports.getFilterEffectsMaskImageData = getFilterEffectsMaskImageData;
+    exports.getFilterEffectsMaskExtraImageData = getFilterEffectsMaskExtraImageData;
+    exports.getFilterEffectsMaskCanvas = getFilterEffectsMaskCanvas;
+    exports.getFilterEffectsMaskExtraCanvas = getFilterEffectsMaskExtraCanvas;
+    exports.decodeLayerPixels = decodeLayerPixels;
+    exports.readGlobalLayerMaskInfo = readGlobalLayerMaskInfo;
+    exports.readAdditionalLayerInfo = readAdditionalLayerInfo;
+    exports.readDataZip = readDataZip;
+    exports.readDataRLE = readDataRLE;
+    exports.readSection = readSection;
+    exports.readColor = readColor;
+    exports.readPatternSafe = readPatternSafe;
+    exports.readPattern = readPattern;
+    exports.consumeMemory = consumeMemory;
     var pako_1 = require_pako();
     var helpers_1 = require_helpers();
     var additionalInfo_1 = require_additionalInfo();
+    var utf8_1 = require_utf8();
     var imageResources_1 = require_imageResources();
     exports.supportedColorModes = [
       0,
       1,
       3,
-      2
-      /* ColorMode.Indexed */
+      2,
+      4
+      /* ColorMode.CMYK */
     ];
-    var colorModes = ["bitmap", "grayscale", "indexed", "RGB", "CMYK", "multichannel", "duotone", "lab"];
+    var colorModes = ["bitmap", "grayscale", "indexed", "RGB", "CMYK", "", "", "multichannel", "duotone", "lab"];
     function setupGrayscale(data) {
-      var size = data.width * data.height * 4;
-      for (var i = 0; i < size; i += 4) {
-        data.data[i + 1] = data.data[i];
-        data.data[i + 2] = data.data[i];
+      const size = data.width * data.height * 4;
+      for (let i = 0; i < size; i += 4) {
+        const c = data.data[i];
+        data.data[i + 1] = c;
+        data.data[i + 2] = c;
       }
     }
+    function createTextDecoder(label, options) {
+      try {
+        return typeof TextDecoder !== "undefined" ? new TextDecoder(label, options) : null;
+      } catch (_a2) {
+        return null;
+      }
+    }
+    function getUtf8Decoder(reader) {
+      if (reader.utf8Decoder === void 0)
+        reader.utf8Decoder = createTextDecoder("utf-8", { ignoreBOM: true });
+      return reader.utf8Decoder;
+    }
+    function getUtf8StrictDecoder(reader) {
+      if (reader.utf8StrictDecoder === void 0)
+        reader.utf8StrictDecoder = createTextDecoder("utf-8", { ignoreBOM: true, fatal: true });
+      return reader.utf8StrictDecoder;
+    }
+    function getGbkStrictDecoder(reader) {
+      if (reader.gbkDecoder === void 0)
+        reader.gbkDecoder = createTextDecoder("gbk", { fatal: true });
+      return reader.gbkDecoder;
+    }
+    function decodeUtf8(reader, buffer) {
+      const decoder = buffer.byteLength > 1e3 ? getUtf8Decoder(reader) : null;
+      return decoder ? decoder.decode(buffer) : (0, utf8_1.decodeString)(buffer);
+    }
     function createReader(buffer, offset, length) {
-      var view = new DataView(buffer, offset, length);
+      const view = new DataView(buffer, offset, length);
       return { view, offset: 0, strict: false, debug: false, large: false, globalAlpha: false, log: console.log };
     }
-    exports.createReader = createReader;
     function warnOrThrow(reader, message) {
       if (reader.strict)
         throw new Error(message);
       if (reader.debug)
         reader.log(message);
     }
-    exports.warnOrThrow = warnOrThrow;
     function readUint8(reader) {
       reader.offset += 1;
       return reader.view.getUint8(reader.offset - 1);
     }
-    exports.readUint8 = readUint8;
     function peekUint8(reader) {
       return reader.view.getUint8(reader.offset);
     }
-    exports.peekUint8 = peekUint8;
     function readInt16(reader) {
       reader.offset += 2;
       return reader.view.getInt16(reader.offset - 2, false);
     }
-    exports.readInt16 = readInt16;
     function readUint16(reader) {
       reader.offset += 2;
       return reader.view.getUint16(reader.offset - 2, false);
     }
-    exports.readUint16 = readUint16;
     function readUint16LE(reader) {
       reader.offset += 2;
       return reader.view.getUint16(reader.offset - 2, true);
     }
-    exports.readUint16LE = readUint16LE;
     function readInt32(reader) {
       reader.offset += 4;
       return reader.view.getInt32(reader.offset - 4, false);
     }
-    exports.readInt32 = readInt32;
     function readInt32LE(reader) {
       reader.offset += 4;
       return reader.view.getInt32(reader.offset - 4, true);
     }
-    exports.readInt32LE = readInt32LE;
     function readUint32(reader) {
       reader.offset += 4;
       return reader.view.getUint32(reader.offset - 4, false);
     }
-    exports.readUint32 = readUint32;
     function readFloat32(reader) {
       reader.offset += 4;
       return reader.view.getFloat32(reader.offset - 4, false);
     }
-    exports.readFloat32 = readFloat32;
     function readFloat64(reader) {
       reader.offset += 8;
       return reader.view.getFloat64(reader.offset - 8, false);
     }
-    exports.readFloat64 = readFloat64;
     function readFixedPoint32(reader) {
       return readInt32(reader) / (1 << 16);
     }
-    exports.readFixedPoint32 = readFixedPoint32;
     function readFixedPointPath32(reader) {
       return readInt32(reader) / (1 << 24);
     }
-    exports.readFixedPointPath32 = readFixedPointPath32;
     function readBytes(reader, length) {
-      var start = reader.view.byteOffset + reader.offset;
+      if (!(length >= 0))
+        throw new Error(`Invalid length: ${length}`);
+      const start = reader.offset;
+      const viewLength = reader.view.byteLength;
       reader.offset += length;
-      if (start + length > reader.view.buffer.byteLength) {
+      if (start + length > viewLength) {
         warnOrThrow(reader, "Reading bytes exceeding buffer length");
         if (length > 100 * 1024 * 1024)
           throw new Error("Reading past end of file");
-        var result = new Uint8Array(length);
-        var len = Math.min(length, reader.view.byteLength - start);
+        consumeMemory(reader, length);
+        const result = new Uint8Array(length);
+        const len = Math.min(length, viewLength - start);
         if (len > 0)
-          result.set(new Uint8Array(reader.view.buffer, start, len));
+          result.set(new Uint8Array(reader.view.buffer, reader.view.byteOffset + start, len));
         return result;
       } else {
-        return new Uint8Array(reader.view.buffer, start, length);
+        return new Uint8Array(reader.view.buffer, reader.view.byteOffset + start, length);
       }
     }
-    exports.readBytes = readBytes;
     function readSignature(reader) {
       return readShortString(reader, 4);
     }
-    exports.readSignature = readSignature;
     function validSignatureAt(reader, offset) {
-      var sig = String.fromCharCode(reader.view.getUint8(offset)) + String.fromCharCode(reader.view.getUint8(offset + 1)) + String.fromCharCode(reader.view.getUint8(offset + 2)) + String.fromCharCode(reader.view.getUint8(offset + 3));
+      const sig = String.fromCharCode(reader.view.getUint8(offset)) + String.fromCharCode(reader.view.getUint8(offset + 1)) + String.fromCharCode(reader.view.getUint8(offset + 2)) + String.fromCharCode(reader.view.getUint8(offset + 3));
       return sig == "8BIM" || sig == "8B64";
     }
-    exports.validSignatureAt = validSignatureAt;
     function readPascalString(reader, padTo) {
-      var length = readUint8(reader);
-      var text = length ? readShortString(reader, length) : "";
+      let length = readUint8(reader);
+      const text = length ? readShortString(reader, length) : "";
       while (++length % padTo) {
         reader.offset++;
       }
       return text;
     }
-    exports.readPascalString = readPascalString;
     function readUnicodeString(reader) {
-      var length = readUint32(reader);
+      const length = readUint32(reader);
       return readUnicodeStringWithLength(reader, length);
     }
-    exports.readUnicodeString = readUnicodeString;
+    var STRING_CHUNK_SIZE = 8192;
+    var SHORT_STRING_LENGTH = 64;
+    function checkReadBounds(reader, size) {
+      if (reader.offset < 0 || reader.offset + size > reader.view.byteLength) {
+        throw new RangeError("Offset is outside the bounds of the DataView");
+      }
+    }
+    function readUtf16String(reader, length, littleEndian) {
+      if (!(length > 0))
+        return "";
+      checkReadBounds(reader, length * 2);
+      const view = reader.view;
+      let offset = reader.offset;
+      let text = "";
+      if (length <= SHORT_STRING_LENGTH) {
+        for (let i = 0; i < length; i++, offset += 2) {
+          text += String.fromCharCode(view.getUint16(offset, littleEndian));
+        }
+        reader.offset = offset;
+        if (text.charCodeAt(text.length - 1) === 0)
+          text = text.substring(0, text.length - 1);
+        return text;
+      }
+      const codes = new Uint16Array(Math.min(length, STRING_CHUNK_SIZE));
+      for (let i = 0; i < length; i += STRING_CHUNK_SIZE) {
+        const count = Math.min(STRING_CHUNK_SIZE, length - i);
+        for (let j = 0; j < count; j++, offset += 2) {
+          codes[j] = view.getUint16(offset, littleEndian);
+        }
+        text += String.fromCharCode.apply(null, count === codes.length ? codes : codes.subarray(0, count));
+      }
+      reader.offset = offset;
+      if (text.charCodeAt(text.length - 1) === 0)
+        text = text.substring(0, text.length - 1);
+      return text;
+    }
+    function bytesToString(bytes) {
+      let text = "";
+      for (let i = 0; i < bytes.length; i += STRING_CHUNK_SIZE) {
+        text += String.fromCharCode.apply(null, bytes.subarray(i, i + STRING_CHUNK_SIZE));
+      }
+      return text;
+    }
     function readUnicodeStringWithLength(reader, length) {
-      var text = "";
-      while (length--) {
-        var value = readUint16(reader);
-        if (value || length > 0) {
-          text += String.fromCharCode(value);
-        }
-      }
-      return text;
+      return readUtf16String(reader, length, false);
     }
-    exports.readUnicodeStringWithLength = readUnicodeStringWithLength;
     function readUnicodeStringWithLengthLE(reader, length) {
-      var text = "";
-      while (length--) {
-        var value = readUint16LE(reader);
-        if (value || length > 0) {
-          text += String.fromCharCode(value);
-        }
-      }
-      return text;
+      return readUtf16String(reader, length, true);
     }
-    exports.readUnicodeStringWithLengthLE = readUnicodeStringWithLengthLE;
     function readAsciiString(reader, length) {
-      var text = "";
-      while (length--) {
-        text += String.fromCharCode(readUint8(reader));
+      if (!(length > 0))
+        return "";
+      checkReadBounds(reader, length);
+      if (length <= SHORT_STRING_LENGTH) {
+        const view = reader.view;
+        let text2 = "";
+        for (let i = 0, offset = reader.offset; i < length; i++, offset++) {
+          text2 += String.fromCharCode(view.getUint8(offset));
+        }
+        reader.offset += length;
+        return text2;
       }
+      const text = bytesToString(new Uint8Array(reader.view.buffer, reader.view.byteOffset + reader.offset, length));
+      reader.offset += length;
       return text;
     }
-    exports.readAsciiString = readAsciiString;
     function skipBytes(reader, count) {
       reader.offset += count;
     }
-    exports.skipBytes = skipBytes;
     function checkSignature(reader, a, b) {
-      var offset = reader.offset;
-      var signature = readSignature(reader);
+      const offset = reader.offset;
+      const signature = readSignature(reader);
       if (signature !== a && signature !== b) {
-        throw new Error("Invalid signature: '".concat(signature, "' at 0x").concat(offset.toString(16)));
+        throw new Error(`Invalid signature: '${signature}' at 0x${offset.toString(16)}`);
       }
     }
-    exports.checkSignature = checkSignature;
     function readShortString(reader, length) {
-      var buffer = readBytes(reader, length);
-      var result = "";
-      for (var i = 0; i < buffer.length; i++) {
-        result += String.fromCharCode(buffer[i]);
+      const bytes = readBytes(reader, length);
+      if (length > SHORT_STRING_LENGTH)
+        return bytesToString(bytes);
+      let text = "";
+      for (let i = 0; i < bytes.length; i++) {
+        text += String.fromCharCode(bytes[i]);
       }
-      return result;
+      return text;
     }
     function isValidSignature(sig) {
       return sig === "8BIM" || sig === "MeSa" || sig === "AgHg" || sig === "PHUT" || sig === "DCSR";
     }
-    function readPsd2(reader, readOptions) {
+    function readPsd2(reader, readOptions = {}) {
       var _a2;
-      if (readOptions === void 0) {
-        readOptions = {};
-      }
       checkSignature(reader, "8BPS");
-      var version = readUint16(reader);
+      const version = readUint16(reader);
       if (version !== 1 && version !== 2)
-        throw new Error("Invalid PSD file version: ".concat(version));
+        throw new Error(`Invalid PSD file version: ${version}`);
       skipBytes(reader, 6);
-      var channels = readUint16(reader);
-      var height = readUint32(reader);
-      var width = readUint32(reader);
-      var bitsPerChannel = readUint16(reader);
-      var colorMode = readUint16(reader);
-      var maxSize = version === 1 ? 3e4 : 3e5;
+      const channels = readUint16(reader);
+      const height = readUint32(reader);
+      const width = readUint32(reader);
+      const bitsPerChannel = readUint16(reader);
+      const colorMode = readUint16(reader);
+      const maxSize = version === 1 ? 3e4 : 3e5;
       if (width > maxSize || height > maxSize)
-        throw new Error("Invalid size: ".concat(width, "x").concat(height));
-      if (channels > 16)
-        throw new Error("Invalid channel count: ".concat(channels));
+        throw new Error(`Invalid size: ${width}x${height}`);
+      if (channels < 1 || channels > 57)
+        throw new Error(`Invalid channel count: ${channels}`);
       if (![1, 8, 16, 32].includes(bitsPerChannel))
-        throw new Error("Invalid bitsPerChannel: ".concat(bitsPerChannel));
+        throw new Error(`Invalid bitsPerChannel: ${bitsPerChannel}`);
       if (exports.supportedColorModes.indexOf(colorMode) === -1)
-        throw new Error("Color mode not supported: ".concat((_a2 = colorModes[colorMode]) !== null && _a2 !== void 0 ? _a2 : colorMode));
-      var psd = { width, height, channels, bitsPerChannel, colorMode };
+        throw new Error(`Color mode not supported: ${(_a2 = colorModes[colorMode]) !== null && _a2 !== void 0 ? _a2 : colorMode}`);
+      const psd = { width, height, channels, bitsPerChannel, colorMode };
       Object.assign(reader, readOptions);
       reader.large = version === 2;
       reader.globalAlpha = false;
-      var fixOffsets = [0, 1, -1, 2, -2, 3, -3, 4, -4];
-      readSection(reader, 1, function(left) {
+      reader.layersInGlobalInfo = false;
+      const whitelist = reader.imageResourcesWhitelist;
+      reader.imageResourcesWhitelistSet = whitelist ? whitelist instanceof Set ? whitelist : new Set(whitelist) : void 0;
+      if (!("totalMemoryLimit" in reader)) {
+        reader.totalMemoryLimit = 2 * 1024 * 1024 * 1024;
+      }
+      readSection(reader, 1, (left) => {
         if (!left())
           return;
         if (colorMode === 2) {
           if (left() != 768)
             throw new Error("Invalid color palette size");
           psd.palette = [];
-          for (var i = 0; i < 256; i++)
+          for (let i = 0; i < 256; i++)
             psd.palette.push({ r: readUint8(reader), g: 0, b: 0 });
-          for (var i = 0; i < 256; i++)
+          for (let i = 0; i < 256; i++)
             psd.palette[i].g = readUint8(reader);
-          for (var i = 0; i < 256; i++)
+          for (let i = 0; i < 256; i++)
             psd.palette[i].b = readUint8(reader);
         } else {
         }
         skipBytes(reader, left());
       });
-      readSection(reader, 1, function(left) {
-        var _loop_1 = function() {
-          var sigOffset = reader.offset;
-          var sig = "";
-          for (var _i = 0, fixOffsets_1 = fixOffsets; _i < fixOffsets_1.length; _i++) {
-            var offset = fixOffsets_1[_i];
-            try {
-              reader.offset = sigOffset + offset;
-              sig = readSignature(reader);
-            } catch (_a3) {
-            }
-            if (isValidSignature(sig))
-              break;
-          }
-          if (!isValidSignature(sig)) {
-            throw new Error("Invalid signature: '".concat(sig, "' at 0x").concat(sigOffset.toString(16)));
-          }
-          var id = readUint16(reader);
-          readPascalString(reader, 2);
-          readSection(reader, 2, function(left2) {
-            var handler = imageResources_1.resourceHandlersMap[id];
-            var skip = id === 1036 && !!reader.skipThumbnail;
-            if (!psd.imageResources) {
-              psd.imageResources = {};
-            }
-            if (handler && !skip) {
-              try {
-                handler.read(reader, psd.imageResources, left2);
-              } catch (e) {
-                if (reader.throwForMissingFeatures)
-                  throw e;
+      const imageResources = {};
+      let unreadResourceBytes = 0;
+      readSection(reader, 1, (left) => {
+        while (left() >= 12) {
+          const signature = realignWithSignature(reader, isValidSignature);
+          const id = readUint16(reader);
+          const nameLength = readUint8(reader);
+          const name = readBytes(reader, nameLength);
+          skipBytes(reader, (nameLength + 1) % 2);
+          readSection(reader, 2, (left2) => {
+            const handler = imageResources_1.resourceHandlersMap[id];
+            if (handler) {
+              const skip = id === 1036 && !!reader.skipThumbnail || !(0, imageResources_1.shouldReadResource)(handler, reader.imageResourcesWhitelistSet);
+              if (skip) {
                 skipBytes(reader, left2());
+              } else {
+                try {
+                  handler.read(reader, imageResources, left2, { signature, id, name, width, height });
+                } catch (e) {
+                  if (reader.throwForMissingFeatures)
+                    throw e;
+                  skipBytes(reader, left2());
+                }
               }
             } else {
+              reader.logMissingFeatures && reader.log(`Unhandled image resource: ${id} (${left2()})`);
               skipBytes(reader, left2());
             }
           });
-        };
-        while (left() > 0) {
-          _loop_1();
         }
+        unreadResourceBytes = left();
+        skipBytes(reader, left());
       });
-      readSection(reader, 1, function(left) {
-        readSection(reader, 2, function(left2) {
-          readLayerInfo(reader, psd);
+      if (unreadResourceBytes && !sectionFits(reader, reader.offset) && sectionFits(reader, reader.offset - unreadResourceBytes)) {
+        reader.offset -= unreadResourceBytes;
+      }
+      const { layersGroup, layerGroupsEnabledId, savedPathsOrigination } = imageResources, rest = __rest(imageResources, ["layersGroup", "layerGroupsEnabledId", "savedPathsOrigination"]);
+      if (Object.keys(rest).length) {
+        psd.imageResources = rest;
+      }
+      readSection(reader, 1, (left) => {
+        readSection(reader, 2, (left2) => {
+          readLayerInfo(reader, psd, imageResources);
           skipBytes(reader, left2());
         }, void 0, reader.large);
         if (left() > 0) {
-          var globalLayerMaskInfo = readGlobalLayerMaskInfo(reader);
+          const globalLayerMaskInfo = readGlobalLayerMaskInfo(reader);
           if (globalLayerMaskInfo)
             psd.globalLayerMaskInfo = globalLayerMaskInfo;
         } else {
@@ -8828,124 +11025,176 @@ var require_psdReader = __commonJS({
             skipBytes(reader, 1);
           }
           if (left() >= 12) {
-            readAdditionalLayerInfo(reader, psd, psd);
+            readAdditionalLayerInfo(reader, psd, psd, imageResources);
           } else {
             skipBytes(reader, left());
           }
         }
       }, void 0, reader.large);
-      var hasChildren = psd.children && psd.children.length;
-      var skipComposite = reader.skipCompositeImageData && (reader.skipLayerImageData || hasChildren);
+      const hasChildren = psd.children && psd.children.length;
+      const skipComposite = reader.skipCompositeImageData && (reader.skipLayerImageData || hasChildren);
       if (!skipComposite) {
-        readImageData(reader, psd);
+        if (reader.useRawData) {
+          const rawOffset = Math.min(reader.offset, reader.view.byteLength);
+          const rawCompositeData = new Uint8Array(reader.view.buffer, reader.view.byteOffset + rawOffset, reader.view.byteLength - rawOffset);
+          psd.rawCompositeData = rawCompositeData;
+          psd.rawCompositeDataInfo = { large: reader.large, globalAlpha: reader.globalAlpha };
+          if (reader.layersInGlobalInfo)
+            psd.rawCompositeDataInfo.layersInGlobalInfo = true;
+        } else {
+          const imageData = readImageData(reader, psd);
+          if (reader.useImageData) {
+            psd.imageData = imageData;
+          } else {
+            psd.canvas = (0, helpers_1.imageDataToCanvas)(imageData);
+          }
+        }
       }
       return psd;
     }
-    exports.readPsd = readPsd2;
-    function readLayerInfo(reader, psd) {
+    function readLayerInfo(reader, psd, imageResources) {
       var _a2, _b2;
-      var layerCount = readInt16(reader);
+      const { layersGroup = [], layerGroupsEnabledId = [] } = imageResources;
+      let layerCount = readInt16(reader);
       if (layerCount < 0) {
         reader.globalAlpha = true;
         layerCount = -layerCount;
       }
-      var layers = [];
-      var layerChannels = [];
-      for (var i = 0; i < layerCount; i++) {
-        var _c = readLayerRecord(reader, psd), layer = _c.layer, channels = _c.channels;
+      const layers = [];
+      const layerChannels = [];
+      for (let i = 0; i < layerCount; i++) {
+        const { layer, channels } = readLayerRecord(reader, psd, imageResources);
+        if (layersGroup[i] !== void 0)
+          layer.linkGroup = layersGroup[i];
+        if (layerGroupsEnabledId[i] !== void 0)
+          layer.linkGroupEnabled = !!layerGroupsEnabledId[i];
         layers.push(layer);
         layerChannels.push(channels);
       }
-      if (!reader.skipLayerImageData) {
-        for (var i = 0; i < layerCount; i++) {
-          readLayerChannelImageData(reader, psd, layers[i], layerChannels[i]);
-        }
+      for (let i = 0; i < layerCount; i++) {
+        readLayerChannelImageData(reader, psd, layers[i], layerChannels[i]);
       }
       if (!psd.children)
         psd.children = [];
-      var stack = [psd];
-      for (var i = layers.length - 1; i >= 0; i--) {
-        var l = layers[i];
-        var type = l.sectionDivider ? l.sectionDivider.type : 0;
+      const stack = [psd];
+      for (let i = layers.length - 1; i >= 0; i--) {
+        const l = layers[i];
+        const type = l.sectionDivider ? l.sectionDivider.type : 0;
         if (type === 1 || type === 2) {
           l.opened = type === 1;
           l.children = [];
+          delete l.canvas;
+          delete l.imageData;
           if ((_a2 = l.sectionDivider) === null || _a2 === void 0 ? void 0 : _a2.key) {
             l.blendMode = (_b2 = helpers_1.toBlendMode[l.sectionDivider.key]) !== null && _b2 !== void 0 ? _b2 : l.blendMode;
           }
           stack[stack.length - 1].children.unshift(l);
           stack.push(l);
         } else if (type === 3) {
-          stack.pop();
+          if (stack.length > 1)
+            stack.pop();
         } else {
           stack[stack.length - 1].children.unshift(l);
         }
       }
     }
-    exports.readLayerInfo = readLayerInfo;
-    function readLayerRecord(reader, psd) {
-      var layer = {};
+    function readLayerRecord(reader, psd, imageResources) {
+      const layer = {};
       layer.top = readInt32(reader);
       layer.left = readInt32(reader);
       layer.bottom = readInt32(reader);
       layer.right = readInt32(reader);
-      var channelCount = readUint16(reader);
-      var channels = [];
-      for (var i = 0; i < channelCount; i++) {
-        var id = readInt16(reader);
-        var length_1 = readUint32(reader);
+      if (!isValidBoxSize(layer, reader))
+        throw new Error("Invalid layer size");
+      const channelCount = readUint16(reader);
+      const channels = [];
+      for (let i = 0; i < channelCount; i++) {
+        let id = readInt16(reader);
+        let length = readUint32(reader);
         if (reader.large) {
-          if (length_1 !== 0)
+          if (length !== 0)
             throw new Error("Sizes larger than 4GB are not supported");
-          length_1 = readUint32(reader);
+          length = readUint32(reader);
         }
-        channels.push({ id, length: length_1 });
+        channels.push({ id, length });
       }
       checkSignature(reader, "8BIM");
-      var blendMode = readSignature(reader);
-      if (!helpers_1.toBlendMode[blendMode])
-        throw new Error("Invalid blend mode: '".concat(blendMode, "'"));
-      layer.blendMode = helpers_1.toBlendMode[blendMode];
+      const blendMode = readSignature(reader);
+      if (!helpers_1.toBlendMode[blendMode]) {
+        if (reader.throwForMissingFeatures)
+          throw new Error(`Invalid blend mode: '${blendMode}'`);
+        reader.logMissingFeatures && reader.log(`Unknown blend mode: '${blendMode}', using normal blend mode`);
+      }
+      layer.blendMode = helpers_1.toBlendMode[blendMode] || "normal";
       layer.opacity = readUint8(reader) / 255;
       layer.clipping = readUint8(reader) === 1;
-      var flags = readUint8(reader);
+      const flags = readUint8(reader);
       layer.transparencyProtected = (flags & 1) !== 0;
       layer.hidden = (flags & 2) !== 0;
       if (flags & 32)
         layer.effectsOpen = true;
       skipBytes(reader, 1);
-      readSection(reader, 1, function(left) {
-        var mask = readLayerMaskData(reader);
-        if (mask)
-          layer.mask = mask;
-        var blendingRanges = readLayerBlendingRanges(reader);
+      readSection(reader, 1, (left) => {
+        readLayerMaskData(reader, layer);
+        const blendingRanges = readLayerBlendingRanges(reader);
         if (blendingRanges)
           layer.blendingRanges = blendingRanges;
         layer.name = readPascalString(reader, 1);
         while (left() > 4 && !validSignatureAt(reader, reader.offset))
           reader.offset++;
         while (left() >= 12)
-          readAdditionalLayerInfo(reader, layer, psd);
+          readAdditionalLayerInfo(reader, layer, psd, imageResources);
         skipBytes(reader, left());
       });
       return { layer, channels };
     }
-    function readLayerMaskData(reader) {
-      return readSection(reader, 1, function(left) {
+    function sectionFits(reader, offset) {
+      const lengthSize = reader.large ? 8 : 4;
+      if (offset < 0 || offset + lengthSize > reader.view.byteLength)
+        return false;
+      const length = reader.large ? reader.view.getUint32(offset) * 4294967296 + reader.view.getUint32(offset + 4) : reader.view.getUint32(offset);
+      return offset + lengthSize + length <= reader.view.byteLength;
+    }
+    function isValidBoxSize(box, reader) {
+      const width = (box.right || 0) - (box.left || 0);
+      const height = (box.bottom || 0) - (box.top || 0);
+      const maxSize = reader.large ? 3e5 : 3e4;
+      return width <= maxSize && height <= maxSize;
+    }
+    function readLayerMaskData(reader, layer) {
+      return readSection(reader, 1, (left) => {
         if (!left())
           return void 0;
-        var mask = {};
+        const mask = {};
+        layer.mask = mask;
         mask.top = readInt32(reader);
         mask.left = readInt32(reader);
         mask.bottom = readInt32(reader);
         mask.right = readInt32(reader);
+        if (!isValidBoxSize(mask, reader))
+          throw new Error("Invalid mask size");
         mask.defaultColor = readUint8(reader);
-        var flags = readUint8(reader);
+        const flags = readUint8(reader);
         mask.positionRelativeToLayer = (flags & 1) !== 0;
         mask.disabled = (flags & 2) !== 0;
         mask.fromVectorData = (flags & 8) !== 0;
+        if (hasRealMaskData(reader, flags, left())) {
+          const realMask = {};
+          layer.realMask = realMask;
+          const realFlags = readUint8(reader);
+          realMask.positionRelativeToLayer = (realFlags & 1) !== 0;
+          realMask.disabled = (realFlags & 2) !== 0;
+          realMask.fromVectorData = (realFlags & 8) !== 0;
+          realMask.defaultColor = readUint8(reader);
+          realMask.top = readInt32(reader);
+          realMask.left = readInt32(reader);
+          realMask.bottom = readInt32(reader);
+          realMask.right = readInt32(reader);
+          if (!isValidBoxSize(realMask, reader))
+            throw new Error("Invalid realMask size");
+        }
         if (flags & 16) {
-          var params = readUint8(reader);
+          const params = readUint8(reader);
           if (params & 1)
             mask.userMaskDensity = readUint8(reader) / 255;
           if (params & 2)
@@ -8955,191 +11204,404 @@ var require_psdReader = __commonJS({
           if (params & 8)
             mask.vectorMaskFeather = readFloat64(reader);
         }
-        if (left() > 2) {
-          if (reader.logMissingFeatures) {
-            reader.log("Unhandled extra real user mask params");
-          }
-        }
         skipBytes(reader, left());
-        return mask;
       });
+    }
+    function maskParamsSize(params) {
+      return 1 + (params & 1 ? 1 : 0) + (params & 2 ? 8 : 0) + (params & 4 ? 1 : 0) + (params & 8 ? 8 : 0);
+    }
+    function isMaskParamsLayout(view, offset, left) {
+      if (left < 1)
+        return false;
+      const params = view.getUint8(offset);
+      if (params === 0 || params & ~15)
+        return false;
+      const size = maskParamsSize(params);
+      if (left < size || left - size > 3)
+        return false;
+      for (let i = size; i < left; i++) {
+        if (view.getUint8(offset + i) !== 0)
+          return false;
+      }
+      return true;
+    }
+    function hasRealMaskData(reader, flags, left) {
+      if (left < 18)
+        return false;
+      if (!(flags & 16))
+        return true;
+      const { view, offset } = reader;
+      if (isMaskParamsLayout(view, offset, left))
+        return false;
+      if (isMaskParamsLayout(view, offset + 18, left - 18))
+        return true;
+      return left === 18 || left - 18 >= maskParamsSize(view.getUint8(offset + 18));
     }
     function readBlendingRange(reader) {
       return [readUint8(reader), readUint8(reader), readUint8(reader), readUint8(reader)];
     }
     function readLayerBlendingRanges(reader) {
-      return readSection(reader, 1, function(left) {
-        var compositeGrayBlendSource = readBlendingRange(reader);
-        var compositeGraphBlendDestinationRange = readBlendingRange(reader);
-        var ranges = [];
+      return readSection(reader, 1, (left) => {
+        const compositeGrayBlendSource = readBlendingRange(reader);
+        const compositeGraphBlendDestinationRange = readBlendingRange(reader);
+        const ranges = [];
         while (left() > 0) {
-          var sourceRange = readBlendingRange(reader);
-          var destRange = readBlendingRange(reader);
+          const sourceRange = readBlendingRange(reader);
+          const destRange = readBlendingRange(reader);
           ranges.push({ sourceRange, destRange });
         }
         return { compositeGrayBlendSource, compositeGraphBlendDestinationRange, ranges };
       });
     }
     function readLayerChannelImageData(reader, psd, layer, channels) {
-      var _a2, _b2, _c, _d;
-      var layerWidth = (layer.right || 0) - (layer.left || 0);
-      var layerHeight = (layer.bottom || 0) - (layer.top || 0);
-      var cmyk = psd.colorMode === 4;
-      var imageData;
-      if (layerWidth && layerHeight) {
-        if (cmyk) {
-          if (psd.bitsPerChannel !== 8)
-            throw new Error("bitsPerChannel Not supproted");
-          imageData = { width: layerWidth, height: layerHeight, data: new Uint8ClampedArray(layerWidth * layerHeight * 5) };
-          for (var p = 4; p < imageData.data.byteLength; p += 5)
-            imageData.data[p] = 255;
-        } else {
-          imageData = createImageDataBitDepth(layerWidth, layerHeight, (_a2 = psd.bitsPerChannel) !== null && _a2 !== void 0 ? _a2 : 8);
-          (0, helpers_1.resetImageData)(imageData);
+      if (reader.skipLayerImageData)
+        return;
+      const { colorMode = 3, bitsPerChannel = 8 } = psd;
+      layer.rawData = { colorMode, bitsPerChannel, channels: [], large: reader.large };
+      for (const channel of channels) {
+        const start = reader.offset;
+        let compression = 0;
+        let data = void 0;
+        if (channel.length >= 2) {
+          compression = readUint16(reader);
+          if (compression > 3) {
+            reader.offset -= 1;
+            compression = readUint16(reader);
+          }
+          if (compression > 3) {
+            reader.offset -= 4;
+            compression = readUint16(reader);
+          }
+          if (compression > 3)
+            throw new Error(`Invalid compression: ${compression}`);
+          if (channel.length > 2) {
+            data = readBytes(reader, channel.length - 2);
+          }
+        }
+        reader.offset = start + channel.length;
+        layer.rawData.channels.push({ id: channel.id, compression, data });
+      }
+      if (!reader.useRawData) {
+        try {
+          decodeLayerImageData(layer, reader);
+        } catch (e) {
+          if (reader.throwForMissingFeatures || e.message === "Exceeded memory limit")
+            throw e;
+          reader.logMissingFeatures && reader.log(`Failed to decode layer image data: ${e.message}`);
+          delete layer.rawData;
         }
       }
-      if (helpers_1.RAW_IMAGE_DATA) {
-        layer.imageDataRaw = [];
-        layer.imageDataRawCompression = [];
+    }
+    function resetAlpha({ data }, cmyk) {
+      const alpha = data instanceof Float32Array ? 1 : data instanceof Uint16Array ? 65535 : 255;
+      const offset = (cmyk ? 4 : 3) | 0;
+      const length = data.length | 0;
+      const step = (cmyk ? 5 : 4) | 0;
+      for (let p = offset; p < length; p = p + step | 0) {
+        data[p] = alpha;
       }
-      for (var _i = 0, channels_1 = channels; _i < channels_1.length; _i++) {
-        var channel = channels_1[_i];
-        if (channel.length === 0)
+    }
+    function getCompositeImageData(psd) {
+      const data = psd.rawCompositeData;
+      if (!data)
+        return void 0;
+      const reader = createReader(data.buffer, data.byteOffset, data.byteLength);
+      const info = psd.rawCompositeDataInfo;
+      if (info) {
+        reader.large = info.large;
+        reader.globalAlpha = info.globalAlpha;
+        reader.layersInGlobalInfo = !!info.layersInGlobalInfo;
+      }
+      return readImageData(reader, psd);
+    }
+    function getCompositeCanvas(psd) {
+      return imageDataToCanvasSafe(getCompositeImageData(psd));
+    }
+    function getLayerImageData(layer) {
+      return getDataFromLayer(layer, LayerDataType.Layer, false, void 0);
+    }
+    function getLayerMaskImageData(layer) {
+      return getDataFromLayer(layer, LayerDataType.Mask, false, void 0);
+    }
+    function getLayerRealMaskImageData(layer) {
+      return getDataFromLayer(layer, LayerDataType.RealMask, false, void 0);
+    }
+    function getLayerCanvas(layer) {
+      return imageDataToCanvasSafe(getLayerImageData(layer));
+    }
+    function getLayerMaskCanvas(layer) {
+      return imageDataToCanvasSafe(getLayerMaskImageData(layer));
+    }
+    function getLayerRealMaskCanvas(layer) {
+      return imageDataToCanvasSafe(getLayerRealMaskImageData(layer));
+    }
+    function getFilterEffectsMaskImageData(mask) {
+      const {
+        depth,
+        channels,
+        colorMode = 3
+        /* ColorMode.RGB */
+      } = mask;
+      const width = Math.max(0, mask.right - mask.left);
+      const height = Math.max(0, mask.bottom - mask.top);
+      if (!width || !height)
+        return void 0;
+      const cmyk = colorMode === 4;
+      if (cmyk && depth !== 8 && depth !== 16)
+        throw new Error("bitsPerChannel not supported");
+      const step = cmyk ? 5 : 4;
+      const transparencyIndex = channels.length - 1;
+      const colorChannels = Math.min(cmyk ? 4 : colorMode === 1 ? 1 : 3, channels.length - 2);
+      let imageData = createImageDataBitDepth(width, height, depth, step, void 0);
+      for (let i = 0; i < channels.length; i++) {
+        const channel = channels[i];
+        if (!channel)
           continue;
-        if (channel.length < 2)
-          throw new Error("Invalid channel length");
-        var start = reader.offset;
-        var compression = readUint16(reader);
-        if (compression > 3) {
-          reader.offset -= 1;
-          compression = readUint16(reader);
+        if (i < colorChannels) {
+          readFilterEffectsChannel(channel, imageData, width, height, depth, i, step);
+        } else if (i === transparencyIndex) {
+          readFilterEffectsChannel(channel, imageData, width, height, depth, step - 1, step);
         }
-        if (compression > 3) {
-          reader.offset -= 3;
-          compression = readUint16(reader);
-        }
-        if (compression > 3)
-          throw new Error("Invalid compression: ".concat(compression));
-        if (channel.id === -2) {
-          var mask = layer.mask;
-          if (!mask)
-            throw new Error("Missing layer mask data");
-          var maskWidth = (mask.right || 0) - (mask.left || 0);
-          var maskHeight = (mask.bottom || 0) - (mask.top || 0);
-          if (maskWidth && maskHeight) {
-            var maskData = createImageDataBitDepth(maskWidth, maskHeight, (_b2 = psd.bitsPerChannel) !== null && _b2 !== void 0 ? _b2 : 8);
-            (0, helpers_1.resetImageData)(maskData);
-            var start_1 = reader.offset;
-            readData(reader, channel.length, maskData, compression, maskWidth, maskHeight, (_c = psd.bitsPerChannel) !== null && _c !== void 0 ? _c : 8, 0, reader.large, 4);
-            if (helpers_1.RAW_IMAGE_DATA) {
-              layer.maskDataRawCompression = compression;
-              layer.maskDataRaw = new Uint8Array(reader.view.buffer, reader.view.byteOffset + start_1, reader.offset - start_1);
-            }
-            setupGrayscale(maskData);
-            if (reader.useImageData) {
-              mask.imageData = maskData;
-            } else {
-              mask.canvas = (0, helpers_1.imageDataToCanvas)(maskData);
-            }
-          }
-        } else if (channel.id === -3) {
-          if (reader.logMissingFeatures) {
-            reader.log("RealUserMask not supported");
-          }
-          reader.offset = start + channel.length;
+      }
+      if (colorMode === 1)
+        setupGrayscale(imageData);
+      if (!channels[transparencyIndex])
+        resetAlpha(imageData, cmyk);
+      if (cmyk) {
+        const cmykData = imageData;
+        imageData = createImageDataBitDepth(cmykData.width, cmykData.height, depth, 4, void 0);
+        cmykToRgb(cmykData, imageData, false);
+      }
+      return imageData;
+    }
+    function getFilterEffectsMaskExtraImageData(mask) {
+      const { extra, depth } = mask;
+      if (!extra)
+        return void 0;
+      const width = Math.max(0, extra.right - extra.left);
+      const height = Math.max(0, extra.bottom - extra.top);
+      if (!width || !height)
+        return void 0;
+      const maskData = createImageDataBitDepth(width, height, depth, 4, void 0);
+      readFilterEffectsChannel(extra, maskData, width, height, depth, 0, 4);
+      setupGrayscale(maskData);
+      resetAlpha(maskData, false);
+      return maskData;
+    }
+    function getFilterEffectsMaskCanvas(mask) {
+      return imageDataToCanvasSafe(getFilterEffectsMaskImageData(mask));
+    }
+    function getFilterEffectsMaskExtraCanvas(mask) {
+      return imageDataToCanvasSafe(getFilterEffectsMaskExtraImageData(mask));
+    }
+    function readFilterEffectsChannel({ compressionMode, data }, pixels, width, height, depth, offset, step) {
+      const reader = createReader(data.buffer, data.byteOffset, data.byteLength);
+      readData(reader, data.byteLength, pixels, compressionMode, width, height, depth, offset, true, step);
+    }
+    function imageDataToCanvasSafe(imageData) {
+      return imageData && (0, helpers_1.imageDataToCanvas)(imageData);
+    }
+    function setImageDataOrCanvas(obj, imageData, useImageData) {
+      if (!imageData)
+        return;
+      if (useImageData) {
+        obj.imageData = imageData;
+      } else {
+        obj.canvas = (0, helpers_1.imageDataToCanvas)(imageData);
+      }
+    }
+    function decodeLayerPixels(layer, useImageData) {
+      decodeLayerImageData(layer, { useImageData });
+    }
+    function decodeLayerImageData(layer, options) {
+      var _a2, _b2, _c;
+      let { throwForMissingFeatures, useImageData } = options;
+      const imageData = getDataFromLayer(layer, LayerDataType.Layer, throwForMissingFeatures, options.totalMemoryLimit, options);
+      setImageDataOrCanvas(layer, imageData, useImageData);
+      if (options.totalMemoryLimit !== void 0)
+        options.totalMemoryLimit -= (_a2 = imageData === null || imageData === void 0 ? void 0 : imageData.data.byteLength) !== null && _a2 !== void 0 ? _a2 : 0;
+      if (layer.mask) {
+        const maskData = getDataFromLayer(layer, LayerDataType.Mask, throwForMissingFeatures, options.totalMemoryLimit, options);
+        setImageDataOrCanvas(layer.mask, maskData, useImageData);
+        if (options.totalMemoryLimit !== void 0)
+          options.totalMemoryLimit -= (_b2 = maskData === null || maskData === void 0 ? void 0 : maskData.data.byteLength) !== null && _b2 !== void 0 ? _b2 : 0;
+      }
+      if (layer.realMask) {
+        const maskData = getDataFromLayer(layer, LayerDataType.RealMask, throwForMissingFeatures, options.totalMemoryLimit, options);
+        setImageDataOrCanvas(layer.realMask, maskData, useImageData);
+        if (options.totalMemoryLimit !== void 0)
+          options.totalMemoryLimit -= (_c = maskData === null || maskData === void 0 ? void 0 : maskData.data.byteLength) !== null && _c !== void 0 ? _c : 0;
+      }
+      delete layer.rawData;
+    }
+    var LayerDataType;
+    (function(LayerDataType2) {
+      LayerDataType2[LayerDataType2["Layer"] = 0] = "Layer";
+      LayerDataType2[LayerDataType2["Mask"] = 1] = "Mask";
+      LayerDataType2[LayerDataType2["RealMask"] = 2] = "RealMask";
+    })(LayerDataType || (LayerDataType = {}));
+    function getDataFromLayer(layer, read, throwForMissingFeatures, memoryLimit, logOptions) {
+      var _a2;
+      if (!layer.rawData)
+        return void 0;
+      const { colorMode, bitsPerChannel, channels, large } = layer.rawData;
+      const layerWidth = Math.max(0, (layer.right || 0) - (layer.left || 0));
+      const layerHeight = Math.max(0, (layer.bottom || 0) - (layer.top || 0));
+      const cmyk = colorMode === 4;
+      let imageData;
+      let maskData;
+      let initializedAlpha = false;
+      if (layerWidth && layerHeight && read === LayerDataType.Layer) {
+        if (cmyk) {
+          if (bitsPerChannel !== 8 && bitsPerChannel !== 16)
+            throw new Error("bitsPerChannel not supported");
+          imageData = createImageDataBitDepth(layerWidth, layerHeight, bitsPerChannel, 5, memoryLimit);
         } else {
-          var offset = (0, helpers_1.offsetForChannel)(channel.id, cmyk);
-          var targetData = imageData;
+          imageData = createImageDataBitDepth(layerWidth, layerHeight, bitsPerChannel, 4, memoryLimit);
+        }
+      }
+      for (const { id, compression, data } of channels) {
+        if (!data)
+          continue;
+        const dataReader = createReader(data.buffer, data.byteOffset, data.byteLength);
+        dataReader.debug = !!(logOptions === null || logOptions === void 0 ? void 0 : logOptions.debug);
+        if (logOptions === null || logOptions === void 0 ? void 0 : logOptions.log)
+          dataReader.log = logOptions.log;
+        if (memoryLimit !== void 0)
+          dataReader.totalMemoryLimit = Math.max(0, memoryLimit - ((_a2 = imageData === null || imageData === void 0 ? void 0 : imageData.data.byteLength) !== null && _a2 !== void 0 ? _a2 : 0));
+        if (id === -2 || id === -3) {
+          if (id === -2 && read !== LayerDataType.Mask)
+            continue;
+          if (id === -3 && read !== LayerDataType.RealMask)
+            continue;
+          const mask = id === -2 ? layer.mask : layer.realMask;
+          if (!mask)
+            throw new Error(`Missing layer ${id === -2 ? "mask" : "real mask"} data`);
+          const maskWidth = Math.max(0, (mask.right || 0) - (mask.left || 0));
+          const maskHeight = Math.max(0, (mask.bottom || 0) - (mask.top || 0));
+          if (maskWidth && maskHeight) {
+            maskData = createImageDataBitDepth(maskWidth, maskHeight, bitsPerChannel, 4, memoryLimit);
+            if (memoryLimit !== void 0)
+              dataReader.totalMemoryLimit = Math.max(0, dataReader.totalMemoryLimit - maskData.data.byteLength);
+            readData(dataReader, data.byteLength, maskData, compression, maskWidth, maskHeight, bitsPerChannel, 0, large, 4);
+            setupGrayscale(maskData);
+            resetAlpha(maskData, false);
+          }
+        } else {
+          if (read !== LayerDataType.Layer)
+            continue;
+          const offset = (0, helpers_1.offsetForChannel)(id, cmyk);
+          let targetData = imageData;
           if (offset < 0) {
             targetData = void 0;
-            if (reader.throwForMissingFeatures) {
-              throw new Error("Channel not supported: ".concat(channel.id));
+            if (throwForMissingFeatures) {
+              throw new Error(`Channel not supported: ${id}`);
             }
           }
-          readData(reader, channel.length, targetData, compression, layerWidth, layerHeight, (_d = psd.bitsPerChannel) !== null && _d !== void 0 ? _d : 8, offset, reader.large, cmyk ? 5 : 4);
-          if (helpers_1.RAW_IMAGE_DATA) {
-            layer.imageDataRawCompression[channel.id] = compression;
-            layer.imageDataRaw[channel.id] = new Uint8Array(reader.view.buffer, reader.view.byteOffset + start + 2, channel.length - 2);
-          }
-          reader.offset = start + channel.length;
-          if (targetData && psd.colorMode === 1) {
-            setupGrayscale(targetData);
-          }
+          readData(dataReader, data.byteLength, targetData, compression, layerWidth, layerHeight, bitsPerChannel, offset, large, cmyk ? 5 : 4);
+        }
+        if (id === -1) {
+          initializedAlpha = true;
         }
       }
       if (imageData) {
+        if (colorMode === 1)
+          setupGrayscale(imageData);
+        if (!initializedAlpha)
+          resetAlpha(imageData, cmyk);
         if (cmyk) {
-          var cmykData = imageData;
-          imageData = (0, helpers_1.createImageData)(cmykData.width, cmykData.height);
+          const cmykData = imageData;
+          const rgbMemoryLimit = memoryLimit === void 0 ? void 0 : Math.max(0, memoryLimit - cmykData.data.byteLength);
+          imageData = createImageDataBitDepth(cmykData.width, cmykData.height, bitsPerChannel, 4, rgbMemoryLimit);
           cmykToRgb(cmykData, imageData, false);
         }
-        if (reader.useImageData) {
-          layer.imageData = imageData;
-        } else {
-          layer.canvas = (0, helpers_1.imageDataToCanvas)(imageData);
-        }
       }
+      return read === LayerDataType.Layer ? imageData : maskData;
     }
-    function readData(reader, length, data, compression, width, height, bitDepth, offset, large, step) {
+    function readData(reader, length, pixels, compression, width, height, bitDepth, offset, large, step) {
+      if (!length)
+        return;
       if (compression === 0) {
-        readDataRaw(reader, data, width, height, bitDepth, step, offset);
+        if (length !== width * height * Math.floor(bitDepth / 8)) {
+          warnOrThrow(reader, `Invalid length (${length}, ${width * height * Math.floor(bitDepth / 8)})`);
+        }
+        const data = readBytes(reader, length);
+        readDataRaw(data, pixels, bitDepth, step, offset);
       } else if (compression === 1) {
-        readDataRLE(reader, data, width, height, bitDepth, step, [offset], large);
+        readDataRLE(reader, pixels, width, height, bitDepth, step, [offset], large);
       } else if (compression === 2) {
-        readDataZip(reader, length, data, width, height, bitDepth, step, offset, false);
+        const data = readBytes(reader, length);
+        readDataZip(data, pixels, width, height, bitDepth, step, offset, false, reader);
       } else if (compression === 3) {
-        readDataZip(reader, length, data, width, height, bitDepth, step, offset, true);
+        const data = readBytes(reader, length);
+        readDataZip(data, pixels, width, height, bitDepth, step, offset, true, reader);
       } else {
-        throw new Error("Invalid Compression type: ".concat(compression));
+        throw new Error(`Invalid Compression type: ${compression}`);
       }
     }
-    exports.readData = readData;
     function readGlobalLayerMaskInfo(reader) {
-      return readSection(reader, 1, function(left) {
+      return readSection(reader, 1, (left) => {
         if (!left())
           return void 0;
-        var overlayColorSpace = readUint16(reader);
-        var colorSpace1 = readUint16(reader);
-        var colorSpace2 = readUint16(reader);
-        var colorSpace3 = readUint16(reader);
-        var colorSpace4 = readUint16(reader);
-        var opacity = readUint16(reader) / 255;
-        var kind = readUint8(reader);
+        const overlayColorSpace = readUint16(reader);
+        const colorSpace1 = readUint16(reader);
+        const colorSpace2 = readUint16(reader);
+        const colorSpace3 = readUint16(reader);
+        const colorSpace4 = readUint16(reader);
+        const opacity = Math.min(readUint16(reader), 100) / 100;
+        const kind = readUint8(reader);
         skipBytes(reader, left());
         return { overlayColorSpace, colorSpace1, colorSpace2, colorSpace3, colorSpace4, opacity, kind };
       });
     }
-    exports.readGlobalLayerMaskInfo = readGlobalLayerMaskInfo;
-    function readAdditionalLayerInfo(reader, target, psd) {
-      var sig = readSignature(reader);
-      if (sig !== "8BIM" && sig !== "8B64")
-        throw new Error("Invalid signature: '".concat(sig, "' at 0x").concat((reader.offset - 4).toString(16)));
-      var key = readSignature(reader);
-      var u64 = sig === "8B64" || reader.large && helpers_1.largeAdditionalInfoKeys.indexOf(key) !== -1;
-      readSection(reader, 2, function(left) {
-        var handler = additionalInfo_1.infoHandlersMap[key];
+    var fixOffsets = [0, 1, -1, 2, -2, 3, -3, 4, -4];
+    function realignWithSignature(reader, isValid) {
+      const sigOffset = reader.offset;
+      let sig = "";
+      for (const offset of fixOffsets) {
+        try {
+          reader.offset = sigOffset + offset;
+          sig = readSignature(reader);
+        } catch (_a2) {
+        }
+        if (isValid(sig))
+          break;
+      }
+      if (!isValid(sig)) {
+        throw new Error(`Invalid signature: '${sig}' at 0x${sigOffset.toString(16)}`);
+      }
+      return sig;
+    }
+    function isValidAdditionalInfoSignature(sig) {
+      return sig === "8BIM" || sig === "8B64";
+    }
+    function readAdditionalLayerInfo(reader, target, psd, imageResources) {
+      const sig = realignWithSignature(reader, isValidAdditionalInfoSignature);
+      const key = readSignature(reader);
+      let u64 = sig === "8B64" || reader.large && helpers_1.largeAdditionalInfoKeys.indexOf(key) !== -1;
+      if (reader.large && sig === "8BIM" && helpers_1.largeAdditionalInfoKeysObserved.indexOf(key) !== -1) {
+        const next = reader.offset + 8 <= reader.view.byteLength ? reader.view.getUint32(reader.offset + 4) : 0;
+        const nextIsSignature = next === 943868237 || next === 943863348;
+        u64 = reader.view.getUint32(reader.offset) === 0 && !nextIsSignature;
+      }
+      readSection(reader, 2, (left) => {
+        const handler = additionalInfo_1.infoHandlersMap[key];
         if (handler) {
-          try {
-            handler.read(reader, target, left, psd);
-          } catch (e) {
-            if (reader.throwForMissingFeatures)
-              throw e;
-          }
+          handler.read(reader, target, left, psd, imageResources);
         } else {
-          reader.logMissingFeatures && reader.log("Unhandled additional info: ".concat(key));
+          reader.logMissingFeatures && key !== "GenI" && key !== "OCIO" && key !== "CAI " && reader.log(`Unhandled additional info: ${key}`);
           skipBytes(reader, left());
         }
         if (left()) {
-          reader.logMissingFeatures && reader.log("Unread ".concat(left(), " bytes left for additional info: ").concat(key));
+          reader.logMissingFeatures && reader.log(`Unread ${left()} bytes left for additional info: ${key}`);
           skipBytes(reader, left());
         }
       }, false, u64);
     }
-    exports.readAdditionalLayerInfo = readAdditionalLayerInfo;
-    function createImageDataBitDepth(width, height, bitDepth, channels) {
-      if (channels === void 0) {
-        channels = 4;
-      }
+    function createImageDataBitDepth(width, height, bitDepth, channels, memoryLimit) {
+      const sizeInBytes = width * height * channels * Math.max(1, bitDepth / 8);
+      if (memoryLimit !== void 0 && sizeInBytes > memoryLimit)
+        throw new Error("Exceeded memory limit");
       if (bitDepth === 1 || bitDepth === 8) {
         if (channels === 4) {
           return (0, helpers_1.createImageData)(width, height);
@@ -9151,56 +11613,42 @@ var require_psdReader = __commonJS({
       } else if (bitDepth === 32) {
         return { width, height, data: new Float32Array(width * height * channels) };
       } else {
-        throw new Error("Invalid bitDepth (".concat(bitDepth, ")"));
+        throw new Error(`Invalid bitDepth (${bitDepth})`);
       }
     }
-    exports.createImageDataBitDepth = createImageDataBitDepth;
     function readImageData(reader, psd) {
-      var _a2;
-      var compression = readUint16(reader);
-      var bitsPerChannel = (_a2 = psd.bitsPerChannel) !== null && _a2 !== void 0 ? _a2 : 8;
+      var _a2, _b2, _c;
+      const compression = readUint16(reader);
+      const bitsPerChannel = (_a2 = psd.bitsPerChannel) !== null && _a2 !== void 0 ? _a2 : 8;
+      const { width, height } = psd;
       if (exports.supportedColorModes.indexOf(psd.colorMode) === -1)
-        throw new Error("Color mode not supported: ".concat(psd.colorMode));
+        throw new Error(`Color mode not supported: ${psd.colorMode}`);
       if (compression !== 0 && compression !== 1)
-        throw new Error("Compression type not supported: ".concat(compression));
-      var imageData = createImageDataBitDepth(psd.width, psd.height, bitsPerChannel);
+        throw new Error(`Compression type not supported: ${compression}`);
+      const imageData = createImageDataBitDepth(width, height, bitsPerChannel, 4, reader.totalMemoryLimit);
+      if (reader.totalMemoryLimit !== void 0)
+        reader.totalMemoryLimit -= imageData.data.byteLength;
       (0, helpers_1.resetImageData)(imageData);
       switch (psd.colorMode) {
         case 0: {
           if (bitsPerChannel !== 1)
             throw new Error("Invalid bitsPerChannel for bitmap color mode");
-          var bytes = void 0;
+          const rowBytes = Math.ceil(width / 8);
+          let bytes;
           if (compression === 0) {
-            bytes = readBytes(reader, Math.ceil(psd.width / 8) * psd.height);
-          } else if (compression === 1) {
-            bytes = new Uint8Array(psd.width * psd.height);
-            readDataRLE(reader, { data: bytes, width: psd.width, height: psd.height }, psd.width, psd.height, 8, 1, [0], reader.large);
+            bytes = readBytes(reader, rowBytes * height);
           } else {
-            throw new Error("Bitmap compression not supported: ".concat(compression));
+            bytes = new Uint8Array(rowBytes * height);
+            readDataRLE(reader, { data: bytes, width: rowBytes, height }, rowBytes, height, 8, 1, [0], reader.large);
           }
-          (0, helpers_1.decodeBitmap)(bytes, imageData.data, psd.width, psd.height);
+          (0, helpers_1.decodeBitmap)(bytes, imageData.data, width, height);
           break;
         }
         case 3:
         case 1: {
-          var channels = psd.colorMode === 1 ? [0] : [0, 1, 2];
-          if (psd.channels && psd.channels > 3) {
-            for (var i = 3; i < psd.channels; i++) {
-              channels.push(i);
-            }
-          } else if (reader.globalAlpha) {
-            channels.push(3);
-          }
-          if (compression === 0) {
-            for (var i = 0; i < channels.length; i++) {
-              readDataRaw(reader, imageData, psd.width, psd.height, bitsPerChannel, 4, channels[i]);
-            }
-          } else if (compression === 1) {
-            var start = reader.offset;
-            readDataRLE(reader, imageData, psd.width, psd.height, bitsPerChannel, 4, channels, reader.large);
-            if (helpers_1.RAW_IMAGE_DATA)
-              psd.imageDataRaw = new Uint8Array(reader.view.buffer, reader.view.byteOffset + start, reader.offset - start);
-          }
+          const colorChannels = psd.colorMode === 1 ? 1 : 3;
+          const offsets = compositeChannelOffsets(reader, psd, colorChannels, 3);
+          readCompositeChannels(reader, compression, imageData, bitsPerChannel, 4, offsets);
           if (psd.colorMode === 1) {
             setupGrayscale(imageData);
           }
@@ -9208,263 +11656,438 @@ var require_psdReader = __commonJS({
         }
         case 2: {
           if (bitsPerChannel !== 8)
-            throw new Error("bitsPerChannel Not supproted");
-          if (psd.channels !== 1)
-            throw new Error("Invalid channel count");
+            throw new Error("bitsPerChannel not supported");
           if (!psd.palette)
             throw new Error("Missing color palette");
-          if (compression === 0) {
-            throw new Error("Not implemented");
-          } else if (compression === 1) {
-            var indexedImageData = {
-              width: imageData.width,
-              height: imageData.height,
-              data: new Uint8Array(imageData.width * imageData.height)
-            };
-            readDataRLE(reader, indexedImageData, psd.width, psd.height, bitsPerChannel, 1, [0], reader.large);
-            indexedToRgb(indexedImageData, imageData, psd.palette);
-          } else {
-            throw new Error("Not implemented");
-          }
+          const offsets = compositeChannelOffsets(reader, psd, 1, -1);
+          const indexedImageData = { width, height, data: new Uint8Array(width * height) };
+          readCompositeChannels(reader, compression, indexedImageData, 8, 1, offsets);
+          indexedToRgb(indexedImageData, imageData, psd.palette, (_c = (_b2 = psd.imageResources) === null || _b2 === void 0 ? void 0 : _b2.transparencyIndex) !== null && _c !== void 0 ? _c : -1);
           break;
         }
         case 4: {
-          if (bitsPerChannel !== 8)
-            throw new Error("bitsPerChannel Not supproted");
-          if (psd.channels !== 4)
-            throw new Error("Invalid channel count");
-          var channels = [0, 1, 2, 3];
-          if (reader.globalAlpha)
-            channels.push(4);
-          if (compression === 0) {
-            throw new Error("Not implemented");
-          } else if (compression === 1) {
-            var cmykImageData = {
-              width: imageData.width,
-              height: imageData.height,
-              data: new Uint8Array(imageData.width * imageData.height * 5)
-            };
-            var start = reader.offset;
-            readDataRLE(reader, cmykImageData, psd.width, psd.height, bitsPerChannel, 5, channels, reader.large);
-            cmykToRgb(cmykImageData, imageData, true);
-            if (helpers_1.RAW_IMAGE_DATA)
-              psd.imageDataRaw = new Uint8Array(reader.view.buffer, reader.view.byteOffset + start, reader.offset - start);
-          } else {
-            throw new Error("Not implemented");
-          }
+          if (bitsPerChannel !== 8 && bitsPerChannel !== 16)
+            throw new Error("bitsPerChannel not supported");
+          const offsets = compositeChannelOffsets(reader, psd, 4, 4);
+          const cmykImageData = createImageDataBitDepth(width, height, bitsPerChannel, 5, reader.totalMemoryLimit);
+          resetAlpha(cmykImageData, true);
+          readCompositeChannels(reader, compression, cmykImageData, bitsPerChannel, 5, offsets);
+          cmykToRgb(cmykImageData, imageData, !!reader.globalAlpha);
           break;
         }
         default:
-          throw new Error("Color mode not supported: ".concat(psd.colorMode));
+          throw new Error(`Color mode not supported: ${psd.colorMode}`);
       }
-      if (reader.globalAlpha) {
-        if (psd.bitsPerChannel !== 8)
-          throw new Error("bitsPerChannel Not supproted");
-        var p = imageData.data;
-        var size = imageData.width * imageData.height * 4;
-        for (var i = 0; i < size; i += 4) {
-          var pa = p[i + 3];
+      if (reader.globalAlpha && psd.colorMode !== 4) {
+        removeWhiteMatte(imageData);
+      }
+      return imageData;
+    }
+    function compositeChannelOffsets(reader, psd, colorChannels, alphaOffset) {
+      var _a2, _b2, _c;
+      const channelCount = (_a2 = psd.channels) !== null && _a2 !== void 0 ? _a2 : colorChannels + (reader.globalAlpha ? 1 : 0);
+      if (channelCount < colorChannels)
+        throw new Error(`Invalid channel count: ${channelCount}`);
+      const alphaNames = (_c = (_b2 = psd.imageResources) === null || _b2 === void 0 ? void 0 : _b2.alphaChannelNames) !== null && _c !== void 0 ? _c : [];
+      const namedChannels = alphaNames.length;
+      const namedTransparency = !!reader.layersInGlobalInfo && alphaNames[0] === "Transparency" && namedChannels === channelCount - colorChannels;
+      const hasTransparency = reader.globalAlpha || namedTransparency || channelCount - colorChannels > namedChannels;
+      const offsets = [];
+      for (let i = 0; i < channelCount; i++) {
+        if (i < colorChannels) {
+          offsets.push(i);
+        } else if (i === colorChannels && hasTransparency && alphaOffset >= 0) {
+          offsets.push(alphaOffset);
+        } else {
+          offsets.push(-1);
+        }
+      }
+      return offsets;
+    }
+    function readCompositeChannels(reader, compression, pixelData, bitsPerChannel, step, offsets) {
+      if (compression === 0) {
+        const channelSize = pixelData.width * pixelData.height * bytesPerValue(bitsPerChannel);
+        for (const offset of offsets) {
+          if (offset < 0) {
+            skipBytes(reader, channelSize);
+          } else {
+            readDataRaw(readBytes(reader, channelSize), pixelData, bitsPerChannel, step, offset);
+          }
+        }
+      } else if (compression === 1) {
+        readDataRLE(reader, pixelData, pixelData.width, pixelData.height, bitsPerChannel, step, offsets, reader.large);
+      } else {
+        throw new Error(`Compression not supported: ${compression}`);
+      }
+    }
+    function removeWhiteMatte({ data, width, height }) {
+      const size = width * height * 4;
+      if (data instanceof Float32Array) {
+        for (let i = 0; i < size; i += 4) {
+          const a = data[i + 3];
+          if (a > 0 && a < 1) {
+            const ra = 1 / a;
+            const invA = 1 - ra;
+            for (let j = 0; j < 3; j++) {
+              const v = data[i + j] * ra + invA;
+              data[i + j] = v < 0 ? 0 : v;
+            }
+          }
+        }
+      } else if (data instanceof Uint16Array) {
+        for (let i = 0; i < size; i += 4) {
+          const pa = data[i + 3];
+          if (pa !== 0 && pa !== 65535) {
+            const ra = 65535 / pa;
+            const invA = 65535 * (1 - ra);
+            for (let j = 0; j < 3; j++) {
+              const v = Math.round(data[i + j] * ra + invA);
+              data[i + j] = v < 0 ? 0 : v > 65535 ? 65535 : v;
+            }
+          }
+        }
+      } else {
+        for (let i = 0; i < size; i += 4) {
+          const pa = data[i + 3];
           if (pa != 0 && pa != 255) {
-            var a = pa / 255;
-            var ra = 1 / a;
-            var invA = 255 * (1 - ra);
-            p[i + 0] = p[i + 0] * ra + invA;
-            p[i + 1] = p[i + 1] * ra + invA;
-            p[i + 2] = p[i + 2] * ra + invA;
+            const a = pa / 255;
+            const ra = 1 / a;
+            const invA = 255 * (1 - ra);
+            data[i + 0] = data[i + 0] * ra + invA;
+            data[i + 1] = data[i + 1] * ra + invA;
+            data[i + 2] = data[i + 2] * ra + invA;
           }
         }
       }
-      if (reader.useImageData) {
-        psd.imageData = imageData;
-      } else {
-        psd.canvas = (0, helpers_1.imageDataToCanvas)(imageData);
+    }
+    function toRange(value, max) {
+      value = Math.round(value * (max / 255));
+      return value <= 0 ? 0 : value >= max ? max : value;
+    }
+    function cmykToRgb(cmyk, rgb, removeMatte) {
+      const size = rgb.width * rgb.height * 4;
+      const srcData = cmyk.data;
+      const dstData = rgb.data;
+      const srcMax = srcData instanceof Uint16Array ? 65535 : 255;
+      const dstMax = dstData instanceof Uint16Array ? 65535 : 255;
+      const out = [0, 0, 0];
+      for (let src = 0, dst = 0; dst < size; src += 5, dst += 4) {
+        const a = srcData[src + 4];
+        let c = 1 - srcData[src] / srcMax;
+        let m = 1 - srcData[src + 1] / srcMax;
+        let y = 1 - srcData[src + 2] / srcMax;
+        let k = 1 - srcData[src + 3] / srcMax;
+        if (removeMatte && a > 0 && a < srcMax) {
+          const ra = srcMax / a;
+          c = Math.min(1, c * ra);
+          m = Math.min(1, m * ra);
+          y = Math.min(1, y * ra);
+          k = Math.min(1, k * ra);
+        }
+        (0, helpers_1.cmykToRgbValues)(c, m, y, k, out);
+        dstData[dst] = toRange(out[0], dstMax);
+        dstData[dst + 1] = toRange(out[1], dstMax);
+        dstData[dst + 2] = toRange(out[2], dstMax);
+        dstData[dst + 3] = srcMax === dstMax ? a : Math.round(a * dstMax / srcMax);
       }
     }
-    function cmykToRgb(cmyk, rgb, reverseAlpha) {
-      var size = rgb.width * rgb.height * 4;
-      var srcData = cmyk.data;
-      var dstData = rgb.data;
-      for (var src = 0, dst = 0; dst < size; src += 5, dst += 4) {
-        var c = srcData[src];
-        var m = srcData[src + 1];
-        var y = srcData[src + 2];
-        var k = srcData[src + 3];
-        dstData[dst] = (c * k | 0) / 255 | 0;
-        dstData[dst + 1] = (m * k | 0) / 255 | 0;
-        dstData[dst + 2] = (y * k | 0) / 255 | 0;
-        dstData[dst + 3] = reverseAlpha ? 255 - srcData[src + 4] : srcData[src + 4];
-      }
-    }
-    function indexedToRgb(indexed, rgb, palette) {
-      var size = indexed.width * indexed.height;
-      var srcData = indexed.data;
-      var dstData = rgb.data;
-      for (var src = 0, dst = 0; src < size; src++, dst += 4) {
-        var c = palette[srcData[src]];
+    function indexedToRgb(indexed, rgb, palette, transparencyIndex) {
+      const size = indexed.width * indexed.height;
+      const srcData = indexed.data;
+      const dstData = rgb.data;
+      for (let src = 0, dst = 0; src < size; src++, dst += 4) {
+        const index = srcData[src];
+        const c = palette[index];
         dstData[dst + 0] = c.r;
         dstData[dst + 1] = c.g;
         dstData[dst + 2] = c.b;
-        dstData[dst + 3] = 255;
+        dstData[dst + 3] = index === transparencyIndex ? 0 : 255;
       }
     }
-    function verifyCompatible(a, b) {
-      if (a.byteLength / a.length !== b.byteLength / b.length) {
+    function bytesPerValue(bitDepth) {
+      switch (bitDepth) {
+        case 1:
+        case 8:
+          return 1;
+        case 16:
+          return 2;
+        case 32:
+          return 4;
+        default:
+          throw new Error(`Invalid bitDepth (${bitDepth})`);
+      }
+    }
+    function verifyArrayType(data, bytesPerValue2) {
+      if (data.BYTES_PER_ELEMENT !== bytesPerValue2) {
         throw new Error("Invalid array types");
       }
     }
-    function bytesToArray(bytes, bitDepth) {
-      if (bitDepth === 8) {
-        return bytes;
-      } else if (bitDepth === 16) {
-        if (bytes.byteOffset % 2) {
-          var result = new Uint16Array(bytes.byteLength / 2);
-          new Uint8Array(result.buffer, result.byteOffset, result.byteLength).set(bytes);
-          return result;
-        } else {
-          return new Uint16Array(bytes.buffer, bytes.byteOffset, bytes.byteLength / 2);
+    function readDataRaw(buffer, pixelData, bitDepth, step, offset) {
+      const bpv = bytesPerValue(bitDepth);
+      if (!pixelData || offset < 0 || offset >= step)
+        return;
+      const data = pixelData.data;
+      verifyArrayType(data, bpv);
+      const size = Math.min(pixelData.width * pixelData.height, Math.floor(buffer.byteLength / bpv)) | 0;
+      if (bpv === 1) {
+        for (let i = 0, p = offset | 0; i < size; i++, p = p + step | 0) {
+          data[p] = buffer[i];
         }
-      } else if (bitDepth === 32) {
-        if (bytes.byteOffset % 4) {
-          var result = new Float32Array(bytes.byteLength / 4);
-          new Uint8Array(result.buffer, result.byteOffset, result.byteLength).set(bytes);
-          return result;
-        } else {
-          return new Float32Array(bytes.buffer, bytes.byteOffset, bytes.byteLength / 4);
+      } else if (bpv === 2) {
+        for (let i = 0, j = 0, p = offset | 0; i < size; i++, j += 2, p = p + step | 0) {
+          data[p] = buffer[j] << 8 | buffer[j + 1];
         }
       } else {
-        throw new Error("Invalid bitDepth (".concat(bitDepth, ")"));
-      }
-    }
-    function copyChannelToPixelData(pixelData, channel, offset, step) {
-      verifyCompatible(pixelData.data, channel);
-      var size = pixelData.width * pixelData.height;
-      var data = pixelData.data;
-      for (var i = 0, p = offset | 0; i < size; i++, p = p + step | 0) {
-        data[p] = channel[i];
-      }
-    }
-    function readDataRaw(reader, pixelData, width, height, bitDepth, step, offset) {
-      var buffer = readBytes(reader, width * height * Math.floor(bitDepth / 8));
-      if (bitDepth == 32) {
-        for (var i = 0; i < buffer.byteLength; i += 4) {
-          var a = buffer[i + 0];
-          var b = buffer[i + 1];
-          var c = buffer[i + 2];
-          var d = buffer[i + 3];
-          buffer[i + 0] = d;
-          buffer[i + 1] = c;
-          buffer[i + 2] = b;
-          buffer[i + 3] = a;
-        }
-      }
-      var array = bytesToArray(buffer, bitDepth);
-      if (pixelData && offset < step) {
-        copyChannelToPixelData(pixelData, array, offset, step);
-      }
-    }
-    function decodePredicted(data, width, height, mod) {
-      for (var y = 0; y < height; y++) {
-        var offset = y * width;
-        for (var x = 1, o = offset + 1; x < width; x++, o++) {
-          data[o] = (data[o - 1] + data[o]) % mod;
+        const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+        for (let i = 0, j = 0, p = offset | 0; i < size; i++, j += 4, p = p + step | 0) {
+          data[p] = view.getFloat32(j, false);
         }
       }
     }
-    function readDataZip(reader, length, pixelData, width, height, bitDepth, step, offset, prediction) {
-      var compressed = readBytes(reader, length);
-      var decompressed = (0, pako_1.inflate)(compressed);
-      if (pixelData && offset < step) {
-        var array = bytesToArray(decompressed, bitDepth);
-        if (bitDepth === 8) {
-          if (prediction)
-            decodePredicted(decompressed, width, height, 256);
-          copyChannelToPixelData(pixelData, decompressed, offset, step);
-        } else if (bitDepth === 16) {
-          if (prediction)
-            decodePredicted(array, width, height, 65536);
-          copyChannelToPixelData(pixelData, array, offset, step);
-        } else if (bitDepth === 32) {
-          if (prediction)
-            decodePredicted(decompressed, width * 4, height, 256);
-          var di = offset;
-          var dst = new Uint32Array(pixelData.data.buffer, pixelData.data.byteOffset, pixelData.data.length);
-          for (var y = 0; y < height; y++) {
-            var a = width * 4 * y;
-            for (var x = 0; x < width; x++, a++, di += step) {
-              var b = a + width;
-              var c = b + width;
-              var d = c + width;
-              dst[di] = (decompressed[a] << 24 | decompressed[b] << 16 | decompressed[c] << 8 | decompressed[d]) >>> 0;
+    function decodePredicted(data, width, height) {
+      for (let y = 0; y < height; y++) {
+        const offset = y * width;
+        for (let x = 1, o = offset + 1; x < width; x++, o++) {
+          data[o] = data[o - 1] + data[o];
+        }
+      }
+    }
+    var zipOverflow = new Error("Decompressed data exceeds expected size");
+    function inflateLimited(compressed, expectedSize, reader, raw = false) {
+      const output = new Uint8Array(expectedSize);
+      let position = 0;
+      let overflow = false;
+      const inflator = new pako_1.Inflate({ chunkSize: Math.max(1024, Math.min(expectedSize, 65536)), raw });
+      inflator.onData = (chunk) => {
+        const data = chunk;
+        const count = Math.min(data.length, expectedSize - position);
+        if (count > 0)
+          output.set(count === data.length ? data : data.subarray(0, count), position);
+        position += count;
+        if (count < data.length) {
+          overflow = true;
+          throw zipOverflow;
+        }
+      };
+      inflator.onEnd = (status) => {
+        var _a2;
+        inflator.err = status;
+        inflator.msg = ((_a2 = inflator.strm) === null || _a2 === void 0 ? void 0 : _a2.msg) || "";
+      };
+      try {
+        inflator.push(compressed, true);
+      } catch (e) {
+        if (e !== zipOverflow)
+          throw e;
+      }
+      if (overflow) {
+        if (reader)
+          warnOrThrow(reader, zipOverflow.message);
+      } else if (inflator.err && inflator.msg === "incorrect data check" && !raw) {
+        if (reader)
+          warnOrThrow(reader, `Invalid zip data: ${inflator.msg}`);
+        return inflateLimited(compressed.subarray(2), expectedSize, reader, true);
+      } else if (inflator.err) {
+        throw new Error(`Invalid zip data: ${inflator.msg}`);
+      }
+      return output;
+    }
+    function readDataZip(compressed, pixelData, width, height, bitDepth, step, offset, prediction, reader) {
+      const bpv = bytesPerValue(bitDepth);
+      if (!pixelData || offset < 0 || offset >= step)
+        return;
+      const data = pixelData.data;
+      verifyArrayType(data, bpv);
+      const expectedSize = width * height * bpv;
+      if (reader)
+        consumeMemory(reader, expectedSize);
+      try {
+        const decompressed = inflateLimited(compressed, expectedSize, reader);
+        if (bpv === 1) {
+          for (let y = 0, i = 0; y < height; y++) {
+            let prev = 0;
+            for (let x = 0, p = offset + y * width * step; x < width; x++, i++, p += step) {
+              let v = decompressed[i];
+              if (prediction)
+                v = prev = prev + v & 255;
+              data[p] = v;
+            }
+          }
+        } else if (bpv === 2) {
+          for (let y = 0, i = 0; y < height; y++) {
+            let prev = 0;
+            for (let x = 0, p = offset + y * width * step; x < width; x++, i += 2, p += step) {
+              let v = decompressed[i] << 8 | decompressed[i + 1];
+              if (prediction)
+                v = prev = prev + v & 65535;
+              data[p] = v;
             }
           }
         } else {
-          throw new Error("Invalid bitDepth");
-        }
-      }
-    }
-    exports.readDataZip = readDataZip;
-    function readDataRLE(reader, pixelData, width, height, bitDepth, step, offsets, large) {
-      var data = pixelData && pixelData.data;
-      var lengths;
-      if (large) {
-        lengths = new Uint32Array(offsets.length * height);
-        for (var o = 0, li = 0; o < offsets.length; o++) {
-          for (var y = 0; y < height; y++, li++) {
-            lengths[li] = readUint32(reader);
-          }
-        }
-      } else {
-        lengths = new Uint16Array(offsets.length * height);
-        for (var o = 0, li = 0; o < offsets.length; o++) {
-          for (var y = 0; y < height; y++, li++) {
-            lengths[li] = readUint16(reader);
-          }
-        }
-      }
-      if (bitDepth !== 1 && bitDepth !== 8)
-        throw new Error("Invalid bit depth (".concat(bitDepth, ")"));
-      var extraLimit = step - 1 | 0;
-      for (var c = 0, li = 0; c < offsets.length; c++) {
-        var offset = offsets[c] | 0;
-        var extra = c > extraLimit || offset > extraLimit;
-        if (!data || extra) {
-          for (var y = 0; y < height; y++, li++) {
-            skipBytes(reader, lengths[li]);
-          }
-        } else {
-          for (var y = 0, p = offset | 0; y < height; y++, li++) {
-            var length_2 = lengths[li];
-            var buffer = readBytes(reader, length_2);
-            for (var i = 0, x = 0; i < length_2; i++) {
-              var header = buffer[i];
-              if (header > 128) {
-                var value = buffer[++i];
-                header = 256 - header | 0;
-                for (var j = 0; j <= header && x < width; j = j + 1 | 0, x = x + 1 | 0) {
-                  data[p] = value;
-                  p = p + step | 0;
-                }
-              } else if (header < 128) {
-                for (var j = 0; j <= header && x < width; j = j + 1 | 0, x = x + 1 | 0) {
-                  data[p] = buffer[++i];
-                  p = p + step | 0;
-                }
-              } else {
+          const dst = new Uint32Array(data.buffer, data.byteOffset, data.length);
+          if (prediction) {
+            decodePredicted(decompressed, width * 4, height);
+            for (let y = 0, di = offset; y < height; y++) {
+              let a = width * 4 * y;
+              for (let x = 0; x < width; x++, a++, di += step) {
+                const b = a + width;
+                const c = b + width;
+                const d = c + width;
+                dst[di] = (decompressed[a] << 24 | decompressed[b] << 16 | decompressed[c] << 8 | decompressed[d]) >>> 0;
               }
             }
+          } else {
+            const view = new DataView(decompressed.buffer, decompressed.byteOffset, decompressed.byteLength);
+            for (let i = 0, j = 0, di = offset, size = width * height; i < size; i++, j += 4, di += step) {
+              dst[di] = view.getUint32(j, false);
+            }
+          }
+        }
+      } finally {
+        if (reader)
+          recoverMemory(reader, expectedSize);
+      }
+    }
+    function decodeRLERow(src, i, end, dst, count) {
+      let x = 0;
+      while (i < end && x < count) {
+        const header = src[i++];
+        if (header > 128) {
+          if (i >= end)
+            break;
+          const value = src[i++];
+          let n = 257 - header;
+          if (n > count - x)
+            n = count - x;
+          dst.fill(value, x, x + n);
+          x += n;
+        } else if (header < 128) {
+          let n = header + 1;
+          if (n > count - x)
+            n = count - x;
+          if (n > end - i)
+            n = end - i;
+          for (; n > 0; n--) {
+            dst[x++] = src[i++];
+          }
+        } else {
+        }
+      }
+      return x;
+    }
+    function decodeRLEChannel8(src, lengths, li, pos, width, height, data, offset, step) {
+      const srcEnd = src.length | 0;
+      for (let y = 0; y < height; y++, li++) {
+        let i = (pos < srcEnd ? pos : srcEnd) | 0;
+        pos += lengths[li];
+        const end = (pos < srcEnd ? pos : srcEnd) | 0;
+        let p = offset + y * width * step | 0;
+        let x = 0;
+        while (i < end && x < width) {
+          const header = src[i++] | 0;
+          if (header > 128) {
+            if (i >= end)
+              break;
+            const value = src[i++] | 0;
+            let n = 257 - header | 0;
+            if (n > width - x)
+              n = width - x | 0;
+            x = x + n | 0;
+            for (const pe = p + n * step | 0; p < pe; p = p + step | 0) {
+              data[p] = value;
+            }
+          } else if (header < 128) {
+            let n = header + 1 | 0;
+            if (n > width - x)
+              n = width - x | 0;
+            if (n > end - i)
+              n = end - i | 0;
+            x = x + n | 0;
+            for (const ie = i + n | 0; i < ie; i = i + 1 | 0, p = p + step | 0) {
+              data[p] = src[i];
+            }
+          } else {
           }
         }
       }
     }
-    exports.readDataRLE = readDataRLE;
-    function readSection(reader, round, func, skipEmpty, eightBytes) {
-      if (skipEmpty === void 0) {
-        skipEmpty = true;
+    function scatterValues(bytes, count, bpv, data, p, step) {
+      if (bpv === 2) {
+        for (let x = 0, i = 0; x < count; x++, i += 2, p += step) {
+          data[p] = bytes[i] << 8 | bytes[i + 1];
+        }
+      } else {
+        const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        for (let x = 0, i = 0; x < count; x++, i += 4, p += step) {
+          data[p] = view.getFloat32(i, false);
+        }
       }
-      if (eightBytes === void 0) {
-        eightBytes = false;
+    }
+    function decodeRLEChannelWide(src, lengths, li, pos, width, height, data, offset, step, bpv, row) {
+      const srcEnd = src.length;
+      const rowSize = width * bpv;
+      for (let y = 0; y < height; y++, li++) {
+        const rowStart = pos < srcEnd ? pos : srcEnd;
+        pos += lengths[li];
+        const rowEnd = pos < srcEnd ? pos : srcEnd;
+        if (rowStart >= rowEnd)
+          continue;
+        const decoded = decodeRLERow(src, rowStart, rowEnd, row, rowSize);
+        scatterValues(row, Math.floor(decoded / bpv), bpv, data, offset + y * width * step, step);
       }
-      var length = readUint32(reader);
+    }
+    function readDataRLE(reader, pixelData, width, height, bitDepth, step, offsets, large) {
+      const data = pixelData && pixelData.data;
+      const rows = offsets.length * height;
+      const lengthSize = large ? 4 : 2;
+      const lengthsMemory = rows * lengthSize;
+      const srcEnd = reader.view.byteLength;
+      const bpv = bytesPerValue(bitDepth);
+      let lengths;
+      consumeMemory(reader, lengthsMemory);
+      try {
+        if (reader.offset + lengthsMemory > srcEnd) {
+          throw new Error("RLE row lengths exceed buffer length");
+        }
+        lengths = large ? new Uint32Array(rows) : new Uint16Array(rows);
+        let total = 0;
+        if (large) {
+          for (let i = 0; i < rows; i++)
+            total += lengths[i] = readUint32(reader);
+        } else {
+          for (let i = 0; i < rows; i++)
+            total += lengths[i] = readUint16(reader);
+        }
+        if (total > srcEnd - reader.offset) {
+          warnOrThrow(reader, "RLE data exceeds buffer length");
+        }
+        if (data)
+          verifyArrayType(data, bpv);
+      } catch (e) {
+        recoverMemory(reader, lengthsMemory);
+        throw e;
+      }
+      const src = new Uint8Array(reader.view.buffer, reader.view.byteOffset, srcEnd);
+      const row = data && bpv > 1 ? new Uint8Array(width * bpv) : void 0;
+      let pos = reader.offset;
+      for (let c = 0, li = 0; c < offsets.length; c++, li += height) {
+        const offset = offsets[c] | 0;
+        const channelStart = pos;
+        for (let y = 0; y < height; y++)
+          pos += lengths[li + y];
+        if (data && offset >= 0 && offset < step) {
+          if (bpv === 1) {
+            decodeRLEChannel8(src, lengths, li, channelStart, width, height, data, offset, step);
+          } else {
+            decodeRLEChannelWide(src, lengths, li, channelStart, width, height, data, offset, step, bpv, row);
+          }
+        }
+      }
+      reader.offset = pos;
+      recoverMemory(reader, lengthsMemory);
+    }
+    function readSection(reader, round, func, skipEmpty = true, eightBytes = false) {
+      let length = readUint32(reader);
       if (eightBytes) {
         if (length !== 0)
           throw new Error("Sizes larger than 4GB are not supported");
@@ -9472,60 +12095,59 @@ var require_psdReader = __commonJS({
       }
       if (length <= 0 && skipEmpty)
         return void 0;
-      var end = reader.offset + length;
+      let end = reader.offset + length;
       if (end > reader.view.byteLength)
         throw new Error("Section exceeds file size");
-      var result = func(function() {
-        return end - reader.offset;
-      });
+      const result = func(() => end - reader.offset);
       if (reader.offset !== end) {
         if (reader.offset > end) {
           warnOrThrow(reader, "Exceeded section limits");
         } else {
-          warnOrThrow(reader, "Unread section data");
+          warnOrThrow(reader, `Unread section data`);
         }
       }
-      while (end % round)
+      while (length % round) {
+        length++;
         end++;
+      }
       reader.offset = end;
       return result;
     }
-    exports.readSection = readSection;
     function readColor(reader) {
-      var colorSpace = readUint16(reader);
+      const colorSpace = readUint16(reader);
       switch (colorSpace) {
         case 0: {
-          var r = readUint16(reader) / 257;
-          var g = readUint16(reader) / 257;
-          var b = readUint16(reader) / 257;
+          const r = readUint16(reader) / 257;
+          const g = readUint16(reader) / 257;
+          const b = readUint16(reader) / 257;
           skipBytes(reader, 2);
           return { r, g, b };
         }
         case 1: {
-          var h = readUint16(reader) / 65535;
-          var s = readUint16(reader) / 65535;
-          var b = readUint16(reader) / 65535;
+          const h = readUint16(reader) / 65535;
+          const s = readUint16(reader) / 65535;
+          const b = readUint16(reader) / 65535;
           skipBytes(reader, 2);
           return { h, s, b };
         }
         case 2: {
-          var c = readUint16(reader) / 257;
-          var m = readUint16(reader) / 257;
-          var y = readUint16(reader) / 257;
-          var k = readUint16(reader) / 257;
+          const c = (65535 - readUint16(reader)) / 257;
+          const m = (65535 - readUint16(reader)) / 257;
+          const y = (65535 - readUint16(reader)) / 257;
+          const k = (65535 - readUint16(reader)) / 257;
           return { c, m, y, k };
         }
         case 7: {
-          var l = readInt16(reader) / 1e4;
-          var ta = readInt16(reader);
-          var tb = readInt16(reader);
-          var a = ta < 0 ? ta / 12800 : ta / 12700;
-          var b = tb < 0 ? tb / 12800 : tb / 12700;
+          const l = readInt16(reader) / 1e4;
+          const ta = readInt16(reader);
+          const tb = readInt16(reader);
+          const a = (0, helpers_1.normalizeLabAB)(ta, 100);
+          const b = (0, helpers_1.normalizeLabAB)(tb, 100);
           skipBytes(reader, 2);
           return { l, a, b };
         }
         case 8: {
-          var k = readUint16(reader) * 255 / 1e4;
+          const k = readUint16(reader) * 255 / 1e4;
           skipBytes(reader, 6);
           return { k };
         }
@@ -9533,103 +12155,210 @@ var require_psdReader = __commonJS({
           throw new Error("Invalid color space");
       }
     }
-    exports.readColor = readColor;
-    function readPattern(reader) {
-      readUint32(reader);
-      var version = readUint32(reader);
-      if (version !== 1)
-        throw new Error("Invalid pattern version: ".concat(version));
-      var colorMode = readUint32(reader);
-      var x = readInt16(reader);
-      var y = readInt16(reader);
-      if (colorMode !== 3 && colorMode !== 1 && colorMode !== 2) {
-        throw new Error("Unsupported pattern color mode: ".concat(colorMode));
+    var MAX_PATTERN_SIZE = 3e4;
+    function readPatternSafe(reader) {
+      let length = reader.view.getUint32(reader.offset);
+      while (length % 4)
+        length++;
+      const end = reader.offset + 4 + length;
+      try {
+        return readPattern(reader);
+      } catch (e) {
+        if (reader.throwForMissingFeatures)
+          throw e;
+        reader.logMissingFeatures && reader.log(`Skipped pattern: ${e.message}`);
+        reader.offset = end;
+        return void 0;
       }
-      var name = readUnicodeString(reader);
-      var id = readPascalString(reader, 1);
-      var palette = [];
+    }
+    function readPattern(reader) {
+      let length = readUint32(reader);
+      while (length % 4)
+        length++;
+      const end = reader.offset + length;
+      const version = readUint32(reader);
+      if (version !== 1)
+        throw new Error(`Invalid pattern version: ${version}`);
+      const colorMode = readUint32(reader);
+      const x = readInt16(reader);
+      const y = readInt16(reader);
+      if (colorMode !== 3 && colorMode !== 1 && colorMode !== 2 && colorMode !== 4) {
+        throw new Error(`Unsupported pattern color mode: ${colorMode}`);
+      }
+      let name = readUnicodeString(reader);
+      const id = readPascalString(reader, 1);
+      const palette = [];
       if (colorMode === 2) {
-        for (var i = 0; i < 256; i++) {
+        for (let i = 0; i < 256; i++) {
           palette.push({
             r: readUint8(reader),
             g: readUint8(reader),
             b: readUint8(reader)
           });
         }
-        skipBytes(reader, 4);
+        if (reader.view.getUint32(reader.offset) !== 3)
+          skipBytes(reader, 4);
       }
-      var version2 = readUint32(reader);
+      const version2 = readUint32(reader);
       if (version2 !== 3)
-        throw new Error("Invalid pattern VMAL version: ".concat(version2));
+        throw new Error(`Invalid pattern VMAL version: ${version2}`);
       readUint32(reader);
-      var top = readUint32(reader);
-      var left = readUint32(reader);
-      var bottom = readUint32(reader);
-      var right = readUint32(reader);
-      var channelsCount = readUint32(reader);
-      var width = right - left;
-      var height = bottom - top;
-      var data = new Uint8Array(width * height * 4);
-      for (var i = 3; i < data.byteLength; i += 4) {
-        data[i] = 255;
-      }
-      for (var i = 0, ch = 0; i < channelsCount + 2; i++) {
-        var has = readUint32(reader);
+      const top = readUint32(reader);
+      const left = readUint32(reader);
+      const bottom = readUint32(reader);
+      const right = readUint32(reader);
+      const channelsCount = readUint32(reader);
+      const width = right - left;
+      const height = bottom - top;
+      if (width < 0 || height < 0)
+        throw new Error("Invalid pattern bounds");
+      if (width > MAX_PATTERN_SIZE || height > MAX_PATTERN_SIZE)
+        throw new Error(`Pattern too large (${width}x${height})`);
+      if (channelsCount > 64)
+        throw new Error(`Invalid pattern channel count: ${channelsCount}`);
+      if (width * height > (Math.min(end, reader.view.byteLength) - reader.offset) * 64)
+        throw new Error("Pattern data out of bounds");
+      const colorChannels = colorMode === 3 ? 3 : colorMode === 4 ? 4 : 1;
+      const isCmyk = colorMode === 4;
+      const alphaTarget = isCmyk ? 4 : 3;
+      const channels = [];
+      let maxDecodeSize = 0;
+      for (let i = 0, ch = 0; i < channelsCount + 2 && reader.offset + 4 <= end; i++) {
+        const has = readUint32(reader);
         if (!has)
           continue;
-        var length_3 = readUint32(reader);
-        var pixelDepth = readUint32(reader);
-        var ctop = readUint32(reader);
-        var cleft = readUint32(reader);
-        var cbottom = readUint32(reader);
-        var cright = readUint32(reader);
-        var pixelDepth2 = readUint16(reader);
-        var compressionMode = readUint8(reader);
-        var dataLength = length_3 - (4 + 16 + 2 + 1);
-        var cdata = readBytes(reader, dataLength);
-        if (pixelDepth !== 8 || pixelDepth2 !== 8) {
-          throw new Error("16bit pixel depth not supported for patterns");
+        const length2 = readUint32(reader);
+        if (!length2)
+          continue;
+        if (length2 < 23)
+          throw new Error("Invalid pattern channel length");
+        const pixelDepth = readUint32(reader);
+        const ctop = readUint32(reader);
+        const cleft = readUint32(reader);
+        const cbottom = readUint32(reader);
+        const cright = readUint32(reader);
+        const pixelDepth2 = readUint16(reader);
+        const compressionMode = readUint8(reader);
+        const cdata = readBytes(reader, length2 - 23);
+        const depth = pixelDepth2 === 8 || pixelDepth2 === 16 || pixelDepth2 === 32 ? pixelDepth2 : pixelDepth;
+        if (depth !== 8 && depth !== 16 && depth !== 32)
+          throw new Error(`Unsupported pattern pixel depth: ${depth}`);
+        if (ctop < top || cleft < left || cbottom > bottom || cright > right || cbottom < ctop || cright < cleft) {
+          throw new Error("Pattern channel bounds outside of pattern bounds");
         }
-        var w = cright - cleft;
-        var h = cbottom - ctop;
-        var ox = cleft - left;
-        var oy = ctop - top;
+        const target = ch < colorChannels ? ch : ch === colorChannels ? alphaTarget : -1;
+        ch++;
+        if (target === -1)
+          continue;
+        const w = cright - cleft;
+        const h = cbottom - ctop;
+        const rowBytes = w * (depth / 8);
+        const channelSize = rowBytes * h;
         if (compressionMode === 0) {
-          if (colorMode === 3 && ch < 3) {
-            for (var y_1 = 0; y_1 < h; y_1++) {
-              for (var x_1 = 0; x_1 < w; x_1++) {
-                var src = x_1 + y_1 * w;
-                var dst = (ox + x_1 + (y_1 + oy) * width) * 4;
-                data[dst + ch] = cdata[src];
-              }
-            }
-          }
-          if (colorMode === 1 && ch < 1) {
-            for (var y_2 = 0; y_2 < h; y_2++) {
-              for (var x_2 = 0; x_2 < w; x_2++) {
-                var src = x_2 + y_2 * w;
-                var dst = (ox + x_2 + (y_2 + oy) * width) * 4;
-                var value = cdata[src];
-                data[dst + 0] = value;
-                data[dst + 1] = value;
-                data[dst + 2] = value;
-              }
-            }
-          }
-          if (colorMode === 2) {
-            throw new Error("Indexed pattern color mode not implemented");
-          }
+          if (cdata.byteLength < channelSize)
+            throw new Error("Pattern channel data out of bounds");
         } else if (compressionMode === 1) {
-          reader.log("Unsupported pattern compression");
-          name += " (failed to decode)";
+          if (channelSize > cdata.byteLength * 64)
+            throw new Error("Pattern channel data out of bounds");
+          maxDecodeSize = Math.max(maxDecodeSize, channelSize);
         } else {
           throw new Error("Invalid pattern compression mode");
         }
-        ch++;
+        channels.push({ target, depth, compressionMode, cdata, ctop, cleft, w, h, rowBytes, channelSize });
       }
+      const size = width * height * 4;
+      const cmykSize = isCmyk ? width * height * 5 : 0;
+      consumeMemory(reader, size + cmykSize + maxDecodeSize);
+      recoverMemory(reader, size + cmykSize + maxDecodeSize);
+      const data = new Uint8Array(size);
+      for (let i = 3; i < data.byteLength; i += 4) {
+        data[i] = 255;
+      }
+      const cmyk = isCmyk ? new Uint8Array(cmykSize).fill(255) : void 0;
+      for (const { target, depth, compressionMode, cdata, ctop, cleft, w, h, rowBytes, channelSize } of channels) {
+        let bytes = cdata;
+        if (compressionMode === 1) {
+          bytes = new Uint8Array(channelSize);
+          const cdataReader = createReader(cdata.buffer, cdata.byteOffset, cdata.byteLength);
+          readDataRLE(cdataReader, { data: bytes, width: rowBytes, height: h }, rowBytes, h, 8, 1, [0], false);
+        }
+        if (depth !== 8)
+          bytes = patternChannelTo8bit(bytes, w * h, depth);
+        const ox = cleft - left;
+        const oy = ctop - top;
+        if (cmyk) {
+          copyPatternChannel(bytes, cmyk, w, h, (ox + oy * width) * 5 + target, width * 5, 5);
+        } else if (target === 3 || colorMode === 3) {
+          copyPatternChannel(bytes, data, w, h, (ox + oy * width) * 4 + target, width * 4, 4);
+        } else if (colorMode === 2) {
+          const colors = new Uint8Array(256 * 3);
+          for (let i = 0; i < 256; i++) {
+            colors[i * 3 + 0] = palette[i].r;
+            colors[i * 3 + 1] = palette[i].g;
+            colors[i * 3 + 2] = palette[i].b;
+          }
+          for (let y2 = 0; y2 < h; y2++) {
+            for (let x2 = 0, src = y2 * w, dst = (ox + (y2 + oy) * width) * 4; x2 < w; x2++, src++, dst += 4) {
+              const index = bytes[src] * 3;
+              data[dst + 0] = colors[index + 0];
+              data[dst + 1] = colors[index + 1];
+              data[dst + 2] = colors[index + 2];
+            }
+          }
+        } else {
+          for (let y2 = 0; y2 < h; y2++) {
+            for (let x2 = 0, src = y2 * w, dst = (ox + (y2 + oy) * width) * 4; x2 < w; x2++, src++, dst += 4) {
+              const value = bytes[src];
+              data[dst + 0] = value;
+              data[dst + 1] = value;
+              data[dst + 2] = value;
+            }
+          }
+        }
+      }
+      if (cmyk) {
+        cmykToRgb({ width, height, data: cmyk }, { width, height, data }, false);
+      }
+      consumeMemory(reader, size);
+      reader.offset = end;
       return { id, name, x, y, bounds: { x: left, y: top, w: width, h: height }, data };
     }
-    exports.readPattern = readPattern;
+    function patternChannelTo8bit(bytes, count, depth) {
+      const result = new Uint8Array(count);
+      if (depth === 16) {
+        for (let i = 0; i < count; i++) {
+          result[i] = Math.round((bytes[i * 2] << 8 | bytes[i * 2 + 1]) / 257);
+        }
+      } else {
+        const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        for (let i = 0; i < count; i++) {
+          const value = view.getFloat32(i * 4, false);
+          result[i] = value > 0 ? value < 1 ? Math.round(value * 255) : 255 : 0;
+        }
+      }
+      return result;
+    }
+    function copyPatternChannel(bytes, data, w, h, offset, stride, step) {
+      for (let y = 0, src = 0; y < h; y++) {
+        for (let x = 0, dst = offset + y * stride; x < w; x++, src++, dst += step) {
+          data[dst] = bytes[src];
+        }
+      }
+    }
+    function consumeMemory(reader, size) {
+      if (!(size >= 0))
+        throw new Error("Invalid size");
+      if (reader.totalMemoryLimit !== void 0) {
+        if (reader.totalMemoryLimit < size)
+          throw new Error("Exceeded memory limit");
+        reader.totalMemoryLimit -= size;
+      }
+    }
+    function recoverMemory(reader, size) {
+      if (reader.totalMemoryLimit !== void 0) {
+        reader.totalMemoryLimit += size;
+      }
+    }
   }
 });
 
@@ -9638,7 +12367,8 @@ var require_effectsHelpers = __commonJS({
   "node_modules/ag-psd/dist/effectsHelpers.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.writeEffects = exports.readEffects = void 0;
+    exports.readEffects = readEffects;
+    exports.writeEffects = writeEffects;
     var helpers_1 = require_helpers();
     var psdReader_1 = require_psdReader();
     var psdWriter_1 = require_psdWriter();
@@ -9665,45 +12395,45 @@ var require_effectsHelpers = __commonJS({
       (0, psdWriter_1.writeUint8)(writer, Math.round(value * 255) | 0);
     }
     function readEffects(reader) {
-      var version = (0, psdReader_1.readUint16)(reader);
+      const version = (0, psdReader_1.readUint16)(reader);
       if (version !== 0)
-        throw new Error("Invalid effects layer version: ".concat(version));
-      var effectsCount = (0, psdReader_1.readUint16)(reader);
-      var effects = {};
-      for (var i = 0; i < effectsCount; i++) {
+        throw new Error(`Invalid effects layer version: ${version}`);
+      const effectsCount = (0, psdReader_1.readUint16)(reader);
+      const effects = {};
+      for (let i = 0; i < effectsCount; i++) {
         (0, psdReader_1.checkSignature)(reader, "8BIM");
-        var type = (0, psdReader_1.readSignature)(reader);
+        const type = (0, psdReader_1.readSignature)(reader);
         switch (type) {
           case "cmnS": {
-            var size = (0, psdReader_1.readUint32)(reader);
-            var version_1 = (0, psdReader_1.readUint32)(reader);
-            var visible = !!(0, psdReader_1.readUint8)(reader);
+            const size = (0, psdReader_1.readUint32)(reader);
+            const version2 = (0, psdReader_1.readUint32)(reader);
+            (0, psdReader_1.readUint8)(reader);
             (0, psdReader_1.skipBytes)(reader, 2);
-            if (size !== 7 || version_1 !== 0 || !visible)
-              throw new Error("Invalid effects common state");
+            if (size !== 7 || version2 !== 0)
+              throw new Error(`Invalid effects common state`);
             break;
           }
           case "dsdw":
           // drop shadow (see See Effects layer, drop shadow and inner shadow info)
           case "isdw": {
-            var blockSize = (0, psdReader_1.readUint32)(reader);
-            var version_2 = (0, psdReader_1.readUint32)(reader);
+            const blockSize = (0, psdReader_1.readUint32)(reader);
+            const version2 = (0, psdReader_1.readUint32)(reader);
             if (blockSize !== 41 && blockSize !== 51)
-              throw new Error("Invalid shadow size: ".concat(blockSize));
-            if (version_2 !== 0 && version_2 !== 2)
-              throw new Error("Invalid shadow version: ".concat(version_2));
-            var size = (0, psdReader_1.readFixedPoint32)(reader);
+              throw new Error(`Invalid shadow size: ${blockSize}`);
+            if (version2 !== 0 && version2 !== 2)
+              throw new Error(`Invalid shadow version: ${version2}`);
+            const size = (0, psdReader_1.readFixedPoint32)(reader);
             (0, psdReader_1.readFixedPoint32)(reader);
-            var angle = (0, psdReader_1.readFixedPoint32)(reader);
-            var distance = (0, psdReader_1.readFixedPoint32)(reader);
-            var color = (0, psdReader_1.readColor)(reader);
-            var blendMode = readBlendMode(reader);
-            var enabled = !!(0, psdReader_1.readUint8)(reader);
-            var useGlobalLight = !!(0, psdReader_1.readUint8)(reader);
-            var opacity = readFixedPoint8(reader);
+            const angle = (0, psdReader_1.readFixedPoint32)(reader);
+            const distance = (0, psdReader_1.readFixedPoint32)(reader);
+            const color = (0, psdReader_1.readColor)(reader);
+            const blendMode = readBlendMode(reader);
+            const enabled = !!(0, psdReader_1.readUint8)(reader);
+            const useGlobalLight = !!(0, psdReader_1.readUint8)(reader);
+            const opacity = readFixedPoint8(reader);
             if (blockSize >= 51)
               (0, psdReader_1.readColor)(reader);
-            var shadowInfo = {
+            const shadowInfo = {
               size: { units: "Pixels", value: size },
               distance: { units: "Pixels", value: distance },
               angle,
@@ -9721,18 +12451,18 @@ var require_effectsHelpers = __commonJS({
             break;
           }
           case "oglw": {
-            var blockSize = (0, psdReader_1.readUint32)(reader);
-            var version_3 = (0, psdReader_1.readUint32)(reader);
+            const blockSize = (0, psdReader_1.readUint32)(reader);
+            const version2 = (0, psdReader_1.readUint32)(reader);
             if (blockSize !== 32 && blockSize !== 42)
-              throw new Error("Invalid outer glow size: ".concat(blockSize));
-            if (version_3 !== 0 && version_3 !== 2)
-              throw new Error("Invalid outer glow version: ".concat(version_3));
-            var size = (0, psdReader_1.readFixedPoint32)(reader);
+              throw new Error(`Invalid outer glow size: ${blockSize}`);
+            if (version2 !== 0 && version2 !== 2)
+              throw new Error(`Invalid outer glow version: ${version2}`);
+            const size = (0, psdReader_1.readFixedPoint32)(reader);
             (0, psdReader_1.readFixedPoint32)(reader);
-            var color = (0, psdReader_1.readColor)(reader);
-            var blendMode = readBlendMode(reader);
-            var enabled = !!(0, psdReader_1.readUint8)(reader);
-            var opacity = readFixedPoint8(reader);
+            const color = (0, psdReader_1.readColor)(reader);
+            const blendMode = readBlendMode(reader);
+            const enabled = !!(0, psdReader_1.readUint8)(reader);
+            const opacity = readFixedPoint8(reader);
             if (blockSize >= 42)
               (0, psdReader_1.readColor)(reader);
             effects.outerGlow = {
@@ -9745,18 +12475,18 @@ var require_effectsHelpers = __commonJS({
             break;
           }
           case "iglw": {
-            var blockSize = (0, psdReader_1.readUint32)(reader);
-            var version_4 = (0, psdReader_1.readUint32)(reader);
+            const blockSize = (0, psdReader_1.readUint32)(reader);
+            const version2 = (0, psdReader_1.readUint32)(reader);
             if (blockSize !== 32 && blockSize !== 43)
-              throw new Error("Invalid inner glow size: ".concat(blockSize));
-            if (version_4 !== 0 && version_4 !== 2)
-              throw new Error("Invalid inner glow version: ".concat(version_4));
-            var size = (0, psdReader_1.readFixedPoint32)(reader);
+              throw new Error(`Invalid inner glow size: ${blockSize}`);
+            if (version2 !== 0 && version2 !== 2)
+              throw new Error(`Invalid inner glow version: ${version2}`);
+            const size = (0, psdReader_1.readFixedPoint32)(reader);
             (0, psdReader_1.readFixedPoint32)(reader);
-            var color = (0, psdReader_1.readColor)(reader);
-            var blendMode = readBlendMode(reader);
-            var enabled = !!(0, psdReader_1.readUint8)(reader);
-            var opacity = readFixedPoint8(reader);
+            const color = (0, psdReader_1.readColor)(reader);
+            const blendMode = readBlendMode(reader);
+            const enabled = !!(0, psdReader_1.readUint8)(reader);
+            const opacity = readFixedPoint8(reader);
             if (blockSize >= 43) {
               (0, psdReader_1.readUint8)(reader);
               (0, psdReader_1.readColor)(reader);
@@ -9771,25 +12501,25 @@ var require_effectsHelpers = __commonJS({
             break;
           }
           case "bevl": {
-            var blockSize = (0, psdReader_1.readUint32)(reader);
-            var version_5 = (0, psdReader_1.readUint32)(reader);
+            const blockSize = (0, psdReader_1.readUint32)(reader);
+            const version2 = (0, psdReader_1.readUint32)(reader);
             if (blockSize !== 58 && blockSize !== 78)
-              throw new Error("Invalid bevel size: ".concat(blockSize));
-            if (version_5 !== 0 && version_5 !== 2)
-              throw new Error("Invalid bevel version: ".concat(version_5));
-            var angle = (0, psdReader_1.readFixedPoint32)(reader);
-            var strength = (0, psdReader_1.readFixedPoint32)(reader);
-            var size = (0, psdReader_1.readFixedPoint32)(reader);
-            var highlightBlendMode = readBlendMode(reader);
-            var shadowBlendMode = readBlendMode(reader);
-            var highlightColor = (0, psdReader_1.readColor)(reader);
-            var shadowColor = (0, psdReader_1.readColor)(reader);
-            var style = bevelStyles[(0, psdReader_1.readUint8)(reader)] || "inner bevel";
-            var highlightOpacity = readFixedPoint8(reader);
-            var shadowOpacity = readFixedPoint8(reader);
-            var enabled = !!(0, psdReader_1.readUint8)(reader);
-            var useGlobalLight = !!(0, psdReader_1.readUint8)(reader);
-            var direction = (0, psdReader_1.readUint8)(reader) ? "down" : "up";
+              throw new Error(`Invalid bevel size: ${blockSize}`);
+            if (version2 !== 0 && version2 !== 2)
+              throw new Error(`Invalid bevel version: ${version2}`);
+            const angle = (0, psdReader_1.readFixedPoint32)(reader);
+            const strength = (0, psdReader_1.readFixedPoint32)(reader);
+            const size = (0, psdReader_1.readFixedPoint32)(reader);
+            const highlightBlendMode = readBlendMode(reader);
+            const shadowBlendMode = readBlendMode(reader);
+            const highlightColor = (0, psdReader_1.readColor)(reader);
+            const shadowColor = (0, psdReader_1.readColor)(reader);
+            const style = bevelStyles[(0, psdReader_1.readUint8)(reader)] || "inner bevel";
+            const highlightOpacity = readFixedPoint8(reader);
+            const shadowOpacity = readFixedPoint8(reader);
+            const enabled = !!(0, psdReader_1.readUint8)(reader);
+            const useGlobalLight = !!(0, psdReader_1.readUint8)(reader);
+            const direction = (0, psdReader_1.readUint8)(reader) ? "down" : "up";
             if (blockSize >= 78) {
               (0, psdReader_1.readColor)(reader);
               (0, psdReader_1.readColor)(reader);
@@ -9812,27 +12542,26 @@ var require_effectsHelpers = __commonJS({
             break;
           }
           case "sofi": {
-            var size = (0, psdReader_1.readUint32)(reader);
-            var version_6 = (0, psdReader_1.readUint32)(reader);
+            const size = (0, psdReader_1.readUint32)(reader);
+            const version2 = (0, psdReader_1.readUint32)(reader);
             if (size !== 34)
-              throw new Error("Invalid effects solid fill info size: ".concat(size));
-            if (version_6 !== 2)
-              throw new Error("Invalid effects solid fill info version: ".concat(version_6));
-            var blendMode = readBlendMode(reader);
-            var color = (0, psdReader_1.readColor)(reader);
-            var opacity = readFixedPoint8(reader);
-            var enabled = !!(0, psdReader_1.readUint8)(reader);
+              throw new Error(`Invalid effects solid fill info size: ${size}`);
+            if (version2 !== 2)
+              throw new Error(`Invalid effects solid fill info version: ${version2}`);
+            const blendMode = readBlendMode(reader);
+            const color = (0, psdReader_1.readColor)(reader);
+            const opacity = readFixedPoint8(reader);
+            const enabled = !!(0, psdReader_1.readUint8)(reader);
             (0, psdReader_1.readColor)(reader);
             effects.solidFill = [{ blendMode, color, opacity, enabled }];
             break;
           }
           default:
-            throw new Error("Invalid effect type: '".concat(type, "'"));
+            throw new Error(`Invalid effect type: '${type}'`);
         }
       }
       return effects;
     }
-    exports.readEffects = readEffects;
     function writeShadowInfo(writer, shadow) {
       var _a2;
       (0, psdWriter_1.writeUint32)(writer, 51);
@@ -9849,14 +12578,14 @@ var require_effectsHelpers = __commonJS({
       (0, psdWriter_1.writeColor)(writer, shadow.color);
     }
     function writeEffects(writer, effects) {
-      var _a2, _b2, _c, _d, _e, _f;
-      var dropShadow = (_a2 = effects.dropShadow) === null || _a2 === void 0 ? void 0 : _a2[0];
-      var innerShadow = (_b2 = effects.innerShadow) === null || _b2 === void 0 ? void 0 : _b2[0];
-      var outerGlow = effects.outerGlow;
-      var innerGlow = effects.innerGlow;
-      var bevel = effects.bevel;
-      var solidFill = (_c = effects.solidFill) === null || _c === void 0 ? void 0 : _c[0];
-      var count = 1;
+      var _a2, _b2, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+      const dropShadow = (_a2 = effects.dropShadow) === null || _a2 === void 0 ? void 0 : _a2[0];
+      const innerShadow = (_b2 = effects.innerShadow) === null || _b2 === void 0 ? void 0 : _b2[0];
+      const outerGlow = effects.outerGlow;
+      const innerGlow = effects.innerGlow;
+      const bevel = effects.bevel;
+      const solidFill = (_c = effects.solidFill) === null || _c === void 0 ? void 0 : _c[0];
+      let count = 1;
       if (dropShadow)
         count++;
       if (innerShadow)
@@ -9897,7 +12626,7 @@ var require_effectsHelpers = __commonJS({
         (0, psdWriter_1.writeColor)(writer, outerGlow.color);
         writeBlendMode(writer, outerGlow.blendMode);
         (0, psdWriter_1.writeUint8)(writer, outerGlow.enabled ? 1 : 0);
-        writeFixedPoint8(writer, outerGlow.opacity || 0);
+        writeFixedPoint8(writer, (_e = outerGlow.opacity) !== null && _e !== void 0 ? _e : 1);
         (0, psdWriter_1.writeColor)(writer, outerGlow.color);
       }
       if (innerGlow) {
@@ -9905,12 +12634,12 @@ var require_effectsHelpers = __commonJS({
         (0, psdWriter_1.writeSignature)(writer, "iglw");
         (0, psdWriter_1.writeUint32)(writer, 43);
         (0, psdWriter_1.writeUint32)(writer, 2);
-        (0, psdWriter_1.writeFixedPoint32)(writer, ((_e = innerGlow.size) === null || _e === void 0 ? void 0 : _e.value) || 0);
+        (0, psdWriter_1.writeFixedPoint32)(writer, ((_f = innerGlow.size) === null || _f === void 0 ? void 0 : _f.value) || 0);
         (0, psdWriter_1.writeFixedPoint32)(writer, 0);
         (0, psdWriter_1.writeColor)(writer, innerGlow.color);
         writeBlendMode(writer, innerGlow.blendMode);
         (0, psdWriter_1.writeUint8)(writer, innerGlow.enabled ? 1 : 0);
-        writeFixedPoint8(writer, innerGlow.opacity || 0);
+        writeFixedPoint8(writer, (_g = innerGlow.opacity) !== null && _g !== void 0 ? _g : 1);
         (0, psdWriter_1.writeUint8)(writer, 0);
         (0, psdWriter_1.writeColor)(writer, innerGlow.color);
       }
@@ -9921,15 +12650,15 @@ var require_effectsHelpers = __commonJS({
         (0, psdWriter_1.writeUint32)(writer, 2);
         (0, psdWriter_1.writeFixedPoint32)(writer, bevel.angle || 0);
         (0, psdWriter_1.writeFixedPoint32)(writer, bevel.strength || 0);
-        (0, psdWriter_1.writeFixedPoint32)(writer, ((_f = bevel.size) === null || _f === void 0 ? void 0 : _f.value) || 0);
+        (0, psdWriter_1.writeFixedPoint32)(writer, ((_h = bevel.size) === null || _h === void 0 ? void 0 : _h.value) || 0);
         writeBlendMode(writer, bevel.highlightBlendMode);
         writeBlendMode(writer, bevel.shadowBlendMode);
         (0, psdWriter_1.writeColor)(writer, bevel.highlightColor);
         (0, psdWriter_1.writeColor)(writer, bevel.shadowColor);
-        var style = bevelStyles.indexOf(bevel.style);
-        (0, psdWriter_1.writeUint8)(writer, style <= 0 ? 1 : style);
-        writeFixedPoint8(writer, bevel.highlightOpacity || 0);
-        writeFixedPoint8(writer, bevel.shadowOpacity || 0);
+        const style = bevelStyles.indexOf(bevel.style);
+        (0, psdWriter_1.writeUint8)(writer, style <= 0 ? bevelStyles.indexOf("inner bevel") : style);
+        writeFixedPoint8(writer, (_j = bevel.highlightOpacity) !== null && _j !== void 0 ? _j : 1);
+        writeFixedPoint8(writer, (_k = bevel.shadowOpacity) !== null && _k !== void 0 ? _k : 1);
         (0, psdWriter_1.writeUint8)(writer, bevel.enabled ? 1 : 0);
         (0, psdWriter_1.writeUint8)(writer, bevel.useGlobalLight ? 1 : 0);
         (0, psdWriter_1.writeUint8)(writer, bevel.direction === "down" ? 1 : 0);
@@ -9943,12 +12672,11 @@ var require_effectsHelpers = __commonJS({
         (0, psdWriter_1.writeUint32)(writer, 2);
         writeBlendMode(writer, solidFill.blendMode);
         (0, psdWriter_1.writeColor)(writer, solidFill.color);
-        writeFixedPoint8(writer, solidFill.opacity || 0);
+        writeFixedPoint8(writer, (_l = solidFill.opacity) !== null && _l !== void 0 ? _l : 1);
         (0, psdWriter_1.writeUint8)(writer, solidFill.enabled ? 1 : 0);
         (0, psdWriter_1.writeColor)(writer, solidFill.color);
       }
     }
-    exports.writeEffects = writeEffects;
   }
 });
 
@@ -9957,22 +12685,33 @@ var require_engineData = __commonJS({
   "node_modules/ag-psd/dist/engineData.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.serializeEngineData = exports.parseEngineData = void 0;
+    exports.setProperty = setProperty;
+    exports.parseEngineData = parseEngineData;
+    exports.serializeEngineData = serializeEngineData;
+    var psdReader_1 = require_psdReader();
     function isWhitespace(char) {
       return char === 32 || char === 10 || char === 13 || char === 9;
     }
     function isNumber(char) {
       return char >= 48 && char <= 57 || char === 46 || char === 45;
     }
-    function parseEngineData(data) {
-      var index = 0;
+    function setProperty(target, key, value) {
+      if (key === "__proto__") {
+        Object.defineProperty(target, key, { value, enumerable: true, configurable: true, writable: true });
+      } else {
+        target[key] = value;
+      }
+    }
+    var NODE_COST = 64;
+    function parseEngineData(data, reader) {
+      let index = 0;
       function skipWhitespace() {
         while (index < data.length && isWhitespace(data[index])) {
           index++;
         }
       }
       function getTextByte() {
-        var byte = data[index];
+        let byte = data[index];
         index++;
         if (byte === 92) {
           byte = data[index];
@@ -9981,44 +12720,52 @@ var require_engineData = __commonJS({
         return byte;
       }
       function getText() {
-        var result = "";
+        let result = "";
         if (data[index] === 41) {
           index++;
           return result;
         }
         if (data[index] !== 254 || data[index + 1] !== 255) {
-          throw new Error("Invalid utf-16 BOM");
+          while (index < data.length && data[index] !== 41) {
+            result += String.fromCharCode(getTextByte());
+          }
+          (0, psdReader_1.consumeMemory)(reader, result.length * 2);
+          index++;
+          return result;
         }
         index += 2;
         while (index < data.length && data[index] !== 41) {
-          var high = getTextByte();
-          var low = getTextByte();
-          var char2 = high << 8 | low;
-          result += String.fromCharCode(char2);
+          const high = getTextByte();
+          const low = getTextByte();
+          const char = high << 8 | low;
+          result += String.fromCharCode(char);
         }
+        (0, psdReader_1.consumeMemory)(reader, result.length * 2);
         index++;
         return result;
       }
-      var root = null;
-      var stack = [];
-      function pushContainer(value2) {
+      let root = null;
+      const stack = [];
+      function pushContainer(value) {
         if (!stack.length) {
-          stack.push(value2);
-          root = value2;
+          stack.push(value);
+          root = value;
         } else {
-          pushValue(value2);
-          stack.push(value2);
+          pushValue(value);
+          stack.push(value);
         }
       }
-      function pushValue(value2) {
+      function pushValue(value) {
         if (!stack.length)
           throw new Error("Invalid data");
-        var top = stack[stack.length - 1];
+        (0, psdReader_1.consumeMemory)(reader, NODE_COST);
+        const top = stack[stack.length - 1];
         if (typeof top === "string") {
-          stack[stack.length - 2][top] = value2;
+          const target = stack[stack.length - 2];
+          setProperty(target, top, value);
           pop();
         } else if (Array.isArray(top)) {
-          top.push(value2);
+          top.push(value);
         } else {
           throw new Error("Invalid data");
         }
@@ -10026,14 +12773,15 @@ var require_engineData = __commonJS({
       function pushProperty(name) {
         if (!stack.length)
           pushContainer({});
-        var top = stack[stack.length - 1];
-        if (top && typeof top === "string") {
+        const top = stack[stack.length - 1];
+        if (typeof top === "string" || Array.isArray(top)) {
           if (name === "nil") {
             pushValue(null);
           } else {
-            pushValue("/".concat(name));
+            pushValue(`/${name}`);
           }
         } else if (top && typeof top === "object") {
+          (0, psdReader_1.consumeMemory)(reader, NODE_COST + name.length * 2);
           stack.push(name);
         } else {
           throw new Error("Invalid data");
@@ -10045,9 +12793,14 @@ var require_engineData = __commonJS({
         stack.pop();
       }
       skipWhitespace();
-      while (index < data.length) {
-        var i = index;
-        var char = data[i];
+      let dataLength = data.length;
+      let invalidTokens = 0;
+      let firstInvalidToken = "";
+      while (dataLength > 0 && data[dataLength - 1] === 0)
+        dataLength--;
+      while (index < dataLength) {
+        const i = index;
+        const char = data[i];
         if (char === 60 && data[i + 1] === 60) {
           index += 2;
           pushContainer({});
@@ -10056,15 +12809,15 @@ var require_engineData = __commonJS({
           pop();
         } else if (char === 47) {
           index += 1;
-          var start = index;
+          const start = index;
           while (index < data.length && !isWhitespace(data[index])) {
             index++;
           }
-          var name_1 = "";
-          for (var i_1 = start; i_1 < index; i_1++) {
-            name_1 += String.fromCharCode(data[i_1]);
+          let name = "";
+          for (let i2 = start; i2 < index; i2++) {
+            name += String.fromCharCode(data[i2]);
           }
-          pushProperty(name_1);
+          pushProperty(name);
         } else if (char === 40) {
           index += 1;
           pushValue(getText());
@@ -10084,7 +12837,7 @@ var require_engineData = __commonJS({
           index += 5;
           pushValue(false);
         } else if (isNumber(char)) {
-          var value = "";
+          let value = "";
           while (index < data.length && isNumber(data[index])) {
             value += String.fromCharCode(data[index]);
             index++;
@@ -10092,13 +12845,17 @@ var require_engineData = __commonJS({
           pushValue(parseFloat(value));
         } else {
           index += 1;
-          console.log("Invalid token ".concat(String.fromCharCode(char), " at ").concat(index));
+          if (!invalidTokens)
+            firstInvalidToken = `'${String.fromCharCode(char)}' (${char}) at ${index}`;
+          invalidTokens++;
         }
         skipWhitespace();
       }
+      if (invalidTokens) {
+        reader.log(`Invalid tokens in engine data (${invalidTokens} in total, first: ${firstInvalidToken})`);
+      }
       return root;
     }
-    exports.parseEngineData = parseEngineData;
     var floatKeys = [
       "Axis",
       "XY",
@@ -10129,16 +12886,13 @@ var require_engineData = __commonJS({
       "AutoLeading"
     ];
     var intArrays = ["RunLengthArray"];
-    function serializeEngineData(data, condensed) {
-      if (condensed === void 0) {
-        condensed = false;
-      }
-      var buffer = new Uint8Array(1024);
-      var offset = 0;
-      var indent = 0;
+    function serializeEngineData(data, condensed = false) {
+      let buffer = new Uint8Array(1024);
+      let offset = 0;
+      let indent = 0;
       function write(value) {
         if (offset >= buffer.length) {
-          var newBuffer = new Uint8Array(buffer.length * 2);
+          const newBuffer = new Uint8Array(buffer.length * 2);
           newBuffer.set(buffer);
           buffer = newBuffer;
         }
@@ -10146,7 +12900,7 @@ var require_engineData = __commonJS({
         offset++;
       }
       function writeString(value) {
-        for (var i = 0; i < value.length; i++) {
+        for (let i = 0; i < value.length; i++) {
           write(value.charCodeAt(i));
         }
       }
@@ -10154,34 +12908,38 @@ var require_engineData = __commonJS({
         if (condensed) {
           writeString(" ");
         } else {
-          for (var i = 0; i < indent; i++) {
+          for (let i = 0; i < indent; i++) {
             writeString("	");
           }
         }
       }
-      function writeProperty(key2, value) {
+      function writeProperty(key, value) {
         writeIndent();
-        writeString("/".concat(key2));
-        writeValue(value, key2, true);
+        writeString(`/${key}`);
+        writeValue(value, key, true);
         if (!condensed)
           writeString("\n");
       }
+      function finite(value) {
+        return Number.isFinite(value) ? value : 0;
+      }
       function serializeInt(value) {
-        return value.toString();
+        return finite(value).toString();
       }
       function serializeFloat(value) {
-        return value.toFixed(5).replace(/(\d)0+$/g, "$1").replace(/^0+\.([1-9])/g, ".$1").replace(/^-0+\.0(\d)/g, "-.0$1");
+        return finite(value).toFixed(5).replace(/(\d)0+$/g, "$1").replace(/^0+\.([1-9])/g, ".$1").replace(/^-0+\.0(\d)/g, "-.0$1");
       }
-      function serializeNumber(value, key2) {
-        var isFloat = key2 && floatKeys.indexOf(key2) !== -1 || (value | 0) !== value;
+      function serializeNumber(value, key) {
+        value = finite(value);
+        const isFloat = key && floatKeys.indexOf(key) !== -1 || (value | 0) !== value;
         return isFloat ? serializeFloat(value) : serializeInt(value);
       }
       function getKeys(value) {
-        var keys = Object.keys(value);
+        const keys = Object.keys(value);
         if (keys.indexOf("98") !== -1)
-          keys.unshift.apply(keys, keys.splice(keys.indexOf("99"), 1));
+          keys.unshift(...keys.splice(keys.indexOf("98"), 1));
         if (keys.indexOf("99") !== -1)
-          keys.unshift.apply(keys, keys.splice(keys.indexOf("99"), 1));
+          keys.unshift(...keys.splice(keys.indexOf("99"), 1));
         return keys;
       }
       function writeStringByte(value) {
@@ -10190,10 +12948,7 @@ var require_engineData = __commonJS({
         }
         write(value);
       }
-      function writeValue(value, key2, inProperty) {
-        if (inProperty === void 0) {
-          inProperty = false;
-        }
+      function writeValue(value, key, inProperty = false) {
         function writePrefix() {
           if (inProperty) {
             writeString(" ");
@@ -10201,25 +12956,25 @@ var require_engineData = __commonJS({
             writeIndent();
           }
         }
-        if (value === null) {
+        if (value === null || value === void 0) {
           writePrefix();
           writeString(condensed ? "/nil" : "null");
         } else if (typeof value === "number") {
           writePrefix();
-          writeString(serializeNumber(value, key2));
+          writeString(serializeNumber(value, key));
         } else if (typeof value === "boolean") {
           writePrefix();
           writeString(value ? "true" : "false");
         } else if (typeof value === "string") {
           writePrefix();
-          if ((key2 === "99" || key2 === "98") && value.charAt(0) === "/") {
+          if ((key === "99" || key === "98") && value.charAt(0) === "/") {
             writeString(value);
           } else {
             writeString("(");
             write(254);
             write(255);
-            for (var i = 0; i < value.length; i++) {
-              var code = value.charCodeAt(i);
+            for (let i = 0; i < value.length; i++) {
+              const code = value.charCodeAt(i);
               writeStringByte(code >> 8 & 255);
               writeStringByte(code & 255);
             }
@@ -10227,13 +12982,10 @@ var require_engineData = __commonJS({
           }
         } else if (Array.isArray(value)) {
           writePrefix();
-          if (value.every(function(x2) {
-            return typeof x2 === "number";
-          })) {
+          if (value.every((x) => typeof x === "number")) {
             writeString("[");
-            var intArray = intArrays.indexOf(key2) !== -1;
-            for (var _i2 = 0, value_1 = value; _i2 < value_1.length; _i2++) {
-              var x = value_1[_i2];
+            const intArray = intArrays.indexOf(key) !== -1;
+            for (const x of value) {
               writeString(" ");
               writeString(intArray ? serializeNumber(x) : serializeFloat(x));
             }
@@ -10242,9 +12994,8 @@ var require_engineData = __commonJS({
             writeString("[");
             if (!condensed)
               writeString("\n");
-            for (var _a3 = 0, value_2 = value; _a3 < value_2.length; _a3++) {
-              var x = value_2[_a3];
-              writeValue(x, key2);
+            for (const x of value) {
+              writeValue(x, key);
               if (!condensed)
                 writeString("\n");
             }
@@ -10259,9 +13010,9 @@ var require_engineData = __commonJS({
           if (!condensed)
             writeString("\n");
           indent++;
-          for (var _b2 = 0, _c = getKeys(value); _b2 < _c.length; _b2++) {
-            var key_1 = _c[_b2];
-            writeProperty(key_1, value[key_1]);
+          for (const key2 of getKeys(value)) {
+            if (value[key2] !== void 0)
+              writeProperty(key2, value[key2]);
           }
           indent--;
           writeIndent();
@@ -10271,9 +13022,9 @@ var require_engineData = __commonJS({
       }
       if (condensed) {
         if (typeof data === "object") {
-          for (var _i = 0, _a2 = getKeys(data); _i < _a2.length; _i++) {
-            var key = _a2[_i];
-            writeProperty(key, data[key]);
+          for (const key of getKeys(data)) {
+            if (data[key] !== void 0)
+              writeProperty(key, data[key]);
           }
         }
       } else {
@@ -10282,7 +13033,6 @@ var require_engineData = __commonJS({
       }
       return buffer.slice(0, offset);
     }
-    exports.serializeEngineData = serializeEngineData;
   }
 });
 
@@ -10290,19 +13040,11 @@ var require_engineData = __commonJS({
 var require_text = __commonJS({
   "node_modules/ag-psd/dist/text.js"(exports) {
     "use strict";
-    var __assign = exports && exports.__assign || function() {
-      __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-          s = arguments[i];
-          for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-        }
-        return t;
-      };
-      return __assign.apply(this, arguments);
-    };
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.encodeEngineData = exports.decodeEngineData = void 0;
+    exports.decodeEngineData = decodeEngineData;
+    exports.decodeLegacyTextData = decodeLegacyTextData;
+    exports.encodeEngineData = encodeEngineData;
+    var helpers_1 = require_helpers();
     var defaultFont = {
       name: "MyriadPro-Regular",
       script: 0,
@@ -10436,14 +13178,37 @@ var require_text = __commonJS({
       "kashida",
       "diacriticPos"
     ];
-    var antialias = ["none", "crisp", "strong", "smooth", "sharp"];
+    var antialias = [
+      "none",
+      // 0
+      "crisp",
+      // 1
+      "strong",
+      // 2
+      "smooth",
+      // 3
+      "sharp",
+      // 4
+      void 0,
+      // 5 - unknown
+      "platformLCD",
+      // 6
+      "platform"
+      // 7
+    ];
     var justification = [
       "left",
+      // 0
       "right",
+      // 1
       "center",
+      // 2
       "justify-left",
+      // 3
       "justify-right",
+      // 4
       "justify-center",
+      // 5
       "justify-all"
       // 6
     ];
@@ -10451,7 +13216,7 @@ var require_text = __commonJS({
       return value.substring(0, 1).toUpperCase() + value.substring(1);
     }
     function decodeColor(color) {
-      var c = color.Values;
+      const c = color.Values;
       switch (color.Type) {
         case 0:
           return { k: c[1] * 255 };
@@ -10469,13 +13234,45 @@ var require_text = __commonJS({
           throw new Error("Unknown color type in text layer");
       }
     }
+    function hsbToRgb(h, s, v) {
+      h = (0, helpers_1.clamp)(h || 0, 0, 1);
+      s = (0, helpers_1.clamp)(s || 0, 0, 1);
+      v = (0, helpers_1.clamp)(v || 0, 0, 1);
+      const h6 = h * 6 % 6;
+      const i = Math.floor(h6);
+      const f = h6 - i;
+      const p = v * (1 - s);
+      const q = v * (1 - s * f);
+      const t = v * (1 - s * (1 - f));
+      switch (i) {
+        case 0:
+          return [v, t, p];
+        case 1:
+          return [q, v, p];
+        case 2:
+          return [p, v, t];
+        case 3:
+          return [p, q, v];
+        case 4:
+          return [t, p, v];
+        default:
+          return [v, p, q];
+      }
+    }
     function encodeColor(color) {
       if (!color) {
         return { Type: 1, Values: [0, 0, 0, 0] };
       } else if ("r" in color) {
         return { Type: 1, Values: ["a" in color ? color.a / 255 : 1, color.r / 255, color.g / 255, color.b / 255] };
+      } else if ("fr" in color) {
+        return { Type: 1, Values: [1, (0, helpers_1.clamp)(color.fr || 0, 0, 1), (0, helpers_1.clamp)(color.fg || 0, 0, 1), (0, helpers_1.clamp)(color.fb || 0, 0, 1)] };
+      } else if ("h" in color) {
+        const [r, g, b] = hsbToRgb(color.h, color.s, color.b);
+        return { Type: 1, Values: [1, r, g, b] };
       } else if ("c" in color) {
         return { Type: 2, Values: [1, color.c / 255, color.m / 255, color.y / 255, color.k / 255] };
+      } else if ("l" in color) {
+        throw new Error("LAB colors are not supported in text layers, use RGB, CMYK or grayscale color instead");
       } else if ("k" in color) {
         return { Type: 0, Values: [1, color.k / 255] };
       } else {
@@ -10487,7 +13284,7 @@ var require_text = __commonJS({
         return false;
       if (a.length !== b.length)
         return false;
-      for (var i = 0; i < a.length; i++)
+      for (let i = 0; i < a.length; i++)
         if (a[i] !== b[i])
           return false;
       return true;
@@ -10495,37 +13292,35 @@ var require_text = __commonJS({
     function objectsEqual(a, b) {
       if (!a || !b)
         return false;
-      for (var _i = 0, _a2 = Object.keys(a); _i < _a2.length; _i++) {
-        var key = _a2[_i];
+      for (const key of Object.keys(a))
         if (a[key] !== b[key])
           return false;
-      }
-      for (var _b2 = 0, _c = Object.keys(b); _b2 < _c.length; _b2++) {
-        var key = _c[_b2];
+      for (const key of Object.keys(b))
         if (a[key] !== b[key])
           return false;
-      }
       return true;
     }
     function findOrAddFont(fonts, font) {
-      for (var i = 0; i < fonts.length; i++) {
-        if (fonts[i].name === font.name)
+      for (let i = 0; i < fonts.length; i++) {
+        if (fonts[i].name === font.name && (fonts[i].synthetic || 0) === (font.synthetic || 0))
           return i;
       }
       fonts.push(font);
       return fonts.length - 1;
     }
     function decodeObject(obj, keys, fonts) {
-      var result = {};
-      for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
-        var key = keys_1[_i];
-        var Key = upperFirst(key);
+      var _a2;
+      const result = {};
+      for (const key of keys) {
+        const Key = upperFirst(key);
         if (obj[Key] === void 0)
           continue;
         if (key === "justification") {
-          result[key] = justification[obj[Key]];
+          result[key] = (_a2 = justification[obj[Key]]) !== null && _a2 !== void 0 ? _a2 : "left";
         } else if (key === "font") {
-          result[key] = fonts[obj[Key]];
+          const font = fonts[obj[Key]];
+          if (font)
+            result[key] = font;
         } else if (key === "fillColor" || key === "strokeColor") {
           result[key] = decodeColor(obj[Key]);
         } else {
@@ -10536,14 +13331,13 @@ var require_text = __commonJS({
     }
     function encodeObject(obj, keys, fonts) {
       var _a2;
-      var result = {};
-      for (var _i = 0, keys_2 = keys; _i < keys_2.length; _i++) {
-        var key = keys_2[_i];
-        var Key = upperFirst(key);
+      const result = {};
+      for (const key of keys) {
+        const Key = upperFirst(key);
         if (obj[key] === void 0)
           continue;
         if (key === "justification") {
-          result[Key] = justification.indexOf((_a2 = obj[key]) !== null && _a2 !== void 0 ? _a2 : "left");
+          result[Key] = Math.max(0, justification.indexOf((_a2 = obj[key]) !== null && _a2 !== void 0 ? _a2 : "left"));
         } else if (key === "font") {
           result[Key] = findOrAddFont(fonts, obj[key]);
         } else if (key === "fillColor" || key === "strokeColor") {
@@ -10569,73 +13363,84 @@ var require_text = __commonJS({
     function deduplicateValues(base, runs, keys) {
       if (!runs.length)
         return;
-      var _loop_1 = function(key2) {
-        var value = runs[0].style[key2];
+      for (const key of keys) {
+        const value = runs[0].style[key];
         if (value !== void 0) {
-          var identical = false;
+          let identical = false;
           if (Array.isArray(value)) {
-            identical = runs.every(function(r2) {
-              return arraysEqual(r2.style[key2], value);
-            });
+            identical = runs.every((r) => arraysEqual(r.style[key], value));
           } else if (typeof value === "object") {
-            identical = runs.every(function(r2) {
-              return objectsEqual(r2.style[key2], value);
-            });
+            identical = runs.every((r) => objectsEqual(r.style[key], value));
           } else {
-            identical = runs.every(function(r2) {
-              return r2.style[key2] === value;
-            });
+            identical = runs.every((r) => r.style[key] === value);
           }
           if (identical) {
-            base[key2] = value;
+            base[key] = value;
           }
         }
-        var styleValue = base[key2];
+        const styleValue = base[key];
         if (styleValue !== void 0) {
-          for (var _a2 = 0, runs_1 = runs; _a2 < runs_1.length; _a2++) {
-            var r = runs_1[_a2];
-            var same = false;
+          for (const r of runs) {
+            let same = false;
             if (Array.isArray(value)) {
-              same = arraysEqual(r.style[key2], value);
+              same = arraysEqual(r.style[key], value);
             } else if (typeof value === "object") {
-              same = objectsEqual(r.style[key2], value);
+              same = objectsEqual(r.style[key], value);
             } else {
-              same = r.style[key2] === value;
+              same = r.style[key] === value;
             }
             if (same)
-              delete r.style[key2];
+              delete r.style[key];
           }
         }
-      };
-      for (var _i = 0, keys_3 = keys; _i < keys_3.length; _i++) {
-        var key = keys_3[_i];
-        _loop_1(key);
       }
-      if (runs.every(function(x) {
-        return Object.keys(x.style).length === 0;
-      })) {
+      if (runs.every((x) => Object.keys(x.style).length === 0)) {
         runs.length = 0;
       }
     }
-    function decodeEngineData(engineData) {
-      var _a2, _b2, _c, _d, _e, _f;
-      var engineDict = engineData.EngineDict;
-      var resourceDict = engineData.ResourceDict;
-      var fonts = resourceDict.FontSet.map(function(f) {
-        return {
-          name: f.Name,
-          script: f.Script,
-          type: f.FontType,
-          synthetic: f.Synthetic
-        };
-      });
-      var text = engineDict.Editor.Text.replace(/\r/g, "\n");
-      var removedCharacters = 0;
-      while (/\n$/.test(text)) {
-        text = text.substring(0, text.length - 1);
-        removedCharacters++;
+    function isDefaultGridColor(color) {
+      return !!color && "r" in color && color.r === 0 && color.g === 0 && color.b === 255;
+    }
+    function decodeGridColor(color, defaultColor) {
+      try {
+        return color ? decodeColor(color) : defaultColor;
+      } catch (_a2) {
+        return defaultColor;
       }
-      var result = {
+    }
+    function decodeGridInfo(grid) {
+      var _a2, _b2;
+      if (!grid || typeof grid !== "object")
+        return void 0;
+      const result = {
+        isOn: !!grid.GridIsOn,
+        show: !!grid.ShowGrid,
+        size: (_a2 = grid.GridSize) !== null && _a2 !== void 0 ? _a2 : defaultGridInfo.size,
+        leading: (_b2 = grid.GridLeading) !== null && _b2 !== void 0 ? _b2 : defaultGridInfo.leading,
+        color: decodeGridColor(grid.GridColor, defaultGridInfo.color),
+        leadingFillColor: decodeGridColor(grid.GridLeadingFillColor, defaultGridInfo.leadingFillColor),
+        alignLineHeightToGridFlags: !!grid.AlignLineHeightToGridFlags
+      };
+      const isDefault = !result.isOn && !result.show && result.size === defaultGridInfo.size && result.leading === defaultGridInfo.leading && !result.alignLineHeightToGridFlags && isDefaultGridColor(result.color) && isDefaultGridColor(result.leadingFillColor);
+      return isDefault ? void 0 : result;
+    }
+    function decodeEngineData(engineData) {
+      var _a2, _b2, _c, _d, _e, _f, _g, _h, _j, _k;
+      const engineDict = engineData.EngineDict;
+      const resourceDict = engineData.ResourceDict;
+      const fonts = resourceDict.FontSet.map((f) => ({
+        name: f.Name,
+        script: f.Script,
+        type: f.FontType,
+        synthetic: f.Synthetic
+      }));
+      let text = engineDict.Editor.Text.replace(/\r/g, "\n");
+      let removedCharacters = 0;
+      if (/\n$/.test(text)) {
+        text = text.substring(0, text.length - 1);
+        removedCharacters = 1;
+      }
+      const result = {
         text,
         antiAlias: (_a2 = antialias[engineDict.AntiAlias]) !== null && _a2 !== void 0 ? _a2 : "smooth",
         useFractionalGlyphWidths: !!engineDict.UseFractionalGlyphWidths,
@@ -10645,7 +13450,7 @@ var require_text = __commonJS({
         subscriptPosition: resourceDict.SubscriptPosition,
         smallCapSize: resourceDict.SmallCapSize
       };
-      var photoshop = (_f = (_e = (_d = (_c = (_b2 = engineDict.Rendered) === null || _b2 === void 0 ? void 0 : _b2.Shapes) === null || _c === void 0 ? void 0 : _c.Children) === null || _d === void 0 ? void 0 : _d[0]) === null || _e === void 0 ? void 0 : _e.Cookie) === null || _f === void 0 ? void 0 : _f.Photoshop;
+      const photoshop = (_f = (_e = (_d = (_c = (_b2 = engineDict.Rendered) === null || _b2 === void 0 ? void 0 : _b2.Shapes) === null || _c === void 0 ? void 0 : _c.Children) === null || _d === void 0 ? void 0 : _d[0]) === null || _e === void 0 ? void 0 : _e.Cookie) === null || _f === void 0 ? void 0 : _f.Photoshop;
       if (photoshop) {
         result.shapeType = photoshop.ShapeType === 1 ? "box" : "point";
         if (photoshop.PointBase)
@@ -10653,38 +13458,44 @@ var require_text = __commonJS({
         if (photoshop.BoxBounds)
           result.boxBounds = photoshop.BoxBounds;
       }
-      var paragraphRun = engineDict.ParagraphRun;
+      const gridInfo = decodeGridInfo(engineDict.GridInfo);
+      if (gridInfo)
+        result.gridInfo = gridInfo;
+      const paragraphRun = engineDict.ParagraphRun;
       result.paragraphStyle = {};
       result.paragraphStyleRuns = [];
-      for (var i = 0; i < paragraphRun.RunArray.length; i++) {
-        var run_1 = paragraphRun.RunArray[i];
-        var length_1 = paragraphRun.RunLengthArray[i];
-        var style = decodeParagraphStyle(run_1.ParagraphSheet.Properties, fonts);
+      for (let i = 0; i < paragraphRun.RunArray.length; i++) {
+        const run = paragraphRun.RunArray[i];
+        const length = paragraphRun.RunLengthArray[i];
+        const style = decodeParagraphStyle(run.ParagraphSheet.Properties, fonts);
         result.paragraphStyleRuns.push({
-          length: length_1,
+          length,
           style
           /*, adjustments*/
         });
       }
-      for (var counter = removedCharacters; result.paragraphStyleRuns.length && counter > 0; counter--) {
-        if (--result.paragraphStyleRuns[result.paragraphStyleRuns.length - 1].length === 0) {
+      for (let counter = removedCharacters; result.paragraphStyleRuns.length && counter > 0; counter--) {
+        if (--result.paragraphStyleRuns[result.paragraphStyleRuns.length - 1].length === 0 && result.paragraphStyleRuns.length === 1) {
           result.paragraphStyleRuns.pop();
         }
       }
       deduplicateValues(result.paragraphStyle, result.paragraphStyleRuns, paragraphStyleKeys);
       if (!result.paragraphStyleRuns.length)
         delete result.paragraphStyleRuns;
-      var styleRun = engineDict.StyleRun;
+      const styleRun = engineDict.StyleRun;
+      const normalStyleSheet = (_j = (_g = resourceDict.StyleSheetSet) === null || _g === void 0 ? void 0 : _g[(_h = resourceDict.TheNormalStyleSheet) !== null && _h !== void 0 ? _h : 0]) === null || _j === void 0 ? void 0 : _j.StyleSheetData;
+      const normalFontIndex = normalStyleSheet === null || normalStyleSheet === void 0 ? void 0 : normalStyleSheet.Font;
+      const normalFont = (_k = normalFontIndex !== void 0 ? fonts[normalFontIndex] : void 0) !== null && _k !== void 0 ? _k : fonts[0];
       result.style = {};
       result.styleRuns = [];
-      for (var i = 0; i < styleRun.RunArray.length; i++) {
-        var length_2 = styleRun.RunLengthArray[i];
-        var style = decodeStyle(styleRun.RunArray[i].StyleSheet.StyleSheetData, fonts);
-        if (!style.font)
-          style.font = fonts[0];
-        result.styleRuns.push({ length: length_2, style });
+      for (let i = 0; i < styleRun.RunArray.length; i++) {
+        const length = styleRun.RunLengthArray[i];
+        const style = decodeStyle(styleRun.RunArray[i].StyleSheet.StyleSheetData, fonts);
+        if (!style.font && normalFont)
+          style.font = normalFont;
+        result.styleRuns.push({ length, style });
       }
-      for (var counter = removedCharacters; result.styleRuns.length && counter > 0; counter--) {
+      for (let counter = removedCharacters; result.styleRuns.length && counter > 0; counter--) {
         if (--result.styleRuns[result.styleRuns.length - 1].length === 0) {
           result.styleRuns.pop();
         }
@@ -10694,58 +13505,133 @@ var require_text = __commonJS({
         delete result.styleRuns;
       return result;
     }
-    exports.decodeEngineData = decodeEngineData;
+    var fixed = (value) => value / 65536;
+    function decodeLegacyTextData(data) {
+      var _a2, _b2, _c, _d;
+      const styleRuns = [];
+      let text = "";
+      for (const line of data.lines) {
+        for (const { code, style } of line.chars) {
+          text += String.fromCharCode(code);
+          const last = styleRuns[styleRuns.length - 1];
+          if (last && last.mark === style) {
+            last.length++;
+          } else {
+            styleRuns.push({ length: 1, mark: style });
+          }
+        }
+      }
+      if (text.endsWith("\r")) {
+        text = text.slice(0, -1);
+        if (--styleRuns[styleRuns.length - 1].length === 0)
+          styleRuns.pop();
+      }
+      const runs = styleRuns.map(({ length, mark }) => {
+        var _a3, _b3;
+        const s = (_a3 = data.styles.find((s2) => s2.mark === mark)) !== null && _a3 !== void 0 ? _a3 : data.styles[0];
+        const face = s && ((_b3 = data.faces.find((f) => f.mark === s.faceMark)) !== null && _b3 !== void 0 ? _b3 : data.faces[0]);
+        const style = {};
+        if (face)
+          style.font = { name: face.name, script: face.script };
+        if (s) {
+          style.fontSize = fixed(s.size);
+          style.autoLeading = s.leading === 0;
+          if (s.leading)
+            style.leading = fixed(s.leading);
+          style.tracking = Math.round(fixed(s.tracking) * 1e3);
+          style.autoKerning = s.autoKerning;
+          style.kerning = Math.round(fixed(s.kerning) * 1e3);
+          style.baselineShift = fixed(s.baselineShift);
+        }
+        style.fillColor = data.color;
+        return { length, style };
+      });
+      const result = {
+        text: text.replace(/\r/g, "\n"),
+        transform: data.transform,
+        antiAlias: data.antiAlias ? "smooth" : "none",
+        orientation: ((_a2 = data.lines[0]) === null || _a2 === void 0 ? void 0 : _a2.orientation) === 1 ? "vertical" : "horizontal",
+        paragraphStyle: { justification: (_d = justification[(_c = (_b2 = data.lines[0]) === null || _b2 === void 0 ? void 0 : _b2.alignment) !== null && _c !== void 0 ? _c : 0]) !== null && _d !== void 0 ? _d : "left" },
+        style: {},
+        styleRuns: runs
+      };
+      deduplicateValues(result.style, result.styleRuns, styleKeys);
+      if (!result.styleRuns.length)
+        delete result.styleRuns;
+      return result;
+    }
+    function adjustRunLengths(runs, removed) {
+      if (!runs || !removed.length)
+        return runs;
+      let start = 0;
+      let removedIndex = 0;
+      return runs.map((run) => {
+        const length = Math.max(0, run.length || 0);
+        const end = start + length;
+        let count = 0;
+        while (removedIndex < removed.length && removed[removedIndex] < end) {
+          if (removed[removedIndex] >= start)
+            count++;
+          removedIndex++;
+        }
+        start = end;
+        return Object.assign(Object.assign({}, run), { length: length - count });
+      });
+    }
     function encodeEngineData(data) {
-      var _a2, _b2, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
-      var text = "".concat((data.text || "").replace(/\r?\n/g, "\r"), "\r");
-      var fonts = [
+      var _a2, _b2, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+      const sourceText = data.text || "";
+      const removedIndices = [];
+      for (let i = 0; i < sourceText.length - 1; i++) {
+        if (sourceText.charCodeAt(i) === 13 && sourceText.charCodeAt(i + 1) === 10)
+          removedIndices.push(i);
+      }
+      const text = `${sourceText.replace(/\r?\n/g, "\r")}\r`;
+      const fonts = [
         { name: "AdobeInvisFont", script: 0, type: 0, synthetic: 0 }
       ];
-      var defFont = ((_a2 = data.style) === null || _a2 === void 0 ? void 0 : _a2.font) || ((_c = (_b2 = data.styleRuns) === null || _b2 === void 0 ? void 0 : _b2.find(function(s) {
-        return s.style.font;
-      })) === null || _c === void 0 ? void 0 : _c.style.font) || defaultFont;
-      var paragraphRunArray = [];
-      var paragraphRunLengthArray = [];
-      var paragraphRuns = data.paragraphStyleRuns;
+      const defFont = ((_a2 = data.style) === null || _a2 === void 0 ? void 0 : _a2.font) || ((_c = (_b2 = data.styleRuns) === null || _b2 === void 0 ? void 0 : _b2.find((s) => s.style.font)) === null || _c === void 0 ? void 0 : _c.style.font) || defaultFont;
+      const paragraphRunArray = [];
+      const paragraphRunLengthArray = [];
+      const paragraphRuns = adjustRunLengths(data.paragraphStyleRuns, removedIndices);
       if (paragraphRuns && paragraphRuns.length) {
-        var leftLength_1 = text.length;
-        for (var _i = 0, paragraphRuns_1 = paragraphRuns; _i < paragraphRuns_1.length; _i++) {
-          var run_2 = paragraphRuns_1[_i];
-          var runLength = Math.min(run_2.length, leftLength_1);
-          leftLength_1 -= runLength;
+        let leftLength2 = text.length;
+        for (const run of paragraphRuns) {
+          let runLength = Math.min(run.length, leftLength2);
+          leftLength2 -= runLength;
+          if (leftLength2 === 1 && run === paragraphRuns[paragraphRuns.length - 1]) {
+            runLength++;
+            leftLength2--;
+          }
           if (!runLength)
             continue;
-          if (leftLength_1 === 1 && run_2 === paragraphRuns[paragraphRuns.length - 1]) {
-            runLength++;
-            leftLength_1--;
-          }
           paragraphRunLengthArray.push(runLength);
           paragraphRunArray.push({
             ParagraphSheet: {
               DefaultStyleSheet: 0,
-              Properties: encodeParagraphStyle(__assign(__assign(__assign({}, defaultParagraphStyle), data.paragraphStyle), run_2.style), fonts)
+              Properties: encodeParagraphStyle(Object.assign(Object.assign(Object.assign({}, defaultParagraphStyle), data.paragraphStyle), run.style), fonts)
             },
             Adjustments: { Axis: [1, 0, 1], XY: [0, 0] }
           });
         }
-        if (leftLength_1) {
-          paragraphRunLengthArray.push(leftLength_1);
+        if (leftLength2) {
+          paragraphRunLengthArray.push(leftLength2);
           paragraphRunArray.push({
             ParagraphSheet: {
               DefaultStyleSheet: 0,
-              Properties: encodeParagraphStyle(__assign(__assign({}, defaultParagraphStyle), data.paragraphStyle), fonts)
+              Properties: encodeParagraphStyle(Object.assign(Object.assign({}, defaultParagraphStyle), data.paragraphStyle), fonts)
             },
             Adjustments: { Axis: [1, 0, 1], XY: [0, 0] }
           });
         }
       } else {
-        for (var i = 0, last = 0; i < text.length; i++) {
+        for (let i = 0, last = 0; i < text.length; i++) {
           if (text.charCodeAt(i) === 13) {
             paragraphRunLengthArray.push(i - last + 1);
             paragraphRunArray.push({
               ParagraphSheet: {
                 DefaultStyleSheet: 0,
-                Properties: encodeParagraphStyle(__assign(__assign({}, defaultParagraphStyle), data.paragraphStyle), fonts)
+                Properties: encodeParagraphStyle(Object.assign(Object.assign({}, defaultParagraphStyle), data.paragraphStyle), fonts)
               },
               Adjustments: { Axis: [1, 0, 1], XY: [0, 0] }
             });
@@ -10753,41 +13639,41 @@ var require_text = __commonJS({
           }
         }
       }
-      var styleSheetData = encodeStyle(__assign(__assign({}, defaultStyle), { font: defFont }), fonts);
-      var styleRuns = data.styleRuns || [{ length: text.length, style: data.style || {} }];
-      var styleRunArray = [];
-      var styleRunLengthArray = [];
-      var leftLength = text.length;
-      for (var _o = 0, styleRuns_1 = styleRuns; _o < styleRuns_1.length; _o++) {
-        var run_3 = styleRuns_1[_o];
-        var runLength = Math.min(run_3.length, leftLength);
+      const styleSheetData = encodeStyle(Object.assign(Object.assign({}, defaultStyle), { font: defFont }), fonts);
+      const styleRuns = ((_d = data.styleRuns) === null || _d === void 0 ? void 0 : _d.length) ? adjustRunLengths(data.styleRuns, removedIndices) : [{ length: text.length, style: data.style || {} }];
+      const styleRunArray = [];
+      const styleRunLengthArray = [];
+      let leftLength = text.length;
+      for (const run of styleRuns) {
+        let runLength = Math.min(run.length, leftLength);
         leftLength -= runLength;
         if (!runLength)
           continue;
-        if (leftLength === 1 && run_3 === styleRuns[styleRuns.length - 1]) {
+        if (leftLength === 1 && run === styleRuns[styleRuns.length - 1]) {
           runLength++;
           leftLength--;
         }
         styleRunLengthArray.push(runLength);
         styleRunArray.push({
           StyleSheet: {
-            StyleSheetData: encodeStyle(__assign(__assign({ kerning: 0, autoKerning: true, fillColor: { r: 0, g: 0, b: 0 } }, data.style), run_3.style), fonts)
+            StyleSheetData: encodeStyle(Object.assign(Object.assign({ kerning: 0, autoKerning: true, fillColor: { r: 0, g: 0, b: 0 } }, data.style), run.style), fonts)
           }
         });
       }
-      if (leftLength && styleRuns.length) {
+      if (leftLength) {
         styleRunLengthArray.push(leftLength);
         styleRunArray.push({
           StyleSheet: {
-            StyleSheetData: encodeStyle(__assign({ kerning: 0, autoKerning: true, fillColor: { r: 0, g: 0, b: 0 } }, data.style), fonts)
+            StyleSheetData: encodeStyle(Object.assign({ kerning: 0, autoKerning: true, fillColor: { r: 0, g: 0, b: 0 } }, data.style), fonts)
           }
         });
       }
-      var gridInfo = __assign(__assign({}, defaultGridInfo), data.gridInfo);
-      var WritingDirection = data.orientation === "vertical" ? 2 : 0;
-      var Procession = data.orientation === "vertical" ? 1 : 0;
-      var ShapeType = data.shapeType === "box" ? 1 : 0;
-      var Photoshop = {
+      const gridInfo = Object.assign(Object.assign({}, defaultGridInfo), data.gridInfo);
+      const antiAliasIndex = antialias.indexOf((_e = data.antiAlias) !== null && _e !== void 0 ? _e : "sharp");
+      const WritingDirection = data.orientation === "vertical" ? 2 : 0;
+      const Procession = data.orientation === "vertical" ? 1 : 0;
+      const ShapeType = data.shapeType === "box" ? 1 : 0;
+      const Photoshop = {
         ShapeType
       };
       if (ShapeType === 0) {
@@ -10801,7 +13687,7 @@ var require_text = __commonJS({
         TransformPoint1: [0, 1],
         TransformPoint2: [0, 0]
       };
-      var defaultResources = {
+      const defaultResources = {
         KinsokuSet: [
           {
             Name: "PhotoshopKinsokuHard",
@@ -10830,7 +13716,7 @@ var require_text = __commonJS({
           {
             Name: "Normal RGB",
             DefaultStyleSheet: 0,
-            Properties: encodeParagraphStyle(__assign(__assign({}, defaultParagraphStyle), data.paragraphStyle), fonts)
+            Properties: encodeParagraphStyle(Object.assign(Object.assign({}, defaultParagraphStyle), data.paragraphStyle), fonts)
           }
         ],
         StyleSheetSet: [
@@ -10839,21 +13725,19 @@ var require_text = __commonJS({
             StyleSheetData: styleSheetData
           }
         ],
-        FontSet: fonts.map(function(f) {
-          return {
-            Name: f.name,
-            Script: f.script || 0,
-            FontType: f.type || 0,
-            Synthetic: f.synthetic || 0
-          };
-        }),
-        SuperscriptSize: (_d = data.superscriptSize) !== null && _d !== void 0 ? _d : 0.583,
-        SuperscriptPosition: (_e = data.superscriptPosition) !== null && _e !== void 0 ? _e : 0.333,
-        SubscriptSize: (_f = data.subscriptSize) !== null && _f !== void 0 ? _f : 0.583,
-        SubscriptPosition: (_g = data.subscriptPosition) !== null && _g !== void 0 ? _g : 0.333,
-        SmallCapSize: (_h = data.smallCapSize) !== null && _h !== void 0 ? _h : 0.7
+        FontSet: fonts.map((f) => ({
+          Name: f.name,
+          Script: f.script || 0,
+          FontType: f.type || 0,
+          Synthetic: f.synthetic || 0
+        })),
+        SuperscriptSize: (_f = data.superscriptSize) !== null && _f !== void 0 ? _f : 0.583,
+        SuperscriptPosition: (_g = data.superscriptPosition) !== null && _g !== void 0 ? _g : 0.333,
+        SubscriptSize: (_h = data.subscriptSize) !== null && _h !== void 0 ? _h : 0.583,
+        SubscriptPosition: (_j = data.subscriptPosition) !== null && _j !== void 0 ? _j : 0.333,
+        SmallCapSize: (_k = data.smallCapSize) !== null && _k !== void 0 ? _k : 0.7
       };
-      var engineData = {
+      const engineData = {
         EngineDict: {
           Editor: { Text: text },
           ParagraphRun: {
@@ -10874,14 +13758,14 @@ var require_text = __commonJS({
           GridInfo: {
             GridIsOn: !!gridInfo.isOn,
             ShowGrid: !!gridInfo.show,
-            GridSize: (_j = gridInfo.size) !== null && _j !== void 0 ? _j : 18,
-            GridLeading: (_k = gridInfo.leading) !== null && _k !== void 0 ? _k : 22,
+            GridSize: (_l = gridInfo.size) !== null && _l !== void 0 ? _l : 18,
+            GridLeading: (_m = gridInfo.leading) !== null && _m !== void 0 ? _m : 22,
             GridColor: encodeColor(gridInfo.color),
-            GridLeadingFillColor: encodeColor(gridInfo.color),
+            GridLeadingFillColor: encodeColor(gridInfo.leadingFillColor),
             AlignLineHeightToGridFlags: !!gridInfo.alignLineHeightToGridFlags
           },
-          AntiAlias: antialias.indexOf((_l = data.antiAlias) !== null && _l !== void 0 ? _l : "sharp"),
-          UseFractionalGlyphWidths: (_m = data.useFractionalGlyphWidths) !== null && _m !== void 0 ? _m : true,
+          AntiAlias: antiAliasIndex === -1 ? antialias.indexOf("sharp") : antiAliasIndex,
+          UseFractionalGlyphWidths: (_o = data.useFractionalGlyphWidths) !== null && _o !== void 0 ? _o : true,
           Rendered: {
             Version: 1,
             Shapes: {
@@ -10897,12 +13781,462 @@ var require_text = __commonJS({
             }
           }
         },
-        ResourceDict: __assign({}, defaultResources),
-        DocumentResources: __assign({}, defaultResources)
+        ResourceDict: Object.assign({}, defaultResources),
+        DocumentResources: Object.assign({}, defaultResources)
       };
       return engineData;
     }
-    exports.encodeEngineData = encodeEngineData;
+  }
+});
+
+// node_modules/ag-psd/dist/engineData2.js
+var require_engineData2 = __commonJS({
+  "node_modules/ag-psd/dist/engineData2.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.decodeEngineData2 = decodeEngineData2;
+    var engineData_1 = require_engineData();
+    var keysColor = {
+      "0": {
+        uproot: true,
+        children: {
+          "0": { name: "Type" },
+          "1": { name: "Values" }
+        }
+      }
+    };
+    var keysStyleSheet = {
+      "0": { name: "Font" },
+      "1": { name: "FontSize" },
+      "2": { name: "FauxBold" },
+      "3": { name: "FauxItalic" },
+      "4": { name: "AutoLeading" },
+      "5": { name: "Leading" },
+      "6": { name: "HorizontalScale" },
+      "7": { name: "VerticalScale" },
+      "8": { name: "Tracking" },
+      "9": { name: "BaselineShift" },
+      // '10': ???
+      "11": { name: "Kerning?" },
+      // different value than EngineData (0 - numerical value, 1 - metric, 2 - optical)
+      "12": { name: "FontCaps" },
+      "13": { name: "FontBaseline" },
+      "15": { name: "Strikethrough?" },
+      // number instead of bool
+      "16": { name: "Underline?" },
+      // number instead of bool
+      "18": { name: "Ligatures" },
+      "19": { name: "DLigatures" },
+      // '20': ???
+      // '21': ???
+      // '22': ???
+      "23": { name: "Fractions" },
+      // not present in EngineData
+      "24": { name: "Ordinals" },
+      // not present in EngineData
+      // '25': ???
+      // '26': ???
+      // '27': ???
+      "28": { name: "StylisticAlternates" },
+      // not present in EngineData
+      // '29': ???
+      "30": { name: "OldStyle?" },
+      // OpenType > OldStyle, number instead of bool, not present in EngineData
+      "35": { name: "BaselineDirection" },
+      "38": { name: "Language" },
+      "52": { name: "NoBreak" },
+      "53": { name: "FillColor", children: keysColor },
+      "54": { name: "StrokeColor", children: keysColor },
+      "55": { children: { "99": { uproot: true } } },
+      // '68': ???
+      // '70': ???
+      // '71': ???
+      // '72': ???
+      // '73': ???
+      "79": { children: keysColor }
+      // '85': ???
+      // '87': ???
+      // '88': ???
+    };
+    var keysParagraph = {
+      "0": { name: "Justification" },
+      "1": { name: "FirstLineIndent" },
+      "2": { name: "StartIndent" },
+      "3": { name: "EndIndent" },
+      "4": { name: "SpaceBefore" },
+      "5": { name: "SpaceAfter" },
+      "7": { name: "AutoLeading" },
+      "9": { name: "AutoHyphenate" },
+      "10": { name: "HyphenatedWordSize" },
+      "11": { name: "PreHyphen" },
+      "12": { name: "PostHyphen" },
+      "13": { name: "ConsecutiveHyphens?" },
+      // different value than EngineData
+      "14": { name: "Zone" },
+      "15": { name: "HypenateCapitalizedWords" },
+      // not present in EngineData
+      "17": { name: "WordSpacing" },
+      "18": { name: "LetterSpacing" },
+      "19": { name: "GlyphSpacing" },
+      "32": { name: "StyleSheet", children: keysStyleSheet }
+    };
+    var keysStyleSheetData = {
+      name: "StyleSheetData",
+      children: keysStyleSheet
+    };
+    var keysRoot = {
+      "0": {
+        name: "ResourceDict",
+        children: {
+          "1": {
+            name: "FontSet",
+            children: {
+              "0": {
+                uproot: true,
+                children: {
+                  "0": {
+                    uproot: true,
+                    children: {
+                      "0": {
+                        uproot: true,
+                        children: {
+                          "0": { name: "Name" },
+                          "2": { name: "FontType" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "2": {
+            name: "2",
+            children: {}
+          },
+          "3": {
+            name: "MojiKumiSet",
+            children: {
+              "0": {
+                uproot: true,
+                children: {
+                  "0": {
+                    uproot: true,
+                    children: {
+                      "0": { name: "InternalName" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4": {
+            name: "KinsokuSet",
+            children: {
+              "0": {
+                uproot: true,
+                children: {
+                  "0": {
+                    uproot: true,
+                    children: {
+                      "0": { name: "Name" },
+                      "5": {
+                        uproot: true,
+                        children: {
+                          "0": { name: "NoStart" },
+                          "1": { name: "NoEnd" },
+                          "2": { name: "Keep" },
+                          "3": { name: "Hanging" },
+                          "4": { name: "Name" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "5": {
+            name: "StyleSheetSet",
+            children: {
+              "0": {
+                uproot: true,
+                children: {
+                  "0": {
+                    uproot: true,
+                    children: {
+                      "0": { name: "Name" },
+                      "6": keysStyleSheetData
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "6": {
+            name: "ParagraphSheetSet",
+            children: {
+              "0": {
+                uproot: true,
+                children: {
+                  "0": {
+                    uproot: true,
+                    children: {
+                      "0": { name: "Name" },
+                      "5": {
+                        name: "Properties",
+                        children: keysParagraph
+                      },
+                      "6": { name: "DefaultStyleSheet" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "8": {
+            name: "TextFrameSet",
+            children: {
+              "0": {
+                uproot: true,
+                children: {
+                  "0": {
+                    name: "path",
+                    children: {
+                      "0": { name: "name" },
+                      "1": {
+                        name: "bezierCurve",
+                        children: {
+                          "0": { name: "controlPoints" }
+                        }
+                      },
+                      "2": {
+                        name: "data",
+                        children: {
+                          "0": { name: "type" },
+                          "1": { name: "orientation" },
+                          "2": { name: "frameMatrix" },
+                          "4": { name: "4" },
+                          "6": { name: "textRange" },
+                          "7": { name: "rowGutter" },
+                          "8": { name: "columnGutter" },
+                          "9": { name: "9" },
+                          "10": {
+                            name: "baselineAlignment",
+                            children: {
+                              "0": { name: "flag" },
+                              "1": { name: "min" }
+                            }
+                          },
+                          "11": {
+                            name: "pathData",
+                            children: {
+                              "1": { name: "1" },
+                              "0": { name: "reversed" },
+                              "2": { name: "2" },
+                              "3": { name: "3" },
+                              "4": { name: "spacing" },
+                              "5": { name: "5" },
+                              "6": { name: "6" },
+                              "7": { name: "7" },
+                              "18": { name: "18" }
+                            }
+                          },
+                          "12": { name: "12" },
+                          "13": { name: "13" }
+                        }
+                      },
+                      "3": { name: "3" },
+                      "97": { name: "uuid" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "9": {
+            name: "Predefined",
+            children: {
+              "0": {
+                children: { "0": { uproot: true } }
+              },
+              "1": {
+                children: { "0": { uproot: true } }
+              }
+            }
+          }
+        }
+      },
+      "1": {
+        name: "EngineDict",
+        children: {
+          "0": {
+            name: "0",
+            children: {
+              // 0: ???
+              // 1: ???
+              // 2: ???
+              "3": { name: "SuperscriptSize" },
+              "4": { name: "SuperscriptPosition" },
+              "5": { name: "SubscriptSize" },
+              "6": { name: "SubscriptPosition" },
+              "7": { name: "SmallCapSize" },
+              "8": { name: "UseFractionalGlyphWidths" },
+              // ???
+              "15": { children: { "0": { uproot: true } } }
+              // 16: ???
+              // 17: ???
+            }
+          },
+          "1": {
+            name: "Editors?",
+            // layer.text.index is specifying the index of the editor related to the layer
+            children: {
+              "0": {
+                name: "Editor",
+                children: {
+                  "0": { name: "Text" },
+                  "5": {
+                    name: "ParagraphRun",
+                    children: {
+                      "0": {
+                        name: "RunArray",
+                        children: {
+                          "0": {
+                            name: "ParagraphSheet",
+                            children: {
+                              "0": {
+                                uproot: true,
+                                children: {
+                                  "0": { name: "0" },
+                                  "5": {
+                                    name: "5",
+                                    children: keysParagraph
+                                  },
+                                  "6": { name: "6" }
+                                }
+                              }
+                            }
+                          },
+                          "1": { name: "RunLength" }
+                        }
+                      }
+                    }
+                  },
+                  "6": {
+                    name: "StyleRun",
+                    children: {
+                      "0": {
+                        name: "RunArray",
+                        children: {
+                          "0": {
+                            name: "StyleSheet",
+                            children: {
+                              "0": {
+                                uproot: true,
+                                children: {
+                                  "6": keysStyleSheetData
+                                }
+                              }
+                            }
+                          },
+                          "1": { name: "RunLength" }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "1": {
+                name: "FontVectorData ???"
+                // children: {
+                // 	'0': {},
+                // 	'2': {
+                // 		// '5'
+                // 		// '6'
+                // 	},
+                // }
+                //     "1": [ // this is probably bounding box? there seem to be many of them nested
+                //       0,
+                //       0,
+                //       999,
+                //       176.30014
+                //     ],
+                // various types: /PC, /F, /R, /L, /S, /G
+              }
+            }
+          },
+          "2": {
+            name: "StyleSheet",
+            children: keysStyleSheet
+          },
+          "3": {
+            name: "ParagraphSheet",
+            children: keysParagraph
+          }
+        }
+      }
+    };
+    var MAX_DEPTH = 256;
+    function getKey(keys, key) {
+      return Object.prototype.hasOwnProperty.call(keys, key) ? keys[key] : void 0;
+    }
+    function decodeObj(obj, keys, depth) {
+      var _a2, _b2;
+      if (depth > MAX_DEPTH)
+        throw new Error(`Engine data is nested too deeply (more than ${MAX_DEPTH} levels)`);
+      if (obj === null || obj === void 0)
+        return obj;
+      if (Array.isArray(obj))
+        return obj.map((x) => decodeObj(x, keys, depth + 1));
+      if (typeof obj !== "object")
+        return obj;
+      const objKeys = Object.keys(obj);
+      const uprootKey = objKeys.find((key) => {
+        var _a3;
+        return key !== "99" && ((_a3 = getKey(keys, key)) === null || _a3 === void 0 ? void 0 : _a3.uproot);
+      });
+      let result;
+      if (uprootKey !== void 0) {
+        result = decodeObj(obj[uprootKey], (_a2 = getKey(keys, uprootKey).children) !== null && _a2 !== void 0 ? _a2 : {}, depth + 1);
+        if (result === null || typeof result !== "object")
+          return result;
+        if (obj["99"])
+          result._type = obj["99"];
+        if (Array.isArray(result))
+          return result;
+      } else {
+        result = {};
+      }
+      for (const key of objKeys) {
+        if (key === uprootKey)
+          continue;
+        const info = getKey(keys, key);
+        if (key === "99") {
+          if (uprootKey === void 0)
+            result._type = obj[key];
+        } else {
+          const name = (info === null || info === void 0 ? void 0 : info.name) || key;
+          if (uprootKey === void 0 || !(name in result)) {
+            (0, engineData_1.setProperty)(result, name, decodeObj(obj[key], (_b2 = info === null || info === void 0 ? void 0 : info.children) !== null && _b2 !== void 0 ? _b2 : {}, depth + 1));
+          }
+        }
+      }
+      return result;
+    }
+    function emptyResourceDict() {
+      return { FontSet: [], StyleSheetSet: [], ParagraphSheetSet: [] };
+    }
+    function decodeEngineData2(data) {
+      const result = decodeObj(data, keysRoot, 0);
+      if (!result || typeof result !== "object" || Array.isArray(result)) {
+        return { ResourceDict: emptyResourceDict(), EngineDict: {} };
+      }
+      if (!result.ResourceDict || typeof result.ResourceDict !== "object") {
+        result.ResourceDict = emptyResourceDict();
+      }
+      return result;
+    }
   }
 });
 
@@ -10910,19 +14244,25 @@ var require_text = __commonJS({
 var require_additionalInfo = __commonJS({
   "node_modules/ag-psd/dist/additionalInfo.js"(exports) {
     "use strict";
-    var __assign = exports && exports.__assign || function() {
-      __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-          s = arguments[i];
-          for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
+    var __rest = exports && exports.__rest || function(s, e) {
+      var t = {};
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+      if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+          if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+            t[p[i]] = s[p[i]];
         }
-        return t;
-      };
-      return __assign.apply(this, arguments);
+      return t;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.hasMultiEffects = exports.readVectorMask = exports.booleanOperations = exports.readBezierKnot = exports.infoHandlersMap = exports.infoHandlers = void 0;
+    exports.booleanOperations = exports.infoHandlersMap = exports.infoHandlers = void 0;
+    exports.readBezierKnot = readBezierKnot;
+    exports.readVectorMask = readVectorMask;
+    exports.writeVectorMask = writeVectorMask;
+    exports.parseKeyDescriptorList = parseKeyDescriptorList;
+    exports.serializeKeyDescriptorList = serializeKeyDescriptorList;
+    exports.hasMultiEffects = hasMultiEffects;
     var base64_js_1 = require_base64_js();
     var effectsHelpers_1 = require_effectsHelpers();
     var helpers_1 = require_helpers();
@@ -10931,11 +14271,12 @@ var require_additionalInfo = __commonJS({
     var descriptor_1 = require_descriptor();
     var engineData_1 = require_engineData();
     var text_1 = require_text();
+    var engineData2_1 = require_engineData2();
     var fromAtoZ = "abcdefghijklmnopqrstuvwxyz";
     exports.infoHandlers = [];
     exports.infoHandlersMap = {};
     function addHandler(key, has, read, write) {
-      var handler = { key, has, read, write };
+      const handler = { key, has, read, write };
       exports.infoHandlers.push(handler);
       exports.infoHandlersMap[handler.key] = handler;
     }
@@ -10943,31 +14284,26 @@ var require_additionalInfo = __commonJS({
       exports.infoHandlersMap[key] = exports.infoHandlersMap[target];
     }
     function hasKey(key) {
-      return function(target) {
-        return target[key] !== void 0;
-      };
+      return (target) => target[key] !== void 0;
     }
     function readLength64(reader) {
       if ((0, psdReader_1.readUint32)(reader))
-        throw new Error("Resource size above 4 GB limit at ".concat(reader.offset.toString(16)));
+        throw new Error(`Resource size above 4 GB limit at ${reader.offset.toString(16)}`);
       return (0, psdReader_1.readUint32)(reader);
     }
-    function writeLength64(writer, length) {
-      (0, psdWriter_1.writeUint32)(writer, 0);
-      (0, psdWriter_1.writeUint32)(writer, length);
-    }
-    addHandler("TySh", hasKey("text"), function(reader, target, leftBytes) {
+    addHandler("TySh", hasKey("text"), (reader, target, leftBytes) => {
+      var _a2;
       if ((0, psdReader_1.readInt16)(reader) !== 1)
-        throw new Error("Invalid TySh version");
-      var transform = [];
-      for (var i = 0; i < 6; i++)
+        throw new Error(`Invalid TySh version`);
+      const transform = [];
+      for (let i = 0; i < 6; i++)
         transform.push((0, psdReader_1.readFloat64)(reader));
       if ((0, psdReader_1.readInt16)(reader) !== 50)
-        throw new Error("Invalid TySh text version");
-      var text = (0, descriptor_1.readVersionAndDescriptor)(reader);
+        throw new Error(`Invalid TySh text version`);
+      const text = (0, descriptor_1.readVersionAndDescriptor)(reader);
       if ((0, psdReader_1.readInt16)(reader) !== 1)
-        throw new Error("Invalid TySh warp version");
-      var warp = (0, descriptor_1.readVersionAndDescriptor)(reader);
+        throw new Error(`Invalid TySh warp version`);
+      const warp = (0, descriptor_1.readVersionAndDescriptor)(reader);
       target.text = {
         transform,
         left: (0, psdReader_1.readFloat32)(reader),
@@ -10991,80 +14327,154 @@ var require_additionalInfo = __commonJS({
         target.text.bounds = (0, descriptor_1.descBoundsToBounds)(text.bounds);
       if (text.boundingBox)
         target.text.boundingBox = (0, descriptor_1.descBoundsToBounds)(text.boundingBox);
+      if (text.substitutesUsed !== void 0)
+        target.text.substitutesUsed = text.substitutesUsed;
+      if (text.TxtC)
+        target.text.clickPoint = (0, descriptor_1.horzVrtcToXY)(text.TxtC);
+      if (text.TxPT !== void 0 || text.TxPR !== void 0 || text.TxMP !== void 0) {
+        target.text.textOnPath = {};
+        if (text.TxPT !== void 0)
+          target.text.textOnPath.type = text.TxPT.split(".")[1];
+        if (text.TxPR !== void 0)
+          target.text.textOnPath.direction = text.TxPR.split(".")[1];
+        if (text.TxMP !== void 0)
+          target.text.textOnPath.mirror = text.TxMP;
+      }
+      if (text.VAlign !== void 0)
+        target.text.verticalAlignment = text.VAlign;
       if (text.EngineData) {
-        var engineData = (0, engineData_1.parseEngineData)(text.EngineData);
-        var textData = (0, text_1.decodeEngineData)(engineData);
-        target.text = __assign(__assign({}, target.text), textData);
+        const engineData = (0, engineData_1.parseEngineData)(text.EngineData, reader);
+        const textData = (0, text_1.decodeEngineData)(engineData);
+        target.text = Object.assign(Object.assign(Object.assign({}, target.text), textData), { antiAlias: (_a2 = target.text.antiAlias) !== null && _a2 !== void 0 ? _a2 : textData.antiAlias });
       }
       (0, psdReader_1.skipBytes)(reader, leftBytes());
-    }, function(writer, target) {
-      var text = target.text;
-      var warp = text.warp || {};
-      var transform = text.transform || [1, 0, 0, 1, 0, 0];
-      var textDescriptor = __assign(__assign(__assign({ "Txt ": (text.text || "").replace(/\r?\n/g, "\r"), textGridding: descriptor_1.textGridding.encode(text.gridding), Ornt: descriptor_1.Ornt.encode(text.orientation), AntA: descriptor_1.Annt.encode(text.antiAlias) }, text.bounds ? { bounds: (0, descriptor_1.boundsToDescBounds)(text.bounds) } : {}), text.boundingBox ? { boundingBox: (0, descriptor_1.boundsToDescBounds)(text.boundingBox) } : {}), { TextIndex: text.index || 0, EngineData: (0, engineData_1.serializeEngineData)((0, text_1.encodeEngineData)(text)) });
+    }, (writer, target) => {
+      var _a2, _b2, _c, _d, _e, _f, _g;
+      const text = target.text;
+      const warp = text.warp || {};
+      const transform = text.transform || [1, 0, 0, 1, 0, 0];
+      const textDescriptor = Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({ "Txt ": (text.text || "").replace(/\r?\n/g, "\r") }, text.clickPoint ? { TxtC: (0, descriptor_1.xyToHorzVrtc)(text.clickPoint) } : {}), text.substitutesUsed !== void 0 ? { substitutesUsed: !!text.substitutesUsed } : {}), { textGridding: descriptor_1.textGridding.encode(text.gridding), Ornt: descriptor_1.Ornt.encode(text.orientation), AntA: descriptor_1.Annt.encode(text.antiAlias) }), ((_a2 = text.textOnPath) === null || _a2 === void 0 ? void 0 : _a2.type) !== void 0 ? { TxPT: `TxPT.${text.textOnPath.type}` } : {}), ((_b2 = text.textOnPath) === null || _b2 === void 0 ? void 0 : _b2.direction) !== void 0 ? { TxPR: `TxPR.${text.textOnPath.direction}` } : {}), ((_c = text.textOnPath) === null || _c === void 0 ? void 0 : _c.mirror) !== void 0 ? { TxMP: !!text.textOnPath.mirror } : {}), text.bounds ? { bounds: (0, descriptor_1.boundsToDescBounds)(text.bounds) } : {}), text.boundingBox ? { boundingBox: (0, descriptor_1.boundsToDescBounds)(text.boundingBox) } : {}), { TextIndex: text.index || 0 }), text.verticalAlignment !== void 0 ? { VAlign: text.verticalAlignment } : {}), { EngineData: (0, engineData_1.serializeEngineData)((0, text_1.encodeEngineData)(text)) });
       (0, psdWriter_1.writeInt16)(writer, 1);
-      for (var i = 0; i < 6; i++) {
+      for (let i = 0; i < 6; i++) {
         (0, psdWriter_1.writeFloat64)(writer, transform[i]);
       }
       (0, psdWriter_1.writeInt16)(writer, 50);
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "TxLr", textDescriptor, "text");
       (0, psdWriter_1.writeInt16)(writer, 1);
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "warp", encodeWarp(warp));
-      (0, psdWriter_1.writeFloat32)(writer, text.left);
-      (0, psdWriter_1.writeFloat32)(writer, text.top);
-      (0, psdWriter_1.writeFloat32)(writer, text.right);
-      (0, psdWriter_1.writeFloat32)(writer, text.bottom);
+      (0, psdWriter_1.writeFloat32)(writer, (_d = text.left) !== null && _d !== void 0 ? _d : 0);
+      (0, psdWriter_1.writeFloat32)(writer, (_e = text.top) !== null && _e !== void 0 ? _e : 0);
+      (0, psdWriter_1.writeFloat32)(writer, (_f = text.right) !== null && _f !== void 0 ? _f : 0);
+      (0, psdWriter_1.writeFloat32)(writer, (_g = text.bottom) !== null && _g !== void 0 ? _g : 0);
     });
-    addHandler("SoCo", function(target) {
-      return target.vectorFill !== void 0 && target.vectorStroke === void 0 && target.vectorFill.type === "color";
-    }, function(reader, target) {
-      var descriptor = (0, descriptor_1.readVersionAndDescriptor)(reader);
-      target.vectorFill = (0, descriptor_1.parseVectorContent)(descriptor);
-    }, function(writer, target) {
-      var descriptor = (0, descriptor_1.serializeVectorContent)(target.vectorFill).descriptor;
-      (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", descriptor);
+    addHandler("tySh", () => false, (reader, target, left) => {
+      if ((0, psdReader_1.readInt16)(reader) !== 1)
+        throw new Error(`Invalid tySh version`);
+      const transform = [];
+      for (let i = 0; i < 6; i++)
+        transform.push((0, psdReader_1.readFloat64)(reader));
+      if ((0, psdReader_1.readInt16)(reader) !== 6)
+        throw new Error(`Invalid tySh font version`);
+      const data = { transform, faces: [], styles: [], lines: [], color: { r: 0, g: 0, b: 0 }, antiAlias: false };
+      const facesCount = (0, psdReader_1.readInt16)(reader);
+      for (let i = 0; i < facesCount; i++) {
+        const mark = (0, psdReader_1.readInt16)(reader);
+        (0, psdReader_1.readInt32)(reader);
+        const name = (0, psdReader_1.readPascalString)(reader, 1);
+        const familyName = (0, psdReader_1.readPascalString)(reader, 1);
+        const styleName = (0, psdReader_1.readPascalString)(reader, 1);
+        const script = (0, psdReader_1.readInt16)(reader);
+        const axesCount = (0, psdReader_1.readInt32)(reader);
+        if (axesCount < 0 || axesCount * 4 > left())
+          throw new Error(`Invalid tySh design axes count`);
+        (0, psdReader_1.skipBytes)(reader, axesCount * 4);
+        data.faces.push({ mark, name, familyName, styleName, script });
+      }
+      const stylesCount = (0, psdReader_1.readInt16)(reader);
+      for (let i = 0; i < stylesCount; i++) {
+        const mark = (0, psdReader_1.readInt16)(reader);
+        const faceMark = (0, psdReader_1.readInt16)(reader);
+        const size = (0, psdReader_1.readInt32)(reader);
+        const tracking = (0, psdReader_1.readInt32)(reader);
+        const kerning = (0, psdReader_1.readInt32)(reader);
+        const leading = (0, psdReader_1.readInt32)(reader);
+        const baselineShift = (0, psdReader_1.readInt32)(reader);
+        const autoKerning = !!(0, psdReader_1.readUint8)(reader);
+        (0, psdReader_1.readUint8)(reader);
+        data.styles.push({ mark, faceMark, size, tracking, kerning, leading, baselineShift, autoKerning });
+      }
+      (0, psdReader_1.readInt16)(reader);
+      (0, psdReader_1.readInt32)(reader);
+      (0, psdReader_1.readInt32)(reader);
+      (0, psdReader_1.readInt32)(reader);
+      (0, psdReader_1.readInt32)(reader);
+      (0, psdReader_1.readInt32)(reader);
+      (0, psdReader_1.readInt32)(reader);
+      const linesCount = (0, psdReader_1.readInt16)(reader);
+      for (let i = 0; i < linesCount; i++) {
+        const charCount = (0, psdReader_1.readInt32)(reader);
+        const orientation = (0, psdReader_1.readInt16)(reader);
+        const alignment = (0, psdReader_1.readInt16)(reader);
+        if (charCount < 0 || charCount * 4 > left())
+          throw new Error(`Invalid tySh character count`);
+        const chars = [];
+        for (let j = 0; j < charCount; j++) {
+          const code = (0, psdReader_1.readUint16)(reader);
+          const style = (0, psdReader_1.readInt16)(reader);
+          chars.push({ code, style });
+        }
+        data.lines.push({ orientation, alignment, chars });
+      }
+      data.color = (0, psdReader_1.readColor)(reader);
+      data.antiAlias = !!(0, psdReader_1.readUint8)(reader);
+      if (!target.text)
+        target.text = (0, text_1.decodeLegacyTextData)(data);
+      (0, psdReader_1.skipBytes)(reader, left());
+    }, () => {
     });
-    addHandler("GdFl", function(target) {
-      return target.vectorFill !== void 0 && target.vectorStroke === void 0 && (target.vectorFill.type === "solid" || target.vectorFill.type === "noise");
-    }, function(reader, target, left) {
-      var descriptor = (0, descriptor_1.readVersionAndDescriptor)(reader);
+    addHandler("SoCo", (target) => target.vectorFill !== void 0 && target.vectorStroke === void 0 && target.vectorFill.type === "color", (reader, target, left) => {
+      const descriptor = (0, descriptor_1.readVersionAndDescriptor)(reader);
       target.vectorFill = (0, descriptor_1.parseVectorContent)(descriptor);
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var descriptor = (0, descriptor_1.serializeVectorContent)(target.vectorFill).descriptor;
+    }, (writer, target) => {
+      const { descriptor } = (0, descriptor_1.serializeVectorContent)(target.vectorFill);
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", descriptor);
     });
-    addHandler("PtFl", function(target) {
-      return target.vectorFill !== void 0 && target.vectorStroke === void 0 && target.vectorFill.type === "pattern";
-    }, function(reader, target) {
-      var descriptor = (0, descriptor_1.readVersionAndDescriptor)(reader);
+    addHandler("GdFl", (target) => target.vectorFill !== void 0 && target.vectorStroke === void 0 && (target.vectorFill.type === "solid" || target.vectorFill.type === "noise"), (reader, target, left) => {
+      const descriptor = (0, descriptor_1.readVersionAndDescriptor)(reader);
       target.vectorFill = (0, descriptor_1.parseVectorContent)(descriptor);
-    }, function(writer, target) {
-      var descriptor = (0, descriptor_1.serializeVectorContent)(target.vectorFill).descriptor;
+      (0, psdReader_1.skipBytes)(reader, left());
+    }, (writer, target) => {
+      const { descriptor } = (0, descriptor_1.serializeVectorContent)(target.vectorFill);
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", descriptor);
     });
-    addHandler("vscg", function(target) {
-      return target.vectorFill !== void 0 && target.vectorStroke !== void 0;
-    }, function(reader, target, left) {
+    addHandler("PtFl", (target) => target.vectorFill !== void 0 && target.vectorStroke === void 0 && target.vectorFill.type === "pattern", (reader, target, left) => {
+      const descriptor = (0, descriptor_1.readVersionAndDescriptor)(reader);
+      target.vectorFill = (0, descriptor_1.parseVectorContent)(descriptor);
+      (0, psdReader_1.skipBytes)(reader, left());
+    }, (writer, target) => {
+      const { descriptor } = (0, descriptor_1.serializeVectorContent)(target.vectorFill);
+      (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", descriptor);
+    });
+    addHandler("vscg", (target) => target.vectorFill !== void 0 && target.vectorStroke !== void 0, (reader, target, left) => {
       (0, psdReader_1.readSignature)(reader);
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
       target.vectorFill = (0, descriptor_1.parseVectorContent)(desc);
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var _a2 = (0, descriptor_1.serializeVectorContent)(target.vectorFill), descriptor = _a2.descriptor, key = _a2.key;
+    }, (writer, target) => {
+      const { descriptor, key } = (0, descriptor_1.serializeVectorContent)(target.vectorFill);
       (0, psdWriter_1.writeSignature)(writer, key);
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", descriptor);
     });
     function readBezierKnot(reader, width, height) {
-      var y0 = (0, psdReader_1.readFixedPointPath32)(reader) * height;
-      var x0 = (0, psdReader_1.readFixedPointPath32)(reader) * width;
-      var y1 = (0, psdReader_1.readFixedPointPath32)(reader) * height;
-      var x1 = (0, psdReader_1.readFixedPointPath32)(reader) * width;
-      var y2 = (0, psdReader_1.readFixedPointPath32)(reader) * height;
-      var x2 = (0, psdReader_1.readFixedPointPath32)(reader) * width;
+      const y0 = (0, psdReader_1.readFixedPointPath32)(reader) * height;
+      const x0 = (0, psdReader_1.readFixedPointPath32)(reader) * width;
+      const y1 = (0, psdReader_1.readFixedPointPath32)(reader) * height;
+      const x1 = (0, psdReader_1.readFixedPointPath32)(reader) * width;
+      const y2 = (0, psdReader_1.readFixedPointPath32)(reader) * height;
+      const x2 = (0, psdReader_1.readFixedPointPath32)(reader) * width;
       return [x0, y0, x1, y1, x2, y2];
     }
-    exports.readBezierKnot = readBezierKnot;
     function writeBezierKnot(writer, points, width, height) {
       (0, psdWriter_1.writeFixedPointPath32)(writer, points[1] / height);
       (0, psdWriter_1.writeFixedPointPath32)(writer, points[0] / width);
@@ -11075,18 +14485,18 @@ var require_additionalInfo = __commonJS({
     }
     exports.booleanOperations = ["exclude", "combine", "subtract", "intersect"];
     function readVectorMask(reader, vectorMask, width, height, size) {
-      var end = reader.offset + size;
-      var paths = vectorMask.paths;
-      var path2 = void 0;
+      const end = reader.offset + size;
+      const paths = vectorMask.paths;
+      let path2 = void 0;
       while (end - reader.offset >= 26) {
-        var selector = (0, psdReader_1.readUint16)(reader);
+        const selector = (0, psdReader_1.readUint16)(reader);
         switch (selector) {
           case 0:
           // Closed subpath length record
           case 3: {
             (0, psdReader_1.readUint16)(reader);
-            var boolOp = (0, psdReader_1.readInt16)(reader);
-            var flags = (0, psdReader_1.readUint16)(reader);
+            const boolOp = (0, psdReader_1.readInt16)(reader);
+            const flags = (0, psdReader_1.readUint16)(reader);
             (0, psdReader_1.skipBytes)(reader, 18);
             path2 = {
               open: selector === 3,
@@ -11105,19 +14515,21 @@ var require_additionalInfo = __commonJS({
           case 4:
           // Open subpath Bezier knot, linked
           case 5:
+            if (!path2)
+              throw new Error("Bezier knot record without subpath length record");
             path2.knots.push({ linked: selector === 1 || selector === 4, points: readBezierKnot(reader, width, height) });
             break;
           case 6:
             (0, psdReader_1.skipBytes)(reader, 24);
             break;
           case 7: {
-            var top_1 = (0, psdReader_1.readFixedPointPath32)(reader);
-            var left = (0, psdReader_1.readFixedPointPath32)(reader);
-            var bottom = (0, psdReader_1.readFixedPointPath32)(reader);
-            var right = (0, psdReader_1.readFixedPointPath32)(reader);
-            var resolution = (0, psdReader_1.readFixedPointPath32)(reader);
+            const top = (0, psdReader_1.readFixedPointPath32)(reader);
+            const left = (0, psdReader_1.readFixedPointPath32)(reader);
+            const bottom = (0, psdReader_1.readFixedPointPath32)(reader);
+            const right = (0, psdReader_1.readFixedPointPath32)(reader);
+            const resolution = (0, psdReader_1.readFixedPointPath32)(reader);
             (0, psdReader_1.skipBytes)(reader, 4);
-            vectorMask.clipboard = { top: top_1, left, bottom, right, resolution };
+            vectorMask.clipboard = { top, left, bottom, right, resolution };
             break;
           }
           case 8:
@@ -11130,28 +14542,10 @@ var require_additionalInfo = __commonJS({
       }
       return paths;
     }
-    exports.readVectorMask = readVectorMask;
-    addHandler("vmsk", hasKey("vectorMask"), function(reader, target, left, _a2) {
-      var width = _a2.width, height = _a2.height;
-      if ((0, psdReader_1.readUint32)(reader) !== 3)
-        throw new Error("Invalid vmsk version");
-      target.vectorMask = { paths: [] };
-      var vectorMask = target.vectorMask;
-      var flags = (0, psdReader_1.readUint32)(reader);
-      vectorMask.invert = (flags & 1) !== 0;
-      vectorMask.notLink = (flags & 2) !== 0;
-      vectorMask.disable = (flags & 4) !== 0;
-      readVectorMask(reader, vectorMask, width, height, left());
-      (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target, _a2) {
-      var width = _a2.width, height = _a2.height;
-      var vectorMask = target.vectorMask;
-      var flags = (vectorMask.invert ? 1 : 0) | (vectorMask.notLink ? 2 : 0) | (vectorMask.disable ? 4 : 0);
-      (0, psdWriter_1.writeUint32)(writer, 3);
-      (0, psdWriter_1.writeUint32)(writer, flags);
+    function writeVectorMask(writer, vectorMask, width, height, componentIndices = false) {
       (0, psdWriter_1.writeUint16)(writer, 6);
       (0, psdWriter_1.writeZeros)(writer, 24);
-      var clipboard = vectorMask.clipboard;
+      const clipboard = vectorMask.clipboard;
       if (clipboard) {
         (0, psdWriter_1.writeUint16)(writer, 7);
         (0, psdWriter_1.writeFixedPointPath32)(writer, clipboard.top);
@@ -11161,47 +14555,78 @@ var require_additionalInfo = __commonJS({
         (0, psdWriter_1.writeFixedPointPath32)(writer, clipboard.resolution);
         (0, psdWriter_1.writeZeros)(writer, 4);
       }
-      if (vectorMask.fillStartsWithAllPixels !== void 0) {
-        (0, psdWriter_1.writeUint16)(writer, 8);
-        (0, psdWriter_1.writeUint16)(writer, vectorMask.fillStartsWithAllPixels ? 1 : 0);
-        (0, psdWriter_1.writeZeros)(writer, 22);
-      }
-      for (var _i = 0, _b2 = vectorMask.paths; _i < _b2.length; _i++) {
-        var path2 = _b2[_i];
+      (0, psdWriter_1.writeUint16)(writer, 8);
+      (0, psdWriter_1.writeUint16)(writer, vectorMask.fillStartsWithAllPixels ? 1 : 0);
+      (0, psdWriter_1.writeZeros)(writer, 22);
+      let componentIndex = -1;
+      for (const path2 of vectorMask.paths) {
+        if (path2.operation || componentIndex < 0)
+          componentIndex++;
         (0, psdWriter_1.writeUint16)(writer, path2.open ? 3 : 0);
         (0, psdWriter_1.writeUint16)(writer, path2.knots.length);
         (0, psdWriter_1.writeUint16)(writer, path2.operation ? exports.booleanOperations.indexOf(path2.operation) : -1);
         (0, psdWriter_1.writeUint16)(writer, path2.fillRule === "non-zero" ? 2 : 1);
-        (0, psdWriter_1.writeZeros)(writer, 18);
-        var linkedKnot = path2.open ? 4 : 1;
-        var unlinkedKnot = path2.open ? 5 : 2;
-        for (var _c = 0, _d = path2.knots; _c < _d.length; _c++) {
-          var _e = _d[_c], linked = _e.linked, points = _e.points;
+        (0, psdWriter_1.writeZeros)(writer, 4);
+        (0, psdWriter_1.writeUint32)(writer, componentIndices ? componentIndex : 0);
+        (0, psdWriter_1.writeZeros)(writer, 10);
+        const linkedKnot = path2.open ? 4 : 1;
+        const unlinkedKnot = path2.open ? 5 : 2;
+        for (const { linked, points } of path2.knots) {
           (0, psdWriter_1.writeUint16)(writer, linked ? linkedKnot : unlinkedKnot);
           writeBezierKnot(writer, points, width, height);
         }
       }
+    }
+    addHandler("vmsk", hasKey("vectorMask"), (reader, target, left, { width, height }) => {
+      if ((0, psdReader_1.readUint32)(reader) !== 3)
+        throw new Error("Invalid vmsk version");
+      target.vectorMask = { paths: [] };
+      const vectorMask = target.vectorMask;
+      const flags = (0, psdReader_1.readUint32)(reader);
+      vectorMask.invert = (flags & 1) !== 0;
+      vectorMask.notLink = (flags & 2) !== 0;
+      vectorMask.disable = (flags & 4) !== 0;
+      readVectorMask(reader, vectorMask, width, height, left());
+      (0, psdReader_1.skipBytes)(reader, left());
+    }, (writer, target, { width, height }) => {
+      const vectorMask = target.vectorMask;
+      const flags = (vectorMask.invert ? 1 : 0) | (vectorMask.notLink ? 2 : 0) | (vectorMask.disable ? 4 : 0);
+      (0, psdWriter_1.writeUint32)(writer, 3);
+      (0, psdWriter_1.writeUint32)(writer, flags);
+      writeVectorMask(writer, vectorMask, width, height, true);
     });
     addHandlerAlias("vsms", "vmsk");
     addHandler(
       "vowv",
       // something with vectors?
       hasKey("vowv"),
-      function(reader, target) {
+      (reader, target) => {
         target.vowv = (0, psdReader_1.readUint32)(reader);
       },
-      function(writer, target) {
+      (writer, target) => {
         (0, psdWriter_1.writeUint32)(writer, target.vowv);
       }
     );
-    addHandler("vogk", hasKey("vectorOrigination"), function(reader, target, left) {
-      if ((0, psdReader_1.readInt32)(reader) !== 1)
-        throw new Error("Invalid vogk version");
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-      target.vectorOrigination = { keyDescriptorList: [] };
-      for (var _i = 0, _a2 = desc.keyDescriptorList; _i < _a2.length; _i++) {
-        var i = _a2[_i];
-        var item = {};
+    function parseBoxCorners(corners) {
+      return [
+        (0, descriptor_1.horzVrtcToXY)(corners.rectangleCornerA),
+        (0, descriptor_1.horzVrtcToXY)(corners.rectangleCornerB),
+        (0, descriptor_1.horzVrtcToXY)(corners.rectangleCornerC),
+        (0, descriptor_1.horzVrtcToXY)(corners.rectangleCornerD)
+      ];
+    }
+    function serializeBoxCorners(corners) {
+      return {
+        rectangleCornerA: (0, descriptor_1.xyToHorzVrtc)(corners[0]),
+        rectangleCornerB: (0, descriptor_1.xyToHorzVrtc)(corners[1]),
+        rectangleCornerC: (0, descriptor_1.xyToHorzVrtc)(corners[2]),
+        rectangleCornerD: (0, descriptor_1.xyToHorzVrtc)(corners[3])
+      };
+    }
+    function parseKeyDescriptorList(desc) {
+      const keyDescriptorList = [];
+      for (const i of desc.keyDescriptorList) {
+        const item = {};
         if (i.keyShapeInvalidated != null)
           item.keyShapeInvalidated = i.keyShapeInvalidated;
         if (i.keyOriginType != null)
@@ -11216,7 +14641,7 @@ var require_additionalInfo = __commonJS({
             right: (0, descriptor_1.parseUnitsOrNumber)(i.keyOriginShapeBBox.Rght)
           };
         }
-        var rectRadii = i.keyOriginRRectRadii;
+        const rectRadii = i.keyOriginRRectRadii;
         if (rectRadii) {
           item.keyOriginRRectRadii = {
             topRight: (0, descriptor_1.parseUnits)(rectRadii.topRight),
@@ -11225,109 +14650,159 @@ var require_additionalInfo = __commonJS({
             bottomRight: (0, descriptor_1.parseUnits)(rectRadii.bottomRight)
           };
         }
-        var corners = i.keyOriginBoxCorners;
-        if (corners) {
-          item.keyOriginBoxCorners = [
-            { x: corners.rectangleCornerA.Hrzn, y: corners.rectangleCornerA.Vrtc },
-            { x: corners.rectangleCornerB.Hrzn, y: corners.rectangleCornerB.Vrtc },
-            { x: corners.rectangleCornerC.Hrzn, y: corners.rectangleCornerC.Vrtc },
-            { x: corners.rectangleCornerD.Hrzn, y: corners.rectangleCornerD.Vrtc }
-          ];
-        }
-        var trnf = i.Trnf;
+        if (i.keyOriginBoxCorners)
+          item.keyOriginBoxCorners = parseBoxCorners(i.keyOriginBoxCorners);
+        if (i.keyOriginPolySides != null)
+          item.keyOriginPolySides = i.keyOriginPolySides;
+        if (i.keyOriginPolyCornerRadius != null)
+          item.keyOriginPolyCornerRadius = i.keyOriginPolyCornerRadius;
+        if (i.keyOriginPolyStarRatio)
+          item.keyOriginPolyStarRatio = (0, descriptor_1.parsePercent)(i.keyOriginPolyStarRatio);
+        if (i.keyOriginPolyPreviousTightBoxCorners)
+          item.keyOriginPolyPreviousTightBoxCorners = parseBoxCorners(i.keyOriginPolyPreviousTightBoxCorners);
+        if (i.keyOriginPolyTrueRectCorners)
+          item.keyOriginPolyTrueRectCorners = parseBoxCorners(i.keyOriginPolyTrueRectCorners);
+        if (i.keyOriginPolyPixelHSF != null)
+          item.keyOriginPolyPixelHSF = i.keyOriginPolyPixelHSF;
+        if (i.keyOriginLineStart)
+          item.keyOriginLineStart = (0, descriptor_1.horzVrtcToXY)(i.keyOriginLineStart);
+        if (i.keyOriginLineEnd)
+          item.keyOriginLineEnd = (0, descriptor_1.horzVrtcToXY)(i.keyOriginLineEnd);
+        if (i.keyOriginLineWeight != null)
+          item.keyOriginLineWeight = i.keyOriginLineWeight;
+        if (i.keyOriginLineArrowSt != null)
+          item.keyOriginLineArrowStart = i.keyOriginLineArrowSt;
+        if (i.keyOriginLineArrowEnd != null)
+          item.keyOriginLineArrowEnd = i.keyOriginLineArrowEnd;
+        if (i.keyOriginLineArrWdth != null)
+          item.keyOriginLineArrowWidth = i.keyOriginLineArrWdth;
+        if (i.keyOriginLineArrLngth != null)
+          item.keyOriginLineArrowLength = i.keyOriginLineArrLngth;
+        if (i.keyOriginLineArrConc != null)
+          item.keyOriginLineArrowConcavity = i.keyOriginLineArrConc;
+        const trnf = i.Trnf;
         if (trnf) {
-          item.transform = [trnf.xx, trnf.xy, trnf.xy, trnf.yy, trnf.tx, trnf.ty];
+          item.transform = [trnf.xx, trnf.xy, trnf.yx, trnf.yy, trnf.tx, trnf.ty];
         }
-        target.vectorOrigination.keyDescriptorList.push(item);
+        keyDescriptorList.push(item);
       }
+      return keyDescriptorList;
+    }
+    function serializeKeyDescriptorList(keyDescriptorList) {
+      const desc = { keyDescriptorList: [] };
+      for (let i = 0; i < keyDescriptorList.length; i++) {
+        const item = keyDescriptorList[i];
+        desc.keyDescriptorList.push({});
+        const out = desc.keyDescriptorList[desc.keyDescriptorList.length - 1];
+        if (item.keyOriginType != null)
+          out.keyOriginType = item.keyOriginType;
+        if (item.keyOriginResolution != null)
+          out.keyOriginResolution = item.keyOriginResolution;
+        const radii = item.keyOriginRRectRadii;
+        if (radii) {
+          out.keyOriginRRectRadii = {
+            unitValueQuadVersion: 1,
+            topRight: (0, descriptor_1.unitsValue)(radii.topRight, "topRight"),
+            topLeft: (0, descriptor_1.unitsValue)(radii.topLeft, "topLeft"),
+            bottomLeft: (0, descriptor_1.unitsValue)(radii.bottomLeft, "bottomLeft"),
+            bottomRight: (0, descriptor_1.unitsValue)(radii.bottomRight, "bottomRight")
+          };
+        }
+        const box = item.keyOriginShapeBoundingBox;
+        if (box) {
+          out.keyOriginShapeBBox = {
+            unitValueQuadVersion: 1,
+            "Top ": (0, descriptor_1.unitsValue)(box.top, "top"),
+            Left: (0, descriptor_1.unitsValue)(box.left, "left"),
+            Btom: (0, descriptor_1.unitsValue)(box.bottom, "bottom"),
+            Rght: (0, descriptor_1.unitsValue)(box.right, "right")
+          };
+        }
+        const corners = item.keyOriginBoxCorners;
+        if (corners && corners.length === 4)
+          out.keyOriginBoxCorners = serializeBoxCorners(corners);
+        if (item.keyOriginPolySides != null)
+          out.keyOriginPolySides = item.keyOriginPolySides;
+        if (item.keyOriginPolyCornerRadius != null)
+          out.keyOriginPolyCornerRadius = item.keyOriginPolyCornerRadius;
+        if (item.keyOriginPolyStarRatio != null)
+          out.keyOriginPolyStarRatio = (0, descriptor_1.unitsPercentF)(item.keyOriginPolyStarRatio);
+        const previousCorners = item.keyOriginPolyPreviousTightBoxCorners;
+        if (previousCorners && previousCorners.length === 4)
+          out.keyOriginPolyPreviousTightBoxCorners = serializeBoxCorners(previousCorners);
+        const trueCorners = item.keyOriginPolyTrueRectCorners;
+        if (trueCorners && trueCorners.length === 4)
+          out.keyOriginPolyTrueRectCorners = serializeBoxCorners(trueCorners);
+        if (item.keyOriginPolyPixelHSF != null)
+          out.keyOriginPolyPixelHSF = item.keyOriginPolyPixelHSF;
+        if (item.keyOriginLineEnd)
+          out.keyOriginLineEnd = (0, descriptor_1.xyToHorzVrtc)(item.keyOriginLineEnd);
+        if (item.keyOriginLineStart)
+          out.keyOriginLineStart = (0, descriptor_1.xyToHorzVrtc)(item.keyOriginLineStart);
+        if (item.keyOriginLineWeight != null)
+          out.keyOriginLineWeight = item.keyOriginLineWeight;
+        if (item.keyOriginLineArrowStart != null)
+          out.keyOriginLineArrowSt = !!item.keyOriginLineArrowStart;
+        if (item.keyOriginLineArrowEnd != null)
+          out.keyOriginLineArrowEnd = !!item.keyOriginLineArrowEnd;
+        if (item.keyOriginLineArrowWidth != null)
+          out.keyOriginLineArrWdth = item.keyOriginLineArrowWidth;
+        if (item.keyOriginLineArrowLength != null)
+          out.keyOriginLineArrLngth = item.keyOriginLineArrowLength;
+        if (item.keyOriginLineArrowConcavity != null)
+          out.keyOriginLineArrConc = item.keyOriginLineArrowConcavity;
+        const transform = item.transform;
+        if (transform && transform.length === 6) {
+          out.Trnf = {
+            xx: transform[0],
+            xy: transform[1],
+            yx: transform[2],
+            yy: transform[3],
+            tx: transform[4],
+            ty: transform[5]
+          };
+        }
+        if (item.keyShapeInvalidated != null)
+          out.keyShapeInvalidated = item.keyShapeInvalidated;
+        out.keyOriginIndex = i;
+      }
+      return desc;
+    }
+    addHandler("vogk", hasKey("vectorOrigination"), (reader, target, left) => {
+      if ((0, psdReader_1.readInt32)(reader) !== 1)
+        throw new Error(`Invalid vogk version`);
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+      target.vectorOrigination = { keyDescriptorList: parseKeyDescriptorList(desc) };
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      target;
-      var orig = target.vectorOrigination;
-      var desc = { keyDescriptorList: [] };
-      for (var i = 0; i < orig.keyDescriptorList.length; i++) {
-        var item = orig.keyDescriptorList[i];
-        if (item.keyShapeInvalidated) {
-          desc.keyDescriptorList.push({ keyShapeInvalidated: true, keyOriginIndex: i });
-        } else {
-          desc.keyDescriptorList.push({});
-          var out = desc.keyDescriptorList[desc.keyDescriptorList.length - 1];
-          if (item.keyOriginType != null)
-            out.keyOriginType = item.keyOriginType;
-          if (item.keyOriginResolution != null)
-            out.keyOriginResolution = item.keyOriginResolution;
-          var radii = item.keyOriginRRectRadii;
-          if (radii) {
-            out.keyOriginRRectRadii = {
-              unitValueQuadVersion: 1,
-              topRight: (0, descriptor_1.unitsValue)(radii.topRight, "topRight"),
-              topLeft: (0, descriptor_1.unitsValue)(radii.topLeft, "topLeft"),
-              bottomLeft: (0, descriptor_1.unitsValue)(radii.bottomLeft, "bottomLeft"),
-              bottomRight: (0, descriptor_1.unitsValue)(radii.bottomRight, "bottomRight")
-            };
-          }
-          var box = item.keyOriginShapeBoundingBox;
-          if (box) {
-            out.keyOriginShapeBBox = {
-              unitValueQuadVersion: 1,
-              "Top ": (0, descriptor_1.unitsValue)(box.top, "top"),
-              Left: (0, descriptor_1.unitsValue)(box.left, "left"),
-              Btom: (0, descriptor_1.unitsValue)(box.bottom, "bottom"),
-              Rght: (0, descriptor_1.unitsValue)(box.right, "right")
-            };
-          }
-          var corners = item.keyOriginBoxCorners;
-          if (corners && corners.length === 4) {
-            out.keyOriginBoxCorners = {
-              rectangleCornerA: { Hrzn: corners[0].x, Vrtc: corners[0].y },
-              rectangleCornerB: { Hrzn: corners[1].x, Vrtc: corners[1].y },
-              rectangleCornerC: { Hrzn: corners[2].x, Vrtc: corners[2].y },
-              rectangleCornerD: { Hrzn: corners[3].x, Vrtc: corners[3].y }
-            };
-          }
-          var transform = item.transform;
-          if (transform && transform.length === 6) {
-            out.Trnf = {
-              xx: transform[0],
-              xy: transform[1],
-              yx: transform[2],
-              yy: transform[3],
-              tx: transform[4],
-              ty: transform[5]
-            };
-          }
-          out.keyOriginIndex = i;
-        }
-      }
+    }, (writer, target) => {
+      const desc = serializeKeyDescriptorList(target.vectorOrigination.keyDescriptorList);
       (0, psdWriter_1.writeInt32)(writer, 1);
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
     });
-    addHandler("lmfx", function(target) {
-      return target.effects !== void 0 && hasMultiEffects(target.effects);
-    }, function(reader, target, left) {
-      var version = (0, psdReader_1.readUint32)(reader);
+    addHandler("lmfx", (target) => target.effects !== void 0 && !isGroupLayer(target) && hasMultiEffects(target.effects), (reader, target, left) => {
+      const version = (0, psdReader_1.readUint32)(reader);
       if (version !== 0)
         throw new Error("Invalid lmfx version");
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-      target.effects = (0, descriptor_1.parseEffects)(desc, !!reader.logMissingFeatures);
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+      target.effects = (0, descriptor_1.parseEffects)(desc, reader);
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target, _, options) {
-      var desc = (0, descriptor_1.serializeEffects)(target.effects, !!options.logMissingFeatures, true);
+    }, (writer, target) => {
+      const desc = (0, descriptor_1.serializeEffects)(target.effects, writer, true);
       (0, psdWriter_1.writeUint32)(writer, 0);
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
     });
-    addHandler("lrFX", hasKey("effects"), function(reader, target, left) {
+    addHandler("lrFX", hasKey("effects"), (reader, target, left) => {
       if (!target.effects)
         target.effects = (0, effectsHelpers_1.readEffects)(reader);
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
+    }, (writer, target) => {
       (0, effectsHelpers_1.writeEffects)(writer, target.effects);
     });
-    addHandler("luni", hasKey("name"), function(reader, target, left) {
+    addHandler("luni", hasKey("name"), (reader, target, left) => {
       if (left() > 4) {
-        var length_1 = (0, psdReader_1.readUint32)(reader);
-        if (left() >= length_1 * 2) {
-          target.name = (0, psdReader_1.readUnicodeStringWithLength)(reader, length_1);
+        const length = (0, psdReader_1.readUint32)(reader);
+        if (left() >= length * 2) {
+          target.name = (0, psdReader_1.readUnicodeStringWithLength)(reader, length);
         } else {
           if (reader.logDevFeatures)
             reader.log("name in luni section is too long");
@@ -11337,25 +14812,59 @@ var require_additionalInfo = __commonJS({
           reader.log("empty luni section");
       }
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
+    }, (writer, target) => {
       (0, psdWriter_1.writeUnicodeString)(writer, target.name);
     });
-    addHandler("lnsr", hasKey("nameSource"), function(reader, target) {
-      return target.nameSource = (0, psdReader_1.readSignature)(reader);
-    }, function(writer, target) {
-      return (0, psdWriter_1.writeSignature)(writer, target.nameSource);
-    });
-    addHandler("lyid", hasKey("id"), function(reader, target) {
+    addHandler("lnsr", hasKey("nameSource"), (reader, target) => target.nameSource = (0, psdReader_1.readSignature)(reader), (writer, target) => (0, psdWriter_1.writeSignature)(writer, target.nameSource));
+    function layerNeedsId(target) {
+      return !!(target.animationFrames || target.timeline || target.comps);
+    }
+    function getExplicitLayerIds(psd, options) {
+      if (!options.explicitLayerIds) {
+        const ids = /* @__PURE__ */ new Set();
+        const addIds = (layers) => {
+          for (const layer of layers !== null && layers !== void 0 ? layers : []) {
+            if (layer.id !== void 0)
+              ids.add(layer.id);
+            addIds(layer.children);
+          }
+        };
+        addIds(psd.children);
+        options.explicitLayerIds = ids;
+      }
+      return options.explicitLayerIds;
+    }
+    function getLayerId(target, options) {
+      var _a2;
+      const id = (_a2 = options.layerToId.get(target)) !== null && _a2 !== void 0 ? _a2 : target.id;
+      if (id === void 0)
+        throw new Error("Missing layer id");
+      return id;
+    }
+    addHandler("lyid", (target) => target.id !== void 0 || layerNeedsId(target), (reader, target) => {
       target.id = (0, psdReader_1.readUint32)(reader);
-    }, function(writer, target, _psd, options) {
-      var id = target.id;
-      while (options.layerIds.has(id))
-        id += 100;
+    }, (writer, target, psd, options) => {
+      var _a2;
+      let id;
+      if (target.id !== void 0) {
+        id = target.id;
+        if (options.layerIds.has(id)) {
+          const explicitIds = getExplicitLayerIds(psd, options);
+          while (options.layerIds.has(id) || explicitIds.has(id))
+            id += 100;
+        }
+      } else {
+        const explicitIds = getExplicitLayerIds(psd, options);
+        id = (_a2 = options.nextGeneratedLayerId) !== null && _a2 !== void 0 ? _a2 : 1;
+        while (options.layerIds.has(id) || explicitIds.has(id))
+          id++;
+        options.nextGeneratedLayerId = id + 1;
+      }
       (0, psdWriter_1.writeUint32)(writer, id);
       options.layerIds.add(id);
       options.layerToId.set(target, id);
     });
-    addHandler("lsct", hasKey("sectionDivider"), function(reader, target, left) {
+    addHandler("lsct", hasKey("sectionDivider"), (reader, target, left) => {
       target.sectionDivider = { type: (0, psdReader_1.readUint32)(reader) };
       if (left()) {
         (0, psdReader_1.checkSignature)(reader, "8BIM");
@@ -11364,7 +14873,7 @@ var require_additionalInfo = __commonJS({
       if (left()) {
         target.sectionDivider.subType = (0, psdReader_1.readUint32)(reader);
       }
-    }, function(writer, target) {
+    }, (writer, target) => {
       (0, psdWriter_1.writeUint32)(writer, target.sectionDivider.type);
       if (target.sectionDivider.key) {
         (0, psdWriter_1.writeSignature)(writer, "8BIM");
@@ -11375,36 +14884,88 @@ var require_additionalInfo = __commonJS({
       }
     });
     addHandlerAlias("lsdk", "lsct");
-    addHandler("clbl", hasKey("blendClippendElements"), function(reader, target) {
+    addHandler("clbl", hasKey("blendClippendElements"), (reader, target) => {
       target.blendClippendElements = !!(0, psdReader_1.readUint8)(reader);
       (0, psdReader_1.skipBytes)(reader, 3);
-    }, function(writer, target) {
+    }, (writer, target) => {
       (0, psdWriter_1.writeUint8)(writer, target.blendClippendElements ? 1 : 0);
       (0, psdWriter_1.writeZeros)(writer, 3);
     });
-    addHandler("infx", hasKey("blendInteriorElements"), function(reader, target) {
+    addHandler("infx", hasKey("blendInteriorElements"), (reader, target) => {
       target.blendInteriorElements = !!(0, psdReader_1.readUint8)(reader);
       (0, psdReader_1.skipBytes)(reader, 3);
-    }, function(writer, target) {
+    }, (writer, target) => {
       (0, psdWriter_1.writeUint8)(writer, target.blendInteriorElements ? 1 : 0);
       (0, psdWriter_1.writeZeros)(writer, 3);
     });
-    addHandler("knko", hasKey("knockout"), function(reader, target) {
+    addHandler("knko", hasKey("knockout"), (reader, target) => {
       target.knockout = !!(0, psdReader_1.readUint8)(reader);
       (0, psdReader_1.skipBytes)(reader, 3);
-    }, function(writer, target) {
+    }, (writer, target) => {
       (0, psdWriter_1.writeUint8)(writer, target.knockout ? 1 : 0);
       (0, psdWriter_1.writeZeros)(writer, 3);
     });
-    addHandler("lmgm", hasKey("layerMaskAsGlobalMask"), function(reader, target) {
+    addHandler("lmgm", hasKey("layerMaskAsGlobalMask"), (reader, target) => {
       target.layerMaskAsGlobalMask = !!(0, psdReader_1.readUint8)(reader);
       (0, psdReader_1.skipBytes)(reader, 3);
-    }, function(writer, target) {
+    }, (writer, target) => {
       (0, psdWriter_1.writeUint8)(writer, target.layerMaskAsGlobalMask ? 1 : 0);
       (0, psdWriter_1.writeZeros)(writer, 3);
     });
-    addHandler("lspf", hasKey("protected"), function(reader, target) {
-      var flags = (0, psdReader_1.readUint32)(reader);
+    addHandler("vmgm", hasKey("vectorMaskAsGlobalMask"), (reader, target) => {
+      target.vectorMaskAsGlobalMask = !!(0, psdReader_1.readUint8)(reader);
+      (0, psdReader_1.skipBytes)(reader, 3);
+    }, (writer, target) => {
+      (0, psdWriter_1.writeUint8)(writer, target.vectorMaskAsGlobalMask ? 1 : 0);
+      (0, psdWriter_1.writeZeros)(writer, 3);
+    });
+    addHandler("ffxi", hasKey("foreignEffectId"), (reader, target) => {
+      target.foreignEffectId = (0, psdReader_1.readInt32)(reader);
+    }, (writer, target) => {
+      (0, psdWriter_1.writeInt32)(writer, target.foreignEffectId);
+    });
+    addHandler("shpa", hasKey("patternData"), (reader, target, left) => {
+      if ((0, psdReader_1.readInt32)(reader) !== 0)
+        throw new Error(`Invalid shpa version`);
+      const count = (0, psdReader_1.readInt32)(reader);
+      target.patternData = [];
+      for (let i = 0; i < count && left() > 0; i++) {
+        const signature = (0, psdReader_1.readSignature)(reader);
+        const key = (0, psdReader_1.readSignature)(reader);
+        const patternsCount = (0, psdReader_1.readInt32)(reader);
+        const copyOnSheetDuplication = !!(0, psdReader_1.readUint8)(reader);
+        (0, psdReader_1.skipBytes)(reader, 3);
+        const patterns = [];
+        for (let j = 0; j < patternsCount && left() > 0; j++) {
+          const colorHandling = descriptor_1.patternColorHandling.decode("." + (0, psdReader_1.readSignature)(reader));
+          (0, psdReader_1.readPascalString)(reader, 1);
+          const name = (0, psdReader_1.readUnicodeString)(reader);
+          const id = (0, psdReader_1.readPascalString)(reader, 1);
+          patterns.push({ colorHandling, name, id });
+        }
+        target.patternData.push({ signature, key, copyOnSheetDuplication, patterns });
+      }
+      (0, psdReader_1.skipBytes)(reader, left());
+    }, (writer, target) => {
+      const sets = target.patternData;
+      (0, psdWriter_1.writeInt32)(writer, 0);
+      (0, psdWriter_1.writeInt32)(writer, sets.length);
+      for (const set of sets) {
+        (0, psdWriter_1.writeSignature)(writer, set.signature);
+        (0, psdWriter_1.writeSignature)(writer, set.key);
+        (0, psdWriter_1.writeInt32)(writer, set.patterns.length);
+        (0, psdWriter_1.writeUint8)(writer, set.copyOnSheetDuplication ? 1 : 0);
+        (0, psdWriter_1.writeZeros)(writer, 3);
+        for (const pattern of set.patterns) {
+          (0, psdWriter_1.writeSignature)(writer, descriptor_1.patternColorHandling.encode(pattern.colorHandling).split(".")[1]);
+          (0, psdWriter_1.writePascalString)(writer, pattern.name.replace(/[^\x20-\x7e]/g, "?"), 1);
+          (0, psdWriter_1.writeUnicodeString)(writer, pattern.name);
+          (0, psdWriter_1.writePascalString)(writer, pattern.id, 1);
+        }
+      }
+    });
+    addHandler("lspf", hasKey("protected"), (reader, target) => {
+      const flags = (0, psdReader_1.readUint32)(reader);
       target.protected = {
         transparency: (flags & 1) !== 0,
         composite: (flags & 2) !== 0,
@@ -11412,116 +14973,248 @@ var require_additionalInfo = __commonJS({
       };
       if (flags & 8)
         target.protected.artboards = true;
-    }, function(writer, target) {
-      var flags = (target.protected.transparency ? 1 : 0) | (target.protected.composite ? 2 : 0) | (target.protected.position ? 4 : 0) | (target.protected.artboards ? 8 : 0);
-      (0, psdWriter_1.writeUint32)(writer, flags);
+      if (flags & 2147483648)
+        target.protected.all = true;
+    }, (writer, target) => {
+      const flags = (target.protected.transparency ? 1 : 0) | (target.protected.composite ? 2 : 0) | (target.protected.position ? 4 : 0) | (target.protected.artboards ? 8 : 0) | (target.protected.all ? 2147483648 : 0);
+      (0, psdWriter_1.writeUint32)(writer, flags >>> 0);
     });
-    addHandler("lclr", hasKey("layerColor"), function(reader, target) {
-      var color = (0, psdReader_1.readUint16)(reader);
+    addHandler("lclr", hasKey("layerColor"), (reader, target) => {
+      const color = (0, psdReader_1.readUint16)(reader);
       (0, psdReader_1.skipBytes)(reader, 6);
       target.layerColor = helpers_1.layerColors[color];
-    }, function(writer, target) {
-      var index = helpers_1.layerColors.indexOf(target.layerColor);
+    }, (writer, target) => {
+      const index = helpers_1.layerColors.indexOf(target.layerColor);
       (0, psdWriter_1.writeUint16)(writer, index === -1 ? 0 : index);
       (0, psdWriter_1.writeZeros)(writer, 6);
     });
+    function parseGeneratorSettings(settings) {
+      const result = {};
+      if (settings.exportAs) {
+        result.exportAs = {};
+        if (settings.exportAs.exportOption !== void 0)
+          result.exportAs.exportOption = settings.exportAs.exportOption;
+        if (settings.exportAs.scaleSettings !== void 0)
+          result.exportAs.scaleSettings = settings.exportAs.scaleSettings;
+      }
+      if (settings.generator_45_assets)
+        result.assets = settings.generator_45_assets.json;
+      if (settings.layerTime !== void 0)
+        result.layerTime = settings.layerTime;
+      if (settings.crema)
+        result.crema = settings.crema.json;
+      return result;
+    }
+    function serializeGeneratorSettings(generatorSettings) {
+      const settings = {
+        _name: "",
+        _classID: generatorSettings.assets !== void 0 ? "generatorSettings" : "null"
+      };
+      if (generatorSettings.exportAs) {
+        settings.exportAs = { _name: "", _classID: "null" };
+        if (generatorSettings.exportAs.exportOption !== void 0)
+          settings.exportAs.exportOption = generatorSettings.exportAs.exportOption;
+        if (generatorSettings.exportAs.scaleSettings !== void 0)
+          settings.exportAs.scaleSettings = generatorSettings.exportAs.scaleSettings;
+      }
+      if (generatorSettings.assets !== void 0)
+        settings.generator_45_assets = { _name: "", _classID: "generatorSettings", json: generatorSettings.assets };
+      if (generatorSettings.layerTime !== void 0)
+        settings.layerTime = generatorSettings.layerTime;
+      if (generatorSettings.crema !== void 0)
+        settings.crema = { _name: "", _classID: "null", json: generatorSettings.crema };
+      return { generatorSettings: settings };
+    }
+    function isDocument(target) {
+      return target.width !== void 0;
+    }
+    var knockoutType = (0, helpers_1.createEnum)("knockout", "none", {
+      none: "none",
+      shallow: "shallow",
+      deep: "deep"
+    });
+    function parseLayerStateBlendOptions(desc, target) {
+      if (desc["Md  "] !== void 0)
+        target.blendMode = descriptor_1.BlnM.decode(desc["Md  "]);
+      if (desc.Opct !== void 0)
+        target.opacity = (0, descriptor_1.parsePercent)(desc.Opct);
+      if (desc.fillOpacity !== void 0)
+        target.fillOpacity = (0, descriptor_1.parsePercent)(desc.fillOpacity);
+      if (desc.blendInterior !== void 0)
+        target.blendInteriorElements = desc.blendInterior;
+      if (desc.blendClipped !== void 0)
+        target.blendClippedElements = desc.blendClipped;
+      if (desc.knockout !== void 0)
+        target.knockout = knockoutType.decode(desc.knockout);
+    }
+    function serializeLayerStateBlendOptions(source) {
+      const desc = {};
+      if (source.blendMode !== void 0)
+        desc["Md  "] = descriptor_1.BlnM.encode(source.blendMode);
+      if (source.opacity !== void 0)
+        desc.Opct = (0, descriptor_1.unitsPercentF)(source.opacity);
+      if (source.fillOpacity !== void 0)
+        desc.fillOpacity = (0, descriptor_1.unitsPercentF)(source.fillOpacity);
+      if (source.blendInteriorElements !== void 0)
+        desc.blendInterior = !!source.blendInteriorElements;
+      if (source.blendClippedElements !== void 0)
+        desc.blendClipped = !!source.blendClippedElements;
+      if (source.knockout !== void 0)
+        desc.knockout = knockoutType.encode(source.knockout);
+      return Object.keys(desc).length ? desc : void 0;
+    }
+    function parseLayerStateSpecific(desc, target) {
+      const settings = desc.textLayerSettings;
+      if (settings) {
+        target.text = {
+          warp: {
+            style: descriptor_1.warpStyle.decode(settings.warpStyle),
+            value: settings.warpValue || 0,
+            perspective: settings.warpPerspective || 0,
+            perspectiveOther: settings.warpPerspectiveOther || 0,
+            rotate: descriptor_1.Ornt.decode(settings.warpRotate)
+          },
+          warpRect: settings.textLayerSettingsWarpRect || [0, 0, 0, 0]
+        };
+      }
+      if (desc.placedLayerSettings)
+        target.placedLayerCompId = desc.placedLayerSettings.placedLayerCompID;
+    }
+    function serializeLayerStateSpecific(source) {
+      const desc = {};
+      const text = source.text;
+      if (text) {
+        desc.textLayerSettings = {
+          warpStyle: descriptor_1.warpStyle.encode(text.warp.style),
+          warpValue: text.warp.value || 0,
+          warpPerspective: text.warp.perspective || 0,
+          warpPerspectiveOther: text.warp.perspectiveOther || 0,
+          warpRotate: descriptor_1.Ornt.encode(text.warp.rotate),
+          textLayerSettingsWarpRect: text.warpRect || [0, 0, 0, 0]
+        };
+      }
+      if (source.placedLayerCompId !== void 0)
+        desc.placedLayerSettings = { placedLayerCompID: source.placedLayerCompId };
+      return Object.keys(desc).length ? desc : void 0;
+    }
     addHandler(
       "shmd",
       // Metadata setting
-      function(target) {
-        return target.timestamp !== void 0 || target.animationFrames !== void 0 || target.animationFrameFlags !== void 0 || target.timeline !== void 0 || target.comps !== void 0;
-      },
-      function(reader, target, left) {
-        var count = (0, psdReader_1.readUint32)(reader);
-        var _loop_1 = function(i2) {
-          (0, psdReader_1.checkSignature)(reader, "8BIM");
-          var key = (0, psdReader_1.readSignature)(reader);
+      // Metadata setting
+      (target) => target.timestamp !== void 0 || target.animationFrames !== void 0 || target.animationFrameFlags !== void 0 || target.timeline !== void 0 || target.comps !== void 0 || target.generatorSettings !== void 0 && !isDocument(target),
+      (reader, target, left) => {
+        const count = (0, psdReader_1.readUint32)(reader);
+        for (let i = 0; i < count; i++) {
+          const signature = (0, psdReader_1.readSignature)(reader);
+          if (signature !== "8BIM" && signature !== "8ELE")
+            throw new Error(`Invalid shmd signature: '${signature}'`);
+          const key = (0, psdReader_1.readSignature)(reader);
           (0, psdReader_1.readUint8)(reader);
           (0, psdReader_1.skipBytes)(reader, 3);
-          (0, psdReader_1.readSection)(reader, 1, function(left2) {
-            if (key === "cust") {
-              var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-              if (desc.layerTime !== void 0)
-                target.timestamp = desc.layerTime;
-            } else if (key === "mlst") {
-              var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-              target.animationFrames = [];
-              for (var i_1 = 0; i_1 < desc.LaSt.length; i_1++) {
-                var f = desc.LaSt[i_1];
-                var frame = { frames: f.FrLs };
-                if (f.enab !== void 0)
-                  frame.enable = f.enab;
-                if (f.Ofst)
-                  frame.offset = (0, descriptor_1.horzVrtcToXY)(f.Ofst);
-                if (f.FXRf)
-                  frame.referencePoint = (0, descriptor_1.horzVrtcToXY)(f.FXRf);
-                if (f.Lefx)
-                  frame.effects = (0, descriptor_1.parseEffects)(f.Lefx, !!reader.logMissingFeatures);
-                if (f.blendOptions && f.blendOptions.Opct)
-                  frame.opacity = (0, descriptor_1.parsePercent)(f.blendOptions.Opct);
-                target.animationFrames.push(frame);
+          const end = reader.offset + 4 + reader.view.getUint32(reader.offset);
+          try {
+            (0, psdReader_1.readSection)(reader, 1, (left2) => {
+              var _a2, _b2, _c;
+              if (key === "cust") {
+                const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+                if (desc.layerTime !== void 0)
+                  target.timestamp = desc.layerTime;
+              } else if (key === "mlst") {
+                const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+                target.animationFrames = [];
+                for (let i2 = 0; i2 < desc.LaSt.length; i2++) {
+                  const f = desc.LaSt[i2];
+                  const frame = { frames: f.FrLs };
+                  if (f.enab !== void 0)
+                    frame.enable = f.enab;
+                  if (f.Ofst)
+                    frame.offset = (0, descriptor_1.horzVrtcToXY)(f.Ofst);
+                  if ((_a2 = f.IMsk) === null || _a2 === void 0 ? void 0 : _a2.Ofst)
+                    frame.maskOffset = (0, descriptor_1.horzVrtcToXY)(f.IMsk.Ofst);
+                  if ((_b2 = f.VMsk) === null || _b2 === void 0 ? void 0 : _b2.Ofst)
+                    frame.vectorMaskOffset = (0, descriptor_1.horzVrtcToXY)(f.VMsk.Ofst);
+                  if (f.FXRf)
+                    frame.referencePoint = (0, descriptor_1.horzVrtcToXY)(f.FXRf);
+                  if (f.Lefx)
+                    frame.effects = (0, descriptor_1.parseEffects)(f.Lefx, reader);
+                  if (f.blendOptions)
+                    parseLayerStateBlendOptions(f.blendOptions, frame);
+                  if (f.LSpc)
+                    parseLayerStateSpecific(f.LSpc, frame);
+                  target.animationFrames.push(frame);
+                }
+              } else if (key === "mdyn") {
+                (0, psdReader_1.readUint16)(reader);
+                const propagate = (0, psdReader_1.readUint8)(reader);
+                const flags = (0, psdReader_1.readUint8)(reader);
+                target.animationFrameFlags = {
+                  propagateFrameOne: !propagate,
+                  unifyLayerPosition: (flags & 1) !== 0,
+                  unifyLayerStyle: (flags & 2) !== 0,
+                  unifyLayerVisibility: (flags & 4) !== 0
+                };
+              } else if (key === "tmln") {
+                const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+                const timeScope = desc.timeScope;
+                const timeline = {
+                  start: (0, descriptor_1.frac)(timeScope.Strt),
+                  duration: (0, descriptor_1.frac)(timeScope.duration),
+                  inTime: (0, descriptor_1.frac)(timeScope.inTime),
+                  outTime: (0, descriptor_1.frac)(timeScope.outTime),
+                  autoScope: desc.autoScope,
+                  audioLevel: desc.audioLevel
+                };
+                if (desc.trackList) {
+                  timeline.tracks = (0, descriptor_1.parseTrackList)(desc.trackList, reader);
+                }
+                target.timeline = timeline;
+              } else if (key === "cmls") {
+                const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+                target.comps = {
+                  settings: []
+                };
+                if (desc.origFXRefPoint)
+                  target.comps.originalEffectsReferencePoint = { x: desc.origFXRefPoint.Hrzn, y: desc.origFXRefPoint.Vrtc };
+                for (const item of desc.layerSettings) {
+                  target.comps.settings.push({ compList: item.compList });
+                  const t = target.comps.settings[target.comps.settings.length - 1];
+                  if ("enab" in item)
+                    t.enabled = item.enab;
+                  if (item.Ofst)
+                    t.offset = { x: item.Ofst.Hrzn, y: item.Ofst.Vrtc };
+                  if ((_c = item.vectorMask) === null || _c === void 0 ? void 0 : _c.Ofst)
+                    t.vectorMaskOffset = (0, descriptor_1.horzVrtcToXY)(item.vectorMask.Ofst);
+                  if (item.Lefx)
+                    t.effects = (0, descriptor_1.parseEffects)(item.Lefx, reader);
+                  if (item.blendOptions)
+                    parseLayerStateBlendOptions(item.blendOptions, t);
+                  if (item.FXRefPoint)
+                    t.effectsReferencePoint = { x: item.FXRefPoint.Hrzn, y: item.FXRefPoint.Vrtc };
+                  if (item.layerSpecific)
+                    parseLayerStateSpecific(item.layerSpecific, t);
+                }
+              } else if (key === "extn") {
+                const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+                if (desc.generatorSettings)
+                  target.generatorSettings = parseGeneratorSettings(desc.generatorSettings);
+              } else {
+                reader.logMissingFeatures && reader.log('Unhandled "shmd" section key', key);
               }
-            } else if (key === "mdyn") {
-              (0, psdReader_1.readUint16)(reader);
-              var propagate = (0, psdReader_1.readUint8)(reader);
-              var flags = (0, psdReader_1.readUint8)(reader);
-              target.animationFrameFlags = {
-                propagateFrameOne: !propagate,
-                unifyLayerPosition: (flags & 1) !== 0,
-                unifyLayerStyle: (flags & 2) !== 0,
-                unifyLayerVisibility: (flags & 4) !== 0
-              };
-            } else if (key === "tmln") {
-              var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-              var timeScope = desc.timeScope;
-              var timeline = {
-                start: (0, descriptor_1.frac)(timeScope.Strt),
-                duration: (0, descriptor_1.frac)(timeScope.duration),
-                inTime: (0, descriptor_1.frac)(timeScope.inTime),
-                outTime: (0, descriptor_1.frac)(timeScope.outTime),
-                autoScope: desc.autoScope,
-                audioLevel: desc.audioLevel
-              };
-              if (desc.trackList) {
-                timeline.tracks = (0, descriptor_1.parseTrackList)(desc.trackList, !!reader.logMissingFeatures);
-              }
-              target.timeline = timeline;
-            } else if (key === "cmls") {
-              var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-              target.comps = {
-                settings: []
-              };
-              if (desc.origFXRefPoint)
-                target.comps.originalEffectsReferencePoint = { x: desc.origFXRefPoint.Hrzn, y: desc.origFXRefPoint.Vrtc };
-              for (var _i = 0, _a2 = desc.layerSettings; _i < _a2.length; _i++) {
-                var item = _a2[_i];
-                target.comps.settings.push({ compList: item.compList });
-                var t = target.comps.settings[target.comps.settings.length - 1];
-                if ("enab" in item)
-                  t.enabled = item.enab;
-                if (item.Ofst)
-                  t.offset = { x: item.Ofst.Hrzn, y: item.Ofst.Vrtc };
-                if (item.FXRefPoint)
-                  t.effectsReferencePoint = { x: item.FXRefPoint.Hrzn, y: item.FXRefPoint.Vrtc };
-              }
-            } else if (key === "extn") {
-              var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-              desc;
-              reader.logMissingFeatures && reader.log('Unhandled "shmd" section key', key);
-            } else {
-              reader.logMissingFeatures && reader.log('Unhandled "shmd" section key', key);
-            }
-            (0, psdReader_1.skipBytes)(reader, left2());
-          });
-        };
-        for (var i = 0; i < count; i++) {
-          _loop_1(i);
+              (0, psdReader_1.skipBytes)(reader, left2());
+            });
+          } catch (e) {
+            if (reader.throwForMissingFeatures)
+              throw e;
+            reader.logMissingFeatures && reader.log(`Failed to read "shmd" section key ${key}: ${e.message}`);
+            reader.offset = end;
+          }
         }
         (0, psdReader_1.skipBytes)(reader, left());
       },
-      function(writer, target, _, options) {
-        var animationFrames = target.animationFrames, animationFrameFlags = target.animationFrameFlags, timestamp = target.timestamp, timeline = target.timeline, comps = target.comps;
-        var count = 0;
+      (writer, target, _, options) => {
+        const { animationFrames, animationFrameFlags, timestamp, timeline, comps } = target;
+        const generatorSettings = isDocument(target) ? void 0 : target.generatorSettings;
+        let count = 0;
         if (animationFrames)
           count++;
         if (animationFrameFlags)
@@ -11532,35 +15225,44 @@ var require_additionalInfo = __commonJS({
           count++;
         if (comps)
           count++;
+        if (generatorSettings)
+          count++;
         (0, psdWriter_1.writeUint32)(writer, count);
         if (animationFrames) {
           (0, psdWriter_1.writeSignature)(writer, "8BIM");
           (0, psdWriter_1.writeSignature)(writer, "mlst");
           (0, psdWriter_1.writeUint8)(writer, 0);
           (0, psdWriter_1.writeZeros)(writer, 3);
-          (0, psdWriter_1.writeSection)(writer, 2, function() {
-            var _a2;
-            var desc = {
-              LaID: (_a2 = target.id) !== null && _a2 !== void 0 ? _a2 : 0,
+          (0, psdWriter_1.writeSection)(writer, 2, () => {
+            const desc = {
+              LaID: getLayerId(target, options),
               LaSt: []
             };
-            for (var i = 0; i < animationFrames.length; i++) {
-              var f = animationFrames[i];
-              var frame = {};
+            for (let i = 0; i < animationFrames.length; i++) {
+              const f = animationFrames[i];
+              const frame = {};
               if (f.enable !== void 0)
                 frame.enab = f.enable;
               frame.FrLs = f.frames;
               if (f.offset)
                 frame.Ofst = (0, descriptor_1.xyToHorzVrtc)(f.offset);
+              if (f.maskOffset)
+                frame.IMsk = { Ofst: (0, descriptor_1.xyToHorzVrtc)(f.maskOffset) };
+              if (f.vectorMaskOffset)
+                frame.VMsk = { Ofst: (0, descriptor_1.xyToHorzVrtc)(f.vectorMaskOffset) };
               if (f.referencePoint)
                 frame.FXRf = (0, descriptor_1.xyToHorzVrtc)(f.referencePoint);
+              const layerSpecific = serializeLayerStateSpecific(f);
+              if (layerSpecific)
+                frame.LSpc = layerSpecific;
               if (f.effects)
-                frame.Lefx = (0, descriptor_1.serializeEffects)(f.effects, false, false);
-              if (f.opacity !== void 0)
-                frame.blendOptions = { Opct: (0, descriptor_1.unitsPercent)(f.opacity) };
+                frame.Lefx = (0, descriptor_1.serializeEffects)(f.effects, writer, hasMultiEffects(f.effects));
+              const blendOptions = serializeLayerStateBlendOptions(f);
+              if (blendOptions)
+                frame.blendOptions = blendOptions;
               desc.LaSt.push(frame);
             }
-            (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
+            (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc, descriptor_1.layerStateRoot);
           }, true);
         }
         if (animationFrameFlags) {
@@ -11568,7 +15270,7 @@ var require_additionalInfo = __commonJS({
           (0, psdWriter_1.writeSignature)(writer, "mdyn");
           (0, psdWriter_1.writeUint8)(writer, 0);
           (0, psdWriter_1.writeZeros)(writer, 3);
-          (0, psdWriter_1.writeSection)(writer, 2, function() {
+          (0, psdWriter_1.writeSection)(writer, 2, () => {
             (0, psdWriter_1.writeUint16)(writer, 0);
             (0, psdWriter_1.writeUint8)(writer, animationFrameFlags.propagateFrameOne ? 0 : 15);
             (0, psdWriter_1.writeUint8)(writer, (animationFrameFlags.unifyLayerPosition ? 1 : 0) | (animationFrameFlags.unifyLayerStyle ? 2 : 0) | (animationFrameFlags.unifyLayerVisibility ? 4 : 0));
@@ -11579,8 +15281,8 @@ var require_additionalInfo = __commonJS({
           (0, psdWriter_1.writeSignature)(writer, "tmln");
           (0, psdWriter_1.writeUint8)(writer, 0);
           (0, psdWriter_1.writeZeros)(writer, 3);
-          (0, psdWriter_1.writeSection)(writer, 2, function() {
-            var desc = {
+          (0, psdWriter_1.writeSection)(writer, 2, () => {
+            const desc = {
               Vrsn: 1,
               timeScope: {
                 Vrsn: 1,
@@ -11593,12 +15295,9 @@ var require_additionalInfo = __commonJS({
               audioLevel: timeline.audioLevel
             };
             if (timeline.tracks) {
-              desc.trackList = (0, descriptor_1.serializeTrackList)(timeline.tracks);
+              desc.trackList = (0, descriptor_1.serializeTrackList)(timeline.tracks, writer);
             }
-            var id = options.layerToId.get(target) || target.id;
-            if (!id)
-              throw new Error("You need to provide layer.id value whan writing document with animations");
-            desc.LyrI = id;
+            desc.LyrI = getLayerId(target, options);
             (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc, "anim");
           }, true);
         }
@@ -11607,8 +15306,8 @@ var require_additionalInfo = __commonJS({
           (0, psdWriter_1.writeSignature)(writer, "cust");
           (0, psdWriter_1.writeUint8)(writer, 0);
           (0, psdWriter_1.writeZeros)(writer, 3);
-          (0, psdWriter_1.writeSection)(writer, 2, function() {
-            var desc = {
+          (0, psdWriter_1.writeSection)(writer, 2, () => {
+            const desc = {
               layerTime: timestamp
             };
             (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "metadata", desc);
@@ -11619,35 +15318,117 @@ var require_additionalInfo = __commonJS({
           (0, psdWriter_1.writeSignature)(writer, "cmls");
           (0, psdWriter_1.writeUint8)(writer, 0);
           (0, psdWriter_1.writeZeros)(writer, 3);
-          (0, psdWriter_1.writeSection)(writer, 2, function() {
-            var id = options.layerToId.get(target) || target.id;
-            if (!id)
-              throw new Error("You need to provide layer.id value whan writing document with layer comps");
-            var desc = {};
+          (0, psdWriter_1.writeSection)(writer, 2, () => {
+            const desc = {};
             if (comps.originalEffectsReferencePoint) {
               desc.origFXRefPoint = { Hrzn: comps.originalEffectsReferencePoint.x, Vrtc: comps.originalEffectsReferencePoint.y };
             }
-            desc.LyrI = id;
+            desc.LyrI = getLayerId(target, options);
             desc.layerSettings = [];
-            for (var _i = 0, _a2 = comps.settings; _i < _a2.length; _i++) {
-              var item = _a2[_i];
-              var t = {};
+            for (const item of comps.settings) {
+              const t = {};
               if (item.enabled !== void 0)
                 t.enab = item.enabled;
               if (item.offset)
-                t.Ofst = { Hrzn: item.offset.x, Vrtc: item.offset.y };
+                t.Ofst = (0, descriptor_1.xyToHorzVrtc)(item.offset);
+              if (item.vectorMaskOffset)
+                t.vectorMask = { Ofst: (0, descriptor_1.xyToHorzVrtc)(item.vectorMaskOffset) };
+              if (item.effects) {
+                const _a2 = (0, descriptor_1.serializeEffects)(item.effects, writer, true), { numModifyingFX: _2 } = _a2, effects = __rest(_a2, ["numModifyingFX"]);
+                t.Lefx = effects;
+              }
+              const blendOptions = serializeLayerStateBlendOptions(item);
+              if (blendOptions)
+                t.blendOptions = blendOptions;
               if (item.effectsReferencePoint)
                 t.FXRefPoint = { Hrzn: item.effectsReferencePoint.x, Vrtc: item.effectsReferencePoint.y };
+              const layerSpecific = serializeLayerStateSpecific(item);
+              if (layerSpecific)
+                t.layerSpecific = layerSpecific;
               t.compList = item.compList;
               desc.layerSettings.push(t);
             }
-            (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
+            (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc, descriptor_1.layerStateRoot);
+          }, true);
+        }
+        if (generatorSettings) {
+          (0, psdWriter_1.writeSignature)(writer, "8BIM");
+          (0, psdWriter_1.writeSignature)(writer, "extn");
+          (0, psdWriter_1.writeUint8)(writer, 0);
+          (0, psdWriter_1.writeZeros)(writer, 3);
+          (0, psdWriter_1.writeSection)(writer, 2, () => {
+            (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", serializeGeneratorSettings(generatorSettings));
           }, true);
         }
       }
     );
-    addHandler("vstk", hasKey("vectorStroke"), function(reader, target, left) {
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+    addHandler("PxSc", hasKey("pixelSource"), (reader, target) => {
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader, true);
+      if (desc.pixelSourceType === 1986285651) {
+        target.pixelSource = {
+          type: "vdPS",
+          origin: { x: desc.origin.Hrzn, y: desc.origin.Vrtc },
+          interpretation: {
+            interpretAlpha: desc.interpretation.interpretAlpha.split(".")[1],
+            profile: desc.interpretation.profile
+          },
+          frameReader: {
+            type: "QTFR",
+            link: {
+              name: desc.frameReader["Lnk "]["Nm  "],
+              fullPath: desc.frameReader["Lnk "].fullPath,
+              originalPath: desc.frameReader["Lnk "].originalPath,
+              relativePath: desc.frameReader["Lnk "].relPath,
+              alias: desc.frameReader["Lnk "].alis
+            },
+            mediaDescriptor: desc.frameReader.mediaDescriptor
+          },
+          showAlteredVideo: desc.showAlteredVideo
+        };
+      } else {
+        reader.log(`Unknown pixelSourceType`);
+      }
+    }, (writer, target) => {
+      const source = target.pixelSource;
+      const desc = {
+        _name: "",
+        _classID: "PixelSource",
+        pixelSourceType: 1986285651,
+        // vdP
+        descVersion: 1,
+        origin: { Hrzn: source.origin.x, Vrtc: source.origin.y },
+        // written as 'null' class with 'long' values (see writeDescriptorStructure)
+        interpretation: {
+          _name: "",
+          _classID: "footageInterpretation",
+          Vrsn: 1,
+          interpretAlpha: `alphaInterpretation.${source.interpretation.interpretAlpha}`,
+          profile: source.interpretation.profile
+        },
+        frameReader: {
+          _name: "",
+          _classID: "FrameReader",
+          frameReaderType: 1364477522,
+          // QTF
+          descVersion: 1,
+          "Lnk ": {
+            _name: "",
+            _classID: "ExternalFileLink",
+            descVersion: 2,
+            "Nm  ": source.frameReader.link.name,
+            fullPath: source.frameReader.link.fullPath,
+            originalPath: source.frameReader.link.originalPath,
+            alis: source.frameReader.link.alias,
+            relPath: source.frameReader.link.relativePath
+          },
+          mediaDescriptor: source.frameReader.mediaDescriptor
+        },
+        showAlteredVideo: source.showAlteredVideo
+      };
+      (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "PixelSource", desc);
+    });
+    addHandler("vstk", hasKey("vectorStroke"), (reader, target, left) => {
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
       target.vectorStroke = {
         strokeEnabled: desc.strokeEnabled,
         fillEnabled: desc.fillEnabled,
@@ -11659,17 +15440,17 @@ var require_additionalInfo = __commonJS({
         lineAlignment: descriptor_1.strokeStyleLineAlignment.decode(desc.strokeStyleLineAlignment),
         scaleLock: desc.strokeStyleScaleLock,
         strokeAdjust: desc.strokeStyleStrokeAdjust,
-        lineDashSet: desc.strokeStyleLineDashSet.map(descriptor_1.parseUnits),
+        lineDashSet: (desc.strokeStyleLineDashSet || []).map(descriptor_1.parseUnits),
         blendMode: descriptor_1.BlnM.decode(desc.strokeStyleBlendMode),
         opacity: (0, descriptor_1.parsePercent)(desc.strokeStyleOpacity),
         content: (0, descriptor_1.parseVectorContent)(desc.strokeStyleContent),
         resolution: desc.strokeStyleResolution
       };
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
+    }, (writer, target) => {
       var _a2, _b2, _c;
-      var stroke = target.vectorStroke;
-      var desc = {
+      const stroke = target.vectorStroke;
+      const desc = {
         strokeStyleVersion: 2,
         strokeEnabled: !!stroke.strokeEnabled,
         fillEnabled: !!stroke.fillEnabled,
@@ -11693,23 +15474,25 @@ var require_additionalInfo = __commonJS({
       "artb",
       // per-layer arboard info
       hasKey("artboard"),
-      function(reader, target, left) {
-        var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-        var rect = desc.artboardRect;
+      (reader, target, left) => {
+        const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+        const rect = desc.artboardRect;
         target.artboard = {
           rect: { top: rect["Top "], left: rect.Left, bottom: rect.Btom, right: rect.Rght },
           guideIndices: desc.guideIndeces,
-          presetName: desc.artboardPresetName,
-          color: (0, descriptor_1.parseColor)(desc["Clr "]),
-          backgroundType: desc.artboardBackgroundType
+          presetName: desc.artboardPresetName
         };
+        if (desc["Clr "])
+          target.artboard.color = (0, descriptor_1.parseColor)(desc["Clr "]);
+        if (desc.artboardBackgroundType !== void 0)
+          target.artboard.backgroundType = desc.artboardBackgroundType;
         (0, psdReader_1.skipBytes)(reader, left());
       },
-      function(writer, target) {
+      (writer, target) => {
         var _a2;
-        var artboard = target.artboard;
-        var rect = artboard.rect;
-        var desc = {
+        const artboard = target.artboard;
+        const rect = artboard.rect;
+        const desc = {
           artboardRect: { "Top ": rect.top, Left: rect.left, Btom: rect.bottom, Rght: rect.right },
           guideIndeces: artboard.guideIndices || [],
           artboardPresetName: artboard.presetName || "",
@@ -11719,15 +15502,11 @@ var require_additionalInfo = __commonJS({
         (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "artboard", desc);
       }
     );
-    addHandler("sn2P", hasKey("usingAlignedRendering"), function(reader, target) {
-      return target.usingAlignedRendering = !!(0, psdReader_1.readUint32)(reader);
-    }, function(writer, target) {
-      return (0, psdWriter_1.writeUint32)(writer, target.usingAlignedRendering ? 1 : 0);
-    });
+    addHandler("sn2P", hasKey("usingAlignedRendering"), (reader, target) => target.usingAlignedRendering = !!(0, psdReader_1.readUint32)(reader), (writer, target) => (0, psdWriter_1.writeUint32)(writer, target.usingAlignedRendering ? 1 : 0));
     var placedLayerTypes = ["unknown", "vector", "raster", "image stack"];
     function parseWarp(warp) {
       var _a2, _b2, _c, _d, _e, _f;
-      var result = __assign(__assign({ style: descriptor_1.warpStyle.decode(warp.warpStyle) }, warp.warpValues ? { values: warp.warpValues } : { value: warp.warpValue || 0 }), { perspective: warp.warpPerspective || 0, perspectiveOther: warp.warpPerspectiveOther || 0, rotate: descriptor_1.Ornt.decode(warp.warpRotate), bounds: warp.bounds && {
+      const result = Object.assign(Object.assign({ style: descriptor_1.warpStyle.decode(warp.warpStyle) }, warp.warpValues ? { values: warp.warpValues } : { value: warp.warpValue || 0 }), { perspective: warp.warpPerspective || 0, perspectiveOther: warp.warpPerspectiveOther || 0, rotate: descriptor_1.Ornt.decode(warp.warpRotate), bounds: warp.bounds && {
         top: (0, descriptor_1.parseUnitsOrNumber)(warp.bounds["Top "]),
         left: (0, descriptor_1.parseUnitsOrNumber)(warp.bounds.Left),
         bottom: (0, descriptor_1.parseUnitsOrNumber)(warp.bounds.Btom),
@@ -11737,18 +15516,14 @@ var require_additionalInfo = __commonJS({
         result.deformNumRows = warp.deformNumRows;
         result.deformNumCols = warp.deformNumCols;
       }
-      var envelopeWarp = warp.customEnvelopeWarp;
+      const envelopeWarp = warp.customEnvelopeWarp;
       if (envelopeWarp) {
         result.customEnvelopeWarp = {
           meshPoints: []
         };
-        var xs = ((_a2 = envelopeWarp.meshPoints.find(function(i2) {
-          return i2.type === "Hrzn";
-        })) === null || _a2 === void 0 ? void 0 : _a2.values) || [];
-        var ys = ((_b2 = envelopeWarp.meshPoints.find(function(i2) {
-          return i2.type === "Vrtc";
-        })) === null || _b2 === void 0 ? void 0 : _b2.values) || [];
-        for (var i = 0; i < xs.length; i++) {
+        const xs = ((_a2 = envelopeWarp.meshPoints.find((i) => i.type === "Hrzn")) === null || _a2 === void 0 ? void 0 : _a2.values) || [];
+        const ys = ((_b2 = envelopeWarp.meshPoints.find((i) => i.type === "Vrtc")) === null || _b2 === void 0 ? void 0 : _b2.values) || [];
+        for (let i = 0; i < xs.length; i++) {
           result.customEnvelopeWarp.meshPoints.push({ x: xs[i], y: ys[i] });
         }
         if (envelopeWarp.quiltSliceX || envelopeWarp.quiltSliceY) {
@@ -11763,24 +15538,33 @@ var require_additionalInfo = __commonJS({
       return warp.deformNumCols != null || warp.deformNumRows != null || ((_a2 = warp.customEnvelopeWarp) === null || _a2 === void 0 ? void 0 : _a2.quiltSliceX) || ((_b2 = warp.customEnvelopeWarp) === null || _b2 === void 0 ? void 0 : _b2.quiltSliceY);
     }
     function encodeWarp(warp) {
-      var bounds = warp.bounds;
-      var desc = __assign(__assign({ warpStyle: descriptor_1.warpStyle.encode(warp.style) }, warp.values ? { warpValues: warp.values } : { warpValue: warp.value || 0 }), { warpPerspective: warp.perspective || 0, warpPerspectiveOther: warp.perspectiveOther || 0, warpRotate: descriptor_1.Ornt.encode(warp.rotate), bounds: {
-        "Top ": (0, descriptor_1.unitsValue)(bounds && bounds.top || { units: "Pixels", value: 0 }, "bounds.top"),
-        Left: (0, descriptor_1.unitsValue)(bounds && bounds.left || { units: "Pixels", value: 0 }, "bounds.left"),
-        Btom: (0, descriptor_1.unitsValue)(bounds && bounds.bottom || { units: "Pixels", value: 0 }, "bounds.bottom"),
-        Rght: (0, descriptor_1.unitsValue)(bounds && bounds.right || { units: "Pixels", value: 0 }, "bounds.right")
-      }, uOrder: warp.uOrder || 0, vOrder: warp.vOrder || 0 });
-      var isQuilt = isQuiltWarp(warp);
+      const bounds = warp.bounds;
+      const desc = Object.assign(Object.assign({ warpStyle: descriptor_1.warpStyle.encode(warp.style) }, warp.values ? { warpValues: warp.values } : { warpValue: warp.value || 0 }), { warpPerspective: warp.perspective || 0, warpPerspectiveOther: warp.perspectiveOther || 0, warpRotate: descriptor_1.Ornt.encode(warp.rotate), bounds: (
+        /*1 ? { // testing
+            _classID: 'classFloatRect',
+            'Top ': bounds && bounds.top && bounds.top.value || 0,
+            Left: bounds && bounds.left && bounds.left.value || 0,
+            Btom: bounds && bounds.bottom && bounds.bottom.value || 0,
+            Rght: bounds && bounds.right && bounds.right.value || 0,
+        } :*/
+        {
+          "Top ": (0, descriptor_1.unitsValue)(bounds && bounds.top || { units: "Pixels", value: 0 }, "bounds.top"),
+          Left: (0, descriptor_1.unitsValue)(bounds && bounds.left || { units: "Pixels", value: 0 }, "bounds.left"),
+          Btom: (0, descriptor_1.unitsValue)(bounds && bounds.bottom || { units: "Pixels", value: 0 }, "bounds.bottom"),
+          Rght: (0, descriptor_1.unitsValue)(bounds && bounds.right || { units: "Pixels", value: 0 }, "bounds.right")
+        }
+      ), uOrder: warp.uOrder || 0, vOrder: warp.vOrder || 0 });
+      const isQuilt = isQuiltWarp(warp);
       if (isQuilt) {
-        var desc2 = desc;
+        const desc2 = desc;
         desc2.deformNumRows = warp.deformNumRows || 0;
         desc2.deformNumCols = warp.deformNumCols || 0;
       }
-      var customEnvelopeWarp = warp.customEnvelopeWarp;
+      const customEnvelopeWarp = warp.customEnvelopeWarp;
       if (customEnvelopeWarp) {
-        var meshPoints = customEnvelopeWarp.meshPoints || [];
+        const meshPoints = customEnvelopeWarp.meshPoints || [];
         if (isQuilt) {
-          var desc2 = desc;
+          const desc2 = desc;
           desc2.customEnvelopeWarp = {
             _name: "",
             _classID: "customEnvelopeWarp",
@@ -11793,12 +15577,8 @@ var require_additionalInfo = __commonJS({
               values: customEnvelopeWarp.quiltSliceY || []
             }],
             meshPoints: [
-              { type: "Hrzn", values: meshPoints.map(function(p) {
-                return p.x;
-              }) },
-              { type: "Vrtc", values: meshPoints.map(function(p) {
-                return p.y;
-              }) }
+              { type: "Hrzn", values: meshPoints.map((p) => p.x) },
+              { type: "Vrtc", values: meshPoints.map((p) => p.y) }
             ]
           };
         } else {
@@ -11806,87 +15586,93 @@ var require_additionalInfo = __commonJS({
             _name: "",
             _classID: "customEnvelopeWarp",
             meshPoints: [
-              { type: "Hrzn", values: meshPoints.map(function(p) {
-                return p.x;
-              }) },
-              { type: "Vrtc", values: meshPoints.map(function(p) {
-                return p.y;
-              }) }
+              { type: "Hrzn", values: meshPoints.map((p) => p.x) },
+              { type: "Vrtc", values: meshPoints.map((p) => p.y) }
             ]
           };
         }
       }
       return desc;
     }
-    addHandler("PlLd", hasKey("placedLayer"), function(reader, target, left) {
-      if ((0, psdReader_1.readSignature)(reader) !== "plcL")
-        throw new Error("Invalid PlLd signature");
-      if ((0, psdReader_1.readInt32)(reader) !== 3)
-        throw new Error("Invalid PlLd version");
-      var id = (0, psdReader_1.readPascalString)(reader, 1);
-      var pageNumber = (0, psdReader_1.readInt32)(reader);
-      var totalPages = (0, psdReader_1.readInt32)(reader);
-      (0, psdReader_1.readInt32)(reader);
-      var placedLayerType = (0, psdReader_1.readInt32)(reader);
-      if (!placedLayerTypes[placedLayerType])
-        throw new Error("Invalid PlLd type");
-      var transform = [];
-      for (var i = 0; i < 8; i++)
-        transform.push((0, psdReader_1.readFloat64)(reader));
-      var warpVersion = (0, psdReader_1.readInt32)(reader);
-      if (warpVersion !== 0)
-        throw new Error("Invalid Warp version ".concat(warpVersion));
-      var warp = (0, descriptor_1.readVersionAndDescriptor)(reader);
-      target.placedLayer = target.placedLayer || {
-        id,
-        type: placedLayerTypes[placedLayerType],
-        pageNumber,
-        totalPages,
-        transform,
-        warp: parseWarp(warp)
-      };
-      (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var placed = target.placedLayer;
-      (0, psdWriter_1.writeSignature)(writer, "plcL");
-      (0, psdWriter_1.writeInt32)(writer, 3);
-      if (!placed.id || typeof placed.id !== "string" || !/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/.test(placed.id)) {
-        throw new Error("Placed layer ID must be in a GUID format (example: 20953ddb-9391-11ec-b4f1-c15674f50bc4)");
+    addHandler(
+      "PlLd",
+      (target) => !!target.placedLayer && !target.placedLayer.external,
+      // linked smart objects are stored in SoLE
+      (reader, target, left) => {
+        if ((0, psdReader_1.readSignature)(reader) !== "plcL")
+          throw new Error(`Invalid PlLd signature`);
+        if ((0, psdReader_1.readInt32)(reader) !== 3)
+          throw new Error(`Invalid PlLd version`);
+        const id = (0, psdReader_1.readPascalString)(reader, 1);
+        const pageNumber = (0, psdReader_1.readInt32)(reader);
+        const totalPages = (0, psdReader_1.readInt32)(reader);
+        (0, psdReader_1.readInt32)(reader);
+        const placedLayerType = (0, psdReader_1.readInt32)(reader);
+        if (!placedLayerTypes[placedLayerType])
+          throw new Error("Invalid PlLd type");
+        const transform = [];
+        for (let i = 0; i < 8; i++)
+          transform.push((0, psdReader_1.readFloat64)(reader));
+        const warpVersion = (0, psdReader_1.readInt32)(reader);
+        if (warpVersion !== 0)
+          throw new Error(`Invalid Warp version ${warpVersion}`);
+        const warp = (0, descriptor_1.readVersionAndDescriptor)(reader);
+        target.placedLayer = target.placedLayer || {
+          id,
+          type: placedLayerTypes[placedLayerType],
+          pageNumber,
+          totalPages,
+          transform,
+          warp: parseWarp(warp)
+        };
+        (0, psdReader_1.skipBytes)(reader, left());
+      },
+      (writer, target) => {
+        const placed = target.placedLayer;
+        (0, psdWriter_1.writeSignature)(writer, "plcL");
+        (0, psdWriter_1.writeInt32)(writer, 3);
+        if (!placed.id || typeof placed.id !== "string" || !/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/.test(placed.id)) {
+          throw new Error("Placed layer ID must be in a GUID format (example: 20953ddb-9391-11ec-b4f1-c15674f50bc4)");
+        }
+        (0, psdWriter_1.writePascalString)(writer, placed.id, 1);
+        (0, psdWriter_1.writeInt32)(writer, placed.pageNumber || 1);
+        (0, psdWriter_1.writeInt32)(writer, placed.totalPages || 1);
+        (0, psdWriter_1.writeInt32)(writer, 16);
+        if (placedLayerTypes.indexOf(placed.type) === -1)
+          throw new Error("Invalid placedLayer type");
+        (0, psdWriter_1.writeInt32)(writer, placedLayerTypes.indexOf(placed.type));
+        for (let i = 0; i < 8; i++)
+          (0, psdWriter_1.writeFloat64)(writer, placed.transform[i]);
+        (0, psdWriter_1.writeInt32)(writer, 0);
+        const warp = getWarpFromPlacedLayer(placed);
+        const isQuilt = isQuiltWarp(warp);
+        const type = isQuilt ? "quiltWarp" : "warp";
+        (0, descriptor_1.writeVersionAndDescriptor)(writer, "", type, encodeWarp(warp), type);
       }
-      (0, psdWriter_1.writePascalString)(writer, placed.id, 1);
-      (0, psdWriter_1.writeInt32)(writer, 1);
-      (0, psdWriter_1.writeInt32)(writer, 1);
-      (0, psdWriter_1.writeInt32)(writer, 16);
-      if (placedLayerTypes.indexOf(placed.type) === -1)
-        throw new Error("Invalid placedLayer type");
-      (0, psdWriter_1.writeInt32)(writer, placedLayerTypes.indexOf(placed.type));
-      for (var i = 0; i < 8; i++)
-        (0, psdWriter_1.writeFloat64)(writer, placed.transform[i]);
-      (0, psdWriter_1.writeInt32)(writer, 0);
-      var warp = getWarpFromPlacedLayer(placed);
-      var isQuilt = isQuiltWarp(warp);
-      var type = isQuilt ? "quiltWarp" : "warp";
-      (0, descriptor_1.writeVersionAndDescriptor)(writer, "", type, encodeWarp(warp), type);
-    });
+    );
+    var levelsFilterKeys = ["_name", "_classID", "presetKind", "Adjs"];
+    var levelsFilterAdjustmentKeys = ["_name", "_classID", "Chnl", "Inpt", "Otpt", "Gmm "];
     function uint8ToFloat32(array) {
-      return new Float32Array(array.buffer.slice(array.byteOffset), 0, array.byteLength / 4);
+      const length = Math.floor(array.byteLength / 4);
+      return new Float32Array(array.buffer.slice(array.byteOffset, array.byteOffset + length * 4), 0, length);
     }
     function uint8ToUint32(array) {
-      return new Uint32Array(array.buffer.slice(array.byteOffset), 0, array.byteLength / 4);
+      const length = Math.floor(array.byteLength / 4);
+      return new Uint32Array(array.buffer.slice(array.byteOffset, array.byteOffset + length * 4), 0, length);
     }
     function toUint8(array) {
       return new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
     }
     function arrayToPoints(array) {
-      var points = [];
-      for (var i = 0; i < array.length; i += 2) {
+      const points = [];
+      for (let i = 0; i < array.length; i += 2) {
         points.push({ x: array[i], y: array[i + 1] });
       }
       return points;
     }
     function pointsToArray(points) {
-      var array = [];
-      for (var i = 0; i < points.length; i++) {
+      const array = [];
+      for (let i = 0; i < points.length; i++) {
         array.push(points[i].x, points[i].y);
       }
       return array;
@@ -11908,8 +15694,131 @@ var require_additionalInfo = __commonJS({
         Vrtc: (0, descriptor_1.unitsValue)(point.y, "y")
       };
     }
-    function parseFilterFXItem(f, options) {
-      var base = {
+    var cameraRawColorKeys = [
+      ["red", "R"],
+      ["orange", "O"],
+      ["yellow", "Y"],
+      ["green", "G"],
+      ["aqua", "A"],
+      ["blue", "B"],
+      ["purple", "P"],
+      ["magenta", "M"]
+    ];
+    var cameraRawSettings = [
+      ["version", "CrVe"],
+      ["processVersion", "PrVN"],
+      ["processVersionCode", "PrVe"],
+      ["whiteBalance", "WBal"],
+      ["temperature", "Temp"],
+      ["tint", "Tint"],
+      ["exposure", "Ex12"],
+      ["contrast", "Cr12"],
+      ["highlights", "Hi12"],
+      ["shadows", "Sh12"],
+      ["whites", "Wh12"],
+      ["blacks", "Bk12"],
+      ["texture", "CrTx"],
+      ["clarity", "Cl12"],
+      ["dehaze", "Dhze"],
+      ["vibrance", "Vibr"],
+      ["saturation", "Strt"],
+      ["parametricCurve.shadows", "PC_S"],
+      ["parametricCurve.darks", "PC_D"],
+      ["parametricCurve.lights", "PC_L"],
+      ["parametricCurve.highlights", "PC_H"],
+      ["parametricCurve.shadowSplit", "PC_1"],
+      ["parametricCurve.midtoneSplit", "PC_2"],
+      ["parametricCurve.highlightSplit", "PC_3"],
+      ["pointCurve.composite", "Crv "],
+      ["pointCurve.red", "CrvR"],
+      ["pointCurve.green", "CrvG"],
+      ["pointCurve.blue", "CrvB"],
+      ...cameraRawColorKeys.map(([name, key]) => [`hsl.hue.${name}`, `HA_${key}`]),
+      ...cameraRawColorKeys.map(([name, key]) => [`hsl.saturation.${name}`, `SA_${key}`]),
+      ...cameraRawColorKeys.map(([name, key]) => [`hsl.luminance.${name}`, `LA_${key}`]),
+      ["colorGrading.shadows.hue", "STSH"],
+      ["colorGrading.shadows.saturation", "STSS"],
+      ["colorGrading.shadows.luminance", "CgSL"],
+      ["colorGrading.midtones.hue", "CgMH"],
+      ["colorGrading.midtones.saturation", "CgMS"],
+      ["colorGrading.midtones.luminance", "CgML"],
+      ["colorGrading.highlights.hue", "STHH"],
+      ["colorGrading.highlights.saturation", "STHS"],
+      ["colorGrading.highlights.luminance", "CgHL"],
+      ["colorGrading.global.hue", "CgGH"],
+      ["colorGrading.global.saturation", "CgGS"],
+      ["colorGrading.global.luminance", "CgGL"],
+      ["colorGrading.blending", "CgBl"],
+      ["colorGrading.balance", "STB "],
+      ["sharpening.amount", "Shrp"],
+      ["sharpening.radius", "ShpR"],
+      ["sharpening.detail", "ShpD"],
+      ["sharpening.masking", "ShpM"],
+      ["noiseReduction.luminance", "LNR "],
+      ["noiseReduction.luminanceDetail", "LNRD"],
+      ["noiseReduction.luminanceContrast", "LNRC"],
+      ["noiseReduction.color", "CNR "],
+      ["noiseReduction.colorDetail", "CNRD"],
+      ["noiseReduction.colorSmoothness", "CNRS"],
+      ["grain.amount", "GRNA"],
+      ["grain.size", "GRNS"],
+      ["grain.roughness", "GRNF"],
+      ["postCropVignette.amount", "PCVA"],
+      ["postCropVignette.midpoint", "PCVM"],
+      ["postCropVignette.feather", "PCVF"],
+      ["postCropVignette.roundness", "PCVR"]
+    ];
+    var cameraRawCurveKeys = ["Crv ", "CrvR", "CrvG", "CrvB"];
+    var cameraRawFilterID = 2783;
+    function parseCameraRawSettings(desc, reader) {
+      var _a2;
+      const settings = {};
+      for (const [path2, key] of cameraRawSettings) {
+        let value = desc[key];
+        if (value === void 0)
+          continue;
+        if (key === "WBal") {
+          value = value.split(".")[1];
+        } else if (cameraRawCurveKeys.includes(key)) {
+          const values = value;
+          value = [];
+          for (let i = 0; i + 1 < values.length; i += 2)
+            value.push({ input: values[i], output: values[i + 1] });
+        }
+        const parts = path2.split(".");
+        let target = settings;
+        for (let i = 0; i < parts.length - 1; i++)
+          target = target[parts[i]] = (_a2 = target[parts[i]]) !== null && _a2 !== void 0 ? _a2 : {};
+        target[parts[parts.length - 1]] = value;
+      }
+      for (const key of Object.keys(desc)) {
+        if (key !== "_name" && key !== "_classID" && !cameraRawSettings.some((s) => s[1] === key)) {
+          reader.logMissingFeatures && reader.log(`Unhandled Camera Raw Filter setting: ${key}`);
+        }
+      }
+      return settings;
+    }
+    function serializeCameraRawSettings(settings) {
+      const desc = { _name: "", _classID: descriptor_1.cameraRawFilterClassID };
+      for (const [path2, key] of cameraRawSettings) {
+        let value = settings;
+        for (const part of path2.split("."))
+          value = value === null || value === void 0 ? void 0 : value[part];
+        if (value === void 0)
+          continue;
+        if (key === "WBal") {
+          value = `WBal.${value}`;
+        } else if (cameraRawCurveKeys.includes(key)) {
+          value = value.flatMap((p) => [Math.round(p.input), Math.round(p.output)]);
+        } else if (typeof value === "number" && key !== "Ex12" && key !== "ShpR") {
+          value = Math.round(value);
+        }
+        desc[key] = value;
+      }
+      return desc;
+    }
+    function parseFilterFXItem(f, reader) {
+      const base = {
         name: f["Nm  "],
         opacity: (0, descriptor_1.parsePercent)(f.blendOptions.Opct),
         blendMode: descriptor_1.BlnM.decode(f.blendOptions["Md  "]),
@@ -11918,46 +15827,49 @@ var require_additionalInfo = __commonJS({
         foregroundColor: (0, descriptor_1.parseColor)(f.FrgC),
         backgroundColor: (0, descriptor_1.parseColor)(f.BckC)
       };
+      if ("Fltr" in f && f.Fltr._classID === descriptor_1.cameraRawFilterClassID) {
+        return Object.assign(Object.assign({}, base), { type: "camera raw", filter: parseCameraRawSettings(f.Fltr, reader) });
+      }
       if ("Fltr" in f) {
         switch (f.Fltr._classID) {
           case "boxblur":
-            return __assign(__assign({}, base), { type: "box blur", filter: {
+            return Object.assign(Object.assign({}, base), { type: "box blur", filter: {
               radius: (0, descriptor_1.parseUnits)(f.Fltr["Rds "])
             } });
           case "GsnB":
-            return __assign(__assign({}, base), { type: "gaussian blur", filter: {
+            return Object.assign(Object.assign({}, base), { type: "gaussian blur", filter: {
               radius: (0, descriptor_1.parseUnits)(f.Fltr["Rds "])
             } });
           case "MtnB":
-            return __assign(__assign({}, base), { type: "motion blur", filter: {
+            return Object.assign(Object.assign({}, base), { type: "motion blur", filter: {
               angle: f.Fltr.Angl,
               distance: (0, descriptor_1.parseUnits)(f.Fltr.Dstn)
             } });
           case "RdlB":
-            return __assign(__assign({}, base), { type: "radial blur", filter: {
+            return Object.assign(Object.assign({}, base), { type: "radial blur", filter: {
               amount: f.Fltr.Amnt,
               method: descriptor_1.BlrM.decode(f.Fltr.BlrM),
               quality: descriptor_1.BlrQ.decode(f.Fltr.BlrQ)
             } });
           case "shapeBlur":
-            return __assign(__assign({}, base), { type: "shape blur", filter: {
+            return Object.assign(Object.assign({}, base), { type: "shape blur", filter: {
               radius: (0, descriptor_1.parseUnits)(f.Fltr["Rds "]),
               customShape: { name: f.Fltr.customShape["Nm  "], id: f.Fltr.customShape.Idnt }
             } });
           case "SmrB":
-            return __assign(__assign({}, base), { type: "smart blur", filter: {
+            return Object.assign(Object.assign({}, base), { type: "smart blur", filter: {
               radius: f.Fltr["Rds "],
               threshold: f.Fltr.Thsh,
               quality: descriptor_1.SmBQ.decode(f.Fltr.SmBQ),
               mode: descriptor_1.SmBM.decode(f.Fltr.SmBM)
             } });
           case "surfaceBlur":
-            return __assign(__assign({}, base), { type: "surface blur", filter: {
+            return Object.assign(Object.assign({}, base), { type: "surface blur", filter: {
               radius: (0, descriptor_1.parseUnits)(f.Fltr["Rds "]),
               threshold: f.Fltr.Thsh
             } });
           case "Dspl":
-            return __assign(__assign({}, base), { type: "displace", filter: {
+            return Object.assign(Object.assign({}, base), { type: "displace", filter: {
               horizontalScale: f.Fltr.HrzS,
               verticalScale: f.Fltr.VrtS,
               displacementMap: descriptor_1.DspM.decode(f.Fltr.DspM),
@@ -11965,42 +15877,39 @@ var require_additionalInfo = __commonJS({
               displacementFile: {
                 signature: f.Fltr.DspF.sig,
                 path: f.Fltr.DspF.path
-                // TODO: this is decoded incorrectly ???
               }
             } });
           case "Pnch":
-            return __assign(__assign({}, base), { type: "pinch", filter: {
+            return Object.assign(Object.assign({}, base), { type: "pinch", filter: {
               amount: f.Fltr.Amnt
             } });
           case "Plr ":
-            return __assign(__assign({}, base), { type: "polar coordinates", filter: {
+            return Object.assign(Object.assign({}, base), { type: "polar coordinates", filter: {
               conversion: descriptor_1.Cnvr.decode(f.Fltr.Cnvr)
             } });
           case "Rple":
-            return __assign(__assign({}, base), { type: "ripple", filter: {
+            return Object.assign(Object.assign({}, base), { type: "ripple", filter: {
               amount: f.Fltr.Amnt,
               size: descriptor_1.RplS.decode(f.Fltr.RplS)
             } });
           case "Shr ":
-            return __assign(__assign({}, base), { type: "shear", filter: {
-              shearPoints: f.Fltr.ShrP.map(function(p) {
-                return { x: p.Hrzn, y: p.Vrtc };
-              }),
+            return Object.assign(Object.assign({}, base), { type: "shear", filter: {
+              shearPoints: f.Fltr.ShrP.map((p) => ({ x: p.Hrzn, y: p.Vrtc })),
               shearStart: f.Fltr.ShrS,
               shearEnd: f.Fltr.ShrE,
               undefinedAreas: descriptor_1.UndA.decode(f.Fltr.UndA)
             } });
           case "Sphr":
-            return __assign(__assign({}, base), { type: "spherize", filter: {
+            return Object.assign(Object.assign({}, base), { type: "spherize", filter: {
               amount: f.Fltr.Amnt,
               mode: descriptor_1.SphM.decode(f.Fltr.SphM)
             } });
           case "Twrl":
-            return __assign(__assign({}, base), { type: "twirl", filter: {
+            return Object.assign(Object.assign({}, base), { type: "twirl", filter: {
               angle: f.Fltr.Angl
             } });
           case "Wave":
-            return __assign(__assign({}, base), { type: "wave", filter: {
+            return Object.assign(Object.assign({}, base), { type: "wave", filter: {
               numberOfGenerators: f.Fltr.NmbG,
               type: descriptor_1.Wvtp.decode(f.Fltr.Wvtp),
               wavelength: { min: f.Fltr.WLMn, max: f.Fltr.WLMx },
@@ -12010,41 +15919,37 @@ var require_additionalInfo = __commonJS({
               undefinedAreas: descriptor_1.UndA.decode(f.Fltr.UndA)
             } });
           case "ZgZg":
-            return __assign(__assign({}, base), { type: "zigzag", filter: {
+            return Object.assign(Object.assign({}, base), { type: "zigzag", filter: {
               amount: f.Fltr.Amnt,
               ridges: f.Fltr.NmbR,
               style: descriptor_1.ZZTy.decode(f.Fltr.ZZTy)
             } });
           case "AdNs":
-            return __assign(__assign({}, base), { type: "add noise", filter: {
+            return Object.assign(Object.assign({}, base), { type: "add noise", filter: {
               amount: (0, descriptor_1.parsePercent)(f.Fltr.Nose),
               distribution: descriptor_1.Dstr.decode(f.Fltr.Dstr),
               monochromatic: f.Fltr.Mnch,
               randomSeed: f.Fltr.FlRs
             } });
           case "DstS":
-            return __assign(__assign({}, base), { type: "dust and scratches", filter: {
+            return Object.assign(Object.assign({}, base), { type: "dust and scratches", filter: {
               radius: f.Fltr["Rds "],
               threshold: f.Fltr.Thsh
             } });
           case "Mdn ":
-            return __assign(__assign({}, base), { type: "median", filter: {
+            return Object.assign(Object.assign({}, base), { type: "median", filter: {
               radius: (0, descriptor_1.parseUnits)(f.Fltr["Rds "])
             } });
           case "denoise":
-            return __assign(__assign({}, base), { type: "reduce noise", filter: {
+            return Object.assign(Object.assign({}, base), { type: "reduce noise", filter: {
               preset: f.Fltr.preset,
               removeJpegArtifact: f.Fltr.removeJPEGArtifact,
               reduceColorNoise: (0, descriptor_1.parsePercent)(f.Fltr.ClNs),
               sharpenDetails: (0, descriptor_1.parsePercent)(f.Fltr.Shrp),
-              channelDenoise: f.Fltr.channelDenoise.map(function(c) {
-                return __assign({ channels: c.Chnl.map(function(i2) {
-                  return descriptor_1.Chnl.decode(i2);
-                }), amount: c.Amnt }, c.EdgF ? { preserveDetails: c.EdgF } : {});
-              })
+              channelDenoise: f.Fltr.channelDenoise.map((c) => Object.assign({ channels: c.Chnl.map(descriptor_1.Chnl.decode), amount: c.Amnt }, c.EdgF ? { preserveDetails: c.EdgF } : {}))
             } });
           case "ClrH":
-            return __assign(__assign({}, base), { type: "color halftone", filter: {
+            return Object.assign(Object.assign({}, base), { type: "color halftone", filter: {
               radius: f.Fltr["Rds "],
               angle1: f.Fltr.Ang1,
               angle2: f.Fltr.Ang2,
@@ -12052,46 +15957,46 @@ var require_additionalInfo = __commonJS({
               angle4: f.Fltr.Ang4
             } });
           case "Crst":
-            return __assign(__assign({}, base), { type: "crystallize", filter: {
+            return Object.assign(Object.assign({}, base), { type: "crystallize", filter: {
               cellSize: f.Fltr.ClSz,
               randomSeed: f.Fltr.FlRs
             } });
           case "Mztn":
-            return __assign(__assign({}, base), { type: "mezzotint", filter: {
+            return Object.assign(Object.assign({}, base), { type: "mezzotint", filter: {
               type: descriptor_1.MztT.decode(f.Fltr.MztT),
               randomSeed: f.Fltr.FlRs
             } });
           case "Msc ":
-            return __assign(__assign({}, base), { type: "mosaic", filter: {
+            return Object.assign(Object.assign({}, base), { type: "mosaic", filter: {
               cellSize: (0, descriptor_1.parseUnits)(f.Fltr.ClSz)
             } });
           case "Pntl":
-            return __assign(__assign({}, base), { type: "pointillize", filter: {
+            return Object.assign(Object.assign({}, base), { type: "pointillize", filter: {
               cellSize: f.Fltr.ClSz,
               randomSeed: f.Fltr.FlRs
             } });
           case "Clds":
-            return __assign(__assign({}, base), { type: "clouds", filter: {
+            return Object.assign(Object.assign({}, base), { type: "clouds", filter: {
               randomSeed: f.Fltr.FlRs
             } });
           case "DfrC":
-            return __assign(__assign({}, base), { type: "difference clouds", filter: {
+            return Object.assign(Object.assign({}, base), { type: "difference clouds", filter: {
               randomSeed: f.Fltr.FlRs
             } });
           case "Fbrs":
-            return __assign(__assign({}, base), { type: "fibers", filter: {
+            return Object.assign(Object.assign({}, base), { type: "fibers", filter: {
               variance: f.Fltr.Vrnc,
               strength: f.Fltr.Strg,
               randomSeed: f.Fltr.RndS
             } });
           case "LnsF":
-            return __assign(__assign({}, base), { type: "lens flare", filter: {
+            return Object.assign(Object.assign({}, base), { type: "lens flare", filter: {
               brightness: f.Fltr.Brgh,
               position: { x: f.Fltr.FlrC.Hrzn, y: f.Fltr.FlrC.Vrtc },
               lensType: descriptor_1.Lns.decode(f.Fltr["Lns "])
             } });
           case "smartSharpen":
-            return __assign(__assign({}, base), { type: "smart sharpen", filter: {
+            return Object.assign(Object.assign({}, base), { type: "smart sharpen", filter: {
               amount: (0, descriptor_1.parsePercent)(f.Fltr.Amnt),
               radius: (0, descriptor_1.parseUnits)(f.Fltr["Rds "]),
               threshold: f.Fltr.Thsh,
@@ -12111,24 +16016,24 @@ var require_additionalInfo = __commonJS({
               }
             } });
           case "UnsM":
-            return __assign(__assign({}, base), { type: "unsharp mask", filter: {
+            return Object.assign(Object.assign({}, base), { type: "unsharp mask", filter: {
               amount: (0, descriptor_1.parsePercent)(f.Fltr.Amnt),
               radius: (0, descriptor_1.parseUnits)(f.Fltr["Rds "]),
               threshold: f.Fltr.Thsh
             } });
           case "Dfs ":
-            return __assign(__assign({}, base), { type: "diffuse", filter: {
+            return Object.assign(Object.assign({}, base), { type: "diffuse", filter: {
               mode: descriptor_1.DfsM.decode(f.Fltr["Md  "]),
               randomSeed: f.Fltr.FlRs
             } });
           case "Embs":
-            return __assign(__assign({}, base), { type: "emboss", filter: {
+            return Object.assign(Object.assign({}, base), { type: "emboss", filter: {
               angle: f.Fltr.Angl,
               height: f.Fltr.Hght,
               amount: f.Fltr.Amnt
             } });
           case "Extr":
-            return __assign(__assign({}, base), { type: "extrude", filter: {
+            return Object.assign(Object.assign({}, base), { type: "extrude", filter: {
               type: descriptor_1.ExtT.decode(f.Fltr.ExtT),
               size: f.Fltr.ExtS,
               depth: f.Fltr.ExtD,
@@ -12138,53 +16043,53 @@ var require_additionalInfo = __commonJS({
               maskIncompleteBlocks: f.Fltr.ExtM
             } });
           case "Tls ":
-            return __assign(__assign({}, base), { type: "tiles", filter: {
+            return Object.assign(Object.assign({}, base), { type: "tiles", filter: {
               numberOfTiles: f.Fltr.TlNm,
               maximumOffset: f.Fltr.TlOf,
               fillEmptyAreaWith: descriptor_1.FlCl.decode(f.Fltr.FlCl),
               randomSeed: f.Fltr.FlRs
             } });
           case "TrcC":
-            return __assign(__assign({}, base), { type: "trace contour", filter: {
+            return Object.assign(Object.assign({}, base), { type: "trace contour", filter: {
               level: f.Fltr["Lvl "],
               edge: descriptor_1.CntE.decode(f.Fltr["Edg "])
             } });
           case "Wnd ":
-            return __assign(__assign({}, base), { type: "wind", filter: {
+            return Object.assign(Object.assign({}, base), { type: "wind", filter: {
               method: descriptor_1.WndM.decode(f.Fltr.WndM),
               direction: descriptor_1.Drct.decode(f.Fltr.Drct)
             } });
           case "Dntr":
-            return __assign(__assign({}, base), { type: "de-interlace", filter: {
+            return Object.assign(Object.assign({}, base), { type: "de-interlace", filter: {
               eliminate: descriptor_1.IntE.decode(f.Fltr.IntE),
               newFieldsBy: descriptor_1.IntC.decode(f.Fltr.IntC)
             } });
           case "Cstm":
-            return __assign(__assign({}, base), { type: "custom", filter: {
+            return Object.assign(Object.assign({}, base), { type: "custom", filter: {
               scale: f.Fltr["Scl "],
               offset: f.Fltr.Ofst,
               matrix: f.Fltr.Mtrx
             } });
           case "HghP":
-            return __assign(__assign({}, base), { type: "high pass", filter: {
+            return Object.assign(Object.assign({}, base), { type: "high pass", filter: {
               radius: (0, descriptor_1.parseUnits)(f.Fltr["Rds "])
             } });
           case "Mxm ":
-            return __assign(__assign({}, base), { type: "maximum", filter: {
+            return Object.assign(Object.assign({}, base), { type: "maximum", filter: {
               radius: (0, descriptor_1.parseUnits)(f.Fltr["Rds "])
             } });
           case "Mnm ":
-            return __assign(__assign({}, base), { type: "minimum", filter: {
+            return Object.assign(Object.assign({}, base), { type: "minimum", filter: {
               radius: (0, descriptor_1.parseUnits)(f.Fltr["Rds "])
             } });
           case "Ofst":
-            return __assign(__assign({}, base), { type: "offset", filter: {
+            return Object.assign(Object.assign({}, base), { type: "offset", filter: {
               horizontal: f.Fltr.Hrzn,
               vertical: f.Fltr.Vrtc,
               undefinedAreas: descriptor_1.FlMd.decode(f.Fltr["Fl  "])
             } });
           case "rigidTransform":
-            return __assign(__assign({}, base), { type: "puppet", filter: {
+            return Object.assign(Object.assign({}, base), { type: "puppet", filter: {
               rigidType: f.Fltr.rigidType,
               bounds: [
                 { x: f.Fltr.PuX0, y: f.Fltr.PuY0 },
@@ -12192,65 +16097,56 @@ var require_additionalInfo = __commonJS({
                 { x: f.Fltr.PuX2, y: f.Fltr.PuY2 },
                 { x: f.Fltr.PuX3, y: f.Fltr.PuY3 }
               ],
-              puppetShapeList: f.Fltr.puppetShapeList.map(function(p) {
-                return {
-                  rigidType: p.rigidType,
-                  // TODO: VrsM
-                  // TODO: VrsN
-                  originalVertexArray: uint8ToPoints(p.originalVertexArray),
-                  deformedVertexArray: uint8ToPoints(p.deformedVertexArray),
-                  indexArray: Array.from(uint8ToUint32(p.indexArray)),
-                  pinOffsets: arrayToPoints(p.pinOffsets),
-                  posFinalPins: arrayToPoints(p.posFinalPins),
-                  pinVertexIndices: p.pinVertexIndices,
-                  selectedPin: p.selectedPin,
-                  pinPosition: arrayToPoints(p.PinP),
-                  pinRotation: p.PnRt,
-                  pinOverlay: p.PnOv,
-                  pinDepth: p.PnDp,
-                  meshQuality: p.meshQuality,
-                  meshExpansion: p.meshExpansion,
-                  meshRigidity: p.meshRigidity,
-                  imageResolution: p.imageResolution,
-                  meshBoundaryPath: {
-                    pathComponents: p.meshBoundaryPath.pathComponents.map(function(c) {
-                      return {
-                        shapeOperation: c.shapeOperation.split(".")[1],
-                        paths: c.SbpL.map(function(t) {
-                          return {
-                            closed: t.Clsp,
-                            points: t["Pts "].map(function(pt) {
-                              return {
-                                anchor: hrznVrtcToPoint(pt.Anch),
-                                forward: hrznVrtcToPoint(pt["Fwd "]),
-                                backward: hrznVrtcToPoint(pt["Bwd "]),
-                                smooth: pt.Smoo
-                              };
-                            })
-                          };
-                        })
-                      };
-                    })
-                  }
-                };
-              })
+              puppetShapeList: (f.Fltr.puppetShapeList || []).map((p) => ({
+                rigidType: p.rigidType,
+                // VrsM / VrsN - version (always 1.0)
+                originalVertexArray: uint8ToPoints(p.originalVertexArray),
+                deformedVertexArray: uint8ToPoints(p.deformedVertexArray),
+                indexArray: Array.from(uint8ToUint32(p.indexArray)),
+                pinOffsets: arrayToPoints(p.pinOffsets),
+                posFinalPins: arrayToPoints(p.posFinalPins),
+                pinVertexIndices: p.pinVertexIndices,
+                selectedPin: p.selectedPin,
+                pinPosition: arrayToPoints(p.PinP),
+                pinRotation: p.PnRt,
+                pinOverlay: p.PnOv,
+                pinDepth: p.PnDp,
+                meshQuality: p.meshQuality,
+                meshExpansion: p.meshExpansion,
+                meshRigidity: p.meshRigidity,
+                imageResolution: p.imageResolution,
+                meshBoundaryPath: {
+                  pathComponents: p.meshBoundaryPath.pathComponents.map((c) => ({
+                    shapeOperation: c.shapeOperation.split(".")[1],
+                    paths: c.SbpL.map((t) => ({
+                      closed: t.Clsp,
+                      points: t["Pts "].map((pt) => ({
+                        anchor: hrznVrtcToPoint(pt.Anch),
+                        forward: hrznVrtcToPoint(pt["Fwd "]),
+                        backward: hrznVrtcToPoint(pt["Bwd "]),
+                        smooth: pt.Smoo
+                      }))
+                    }))
+                  }))
+                }
+              }))
             } });
           case "PbPl": {
-            var parameters = [];
-            var Flrt = f.Fltr;
-            for (var i = 0; i < fromAtoZ.length; i++) {
-              if (!Flrt["PN".concat(fromAtoZ[i], "a")])
+            const parameters = [];
+            const Flrt = f.Fltr;
+            for (let i = 0; i < fromAtoZ.length; i++) {
+              if (!Flrt[`PN${fromAtoZ[i]}a`])
                 break;
-              for (var j = 0; j < fromAtoZ.length; j++) {
-                if (!Flrt["PN".concat(fromAtoZ[i]).concat(fromAtoZ[j])])
+              for (let j = 0; j < fromAtoZ.length; j++) {
+                if (!Flrt[`PN${fromAtoZ[i]}${fromAtoZ[j]}`])
                   break;
                 parameters.push({
-                  name: Flrt["PN".concat(fromAtoZ[i]).concat(fromAtoZ[j])],
-                  value: Flrt["PF".concat(fromAtoZ[i]).concat(fromAtoZ[j])]
+                  name: Flrt[`PN${fromAtoZ[i]}${fromAtoZ[j]}`],
+                  value: Flrt[`PF${fromAtoZ[i]}${fromAtoZ[j]}`]
                 });
               }
             }
-            return __assign(__assign({}, base), { type: "oil paint plugin", filter: {
+            return Object.assign(Object.assign({}, base), { type: "oil paint plugin", filter: {
               name: f.Fltr.KnNm,
               gpu: f.Fltr.GpuY,
               lighting: f.Fltr.LIWy,
@@ -12270,12 +16166,12 @@ var require_additionalInfo = __commonJS({
           // 	},
           // };
           case "HsbP":
-            return __assign(__assign({}, base), { type: "hsb/hsl", filter: {
+            return Object.assign(Object.assign({}, base), { type: "hsb/hsl", filter: {
               inputMode: descriptor_1.ClrS.decode(f.Fltr.Inpt),
               rowOrder: descriptor_1.ClrS.decode(f.Fltr.Otpt)
             } });
           case "oilPaint":
-            return __assign(__assign({}, base), { type: "oil paint", filter: {
+            return Object.assign(Object.assign({}, base), { type: "oil paint", filter: {
               lightingOn: f.Fltr.lightingOn,
               stylization: f.Fltr.stylization,
               cleanliness: f.Fltr.cleanliness,
@@ -12286,35 +16182,30 @@ var require_additionalInfo = __commonJS({
             } });
           case "LqFy":
             {
-              return __assign(__assign({}, base), { type: "liquify", filter: {
+              return Object.assign(Object.assign({}, base), { type: "liquify", filter: {
                 liquifyMesh: f.Fltr.LqMe
               } });
             }
             ;
           case "perspectiveWarpTransform":
             {
-              return __assign(__assign({}, base), { type: "perspective warp", filter: {
+              return Object.assign(Object.assign({}, base), { type: "perspective warp", filter: {
                 vertices: f.Fltr.vertices.map(hrznVrtcToPoint),
                 warpedVertices: f.Fltr.warpedVertices.map(hrznVrtcToPoint),
-                quads: f.Fltr.quads.map(function(q) {
-                  return q.indices;
-                })
+                quads: f.Fltr.quads.map((q) => q.indices)
               } });
             }
             ;
           case "Crvs":
             {
-              return __assign(__assign({}, base), { type: "curves", filter: {
-                presetKind: descriptor_1.presetKindType.decode(f.Fltr.presetKind),
-                adjustments: f.Fltr.Adjs.map(function(a) {
-                  var channels = a.Chnl.map(function(c) {
-                    return descriptor_1.Chnl.decode(c);
-                  });
+              return Object.assign(Object.assign({}, base), { type: "curves", filter: Object.assign(Object.assign({}, f.Fltr.presetKind !== void 0 ? { presetKind: descriptor_1.presetKindType.decode(f.Fltr.presetKind) } : {}), f.Fltr.Adjs ? {
+                adjustments: f.Fltr.Adjs.map((a) => {
+                  const channels = a.Chnl.map(descriptor_1.Chnl.decode);
                   if (a["Crv "]) {
                     return {
                       channels,
-                      curve: a["Crv "].map(function(c) {
-                        var point = { x: c.Hrzn, y: c.Vrtc };
+                      curve: a["Crv "].map((c) => {
+                        const point = { x: c.Hrzn, y: c.Vrtc };
                         if (c.Cnty)
                           point.curved = true;
                         return point;
@@ -12323,70 +16214,108 @@ var require_additionalInfo = __commonJS({
                   } else if (a.Mpng) {
                     return { channels, values: a.Mpng };
                   } else {
-                    throw new Error("Unknown curve adjustment");
+                    throw new Error(`Unknown curve adjustment`);
                   }
                 })
+              } : {}) });
+            }
+            ;
+          case "Lvls":
+            {
+              const adjustments = f.Fltr.Adjs;
+              const isKnown = (obj, keys) => Object.keys(obj).every((k) => keys.indexOf(k) !== -1);
+              if (!isKnown(f.Fltr, levelsFilterKeys) || adjustments && !adjustments.every((a) => isKnown(a, levelsFilterAdjustmentKeys))) {
+                if (reader.throwForMissingFeatures)
+                  throw new Error("Unknown levels filter settings");
+                reader.logMissingFeatures && reader.log(`Skipped levels smart filter with unknown settings`);
+                return void 0;
+              }
+              return Object.assign(Object.assign({}, base), { type: "levels", filter: Object.assign(Object.assign({}, f.Fltr.presetKind !== void 0 ? { presetKind: descriptor_1.presetKindType.decode(f.Fltr.presetKind) } : {}), adjustments ? {
+                adjustments: adjustments.map((a) => {
+                  const result = { channels: a.Chnl.map(descriptor_1.Chnl.decode) };
+                  if (a.Inpt) {
+                    result.shadowInput = a.Inpt[0];
+                    result.highlightInput = a.Inpt[1];
+                  }
+                  if (a.Otpt) {
+                    result.shadowOutput = a.Otpt[0];
+                    result.highlightOutput = a.Otpt[1];
+                  }
+                  if (a["Gmm "] !== void 0)
+                    result.midtoneInput = a["Gmm "];
+                  return result;
+                })
+              } : {}) });
+            }
+            ;
+          case "BrgC":
+            {
+              return Object.assign(Object.assign({}, base), { type: "brightness/contrast", filter: {
+                brightness: f.Fltr.Brgh,
+                contrast: f.Fltr.Cntr,
+                useLegacy: !!f.Fltr.useLegacy
               } });
             }
             ;
           default:
-            if (options.throwForMissingFeatures) {
-              throw new Error("Unknown filter classId: ".concat(f.Fltr._classID));
+            if (reader.throwForMissingFeatures) {
+              throw new Error(`Unknown filter classId: ${f.Fltr._classID}`);
             }
+            reader.logMissingFeatures && reader.log(`Unhandled smart filter: ${f.Fltr._classID} (${f["Nm  "]})`);
             return void 0;
         }
       } else {
         switch (f.filterID) {
           case 1098281575:
-            return __assign(__assign({}, base), { type: "average" });
+            return Object.assign(Object.assign({}, base), { type: "average" });
           case 1114403360:
-            return __assign(__assign({}, base), { type: "blur" });
+            return Object.assign(Object.assign({}, base), { type: "blur" });
           case 1114403405:
-            return __assign(__assign({}, base), { type: "blur more" });
+            return Object.assign(Object.assign({}, base), { type: "blur more" });
           case 1148416099:
-            return __assign(__assign({}, base), { type: "despeckle" });
+            return Object.assign(Object.assign({}, base), { type: "despeckle" });
           case 1180922912:
-            return __assign(__assign({}, base), { type: "facet" });
+            return Object.assign(Object.assign({}, base), { type: "facet" });
           case 1181902701:
-            return __assign(__assign({}, base), { type: "fragment" });
+            return Object.assign(Object.assign({}, base), { type: "fragment" });
           case 1399353968:
-            return __assign(__assign({}, base), { type: "sharpen" });
+            return Object.assign(Object.assign({}, base), { type: "sharpen" });
           case 1399353925:
-            return __assign(__assign({}, base), { type: "sharpen edges" });
+            return Object.assign(Object.assign({}, base), { type: "sharpen edges" });
           case 1399353933:
-            return __assign(__assign({}, base), { type: "sharpen more" });
+            return Object.assign(Object.assign({}, base), { type: "sharpen more" });
           case 1181639749:
-            return __assign(__assign({}, base), { type: "find edges" });
+            return Object.assign(Object.assign({}, base), { type: "find edges" });
           case 1399616122:
-            return __assign(__assign({}, base), { type: "solarize" });
+            return Object.assign(Object.assign({}, base), { type: "solarize" });
           case 1314149187:
-            return __assign(__assign({}, base), { type: "ntsc colors" });
+            return Object.assign(Object.assign({}, base), { type: "ntsc colors" });
+          case 1231976050:
+            return Object.assign(Object.assign({}, base), { type: "invert" });
           default:
-            if (options.throwForMissingFeatures) {
-              throw new Error("Unknown filterID: ".concat(f.filterID));
+            if (reader.throwForMissingFeatures) {
+              throw new Error(`Unknown filterID: ${f.filterID}`);
             }
+            reader.logMissingFeatures && reader.log(`Unhandled smart filter: ${f.filterID} (${f["Nm  "]})`);
+            return void 0;
         }
       }
     }
-    function parseFilterFX(desc, options) {
+    function parseFilterFX(desc, reader) {
       return {
         enabled: desc.enab,
         validAtPosition: desc.validAtPosition,
         maskEnabled: desc.filterMaskEnable,
         maskLinked: desc.filterMaskLinked,
         maskExtendWithWhite: desc.filterMaskExtendWithWhite,
-        list: desc.filterFXList.map(function(x) {
-          return parseFilterFXItem(x, options);
-        }).filter(function(x) {
-          return !!x;
-        })
+        list: desc.filterFXList.map((x) => parseFilterFXItem(x, reader)).filter((x) => !!x)
       };
     }
     function uvRadius(t) {
       return (0, descriptor_1.unitsValue)(t.radius, "radius");
     }
     function serializeFilterFXItem(f) {
-      var base = {
+      const base = {
         _name: "",
         _classID: "filterFX",
         "Nm  ": f.name,
@@ -12403,32 +16332,33 @@ var require_additionalInfo = __commonJS({
       };
       switch (f.type) {
         case "average":
-          return __assign(__assign({}, base), { filterID: 1098281575 });
+          return Object.assign(Object.assign({}, base), { filterID: 1098281575 });
         case "blur":
-          return __assign(__assign({}, base), { filterID: 1114403360 });
+          return Object.assign(Object.assign({}, base), { filterID: 1114403360 });
         case "blur more":
-          return __assign(__assign({}, base), { filterID: 1114403405 });
+          return Object.assign(Object.assign({}, base), { filterID: 1114403405 });
         case "box blur":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Box Blur",
             _classID: "boxblur",
             "Rds ": uvRadius(f.filter)
           }, filterID: 697 });
         case "gaussian blur":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
+            // _name: '高斯模糊', // Testing
             _name: "Gaussian Blur",
             _classID: "GsnB",
             "Rds ": uvRadius(f.filter)
           }, filterID: 1198747202 });
         case "motion blur":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Motion Blur",
             _classID: "MtnB",
             Angl: f.filter.angle,
             Dstn: (0, descriptor_1.unitsValue)(f.filter.distance, "distance")
           }, filterID: 1299476034 });
         case "radial blur":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Radial Blur",
             _classID: "RdlB",
             Amnt: f.filter.amount,
@@ -12436,7 +16366,7 @@ var require_additionalInfo = __commonJS({
             BlrQ: descriptor_1.BlrQ.encode(f.filter.quality)
           }, filterID: 1382313026 });
         case "shape blur":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Shape Blur",
             _classID: "shapeBlur",
             "Rds ": uvRadius(f.filter),
@@ -12448,7 +16378,7 @@ var require_additionalInfo = __commonJS({
             }
           }, filterID: 702 });
         case "smart blur":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Smart Blur",
             _classID: "SmrB",
             "Rds ": f.filter.radius,
@@ -12457,14 +16387,14 @@ var require_additionalInfo = __commonJS({
             SmBM: descriptor_1.SmBM.encode(f.filter.mode)
           }, filterID: 1399681602 });
         case "surface blur":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Surface Blur",
             _classID: "surfaceBlur",
             "Rds ": uvRadius(f.filter),
             Thsh: f.filter.threshold
           }, filterID: 701 });
         case "displace":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Displace",
             _classID: "Dspl",
             HrzS: f.filter.horizontalScale,
@@ -12477,50 +16407,48 @@ var require_additionalInfo = __commonJS({
             }
           }, filterID: 1148416108 });
         case "pinch":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Pinch",
             _classID: "Pnch",
             Amnt: f.filter.amount
           }, filterID: 1349411688 });
         case "polar coordinates":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Polar Coordinates",
             _classID: "Plr ",
             Cnvr: descriptor_1.Cnvr.encode(f.filter.conversion)
           }, filterID: 1349284384 });
         case "ripple":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Ripple",
             _classID: "Rple",
             Amnt: f.filter.amount,
             RplS: descriptor_1.RplS.encode(f.filter.size)
           }, filterID: 1383099493 });
         case "shear":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Shear",
             _classID: "Shr ",
-            ShrP: f.filter.shearPoints.map(function(p) {
-              return { _name: "", _classID: "Pnt ", Hrzn: p.x, Vrtc: p.y };
-            }),
+            ShrP: f.filter.shearPoints.map((p) => ({ _name: "", _classID: "Pnt ", Hrzn: p.x, Vrtc: p.y })),
             UndA: descriptor_1.UndA.encode(f.filter.undefinedAreas),
             ShrS: f.filter.shearStart,
             ShrE: f.filter.shearEnd
           }, filterID: 1399353888 });
         case "spherize":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Spherize",
             _classID: "Sphr",
             Amnt: f.filter.amount,
             SphM: descriptor_1.SphM.encode(f.filter.mode)
           }, filterID: 1399875698 });
         case "twirl":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Twirl",
             _classID: "Twrl",
             Angl: f.filter.angle
           }, filterID: 1417114220 });
         case "wave":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Wave",
             _classID: "Wave",
             Wvtp: descriptor_1.Wvtp.encode(f.filter.type),
@@ -12535,7 +16463,7 @@ var require_additionalInfo = __commonJS({
             RndS: f.filter.randomSeed
           }, filterID: 1466005093 });
         case "zigzag":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "ZigZag",
             _classID: "ZgZg",
             Amnt: f.filter.amount,
@@ -12543,7 +16471,7 @@ var require_additionalInfo = __commonJS({
             ZZTy: descriptor_1.ZZTy.encode(f.filter.style)
           }, filterID: 1516722791 });
         case "add noise":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Add Noise",
             _classID: "AdNs",
             Dstr: descriptor_1.Dstr.encode(f.filter.distribution),
@@ -12552,36 +16480,32 @@ var require_additionalInfo = __commonJS({
             FlRs: f.filter.randomSeed
           }, filterID: 1097092723 });
         case "despeckle":
-          return __assign(__assign({}, base), { filterID: 1148416099 });
+          return Object.assign(Object.assign({}, base), { filterID: 1148416099 });
         case "dust and scratches":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Dust & Scratches",
             _classID: "DstS",
             "Rds ": f.filter.radius,
             Thsh: f.filter.threshold
           }, filterID: 1148417107 });
         case "median":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Median",
             _classID: "Mdn ",
             "Rds ": uvRadius(f.filter)
           }, filterID: 1298427424 });
         case "reduce noise":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Reduce Noise",
             _classID: "denoise",
             ClNs: (0, descriptor_1.unitsPercentF)(f.filter.reduceColorNoise),
             Shrp: (0, descriptor_1.unitsPercentF)(f.filter.sharpenDetails),
             removeJPEGArtifact: f.filter.removeJpegArtifact,
-            channelDenoise: f.filter.channelDenoise.map(function(c) {
-              return __assign({ _name: "", _classID: "channelDenoiseParams", Chnl: c.channels.map(function(i2) {
-                return descriptor_1.Chnl.encode(i2);
-              }), Amnt: c.amount }, c.preserveDetails ? { EdgF: c.preserveDetails } : {});
-            }),
+            channelDenoise: f.filter.channelDenoise.map((c) => Object.assign({ _name: "", _classID: "channelDenoiseParams", Chnl: c.channels.map((i) => descriptor_1.Chnl.encode(i)), Amnt: c.amount }, c.preserveDetails ? { EdgF: c.preserveDetails } : {})),
             preset: f.filter.preset
           }, filterID: 633 });
         case "color halftone":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Color Halftone",
             _classID: "ClrH",
             "Rds ": f.filter.radius,
@@ -12591,50 +16515,50 @@ var require_additionalInfo = __commonJS({
             Ang4: f.filter.angle4
           }, filterID: 1131180616 });
         case "crystallize":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Crystallize",
             _classID: "Crst",
             ClSz: f.filter.cellSize,
             FlRs: f.filter.randomSeed
           }, filterID: 1131574132 });
         case "facet":
-          return __assign(__assign({}, base), { filterID: 1180922912 });
+          return Object.assign(Object.assign({}, base), { filterID: 1180922912 });
         case "fragment":
-          return __assign(__assign({}, base), { filterID: 1181902701 });
+          return Object.assign(Object.assign({}, base), { filterID: 1181902701 });
         case "mezzotint":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Mezzotint",
             _classID: "Mztn",
             MztT: descriptor_1.MztT.encode(f.filter.type),
             FlRs: f.filter.randomSeed
           }, filterID: 1299870830 });
         case "mosaic":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Mosaic",
             _classID: "Msc ",
             ClSz: (0, descriptor_1.unitsValue)(f.filter.cellSize, "cellSize")
           }, filterID: 1299407648 });
         case "pointillize":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Pointillize",
             _classID: "Pntl",
             ClSz: f.filter.cellSize,
             FlRs: f.filter.randomSeed
           }, filterID: 1349416044 });
         case "clouds":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Clouds",
             _classID: "Clds",
             FlRs: f.filter.randomSeed
           }, filterID: 1131177075 });
         case "difference clouds":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Difference Clouds",
             _classID: "DfrC",
             FlRs: f.filter.randomSeed
           }, filterID: 1147564611 });
         case "fibers":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Fibers",
             _classID: "Fbrs",
             Vrnc: f.filter.variance,
@@ -12642,7 +16566,7 @@ var require_additionalInfo = __commonJS({
             RndS: f.filter.randomSeed
           }, filterID: 1180856947 });
         case "lens flare":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Lens Flare",
             _classID: "LnsF",
             Brgh: f.filter.brightness,
@@ -12655,13 +16579,13 @@ var require_additionalInfo = __commonJS({
             "Lns ": descriptor_1.Lns.encode(f.filter.lensType)
           }, filterID: 1282306886 });
         case "sharpen":
-          return __assign(__assign({}, base), { filterID: 1399353968 });
+          return Object.assign(Object.assign({}, base), { filterID: 1399353968 });
         case "sharpen edges":
-          return __assign(__assign({}, base), { filterID: 1399353925 });
+          return Object.assign(Object.assign({}, base), { filterID: 1399353925 });
         case "sharpen more":
-          return __assign(__assign({}, base), { filterID: 1399353933 });
+          return Object.assign(Object.assign({}, base), { filterID: 1399353933 });
         case "smart sharpen":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Smart Sharpen",
             _classID: "smartSharpen",
             Amnt: (0, descriptor_1.unitsPercentF)(f.filter.amount),
@@ -12687,7 +16611,7 @@ var require_additionalInfo = __commonJS({
             }
           }, filterID: 698 });
         case "unsharp mask":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Unsharp Mask",
             _classID: "UnsM",
             Amnt: (0, descriptor_1.unitsPercentF)(f.filter.amount),
@@ -12695,14 +16619,14 @@ var require_additionalInfo = __commonJS({
             Thsh: f.filter.threshold
           }, filterID: 1433301837 });
         case "diffuse":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Diffuse",
             _classID: "Dfs ",
             "Md  ": descriptor_1.DfsM.encode(f.filter.mode),
             FlRs: f.filter.randomSeed
           }, filterID: 1147564832 });
         case "emboss":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Emboss",
             _classID: "Embs",
             Angl: f.filter.angle,
@@ -12710,7 +16634,7 @@ var require_additionalInfo = __commonJS({
             Amnt: f.filter.amount
           }, filterID: 1164796531 });
         case "extrude":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Extrude",
             _classID: "Extr",
             ExtS: f.filter.size,
@@ -12722,11 +16646,11 @@ var require_additionalInfo = __commonJS({
             FlRs: f.filter.randomSeed
           }, filterID: 1165522034 });
         case "find edges":
-          return __assign(__assign({}, base), { filterID: 1181639749 });
+          return Object.assign(Object.assign({}, base), { filterID: 1181639749 });
         case "solarize":
-          return __assign(__assign({}, base), { filterID: 1399616122 });
+          return Object.assign(Object.assign({}, base), { filterID: 1399616122 });
         case "tiles":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Tiles",
             _classID: "Tls ",
             TlNm: f.filter.numberOfTiles,
@@ -12735,30 +16659,32 @@ var require_additionalInfo = __commonJS({
             FlRs: f.filter.randomSeed
           }, filterID: 1416393504 });
         case "trace contour":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Trace Contour",
             _classID: "TrcC",
             "Lvl ": f.filter.level,
             "Edg ": descriptor_1.CntE.encode(f.filter.edge)
           }, filterID: 1416782659 });
         case "wind":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Wind",
             _classID: "Wnd ",
             WndM: descriptor_1.WndM.encode(f.filter.method),
             Drct: descriptor_1.Drct.encode(f.filter.direction)
           }, filterID: 1466852384 });
         case "de-interlace":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "De-Interlace",
             _classID: "Dntr",
             IntE: descriptor_1.IntE.encode(f.filter.eliminate),
             IntC: descriptor_1.IntC.encode(f.filter.newFieldsBy)
           }, filterID: 1148089458 });
         case "ntsc colors":
-          return __assign(__assign({}, base), { filterID: 1314149187 });
+          return Object.assign(Object.assign({}, base), { filterID: 1314149187 });
+        case "invert":
+          return Object.assign(Object.assign({}, base), { filterID: 1231976050 });
         case "custom":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Custom",
             _classID: "Cstm",
             "Scl ": f.filter.scale,
@@ -12766,25 +16692,25 @@ var require_additionalInfo = __commonJS({
             Mtrx: f.filter.matrix
           }, filterID: 1131639917 });
         case "high pass":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "High Pass",
             _classID: "HghP",
             "Rds ": uvRadius(f.filter)
           }, filterID: 1214736464 });
         case "maximum":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Maximum",
             _classID: "Mxm ",
             "Rds ": uvRadius(f.filter)
           }, filterID: 1299737888 });
         case "minimum":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Minimum",
             _classID: "Mnm ",
             "Rds ": uvRadius(f.filter)
           }, filterID: 1299082528 });
         case "offset":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Offset",
             _classID: "Ofst",
             Hrzn: f.filter.horizontal,
@@ -12792,63 +16718,58 @@ var require_additionalInfo = __commonJS({
             "Fl  ": descriptor_1.FlMd.encode(f.filter.undefinedAreas)
           }, filterID: 1332114292 });
         case "puppet":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Rigid Transform",
             _classID: "rigidTransform",
             "null": ["Ordn.Trgt"],
+            // target layer reference
             rigidType: f.filter.rigidType,
-            puppetShapeList: f.filter.puppetShapeList.map(function(p) {
-              return {
+            puppetShapeList: (f.filter.puppetShapeList || []).map((p) => ({
+              _name: "",
+              _classID: "puppetShape",
+              rigidType: p.rigidType,
+              VrsM: 1,
+              // version major
+              VrsN: 0,
+              // version minor
+              originalVertexArray: toUint8(new Float32Array(pointsToArray(p.originalVertexArray))),
+              deformedVertexArray: toUint8(new Float32Array(pointsToArray(p.deformedVertexArray))),
+              indexArray: toUint8(new Uint32Array(p.indexArray)),
+              pinOffsets: pointsToArray(p.pinOffsets),
+              posFinalPins: pointsToArray(p.posFinalPins),
+              pinVertexIndices: p.pinVertexIndices,
+              PinP: pointsToArray(p.pinPosition),
+              PnRt: p.pinRotation,
+              PnOv: p.pinOverlay,
+              PnDp: p.pinDepth,
+              meshQuality: p.meshQuality,
+              meshExpansion: p.meshExpansion,
+              meshRigidity: p.meshRigidity,
+              imageResolution: p.imageResolution,
+              meshBoundaryPath: {
                 _name: "",
-                _classID: "puppetShape",
-                rigidType: p.rigidType,
-                VrsM: 1,
-                VrsN: 0,
-                originalVertexArray: toUint8(new Float32Array(pointsToArray(p.originalVertexArray))),
-                deformedVertexArray: toUint8(new Float32Array(pointsToArray(p.deformedVertexArray))),
-                indexArray: toUint8(new Uint32Array(p.indexArray)),
-                pinOffsets: pointsToArray(p.pinOffsets),
-                posFinalPins: pointsToArray(p.posFinalPins),
-                pinVertexIndices: p.pinVertexIndices,
-                PinP: pointsToArray(p.pinPosition),
-                PnRt: p.pinRotation,
-                PnOv: p.pinOverlay,
-                PnDp: p.pinDepth,
-                meshQuality: p.meshQuality,
-                meshExpansion: p.meshExpansion,
-                meshRigidity: p.meshRigidity,
-                imageResolution: p.imageResolution,
-                meshBoundaryPath: {
+                _classID: "pathClass",
+                pathComponents: p.meshBoundaryPath.pathComponents.map((c) => ({
                   _name: "",
-                  _classID: "pathClass",
-                  pathComponents: p.meshBoundaryPath.pathComponents.map(function(c) {
-                    return {
+                  _classID: "PaCm",
+                  shapeOperation: `shapeOperation.${c.shapeOperation}`,
+                  SbpL: c.paths.map((path2) => ({
+                    _name: "",
+                    _classID: "Sbpl",
+                    Clsp: path2.closed,
+                    "Pts ": path2.points.map((pt) => ({
                       _name: "",
-                      _classID: "PaCm",
-                      shapeOperation: "shapeOperation.".concat(c.shapeOperation),
-                      SbpL: c.paths.map(function(path2) {
-                        return {
-                          _name: "",
-                          _classID: "Sbpl",
-                          Clsp: path2.closed,
-                          "Pts ": path2.points.map(function(pt) {
-                            return {
-                              _name: "",
-                              _classID: "Pthp",
-                              Anch: pointToHrznVrtc(pt.anchor),
-                              "Fwd ": pointToHrznVrtc(pt.forward),
-                              "Bwd ": pointToHrznVrtc(pt.backward),
-                              Smoo: pt.smooth
-                            };
-                          })
-                        };
-                      })
-                    };
-                  })
-                },
-                selectedPin: p.selectedPin
-              };
-            }),
+                      _classID: "Pthp",
+                      Anch: pointToHrznVrtc(pt.anchor),
+                      "Fwd ": pointToHrznVrtc(pt.forward),
+                      "Bwd ": pointToHrznVrtc(pt.backward),
+                      Smoo: pt.smooth
+                    }))
+                  }))
+                }))
+              },
+              selectedPin: p.selectedPin
+            })),
             PuX0: f.filter.bounds[0].x,
             PuX1: f.filter.bounds[1].x,
             PuX2: f.filter.bounds[2].x,
@@ -12859,18 +16780,18 @@ var require_additionalInfo = __commonJS({
             PuY3: f.filter.bounds[3].y
           }, filterID: 991 });
         case "oil paint plugin": {
-          var params = {};
-          for (var i = 0; i < f.filter.parameters.length; i++) {
-            var _a2 = f.filter.parameters[i], name_1 = _a2.name, value = _a2.value;
-            var suffix = "".concat(fromAtoZ[Math.floor(i / fromAtoZ.length)]).concat(fromAtoZ[i % fromAtoZ.length]);
-            params["PN".concat(suffix)] = name_1;
-            params["PT".concat(suffix)] = 0;
-            params["PF".concat(suffix)] = value;
+          const params = {};
+          for (let i = 0; i < f.filter.parameters.length; i++) {
+            const { name, value } = f.filter.parameters[i];
+            const suffix = `${fromAtoZ[Math.floor(i / fromAtoZ.length)]}${fromAtoZ[i % fromAtoZ.length]}`;
+            params[`PN${suffix}`] = name;
+            params[`PT${suffix}`] = 0;
+            params[`PF${suffix}`] = value;
           }
-          return __assign(__assign({}, base), { Fltr: __assign({ _name: "Oil Paint Plugin", _classID: "PbPl", KnNm: f.filter.name, GpuY: f.filter.gpu, LIWy: f.filter.lighting, FPth: "1" }, params), filterID: 1348620396 });
+          return Object.assign(Object.assign({}, base), { Fltr: Object.assign({ _name: "Oil Paint Plugin", _classID: "PbPl", KnNm: f.filter.name, GpuY: f.filter.gpu, LIWy: f.filter.lighting, FPth: "1" }, params), filterID: 1348620396 });
         }
         case "oil paint":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Oil Paint",
             _classID: "oilPaint",
             lightingOn: f.filter.lightingOn,
@@ -12882,51 +16803,68 @@ var require_additionalInfo = __commonJS({
             specularity: f.filter.specularity
           }, filterID: 1122 });
         case "liquify":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Liquify",
             _classID: "LqFy",
             LqMe: f.filter.liquifyMesh
           }, filterID: 1282492025 });
         case "perspective warp":
-          return __assign(__assign({}, base), { Fltr: {
+          return Object.assign(Object.assign({}, base), { Fltr: {
             _name: "Perspective Warp",
             _classID: "perspectiveWarpTransform",
             vertices: f.filter.vertices.map(pointToHrznVrtc),
             warpedVertices: f.filter.warpedVertices.map(pointToHrznVrtc),
-            quads: f.filter.quads.map(function(indices) {
-              return { indices };
-            })
+            quads: f.filter.quads.map((indices) => ({ _name: "", _classID: "quadIndices", indices }))
           }, filterID: 442 });
         case "curves":
-          return __assign(__assign({}, base), { Fltr: {
-            _name: "Curves",
-            _classID: "Crvs",
-            presetKind: descriptor_1.presetKindType.encode(f.filter.presetKind),
-            Adjs: f.filter.adjustments.map(function(a) {
-              return "curve" in a ? {
-                _name: "",
-                _classID: "CrvA",
-                Chnl: a.channels.map(function(c) {
-                  return descriptor_1.Chnl.encode(c);
-                }),
-                "Crv ": a.curve.map(function(c) {
-                  return __assign({ _name: "", _classID: "Pnt ", Hrzn: c.x, Vrtc: c.y }, c.curved ? { Cnty: true } : {});
-                })
-              } : {
-                _name: "",
-                _classID: "CrvA",
-                Chnl: a.channels.map(function(c) {
-                  return descriptor_1.Chnl.encode(c);
-                }),
-                Mpng: a.values
-              };
+          return Object.assign(Object.assign({}, base), { Fltr: Object.assign(Object.assign({ _name: "Curves", _classID: "Crvs" }, f.filter.presetKind !== void 0 ? { presetKind: descriptor_1.presetKindType.encode(f.filter.presetKind) } : {}), f.filter.adjustments ? {
+            Adjs: f.filter.adjustments.map((a) => "curve" in a ? {
+              _name: "",
+              _classID: "CrvA",
+              Chnl: a.channels.map(descriptor_1.Chnl.encode),
+              "Crv ": a.curve.map((c) => Object.assign({ _name: "", _classID: "Pnt ", Hrzn: c.x, Vrtc: c.y }, c.curved ? { Cnty: true } : {}))
+            } : {
+              _name: "",
+              _classID: "CrvA",
+              Chnl: a.channels.map(descriptor_1.Chnl.encode),
+              Mpng: a.values
             })
-          }, filterID: 1131574899 });
-        // case 'hsb/hsl': return {
-        // TODO: ...
-        // };
+          } : {}), filterID: 1131574899 });
+        case "levels":
+          return Object.assign(Object.assign({}, base), { Fltr: Object.assign(Object.assign({ _name: "Levels", _classID: "Lvls" }, f.filter.presetKind !== void 0 ? { presetKind: descriptor_1.presetKindType.encode(f.filter.presetKind) } : {}), f.filter.adjustments ? {
+            Adjs: f.filter.adjustments.map((a) => {
+              var _a2, _b2, _c, _d;
+              const adjustment = { _name: "", _classID: "LvlA", Chnl: a.channels.map(descriptor_1.Chnl.encode) };
+              if (a.shadowInput !== void 0 || a.highlightInput !== void 0) {
+                adjustment.Inpt = [Math.round((_a2 = a.shadowInput) !== null && _a2 !== void 0 ? _a2 : 0), Math.round((_b2 = a.highlightInput) !== null && _b2 !== void 0 ? _b2 : 255)];
+              }
+              if (a.shadowOutput !== void 0 || a.highlightOutput !== void 0) {
+                adjustment.Otpt = [Math.round((_c = a.shadowOutput) !== null && _c !== void 0 ? _c : 0), Math.round((_d = a.highlightOutput) !== null && _d !== void 0 ? _d : 255)];
+              }
+              if (a.midtoneInput !== void 0)
+                adjustment["Gmm "] = a.midtoneInput;
+              return adjustment;
+            })
+          } : {}), filterID: 1282829427 });
+        case "camera raw":
+          return Object.assign(Object.assign({}, base), { Fltr: serializeCameraRawSettings(f.filter), filterID: cameraRawFilterID });
+        case "brightness/contrast":
+          return Object.assign(Object.assign({}, base), { Fltr: {
+            _name: "Brightness/Contrast",
+            _classID: "BrgC",
+            Brgh: f.filter.brightness,
+            Cntr: f.filter.contrast,
+            useLegacy: !!f.filter.useLegacy
+          }, filterID: 1114793795 });
+        case "hsb/hsl":
+          return Object.assign(Object.assign({}, base), { Fltr: {
+            _name: "HSB/HSL",
+            _classID: "HsbP",
+            Inpt: descriptor_1.ClrS.encode(f.filter.inputMode),
+            Otpt: descriptor_1.ClrS.encode(f.filter.rowOrder)
+          }, filterID: 1215521360 });
         default:
-          throw new Error("Unknow filter type: ".concat(f.type));
+          throw new Error(`Unknown filter type: ${f.type}`);
       }
     }
     function getWarpFromPlacedLayer(placed) {
@@ -12934,10 +16872,10 @@ var require_additionalInfo = __commonJS({
         return placed.warp;
       if (!placed.width || !placed.height)
         throw new Error("You must provide width and height of the linked image in placedLayer");
-      var w = placed.width;
-      var h = placed.height;
-      var x0 = 0, x1 = w / 3, x2 = w * 2 / 3, x3 = w;
-      var y0 = 0, y1 = h / 3, y2 = h * 2 / 3, y3 = h;
+      const w = placed.width;
+      const h = placed.height;
+      const x0 = 0, x1 = w / 3, x2 = w * 2 / 3, x3 = w;
+      const y0 = 0, y1 = h / 3, y2 = h * 2 / 3, y3 = h;
       return {
         style: "custom",
         value: 0,
@@ -12974,194 +16912,237 @@ var require_additionalInfo = __commonJS({
         }
       };
     }
-    addHandler("SoLd", hasKey("placedLayer"), function(reader, target, left) {
-      if ((0, psdReader_1.readSignature)(reader) !== "soLD")
-        throw new Error("Invalid SoLd type");
-      var version = (0, psdReader_1.readInt32)(reader);
-      if (version !== 4 && version !== 5)
-        throw new Error("Invalid SoLd version");
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader, true);
-      target.placedLayer = {
-        id: desc.Idnt,
-        placed: desc.placed,
-        type: placedLayerTypes[desc.Type],
-        pageNumber: desc.PgNm,
-        totalPages: desc.totalPages,
-        frameStep: (0, descriptor_1.frac)(desc.frameStep),
-        duration: (0, descriptor_1.frac)(desc.duration),
-        frameCount: desc.frameCount,
-        transform: desc.Trnf,
-        width: desc["Sz  "].Wdth,
-        height: desc["Sz  "].Hght,
-        resolution: (0, descriptor_1.parseUnits)(desc.Rslt),
-        warp: parseWarp(desc.quiltWarp || desc.warp)
-      };
-      if (desc.nonAffineTransform && desc.nonAffineTransform.some(function(x, i) {
-        return x !== desc.Trnf[i];
-      })) {
-        target.placedLayer.nonAffineTransform = desc.nonAffineTransform;
-      }
-      if (desc.Crop)
-        target.placedLayer.crop = desc.Crop;
-      if (desc.comp)
-        target.placedLayer.comp = desc.comp;
-      if (desc.compInfo) {
-        target.placedLayer.compInfo = {
-          compID: desc.compInfo.compID,
-          originalCompID: desc.compInfo.originalCompID
+    addHandler(
+      "SoLd",
+      (target) => !!target.placedLayer && !target.placedLayer.external,
+      // linked smart objects are stored in SoLE
+      (reader, target, left) => {
+        if ((0, psdReader_1.readSignature)(reader) !== "soLD")
+          throw new Error(`Invalid SoLd type`);
+        const version = (0, psdReader_1.readInt32)(reader);
+        if (version !== 4 && version !== 5)
+          throw new Error(`Invalid SoLd version`);
+        const desc = (0, descriptor_1.readVersionAndDescriptor)(reader, true);
+        target.placedLayer = {
+          id: desc.Idnt,
+          placed: desc.placed,
+          type: placedLayerTypes[desc.Type],
+          pageNumber: desc.PgNm,
+          totalPages: desc.totalPages,
+          frameStep: (0, descriptor_1.frac)(desc.frameStep),
+          duration: (0, descriptor_1.frac)(desc.duration),
+          frameCount: desc.frameCount,
+          transform: desc.Trnf,
+          width: desc["Sz  "].Wdth,
+          height: desc["Sz  "].Hght,
+          resolution: (0, descriptor_1.parseUnits)(desc.Rslt),
+          warp: parseWarp(desc.quiltWarp || desc.warp)
         };
+        if (desc.nonAffineTransform && desc.nonAffineTransform.some((x, i) => x !== desc.Trnf[i])) {
+          target.placedLayer.nonAffineTransform = desc.nonAffineTransform;
+        }
+        if (desc.Crop)
+          target.placedLayer.crop = desc.Crop;
+        if (desc.comp)
+          target.placedLayer.comp = desc.comp;
+        if (desc.compInfo) {
+          target.placedLayer.compInfo = {
+            compID: desc.compInfo.compID,
+            originalCompID: desc.compInfo.originalCompID
+          };
+        }
+        if (desc.filterFX)
+          target.placedLayer.filter = parseFilterFX(desc.filterFX, reader);
+        if (desc.Impr)
+          target.placedLayer.imported = true;
+        (0, psdReader_1.skipBytes)(reader, left());
+      },
+      (writer, target) => {
+        var _a2, _b2;
+        (0, psdWriter_1.writeSignature)(writer, "soLD");
+        (0, psdWriter_1.writeInt32)(writer, 4);
+        const placed = target.placedLayer;
+        if (!placed.id || typeof placed.id !== "string" || !/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/.test(placed.id)) {
+          throw new Error("Placed layer ID must be in a GUID format (example: 20953ddb-9391-11ec-b4f1-c15674f50bc4)");
+        }
+        const placedType = placedLayerTypes.indexOf(placed.type);
+        if (placedType === -1)
+          throw new Error("Invalid placedLayer type");
+        const warp = getWarpFromPlacedLayer(placed);
+        const bounds = warp.bounds;
+        const width = placed.width || (bounds ? bounds.right.value - bounds.left.value : 0);
+        const height = placed.height || (bounds ? bounds.bottom.value - bounds.top.value : 0);
+        const desc = Object.assign(Object.assign({ Idnt: placed.id, placed: (_a2 = placed.placed) !== null && _a2 !== void 0 ? _a2 : placed.id, PgNm: placed.pageNumber || 1, totalPages: placed.totalPages || 1 }, placed.crop ? { Crop: placed.crop } : {}), {
+          frameStep: placed.frameStep || { numerator: 0, denominator: 600 },
+          duration: placed.duration || { numerator: 0, denominator: 600 },
+          frameCount: placed.frameCount || 0,
+          Annt: 16,
+          Type: placedType,
+          Trnf: placed.transform,
+          nonAffineTransform: (_b2 = placed.nonAffineTransform) !== null && _b2 !== void 0 ? _b2 : placed.transform,
+          // quiltWarp: {} as any,
+          warp: encodeWarp(warp),
+          "Sz  ": {
+            _name: "",
+            _classID: "Pnt ",
+            Wdth: width,
+            Hght: height
+          },
+          Rslt: placed.resolution ? (0, descriptor_1.unitsValue)(placed.resolution, "resolution") : { units: "Density", value: 72 }
+        });
+        if (placed.filter) {
+          desc.filterFX = {
+            _name: "",
+            _classID: "filterFXStyle",
+            enab: placed.filter.enabled,
+            validAtPosition: placed.filter.validAtPosition,
+            filterMaskEnable: placed.filter.maskEnabled,
+            filterMaskLinked: placed.filter.maskLinked,
+            filterMaskExtendWithWhite: placed.filter.maskExtendWithWhite,
+            filterFXList: placed.filter.list.map((f) => serializeFilterFXItem(f))
+          };
+        }
+        if (placed.warp && isQuiltWarp(placed.warp)) {
+          const quiltWarp = encodeWarp(placed.warp);
+          desc.quiltWarp = quiltWarp;
+          desc.warp = {
+            warpStyle: "warpStyle.warpNone",
+            warpValue: quiltWarp.warpValue,
+            warpPerspective: quiltWarp.warpPerspective,
+            warpPerspectiveOther: quiltWarp.warpPerspectiveOther,
+            warpRotate: quiltWarp.warpRotate,
+            bounds: quiltWarp.bounds,
+            uOrder: quiltWarp.uOrder,
+            vOrder: quiltWarp.vOrder
+          };
+        } else {
+          delete desc.quiltWarp;
+        }
+        if (placed.comp)
+          desc.comp = placed.comp;
+        if (placed.compInfo)
+          desc.compInfo = placed.compInfo;
+        if (placed.imported)
+          desc.Impr = {};
+        (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc, desc.quiltWarp ? "quiltWarp" : "warp");
       }
-      if (desc.filterFX)
-        target.placedLayer.filter = parseFilterFX(desc.filterFX, reader);
-      (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var _a2, _b2;
-      (0, psdWriter_1.writeSignature)(writer, "soLD");
-      (0, psdWriter_1.writeInt32)(writer, 4);
-      var placed = target.placedLayer;
-      if (!placed.id || typeof placed.id !== "string" || !/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/.test(placed.id)) {
-        throw new Error("Placed layer ID must be in a GUID format (example: 20953ddb-9391-11ec-b4f1-c15674f50bc4)");
-      }
-      var desc = __assign(__assign({ Idnt: placed.id, placed: (_a2 = placed.placed) !== null && _a2 !== void 0 ? _a2 : placed.id, PgNm: placed.pageNumber || 1, totalPages: placed.totalPages || 1 }, placed.crop ? { Crop: placed.crop } : {}), {
-        frameStep: placed.frameStep || { numerator: 0, denominator: 600 },
-        duration: placed.duration || { numerator: 0, denominator: 600 },
-        frameCount: placed.frameCount || 0,
-        Annt: 16,
-        Type: placedLayerTypes.indexOf(placed.type),
-        Trnf: placed.transform,
-        nonAffineTransform: (_b2 = placed.nonAffineTransform) !== null && _b2 !== void 0 ? _b2 : placed.transform,
-        // quiltWarp: {} as any,
-        warp: encodeWarp(getWarpFromPlacedLayer(placed)),
-        "Sz  ": {
-          _name: "",
-          _classID: "Pnt ",
-          Wdth: placed.width || 0,
-          Hght: placed.height || 0
-          // TODO: find size ?
-        },
-        Rslt: placed.resolution ? (0, descriptor_1.unitsValue)(placed.resolution, "resolution") : { units: "Density", value: 72 }
-      });
-      if (placed.filter) {
-        desc.filterFX = {
-          _name: "",
-          _classID: "filterFXStyle",
-          enab: placed.filter.enabled,
-          validAtPosition: placed.filter.validAtPosition,
-          filterMaskEnable: placed.filter.maskEnabled,
-          filterMaskLinked: placed.filter.maskLinked,
-          filterMaskExtendWithWhite: placed.filter.maskExtendWithWhite,
-          filterFXList: placed.filter.list.map(function(f) {
-            return serializeFilterFXItem(f);
-          })
-        };
-      }
-      if (placed.warp && isQuiltWarp(placed.warp)) {
-        var quiltWarp = encodeWarp(placed.warp);
-        desc.quiltWarp = quiltWarp;
-        desc.warp = {
-          warpStyle: "warpStyle.warpNone",
-          warpValue: quiltWarp.warpValue,
-          warpPerspective: quiltWarp.warpPerspective,
-          warpPerspectiveOther: quiltWarp.warpPerspectiveOther,
-          warpRotate: quiltWarp.warpRotate,
-          bounds: quiltWarp.bounds,
-          uOrder: quiltWarp.uOrder,
-          vOrder: quiltWarp.vOrder
-        };
-      } else {
-        delete desc.quiltWarp;
-      }
-      if (placed.comp)
-        desc.comp = placed.comp;
-      if (placed.compInfo)
-        desc.compInfo = placed.compInfo;
-      (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc, desc.quiltWarp ? "quiltWarp" : "warp");
-    });
-    addHandlerAlias("SoLE", "SoLd");
-    addHandler("fxrp", hasKey("referencePoint"), function(reader, target) {
+    );
+    var soLdHandler = exports.infoHandlersMap["SoLd"];
+    addHandler(
+      "SoLE",
+      // linked smart object (Photoshop doesn't write PlLd for these)
+      // linked smart object (Photoshop doesn't write PlLd for these)
+      (target) => {
+        var _a2;
+        return !!((_a2 = target.placedLayer) === null || _a2 === void 0 ? void 0 : _a2.external);
+      },
+      (reader, target, left, psd, imageResources) => {
+        soLdHandler.read(reader, target, left, psd, imageResources);
+        target.placedLayer.external = true;
+      },
+      soLdHandler.write
+    );
+    addHandler("fxrp", hasKey("referencePoint"), (reader, target) => {
       target.referencePoint = {
         x: (0, psdReader_1.readFloat64)(reader),
         y: (0, psdReader_1.readFloat64)(reader)
       };
-    }, function(writer, target) {
+    }, (writer, target) => {
       (0, psdWriter_1.writeFloat64)(writer, target.referencePoint.x);
       (0, psdWriter_1.writeFloat64)(writer, target.referencePoint.y);
     });
-    addHandler("Lr16", function() {
-      return false;
-    }, function(reader, _target, _left, psd) {
-      (0, psdReader_1.readLayerInfo)(reader, psd);
-    }, function(_writer, _target) {
-    });
-    addHandler("Lr32", function() {
-      return false;
-    }, function(reader, _target, _left, psd) {
-      (0, psdReader_1.readLayerInfo)(reader, psd);
-    }, function(_writer, _target) {
-    });
-    addHandler("LMsk", hasKey("userMask"), function(reader, target) {
+    function createGlobalLayerInfoHandler(key, bitsPerChannel) {
+      addHandler(key, () => false, (reader, _target, left, psd, imageResources) => {
+        var _a2;
+        if (!reader.layersInGlobalInfo && (psd.bitsPerChannel === bitsPerChannel || !((_a2 = psd.children) === null || _a2 === void 0 ? void 0 : _a2.length))) {
+          const sectionLayers = psd.children;
+          psd.children = [];
+          try {
+            (0, psdReader_1.readLayerInfo)(reader, psd, imageResources);
+          } catch (e) {
+            psd.children = sectionLayers;
+            throw e;
+          }
+          reader.layersInGlobalInfo = true;
+        }
+        (0, psdReader_1.skipBytes)(reader, left());
+      }, () => {
+      });
+    }
+    createGlobalLayerInfoHandler("Lr16", 16);
+    createGlobalLayerInfoHandler("Lr32", 32);
+    createGlobalLayerInfoHandler("Layr", void 0);
+    for (const key of ["Mtrn", "Mt16", "Mt32"]) {
+      addHandler(key, () => false, (reader, _target, left) => {
+        reader.globalAlpha = true;
+        (0, psdReader_1.skipBytes)(reader, left());
+      }, () => {
+      });
+    }
+    addHandler("LMsk", hasKey("userMask"), (reader, target) => {
       target.userMask = {
         colorSpace: (0, psdReader_1.readColor)(reader),
-        opacity: (0, psdReader_1.readUint16)(reader) / 255
+        opacity: (0, psdReader_1.readUint16)(reader) / 100
       };
-      var flag = (0, psdReader_1.readUint8)(reader);
+      const flag = (0, psdReader_1.readUint8)(reader);
       if (flag !== 128)
         throw new Error("Invalid flag value");
       (0, psdReader_1.skipBytes)(reader, 1);
-    }, function(writer, target) {
-      var userMask = target.userMask;
+    }, (writer, target) => {
+      const userMask = target.userMask;
       (0, psdWriter_1.writeColor)(writer, userMask.colorSpace);
-      (0, psdWriter_1.writeUint16)(writer, (0, helpers_1.clamp)(userMask.opacity, 0, 1) * 255);
+      (0, psdWriter_1.writeUint16)(writer, Math.round((0, helpers_1.clamp)(userMask.opacity, 0, 1) * 100));
       (0, psdWriter_1.writeUint8)(writer, 128);
       (0, psdWriter_1.writeZeros)(writer, 1);
     });
+    addHandler(
+      "Patt",
+      // 'Pat2' and 'Pat3' (16 and 32 bit documents) are aliases, patterns are always written as 8 bit
+      // 'Pat2' and 'Pat3' (16 and 32 bit documents) are aliases, patterns are always written as 8 bit
+      (target) => !!(target.patterns && target.patterns.length > 0),
+      (reader, target, left) => {
+        while (left() > 0) {
+          const pattern = (0, psdReader_1.readPatternSafe)(reader);
+          if (!pattern)
+            continue;
+          if (target.patterns === void 0)
+            target.patterns = [];
+          target.patterns.push(pattern);
+        }
+      },
+      (writer, target, _, _options) => {
+        const patterns = target.patterns || [];
+        for (const pattern of patterns) {
+          (0, psdWriter_1.writePattern)(writer, pattern);
+        }
+      }
+    );
+    addHandlerAlias("Pat2", "Patt");
+    addHandlerAlias("Pat3", "Patt");
     if (helpers_1.MOCK_HANDLERS) {
-      addHandler("Patt", function(target) {
-        return target._Patt !== void 0;
-      }, function(reader, target, left) {
-        target._Patt = (0, psdReader_1.readBytes)(reader, left());
-      }, function(writer, target) {
-        return false;
-      });
-    } else {
       addHandler(
-        "Patt",
-        // TODO: handle also Pat2 & Pat3
-        function(target) {
-          return !target;
+        "CAI ",
+        // Content Authenticity Initiative / C2PA provenance metadata
+        // Content Authenticity Initiative / C2PA provenance metadata
+        (target) => target._CAI_ !== void 0,
+        (reader, target, left) => {
+          target._CAI_ = (0, psdReader_1.readBytes)(reader, left());
         },
-        function(reader, target, left) {
-          if (!left())
-            return;
-          (0, psdReader_1.skipBytes)(reader, left());
-          return;
-          target;
-          psdReader_1.readPattern;
-        },
-        function(_writer, _target) {
+        (writer, target) => {
+          (0, psdWriter_1.writeBytes)(writer, target._CAI_);
         }
       );
     }
     if (helpers_1.MOCK_HANDLERS) {
-      addHandler("CAI ", function(target) {
-        return target._CAI_ !== void 0;
-      }, function(reader, target, left) {
-        target._CAI_ = (0, psdReader_1.readBytes)(reader, left());
-      }, function(writer, target) {
-        (0, psdWriter_1.writeBytes)(writer, target._CAI_);
-      });
-    }
-    if (helpers_1.MOCK_HANDLERS) {
       addHandler(
         "OCIO",
-        // generative tech?
-        function(target) {
-          return target._OCIO !== void 0;
-        },
-        function(reader, target, left) {
+        // Document color management info
+        // Document color management info
+        (target) => target._OCIO !== void 0,
+        (reader, target, left) => {
           target._OCIO = (0, psdReader_1.readBytes)(reader, left());
         },
-        function(writer, target) {
+        (writer, target) => {
           (0, psdWriter_1.writeBytes)(writer, target._OCIO);
         }
       );
@@ -13169,23 +17150,22 @@ var require_additionalInfo = __commonJS({
     if (helpers_1.MOCK_HANDLERS) {
       addHandler(
         "GenI",
-        // generative tech
-        function(target) {
-          return target._GenI !== void 0;
-        },
-        function(reader, target, left) {
+        // Generative Fill / generative AI (Firefly) features
+        // Generative Fill / generative AI (Firefly) features
+        (target) => target._GenI !== void 0,
+        (reader, target, left) => {
           target._GenI = (0, psdReader_1.readBytes)(reader, left());
         },
-        function(writer, target) {
+        (writer, target) => {
           (0, psdWriter_1.writeBytes)(writer, target._GenI);
         }
       );
     }
     function readRect(reader) {
-      var top = (0, psdReader_1.readInt32)(reader);
-      var left = (0, psdReader_1.readInt32)(reader);
-      var bottom = (0, psdReader_1.readInt32)(reader);
-      var right = (0, psdReader_1.readInt32)(reader);
+      const top = (0, psdReader_1.readInt32)(reader);
+      const left = (0, psdReader_1.readInt32)(reader);
+      const bottom = (0, psdReader_1.readInt32)(reader);
+      const right = (0, psdReader_1.readInt32)(reader);
       return { top, left, bottom, right };
     }
     function writeRect(writer, rect) {
@@ -13194,36 +17174,36 @@ var require_additionalInfo = __commonJS({
       (0, psdWriter_1.writeInt32)(writer, rect.bottom);
       (0, psdWriter_1.writeInt32)(writer, rect.right);
     }
-    addHandler("Anno", function(target) {
-      return target.annotations !== void 0;
-    }, function(reader, target, left) {
-      var major = (0, psdReader_1.readUint16)(reader);
-      var minor = (0, psdReader_1.readUint16)(reader);
+    addHandler("Anno", (target) => target.annotations !== void 0, (reader, target, left) => {
+      const major = (0, psdReader_1.readUint16)(reader);
+      const minor = (0, psdReader_1.readUint16)(reader);
       if (major !== 2 || minor !== 1)
         throw new Error("Invalid Anno version");
-      var count = (0, psdReader_1.readUint32)(reader);
-      var annotations = [];
-      for (var i = 0; i < count; i++) {
-        (0, psdReader_1.readUint32)(reader);
-        var type = (0, psdReader_1.readSignature)(reader);
-        var open_1 = !!(0, psdReader_1.readUint8)(reader);
+      const count = (0, psdReader_1.readUint32)(reader);
+      const annotations = [];
+      for (let i = 0; i < count; i++) {
+        const recordStart = reader.offset;
+        const length = (0, psdReader_1.readUint32)(reader);
+        const type = (0, psdReader_1.readSignature)(reader);
+        const open = !!(0, psdReader_1.readUint8)(reader);
         (0, psdReader_1.readUint8)(reader);
         (0, psdReader_1.readUint16)(reader);
-        var iconLocation = readRect(reader);
-        var popupLocation = readRect(reader);
-        var color = (0, psdReader_1.readColor)(reader);
-        var author = (0, psdReader_1.readPascalString)(reader, 2);
-        var name_2 = (0, psdReader_1.readPascalString)(reader, 2);
-        var date = (0, psdReader_1.readPascalString)(reader, 2);
+        const iconLocation = readRect(reader);
+        const popupLocation = readRect(reader);
+        const color = (0, psdReader_1.readColor)(reader);
+        const author = (0, psdReader_1.readPascalString)(reader, 2);
+        const name = (0, psdReader_1.readPascalString)(reader, 2);
+        const date = (0, psdReader_1.readPascalString)(reader, 2);
         (0, psdReader_1.readUint32)(reader);
         (0, psdReader_1.readSignature)(reader);
-        var dataLength = (0, psdReader_1.readUint32)(reader);
-        var data = void 0;
+        const dataLength = (0, psdReader_1.readUint32)(reader);
+        let data;
         if (type === "txtA") {
+          const dataStart = reader.offset;
           if (dataLength >= 2 && (0, psdReader_1.readUint16)(reader) === 65279) {
-            data = (0, psdReader_1.readUnicodeStringWithLength)(reader, (dataLength - 2) / 2);
+            data = (0, psdReader_1.readUnicodeStringWithLength)(reader, Math.floor((dataLength - 2) / 2));
           } else {
-            reader.offset -= 2;
+            reader.offset = dataStart;
             data = (0, psdReader_1.readAsciiString)(reader, dataLength);
           }
           data = data.replace(/\r/g, "\n");
@@ -13234,31 +17214,32 @@ var require_additionalInfo = __commonJS({
         }
         annotations.push({
           type: type === "txtA" ? "text" : "sound",
-          open: open_1,
+          open,
           iconLocation,
           popupLocation,
           color,
           author,
-          name: name_2,
+          name,
           date,
           data
         });
+        if (length >= reader.offset - recordStart)
+          reader.offset = recordStart + length;
       }
       target.annotations = annotations;
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var annotations = target.annotations;
+    }, (writer, target) => {
+      const annotations = target.annotations;
       (0, psdWriter_1.writeUint16)(writer, 2);
       (0, psdWriter_1.writeUint16)(writer, 1);
       (0, psdWriter_1.writeUint32)(writer, annotations.length);
-      for (var _i = 0, annotations_1 = annotations; _i < annotations_1.length; _i++) {
-        var annotation = annotations_1[_i];
-        var sound = annotation.type === "sound";
+      for (const annotation of annotations) {
+        const sound = annotation.type === "sound";
         if (sound && !(annotation.data instanceof Uint8Array))
           throw new Error("Sound annotation data should be Uint8Array");
         if (!sound && typeof annotation.data !== "string")
           throw new Error("Text annotation data should be string");
-        var lengthOffset = writer.offset;
+        const lengthOffset = writer.offset;
         (0, psdWriter_1.writeUint32)(writer, 0);
         (0, psdWriter_1.writeSignature)(writer, sound ? "sndA" : "txtA");
         (0, psdWriter_1.writeUint8)(writer, annotation.open ? 1 : 0);
@@ -13270,17 +17251,17 @@ var require_additionalInfo = __commonJS({
         (0, psdWriter_1.writePascalString)(writer, annotation.author || "", 2);
         (0, psdWriter_1.writePascalString)(writer, annotation.name || "", 2);
         (0, psdWriter_1.writePascalString)(writer, annotation.date || "", 2);
-        var contentOffset = writer.offset;
+        const contentOffset = writer.offset;
         (0, psdWriter_1.writeUint32)(writer, 0);
         (0, psdWriter_1.writeSignature)(writer, sound ? "sndM" : "txtC");
         (0, psdWriter_1.writeUint32)(writer, 0);
-        var dataOffset = writer.offset;
+        const dataOffset = writer.offset;
         if (sound) {
           (0, psdWriter_1.writeBytes)(writer, annotation.data);
         } else {
           (0, psdWriter_1.writeUint16)(writer, 65279);
-          var text = annotation.data.replace(/\n/g, "\r");
-          for (var i = 0; i < text.length; i++)
+          const text = annotation.data.replace(/\n/g, "\r");
+          for (let i = 0; i < text.length; i++)
             (0, psdWriter_1.writeUint16)(writer, text.charCodeAt(i));
         }
         writer.view.setUint32(lengthOffset, writer.offset - lengthOffset, false);
@@ -13288,33 +17269,35 @@ var require_additionalInfo = __commonJS({
         writer.view.setUint32(dataOffset - 4, writer.offset - dataOffset, false);
       }
     });
+    function readFileTypeSignature(reader) {
+      const value = (0, psdReader_1.readSignature)(reader);
+      return /^[\0 ]*$/.test(value) ? "" : value.trim();
+    }
     function createLnkHandler(tag) {
-      addHandler(tag, function(target) {
-        var psd = target;
+      addHandler(tag, (target) => {
+        const psd = target;
         if (!psd.linkedFiles || !psd.linkedFiles.length)
           return false;
-        if (tag === "lnkE" && !psd.linkedFiles.some(function(f) {
-          return f.linkedFile;
-        }))
+        if (tag === "lnkE" && !psd.linkedFiles.some((f) => f.linkedFile))
           return false;
         return true;
-      }, function(reader, target, left, _psd) {
-        var psd = target;
+      }, (reader, target, left, _psd) => {
+        const psd = target;
         psd.linkedFiles = psd.linkedFiles || [];
         while (left() > 8) {
-          var size = readLength64(reader);
-          var startOffset = reader.offset;
-          var type = (0, psdReader_1.readSignature)(reader);
-          var version = (0, psdReader_1.readInt32)(reader);
-          var id = (0, psdReader_1.readPascalString)(reader, 1);
-          var name_3 = (0, psdReader_1.readUnicodeString)(reader);
-          var fileType = (0, psdReader_1.readSignature)(reader).trim();
-          var fileCreator = (0, psdReader_1.readSignature)(reader).trim();
-          var dataSize = readLength64(reader);
-          var hasFileOpenDescriptor = (0, psdReader_1.readUint8)(reader);
-          var fileOpenDescriptor = hasFileOpenDescriptor ? (0, descriptor_1.readVersionAndDescriptor)(reader) : void 0;
-          var linkedFileDescriptor = type === "liFE" ? (0, descriptor_1.readVersionAndDescriptor)(reader) : void 0;
-          var file = { id, name: name_3 };
+          let size = readLength64(reader);
+          const startOffset = reader.offset;
+          const type = (0, psdReader_1.readSignature)(reader);
+          const version = (0, psdReader_1.readInt32)(reader);
+          const id = (0, psdReader_1.readPascalString)(reader, 1);
+          const name = (0, psdReader_1.readUnicodeString)(reader);
+          const fileType = readFileTypeSignature(reader);
+          const fileCreator = readFileTypeSignature(reader);
+          const dataSize = readLength64(reader);
+          const hasFileOpenDescriptor = (0, psdReader_1.readUint8)(reader);
+          const fileOpenDescriptor = hasFileOpenDescriptor ? (0, descriptor_1.readVersionAndDescriptor)(reader) : void 0;
+          const linkedFileDescriptor = type === "liFE" ? (0, descriptor_1.readVersionAndDescriptor)(reader) : void 0;
+          const file = { id, name };
           if (fileType)
             file.type = fileType;
           if (fileCreator)
@@ -13328,17 +17311,23 @@ var require_additionalInfo = __commonJS({
             };
           }
           if (type === "liFE" && version > 3) {
-            var year = (0, psdReader_1.readInt32)(reader);
-            var month = (0, psdReader_1.readUint8)(reader);
-            var day = (0, psdReader_1.readUint8)(reader);
-            var hour = (0, psdReader_1.readUint8)(reader);
-            var minute = (0, psdReader_1.readUint8)(reader);
-            var seconds = (0, psdReader_1.readFloat64)(reader);
-            var wholeSeconds = Math.floor(seconds);
-            var ms = (seconds - wholeSeconds) * 1e3;
-            file.time = new Date(Date.UTC(year, month, day, hour, minute, wholeSeconds, ms)).toISOString();
+            const year = (0, psdReader_1.readInt32)(reader);
+            const month = (0, psdReader_1.readUint8)(reader);
+            const day = (0, psdReader_1.readUint8)(reader);
+            const hour = (0, psdReader_1.readUint8)(reader);
+            const minute = (0, psdReader_1.readUint8)(reader);
+            const seconds = (0, psdReader_1.readFloat64)(reader);
+            const wholeSeconds = Math.floor(seconds);
+            const ms = (seconds - wholeSeconds) * 1e3;
+            try {
+              file.time = new Date(Date.UTC(year, month, day, hour, minute, wholeSeconds, ms)).toISOString();
+            } catch (_a2) {
+              file.time = (/* @__PURE__ */ new Date(0)).toISOString();
+            }
           }
-          var fileSize = type === "liFE" ? readLength64(reader) : 0;
+          const fileSize = type === "liFE" ? readLength64(reader) : 0;
+          if (type === "liFD" && dataSize > left())
+            throw new Error("Invalid linked file data size");
           if (type === "liFA")
             (0, psdReader_1.skipBytes)(reader, 8);
           if (type === "liFD")
@@ -13349,8 +17338,11 @@ var require_additionalInfo = __commonJS({
             file.assetModTime = (0, psdReader_1.readFloat64)(reader);
           if (version >= 7)
             file.assetLockedState = (0, psdReader_1.readUint8)(reader);
-          if (type === "liFE" && version === 2)
+          if (type === "liFE" && version === 2) {
+            if (fileSize > left())
+              throw new Error("Invalid linked file size");
             file.data = (0, psdReader_1.readBytes)(reader, fileSize);
+          }
           if (reader.skipLinkedFilesData)
             file.data = void 0;
           if (tag === "lnkE") {
@@ -13361,6 +17353,8 @@ var require_additionalInfo = __commonJS({
               originalPath: (linkedFileDescriptor === null || linkedFileDescriptor === void 0 ? void 0 : linkedFileDescriptor.originalPath) || "",
               relativePath: (linkedFileDescriptor === null || linkedFileDescriptor === void 0 ? void 0 : linkedFileDescriptor.relPath) || ""
             };
+            if ((linkedFileDescriptor === null || linkedFileDescriptor === void 0 ? void 0 : linkedFileDescriptor.alis) !== void 0)
+              file.linkedFile.alias = linkedFileDescriptor.alis;
           }
           psd.linkedFiles.push(file);
           while (size % 4)
@@ -13368,36 +17362,36 @@ var require_additionalInfo = __commonJS({
           reader.offset = startOffset + size;
         }
         (0, psdReader_1.skipBytes)(reader, left());
-      }, function(writer, target) {
-        var _a2, _b2, _c, _d, _e, _f, _g, _h, _j;
-        var psd = target;
-        for (var _i = 0, _k = psd.linkedFiles; _i < _k.length; _i++) {
-          var file = _k[_i];
+      }, (writer, target) => {
+        var _a2, _b2, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+        const psd = target;
+        for (const file of psd.linkedFiles) {
           if (tag === "lnkE" !== !!file.linkedFile)
             continue;
-          var version = 2;
+          const external = tag === "lnkE";
+          let version = 2;
           if (file.assetLockedState != null)
             version = 7;
           else if (file.assetModTime != null)
             version = 6;
           else if (file.childDocumentID != null)
             version = 5;
-          else if (tag == "lnkE")
-            version = 3;
-          writeLength64(writer, 0);
-          var sizeOffset = writer.offset;
-          (0, psdWriter_1.writeSignature)(writer, tag === "lnkE" ? "liFE" : file.data ? "liFD" : "liFA");
+          else if (external && !file.data)
+            version = 4;
+          (0, psdWriter_1.writeUint64)(writer, 0);
+          const sizeOffset = writer.offset;
+          (0, psdWriter_1.writeSignature)(writer, external ? "liFE" : file.data ? "liFD" : "liFA");
           (0, psdWriter_1.writeInt32)(writer, version);
           if (!file.id || typeof file.id !== "string" || !/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/.test(file.id)) {
             throw new Error("Linked file ID must be in a GUID format (example: 20953ddb-9391-11ec-b4f1-c15674f50bc4)");
           }
           (0, psdWriter_1.writePascalString)(writer, file.id, 1);
           (0, psdWriter_1.writeUnicodeStringWithPadding)(writer, file.name || "");
-          (0, psdWriter_1.writeSignature)(writer, file.type ? "".concat(file.type, "    ").substring(0, 4) : "    ");
-          (0, psdWriter_1.writeSignature)(writer, file.creator ? "".concat(file.creator, "    ").substring(0, 4) : "\0\0\0\0");
-          writeLength64(writer, file.data ? file.data.byteLength : 0);
+          (0, psdWriter_1.writeSignature)(writer, file.type ? `${file.type}    `.substring(0, 4) : "    ");
+          (0, psdWriter_1.writeSignature)(writer, file.creator ? `${file.creator}    `.substring(0, 4) : "\0\0\0\0");
+          (0, psdWriter_1.writeUint64)(writer, !external && file.data ? file.data.byteLength : 0);
           if (file.descriptor && file.descriptor.compInfo) {
-            var desc = {
+            const desc = {
               compInfo: {
                 compID: file.descriptor.compInfo.compID,
                 originalCompID: file.descriptor.compInfo.originalCompID
@@ -13408,16 +17402,12 @@ var require_additionalInfo = __commonJS({
           } else {
             (0, psdWriter_1.writeUint8)(writer, 0);
           }
-          if (tag === "lnkE") {
-            var desc = {
-              descVersion: 2,
-              "Nm  ": (_b2 = (_a2 = file.linkedFile) === null || _a2 === void 0 ? void 0 : _a2.name) !== null && _b2 !== void 0 ? _b2 : "",
-              fullPath: (_d = (_c = file.linkedFile) === null || _c === void 0 ? void 0 : _c.fullPath) !== null && _d !== void 0 ? _d : "",
-              originalPath: (_f = (_e = file.linkedFile) === null || _e === void 0 ? void 0 : _e.originalPath) !== null && _f !== void 0 ? _f : "",
-              relPath: (_h = (_g = file.linkedFile) === null || _g === void 0 ? void 0 : _g.relativePath) !== null && _h !== void 0 ? _h : ""
-            };
+          if (external) {
+            const desc = Object.assign(Object.assign({ descVersion: 2, "Nm  ": (_b2 = (_a2 = file.linkedFile) === null || _a2 === void 0 ? void 0 : _a2.name) !== null && _b2 !== void 0 ? _b2 : "", fullPath: (_d = (_c = file.linkedFile) === null || _c === void 0 ? void 0 : _c.fullPath) !== null && _d !== void 0 ? _d : "" }, ((_e = file.linkedFile) === null || _e === void 0 ? void 0 : _e.alias) !== void 0 ? { alis: file.linkedFile.alias } : {}), { originalPath: (_g = (_f = file.linkedFile) === null || _f === void 0 ? void 0 : _f.originalPath) !== null && _g !== void 0 ? _g : "", relPath: (_j = (_h = file.linkedFile) === null || _h === void 0 ? void 0 : _h.relativePath) !== null && _j !== void 0 ? _j : "" });
             (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "ExternalFileLink", desc);
-            var time = file.time ? new Date(file.time) : /* @__PURE__ */ new Date();
+          }
+          if (external && version > 3) {
+            const time = file.time ? new Date(file.time) : /* @__PURE__ */ new Date();
             (0, psdWriter_1.writeInt32)(writer, time.getUTCFullYear());
             (0, psdWriter_1.writeUint8)(writer, time.getUTCMonth());
             (0, psdWriter_1.writeUint8)(writer, time.getUTCDate());
@@ -13425,10 +17415,12 @@ var require_additionalInfo = __commonJS({
             (0, psdWriter_1.writeUint8)(writer, time.getUTCMinutes());
             (0, psdWriter_1.writeFloat64)(writer, time.getUTCSeconds() + time.getUTCMilliseconds() / 1e3);
           }
-          if (file.data) {
+          if (external) {
+            (0, psdWriter_1.writeUint64)(writer, (version === 2 ? (_k = file.data) === null || _k === void 0 ? void 0 : _k.byteLength : (_l = file.linkedFile) === null || _l === void 0 ? void 0 : _l.fileSize) || 0);
+          } else if (file.data) {
             (0, psdWriter_1.writeBytes)(writer, file.data);
           } else {
-            writeLength64(writer, ((_j = file.linkedFile) === null || _j === void 0 ? void 0 : _j.fileSize) || 0);
+            (0, psdWriter_1.writeZeros)(writer, 8);
           }
           if (version >= 5)
             (0, psdWriter_1.writeUnicodeStringWithPadding)(writer, file.childDocumentID || "");
@@ -13436,7 +17428,9 @@ var require_additionalInfo = __commonJS({
             (0, psdWriter_1.writeFloat64)(writer, file.assetModTime || 0);
           if (version >= 7)
             (0, psdWriter_1.writeUint8)(writer, file.assetLockedState || 0);
-          var size = writer.offset - sizeOffset;
+          if (external && version === 2 && file.data)
+            (0, psdWriter_1.writeBytes)(writer, file.data);
+          let size = writer.offset - sizeOffset;
           writer.view.setUint32(sizeOffset - 4, size, false);
           while (size % 4) {
             size++;
@@ -13449,28 +17443,67 @@ var require_additionalInfo = __commonJS({
     createLnkHandler("lnkE");
     addHandlerAlias("lnkD", "lnk2");
     addHandlerAlias("lnk3", "lnk2");
-    addHandler("pths", hasKey("pathList"), function(reader, target) {
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader, true);
-      desc;
-      target.pathList = [];
-    }, function(writer, _target) {
-      var desc = {
-        pathList: []
-        // TODO: write paths
+    addHandler("pths", (target) => {
+      var _a2;
+      return ((_a2 = target.imageResources) === null || _a2 === void 0 ? void 0 : _a2.savedPaths) !== void 0;
+    }, (reader, _target, left, psd) => {
+      var _a2, _b2;
+      if (!left())
+        return;
+      if (reader.imageResourcesWhitelistSet && !reader.imageResourcesWhitelistSet.has("savedPaths")) {
+        (0, psdReader_1.skipBytes)(reader, left());
+        return;
+      }
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader, true);
+      const imageResources = (_a2 = psd.imageResources) !== null && _a2 !== void 0 ? _a2 : psd.imageResources = {};
+      const savedPaths = (_b2 = imageResources.savedPaths) !== null && _b2 !== void 0 ? _b2 : imageResources.savedPaths = [];
+      for (let i = 0; i < desc.pathList.length && i < savedPaths.length; i++) {
+        const { pathUnicodeName, pathSymmetryClass } = desc.pathList[i];
+        const path2 = savedPaths[i];
+        if (imageResources.clippingPath && imageResources.clippingPath.name === path2.name) {
+          imageResources.clippingPath.name = pathUnicodeName;
+        }
+        path2.name = pathUnicodeName;
+        if (pathSymmetryClass)
+          path2.symmetryMode = pathSymmetryClass.pathSymmetryMode.split(".")[1];
+      }
+      (0, psdReader_1.skipBytes)(reader, left());
+    }, (writer, _target, psd) => {
+      const desc = {
+        pathList: psd.imageResources.savedPaths.map((path2) => Object.assign({ _name: "", _classID: "pathInfoClass", pathUnicodeName: path2.name }, path2.symmetryMode ? {
+          pathSymmetryClass: {
+            _name: "",
+            _classID: "pathSymmetryClass",
+            pathSymmetryMode: `pathSymmetryModeEnum.${path2.symmetryMode}`
+          }
+        } : {}))
       };
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "pathsDataClass", desc);
     });
-    addHandler("lyvr", hasKey("version"), function(reader, target) {
-      return target.version = (0, psdReader_1.readUint32)(reader);
-    }, function(writer, target) {
-      return (0, psdWriter_1.writeUint32)(writer, target.version);
-    });
+    addHandler("lyvr", hasKey("version"), (reader, target) => target.version = (0, psdReader_1.readUint32)(reader), (writer, target) => (0, psdWriter_1.writeUint32)(writer, target.version));
+    addHandler(
+      "lfxs",
+      // effects of group layers (instead of 'lfx2' / 'lmfx')
+      // effects of group layers (instead of 'lfx2' / 'lmfx')
+      (target) => target.effects !== void 0 && isGroupLayer(target),
+      (reader, target, left) => {
+        const version = (0, psdReader_1.readUint32)(reader);
+        if (version !== 0)
+          throw new Error(`Invalid lfxs version`);
+        const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+        target.effects = (0, descriptor_1.parseEffects)(desc, reader);
+        (0, psdReader_1.skipBytes)(reader, left());
+      },
+      (writer, target) => {
+        const desc = (0, descriptor_1.serializeEffects)(target.effects, writer, true);
+        (0, psdWriter_1.writeUint32)(writer, 0);
+        (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
+      }
+    );
     function adjustmentType(type) {
-      return function(target) {
-        return !!target.adjustment && target.adjustment.type === type;
-      };
+      return (target) => !!target.adjustment && target.adjustment.type === type;
     }
-    addHandler("brit", adjustmentType("brightness/contrast"), function(reader, target, left) {
+    addHandler("brit", adjustmentType("brightness/contrast"), (reader, target, left) => {
       if (!target.adjustment) {
         target.adjustment = {
           type: "brightness/contrast",
@@ -13482,9 +17515,9 @@ var require_additionalInfo = __commonJS({
         };
       }
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
+    }, (writer, target) => {
       var _a2;
-      var info = target.adjustment;
+      const info = target.adjustment;
       (0, psdWriter_1.writeInt16)(writer, info.brightness || 0);
       (0, psdWriter_1.writeInt16)(writer, info.contrast || 0);
       (0, psdWriter_1.writeInt16)(writer, (_a2 = info.meanValue) !== null && _a2 !== void 0 ? _a2 : 127);
@@ -13492,12 +17525,16 @@ var require_additionalInfo = __commonJS({
       (0, psdWriter_1.writeZeros)(writer, 1);
     });
     function readLevelsChannel(reader) {
-      var shadowInput = (0, psdReader_1.readInt16)(reader);
-      var highlightInput = (0, psdReader_1.readInt16)(reader);
-      var shadowOutput = (0, psdReader_1.readInt16)(reader);
-      var highlightOutput = (0, psdReader_1.readInt16)(reader);
-      var midtoneInput = (0, psdReader_1.readInt16)(reader) / 100;
+      const shadowInput = (0, psdReader_1.readInt16)(reader);
+      const highlightInput = (0, psdReader_1.readInt16)(reader);
+      const shadowOutput = (0, psdReader_1.readInt16)(reader);
+      const highlightOutput = (0, psdReader_1.readInt16)(reader);
+      const midtoneInput = (0, psdReader_1.readInt16)(reader) / 100;
       return { shadowInput, highlightInput, shadowOutput, highlightOutput, midtoneInput };
+    }
+    var defaultLevelsChannel = { shadowInput: 0, highlightInput: 255, shadowOutput: 0, highlightOutput: 255, midtoneInput: 1 };
+    function isDefaultLevelsChannel(c) {
+      return c.shadowInput === 0 && c.highlightInput === 255 && c.shadowOutput === 0 && c.highlightOutput === 255 && c.midtoneInput === 1;
     }
     function writeLevelsChannel(writer, channel) {
       (0, psdWriter_1.writeInt16)(writer, channel.shadowInput);
@@ -13506,142 +17543,159 @@ var require_additionalInfo = __commonJS({
       (0, psdWriter_1.writeInt16)(writer, channel.highlightOutput);
       (0, psdWriter_1.writeInt16)(writer, Math.round(channel.midtoneInput * 100));
     }
-    addHandler("levl", adjustmentType("levels"), function(reader, target, left) {
+    addHandler("levl", adjustmentType("levels"), (reader, target, left) => {
       if ((0, psdReader_1.readUint16)(reader) !== 2)
         throw new Error("Invalid levl version");
-      target.adjustment = __assign(__assign({}, target.adjustment), { type: "levels", rgb: readLevelsChannel(reader), red: readLevelsChannel(reader), green: readLevelsChannel(reader), blue: readLevelsChannel(reader) });
+      const channels = [];
+      for (let i = 0; i < 29 && left() >= 10; i++) {
+        channels.push(readLevelsChannel(reader));
+      }
+      if (left() >= 8) {
+        const signature = (0, psdReader_1.readSignature)(reader);
+        let totalChannelRecords;
+        if (signature === "ls\0") {
+          totalChannelRecords = (0, psdReader_1.readUint16)(reader);
+        } else {
+          if (signature !== "Lvls")
+            throw new Error(`Invalid levl signature`);
+          if ((0, psdReader_1.readUint16)(reader) !== 3)
+            throw new Error(`Invalid levl version`);
+          totalChannelRecords = (0, psdReader_1.readUint16)(reader);
+        }
+        while (channels.length < totalChannelRecords && left() >= 10) {
+          channels.push(readLevelsChannel(reader));
+        }
+      }
+      while (channels.length && isDefaultLevelsChannel(channels[channels.length - 1]))
+        channels.pop();
+      target.adjustment = Object.assign(Object.assign({}, target.adjustment), { type: "levels", channels });
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var info = target.adjustment;
-      var defaultChannel = {
-        shadowInput: 0,
-        highlightInput: 255,
-        shadowOutput: 0,
-        highlightOutput: 255,
-        midtoneInput: 1
-      };
+    }, (writer, target) => {
+      const channels = target.adjustment.channels || [];
       (0, psdWriter_1.writeUint16)(writer, 2);
-      writeLevelsChannel(writer, info.rgb || defaultChannel);
-      writeLevelsChannel(writer, info.red || defaultChannel);
-      writeLevelsChannel(writer, info.blue || defaultChannel);
-      writeLevelsChannel(writer, info.green || defaultChannel);
-      for (var i = 0; i < 59; i++)
-        writeLevelsChannel(writer, defaultChannel);
+      for (let i = 0; i < 29; i++) {
+        writeLevelsChannel(writer, channels[i] || defaultLevelsChannel);
+      }
+      (0, psdWriter_1.writeSignature)(writer, "Lvls");
+      (0, psdWriter_1.writeUint16)(writer, 3);
+      (0, psdWriter_1.writeUint16)(writer, 62);
+      for (let i = 29; i < 62; i++) {
+        writeLevelsChannel(writer, channels[i] || defaultLevelsChannel);
+      }
     });
     function readCurveChannel(reader) {
-      var nodes = (0, psdReader_1.readUint16)(reader);
-      var channel = [];
-      for (var j = 0; j < nodes; j++) {
-        var output = (0, psdReader_1.readInt16)(reader);
-        var input = (0, psdReader_1.readInt16)(reader);
+      const nodes = (0, psdReader_1.readUint16)(reader);
+      const channel = [];
+      for (let j = 0; j < nodes; j++) {
+        const output = (0, psdReader_1.readInt16)(reader);
+        const input = (0, psdReader_1.readInt16)(reader);
         channel.push({ input, output });
       }
       return channel;
     }
     function writeCurveChannel(writer, channel) {
       (0, psdWriter_1.writeUint16)(writer, channel.length);
-      for (var _i = 0, channel_1 = channel; _i < channel_1.length; _i++) {
-        var n = channel_1[_i];
+      for (const n of channel) {
         (0, psdWriter_1.writeUint16)(writer, n.output);
         (0, psdWriter_1.writeUint16)(writer, n.input);
       }
     }
-    addHandler("curv", adjustmentType("curves"), function(reader, target, left) {
-      (0, psdReader_1.readUint8)(reader);
-      if ((0, psdReader_1.readUint16)(reader) !== 1)
+    addHandler("curv", adjustmentType("curves"), (reader, target, left) => {
+      const isMap = !!(0, psdReader_1.readUint8)(reader);
+      const version = (0, psdReader_1.readUint16)(reader);
+      if (version !== 1 && version !== 4)
         throw new Error("Invalid curv version");
-      (0, psdReader_1.readUint16)(reader);
-      var channels = (0, psdReader_1.readUint16)(reader);
-      var info = { type: "curves" };
-      if (channels & 1)
-        info.rgb = readCurveChannel(reader);
-      if (channels & 2)
-        info.red = readCurveChannel(reader);
-      if (channels & 4)
-        info.green = readCurveChannel(reader);
-      if (channels & 8)
-        info.blue = readCurveChannel(reader);
-      target.adjustment = __assign(__assign({}, target.adjustment), info);
+      const countOrMask = (0, psdReader_1.readUint32)(reader);
+      const channels = [];
+      const readChannel = () => isMap ? Array.from((0, psdReader_1.readBytes)(reader, 256)) : readCurveChannel(reader);
+      if (version === 1) {
+        for (let i = 0; i < 32; i++) {
+          if (countOrMask & 1 << i) {
+            while (channels.length < i)
+              channels.push([]);
+            channels.push(readChannel());
+          }
+        }
+      } else {
+        if (countOrMask > 64)
+          throw new Error("Invalid curv channel count");
+        for (let i = 0; i < countOrMask; i++)
+          channels.push(readChannel());
+      }
+      if (version === 1 && left() >= 10 && (0, psdReader_1.readSignature)(reader) === "Crv ") {
+        (0, psdReader_1.readUint16)(reader);
+        const count = (0, psdReader_1.readUint32)(reader);
+        for (let i = 0; i < count && left() >= 2; i++) {
+          const index = (0, psdReader_1.readUint16)(reader);
+          const channel = readChannel();
+          while (channels.length < index)
+            channels.push([]);
+          channels[index] = channel;
+        }
+      }
+      target.adjustment = Object.assign(Object.assign(Object.assign({}, target.adjustment), { type: "curves" }), isMap ? { values: channels } : { channels });
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var info = target.adjustment;
-      var rgb = info.rgb, red = info.red, green = info.green, blue = info.blue;
-      var channels = 0;
-      var channelCount = 0;
-      if (rgb && rgb.length) {
-        channels |= 1;
-        channelCount++;
+    }, (writer, target) => {
+      var _a2;
+      const adjustment = target.adjustment;
+      const isMap = !!adjustment.values;
+      const channels = (isMap ? adjustment.values : adjustment.channels) || [];
+      const used = [];
+      let channelsMask = 0;
+      for (let i = 0; i < channels.length; i++) {
+        if ((_a2 = channels[i]) === null || _a2 === void 0 ? void 0 : _a2.length) {
+          if (i < 32)
+            channelsMask |= 1 << i;
+          used.push(i);
+        }
       }
-      if (red && red.length) {
-        channels |= 2;
-        channelCount++;
-      }
-      if (green && green.length) {
-        channels |= 4;
-        channelCount++;
-      }
-      if (blue && blue.length) {
-        channels |= 8;
-        channelCount++;
-      }
-      (0, psdWriter_1.writeUint8)(writer, 0);
+      const writeChannel = (channel) => {
+        var _a3;
+        if (isMap) {
+          for (let i = 0; i < 256; i++)
+            (0, psdWriter_1.writeUint8)(writer, (0, helpers_1.clamp)(Math.round((_a3 = channel[i]) !== null && _a3 !== void 0 ? _a3 : i), 0, 255));
+        } else {
+          writeCurveChannel(writer, channel);
+        }
+      };
+      (0, psdWriter_1.writeUint8)(writer, isMap ? 1 : 0);
       (0, psdWriter_1.writeUint16)(writer, 1);
-      (0, psdWriter_1.writeUint16)(writer, 0);
-      (0, psdWriter_1.writeUint16)(writer, channels);
-      if (rgb && rgb.length)
-        writeCurveChannel(writer, rgb);
-      if (red && red.length)
-        writeCurveChannel(writer, red);
-      if (green && green.length)
-        writeCurveChannel(writer, green);
-      if (blue && blue.length)
-        writeCurveChannel(writer, blue);
+      (0, psdWriter_1.writeUint32)(writer, channelsMask >>> 0);
+      for (const i of used)
+        if (i < 32)
+          writeChannel(channels[i]);
       (0, psdWriter_1.writeSignature)(writer, "Crv ");
       (0, psdWriter_1.writeUint16)(writer, 4);
-      (0, psdWriter_1.writeUint16)(writer, 0);
-      (0, psdWriter_1.writeUint16)(writer, channelCount);
-      if (rgb && rgb.length) {
-        (0, psdWriter_1.writeUint16)(writer, 0);
-        writeCurveChannel(writer, rgb);
+      (0, psdWriter_1.writeUint32)(writer, used.length);
+      for (const i of used) {
+        (0, psdWriter_1.writeUint16)(writer, i);
+        writeChannel(channels[i]);
       }
-      if (red && red.length) {
-        (0, psdWriter_1.writeUint16)(writer, 1);
-        writeCurveChannel(writer, red);
-      }
-      if (green && green.length) {
-        (0, psdWriter_1.writeUint16)(writer, 2);
-        writeCurveChannel(writer, green);
-      }
-      if (blue && blue.length) {
-        (0, psdWriter_1.writeUint16)(writer, 3);
-        writeCurveChannel(writer, blue);
-      }
-      (0, psdWriter_1.writeZeros)(writer, 2);
     });
-    addHandler("expA", adjustmentType("exposure"), function(reader, target, left) {
+    addHandler("expA", adjustmentType("exposure"), (reader, target, left) => {
       if ((0, psdReader_1.readUint16)(reader) !== 1)
         throw new Error("Invalid expA version");
-      target.adjustment = __assign(__assign({}, target.adjustment), { type: "exposure", exposure: (0, psdReader_1.readFloat32)(reader), offset: (0, psdReader_1.readFloat32)(reader), gamma: (0, psdReader_1.readFloat32)(reader) });
+      target.adjustment = Object.assign(Object.assign({}, target.adjustment), { type: "exposure", exposure: (0, psdReader_1.readFloat32)(reader), offset: (0, psdReader_1.readFloat32)(reader), gamma: (0, psdReader_1.readFloat32)(reader) });
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var info = target.adjustment;
+    }, (writer, target) => {
+      const info = target.adjustment;
       (0, psdWriter_1.writeUint16)(writer, 1);
       (0, psdWriter_1.writeFloat32)(writer, info.exposure);
       (0, psdWriter_1.writeFloat32)(writer, info.offset);
       (0, psdWriter_1.writeFloat32)(writer, info.gamma);
       (0, psdWriter_1.writeZeros)(writer, 2);
     });
-    addHandler("vibA", adjustmentType("vibrance"), function(reader, target, left) {
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+    addHandler("vibA", adjustmentType("vibrance"), (reader, target, left) => {
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
       target.adjustment = { type: "vibrance" };
       if (desc.vibrance !== void 0)
         target.adjustment.vibrance = desc.vibrance;
       if (desc.Strt !== void 0)
         target.adjustment.saturation = desc.Strt;
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var info = target.adjustment;
-      var desc = {};
+    }, (writer, target) => {
+      const info = target.adjustment;
+      const desc = {};
       if (info.vibrance !== void 0)
         desc.vibrance = info.vibrance;
       if (info.saturation !== void 0)
@@ -13660,7 +17714,7 @@ var require_additionalInfo = __commonJS({
       };
     }
     function writeHueChannel(writer, channel) {
-      var c = channel || {};
+      const c = channel || {};
       (0, psdWriter_1.writeInt16)(writer, c.a || 0);
       (0, psdWriter_1.writeInt16)(writer, c.b || 0);
       (0, psdWriter_1.writeInt16)(writer, c.c || 0);
@@ -13669,15 +17723,37 @@ var require_additionalInfo = __commonJS({
       (0, psdWriter_1.writeInt16)(writer, c.saturation || 0);
       (0, psdWriter_1.writeInt16)(writer, c.lightness || 0);
     }
-    addHandler("hue2", adjustmentType("hue/saturation"), function(reader, target, left) {
+    addHandler("hue2", adjustmentType("hue/saturation"), (reader, target, left) => {
       if ((0, psdReader_1.readUint16)(reader) !== 2)
         throw new Error("Invalid hue2 version");
-      target.adjustment = __assign(__assign({}, target.adjustment), { type: "hue/saturation", master: readHueChannel(reader), reds: readHueChannel(reader), yellows: readHueChannel(reader), greens: readHueChannel(reader), cyans: readHueChannel(reader), blues: readHueChannel(reader), magentas: readHueChannel(reader) });
+      const colorize = !!(0, psdReader_1.readUint8)(reader);
+      (0, psdReader_1.skipBytes)(reader, 1);
+      const colorizeHue = (0, psdReader_1.readInt16)(reader);
+      const colorizeSaturation = (0, psdReader_1.readInt16)(reader);
+      const colorizeLightness = (0, psdReader_1.readInt16)(reader);
+      target.adjustment = Object.assign(Object.assign({}, target.adjustment), { type: "hue/saturation", colorize, colorization: {
+        hue: colorizeHue < 0 ? colorizeHue + 360 : colorizeHue,
+        saturation: colorizeSaturation,
+        lightness: colorizeLightness
+      }, master: {
+        hue: (0, psdReader_1.readInt16)(reader),
+        saturation: (0, psdReader_1.readInt16)(reader),
+        lightness: (0, psdReader_1.readInt16)(reader)
+      }, reds: readHueChannel(reader), yellows: readHueChannel(reader), greens: readHueChannel(reader), cyans: readHueChannel(reader), blues: readHueChannel(reader), magentas: readHueChannel(reader) });
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var info = target.adjustment;
+    }, (writer, target) => {
+      var _a2, _b2, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+      const info = target.adjustment;
       (0, psdWriter_1.writeUint16)(writer, 2);
-      writeHueChannel(writer, info.master);
+      (0, psdWriter_1.writeUint8)(writer, info.colorize ? 1 : 0);
+      (0, psdWriter_1.writeUint8)(writer, 0);
+      const colorizeHue = Math.round((_b2 = (_a2 = info.colorization) === null || _a2 === void 0 ? void 0 : _a2.hue) !== null && _b2 !== void 0 ? _b2 : 0);
+      (0, psdWriter_1.writeInt16)(writer, colorizeHue > 180 ? colorizeHue - 360 : colorizeHue);
+      (0, psdWriter_1.writeInt16)(writer, Math.round((_d = (_c = info.colorization) === null || _c === void 0 ? void 0 : _c.saturation) !== null && _d !== void 0 ? _d : 0));
+      (0, psdWriter_1.writeInt16)(writer, Math.round((_f = (_e = info.colorization) === null || _e === void 0 ? void 0 : _e.lightness) !== null && _f !== void 0 ? _f : 0));
+      (0, psdWriter_1.writeInt16)(writer, Math.round((_h = (_g = info.master) === null || _g === void 0 ? void 0 : _g.hue) !== null && _h !== void 0 ? _h : 0));
+      (0, psdWriter_1.writeInt16)(writer, Math.round((_k = (_j = info.master) === null || _j === void 0 ? void 0 : _j.saturation) !== null && _k !== void 0 ? _k : 0));
+      (0, psdWriter_1.writeInt16)(writer, Math.round((_m = (_l = info.master) === null || _l === void 0 ? void 0 : _l.lightness) !== null && _m !== void 0 ? _m : 0));
       writeHueChannel(writer, info.reds);
       writeHueChannel(writer, info.yellows);
       writeHueChannel(writer, info.greens);
@@ -13697,7 +17773,7 @@ var require_additionalInfo = __commonJS({
       (0, psdWriter_1.writeInt16)(writer, value.magentaGreen || 0);
       (0, psdWriter_1.writeInt16)(writer, value.yellowBlue || 0);
     }
-    addHandler("blnc", adjustmentType("color balance"), function(reader, target, left) {
+    addHandler("blnc", adjustmentType("color balance"), (reader, target, left) => {
       target.adjustment = {
         type: "color balance",
         shadows: readColorBalance(reader),
@@ -13706,16 +17782,16 @@ var require_additionalInfo = __commonJS({
         preserveLuminosity: !!(0, psdReader_1.readUint8)(reader)
       };
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var info = target.adjustment;
+    }, (writer, target) => {
+      const info = target.adjustment;
       writeColorBalance(writer, info.shadows || {});
       writeColorBalance(writer, info.midtones || {});
       writeColorBalance(writer, info.highlights || {});
       (0, psdWriter_1.writeUint8)(writer, info.preserveLuminosity ? 1 : 0);
       (0, psdWriter_1.writeZeros)(writer, 1);
     });
-    addHandler("blwh", adjustmentType("black & white"), function(reader, target, left) {
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+    addHandler("blwh", adjustmentType("black & white"), (reader, target, left) => {
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
       target.adjustment = {
         type: "black & white",
         reds: desc["Rd  "],
@@ -13731,9 +17807,9 @@ var require_additionalInfo = __commonJS({
       if (desc.tintColor !== void 0)
         target.adjustment.tintColor = (0, descriptor_1.parseColor)(desc.tintColor);
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var info = target.adjustment;
-      var desc = {
+    }, (writer, target) => {
+      const info = target.adjustment;
+      const desc = {
         "Rd  ": info.reds || 0,
         Yllw: info.yellows || 0,
         "Grn ": info.greens || 0,
@@ -13747,18 +17823,24 @@ var require_additionalInfo = __commonJS({
       };
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
     });
-    addHandler("phfl", adjustmentType("photo filter"), function(reader, target, left) {
-      var version = (0, psdReader_1.readUint16)(reader);
+    addHandler("phfl", adjustmentType("photo filter"), (reader, target, left) => {
+      const version = (0, psdReader_1.readUint16)(reader);
       if (version !== 2 && version !== 3)
         throw new Error("Invalid phfl version");
-      var color;
+      let color;
       if (version === 2) {
         color = (0, psdReader_1.readColor)(reader);
       } else {
+        const x = (0, psdReader_1.readInt32)(reader) / 32768;
+        const y = (0, psdReader_1.readInt32)(reader) / 32768;
+        const z = (0, psdReader_1.readInt32)(reader) / 32768;
+        if (!(x >= 0 && y >= 0 && z >= 0 && x <= 2 && y <= 2 && z <= 2))
+          throw new Error("Invalid phfl XYZ color");
+        const f = (t) => t > 216 / 24389 ? Math.cbrt(t) : (24389 / 27 * t + 16) / 116;
         color = {
-          l: (0, psdReader_1.readInt32)(reader) / 100,
-          a: (0, psdReader_1.readInt32)(reader) / 100,
-          b: (0, psdReader_1.readInt32)(reader) / 100
+          l: Math.max(0, 116 * f(y) - 16) / 100,
+          a: (0, helpers_1.normalizeLabAB)(500 * (f(x) - f(y))),
+          b: (0, helpers_1.normalizeLabAB)(200 * (f(y) - f(z)))
         };
       }
       target.adjustment = {
@@ -13768,34 +17850,34 @@ var require_additionalInfo = __commonJS({
         preserveLuminosity: !!(0, psdReader_1.readUint8)(reader)
       };
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var info = target.adjustment;
+    }, (writer, target) => {
+      const info = target.adjustment;
       (0, psdWriter_1.writeUint16)(writer, 2);
       (0, psdWriter_1.writeColor)(writer, info.color || { l: 0, a: 0, b: 0 });
-      (0, psdWriter_1.writeUint32)(writer, (info.density || 0) * 100);
+      (0, psdWriter_1.writeUint32)(writer, Math.round(Math.max(0, info.density || 0) * 100));
       (0, psdWriter_1.writeUint8)(writer, info.preserveLuminosity ? 1 : 0);
       (0, psdWriter_1.writeZeros)(writer, 3);
     });
     function readMixrChannel(reader) {
-      var red = (0, psdReader_1.readInt16)(reader);
-      var green = (0, psdReader_1.readInt16)(reader);
-      var blue = (0, psdReader_1.readInt16)(reader);
+      const red = (0, psdReader_1.readInt16)(reader);
+      const green = (0, psdReader_1.readInt16)(reader);
+      const blue = (0, psdReader_1.readInt16)(reader);
       (0, psdReader_1.skipBytes)(reader, 2);
-      var constant = (0, psdReader_1.readInt16)(reader);
+      const constant = (0, psdReader_1.readInt16)(reader);
       return { red, green, blue, constant };
     }
     function writeMixrChannel(writer, channel) {
-      var c = channel || {};
+      const c = channel || {};
       (0, psdWriter_1.writeInt16)(writer, c.red);
       (0, psdWriter_1.writeInt16)(writer, c.green);
       (0, psdWriter_1.writeInt16)(writer, c.blue);
       (0, psdWriter_1.writeZeros)(writer, 2);
       (0, psdWriter_1.writeInt16)(writer, c.constant);
     }
-    addHandler("mixr", adjustmentType("channel mixer"), function(reader, target, left) {
+    addHandler("mixr", adjustmentType("channel mixer"), (reader, target, left) => {
       if ((0, psdReader_1.readUint16)(reader) !== 1)
         throw new Error("Invalid mixr version");
-      var adjustment = target.adjustment = __assign(__assign({}, target.adjustment), { type: "channel mixer", monochrome: !!(0, psdReader_1.readUint16)(reader) });
+      const adjustment = target.adjustment = Object.assign(Object.assign({}, target.adjustment), { type: "channel mixer", monochrome: !!(0, psdReader_1.readUint16)(reader) });
       if (!adjustment.monochrome) {
         adjustment.red = readMixrChannel(reader);
         adjustment.green = readMixrChannel(reader);
@@ -13803,8 +17885,8 @@ var require_additionalInfo = __commonJS({
       }
       adjustment.gray = readMixrChannel(reader);
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var info = target.adjustment;
+    }, (writer, target) => {
+      const info = target.adjustment;
       (0, psdWriter_1.writeUint16)(writer, 1);
       (0, psdWriter_1.writeUint16)(writer, info.monochrome ? 1 : 0);
       if (info.monochrome) {
@@ -13817,7 +17899,7 @@ var require_additionalInfo = __commonJS({
         writeMixrChannel(writer, info.gray);
       }
     });
-    var colorLookupType = (0, helpers_1.createEnum)("colorLookupType", "3DLUT", {
+    var colorLookupType = (0, helpers_1.createEnum)("colorLookupType", "3dlut", {
       "3dlut": "3DLUT",
       abstractProfile: "abstractProfile",
       deviceLinkProfile: "deviceLinkProfile"
@@ -13831,12 +17913,12 @@ var require_additionalInfo = __commonJS({
       rgb: "rgbOrder",
       bgr: "bgrOrder"
     });
-    addHandler("clrL", adjustmentType("color lookup"), function(reader, target, left) {
+    addHandler("clrL", adjustmentType("color lookup"), (reader, target, left) => {
       if ((0, psdReader_1.readUint16)(reader) !== 1)
         throw new Error("Invalid clrL version");
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
       target.adjustment = { type: "color lookup" };
-      var info = target.adjustment;
+      const info = target.adjustment;
       if (desc.lookupType !== void 0)
         info.lookupType = colorLookupType.decode(desc.lookupType);
       if (desc["Nm  "] !== void 0)
@@ -13856,9 +17938,9 @@ var require_additionalInfo = __commonJS({
       if (desc.LUT3DFileName !== void 0)
         info.lut3DFileName = desc.LUT3DFileName;
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var info = target.adjustment;
-      var desc = {};
+    }, (writer, target) => {
+      const info = target.adjustment;
+      const desc = {};
       if (info.lookupType !== void 0)
         desc.lookupType = colorLookupType.encode(info.lookupType);
       if (info.name !== void 0)
@@ -13880,50 +17962,57 @@ var require_additionalInfo = __commonJS({
       (0, psdWriter_1.writeUint16)(writer, 1);
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
     });
-    addHandler("nvrt", adjustmentType("invert"), function(reader, target, left) {
+    addHandler("nvrt", adjustmentType("invert"), (reader, target, left) => {
       target.adjustment = { type: "invert" };
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function() {
+    }, () => {
     });
-    addHandler("post", adjustmentType("posterize"), function(reader, target, left) {
+    addHandler("post", adjustmentType("posterize"), (reader, target, left) => {
       target.adjustment = {
         type: "posterize",
         levels: (0, psdReader_1.readUint16)(reader)
       };
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
+    }, (writer, target) => {
       var _a2;
-      var info = target.adjustment;
+      const info = target.adjustment;
       (0, psdWriter_1.writeUint16)(writer, (_a2 = info.levels) !== null && _a2 !== void 0 ? _a2 : 4);
       (0, psdWriter_1.writeZeros)(writer, 2);
     });
-    addHandler("thrs", adjustmentType("threshold"), function(reader, target, left) {
+    addHandler("thrs", adjustmentType("threshold"), (reader, target, left) => {
       target.adjustment = {
         type: "threshold",
         level: (0, psdReader_1.readUint16)(reader)
       };
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
+    }, (writer, target) => {
       var _a2;
-      var info = target.adjustment;
+      const info = target.adjustment;
       (0, psdWriter_1.writeUint16)(writer, (_a2 = info.level) !== null && _a2 !== void 0 ? _a2 : 128);
       (0, psdWriter_1.writeZeros)(writer, 2);
     });
     var grdmColorModels = ["", "", "", "rgb", "hsb", "", "lab"];
-    addHandler("grdm", adjustmentType("gradient map"), function(reader, target, left) {
-      if ((0, psdReader_1.readUint16)(reader) !== 1)
+    addHandler("grdm", adjustmentType("gradient map"), (reader, target, left) => {
+      const version = (0, psdReader_1.readUint16)(reader);
+      if (version !== 1 && version !== 3)
         throw new Error("Invalid grdm version");
-      var info = {
+      const info = {
         type: "gradient map",
         gradientType: "solid"
       };
       info.reverse = !!(0, psdReader_1.readUint8)(reader);
       info.dither = !!(0, psdReader_1.readUint8)(reader);
+      const hasMethod = !!(0, psdReader_1.readUint8)(reader);
+      reader.offset--;
+      if (hasMethod) {
+        const method = (0, psdReader_1.readSignature)(reader);
+        info.method = descriptor_1.gradientInterpolationMethodType.decode(`gradientInterpolationMethodType.${method}`);
+      }
       info.name = (0, psdReader_1.readUnicodeString)(reader);
       info.colorStops = [];
       info.opacityStops = [];
-      var stopsCount = (0, psdReader_1.readUint16)(reader);
-      for (var i = 0; i < stopsCount; i++) {
+      const stopsCount = (0, psdReader_1.readUint16)(reader);
+      for (let i = 0; i < stopsCount; i++) {
         info.colorStops.push({
           location: (0, psdReader_1.readUint32)(reader),
           midpoint: (0, psdReader_1.readUint32)(reader) / 100,
@@ -13931,20 +18020,20 @@ var require_additionalInfo = __commonJS({
         });
         (0, psdReader_1.skipBytes)(reader, 2);
       }
-      var opacityStopsCount = (0, psdReader_1.readUint16)(reader);
-      for (var i = 0; i < opacityStopsCount; i++) {
+      const opacityStopsCount = (0, psdReader_1.readUint16)(reader);
+      for (let i = 0; i < opacityStopsCount; i++) {
         info.opacityStops.push({
           location: (0, psdReader_1.readUint32)(reader),
           midpoint: (0, psdReader_1.readUint32)(reader) / 100,
           opacity: (0, psdReader_1.readUint16)(reader) / 255
         });
       }
-      var expansionCount = (0, psdReader_1.readUint16)(reader);
+      const expansionCount = (0, psdReader_1.readUint16)(reader);
       if (expansionCount !== 2)
         throw new Error("Invalid grdm expansion count");
-      var interpolation = (0, psdReader_1.readUint16)(reader);
+      const interpolation = (0, psdReader_1.readUint16)(reader);
       info.smoothness = interpolation / 4096;
-      var length = (0, psdReader_1.readUint16)(reader);
+      const length = (0, psdReader_1.readUint16)(reader);
       if (length !== 32)
         throw new Error("Invalid grdm length");
       info.gradientType = (0, psdReader_1.readUint16)(reader) ? "noise" : "solid";
@@ -13966,37 +18055,34 @@ var require_additionalInfo = __commonJS({
         (0, psdReader_1.readUint16)(reader) / 32768
       ];
       (0, psdReader_1.skipBytes)(reader, left());
-      for (var _i = 0, _a2 = info.colorStops; _i < _a2.length; _i++) {
-        var s = _a2[_i];
-        s.location /= interpolation;
-      }
-      for (var _b2 = 0, _c = info.opacityStops; _b2 < _c.length; _b2++) {
-        var s = _c[_b2];
-        s.location /= interpolation;
-      }
+      for (const s of info.colorStops)
+        s.location /= 4096;
+      for (const s of info.opacityStops)
+        s.location /= 4096;
       target.adjustment = info;
-    }, function(writer, target) {
+    }, (writer, target) => {
       var _a2, _b2, _c;
-      var info = target.adjustment;
-      (0, psdWriter_1.writeUint16)(writer, 1);
+      const info = target.adjustment;
+      (0, psdWriter_1.writeUint16)(writer, info.method !== void 0 ? 3 : 1);
       (0, psdWriter_1.writeUint8)(writer, info.reverse ? 1 : 0);
       (0, psdWriter_1.writeUint8)(writer, info.dither ? 1 : 0);
+      if (info.method !== void 0) {
+        (0, psdWriter_1.writeSignature)(writer, descriptor_1.gradientInterpolationMethodType.encode(info.method).split(".")[1]);
+      }
       (0, psdWriter_1.writeUnicodeStringWithPadding)(writer, info.name || "");
       (0, psdWriter_1.writeUint16)(writer, info.colorStops && info.colorStops.length || 0);
-      var interpolation = Math.round(((_a2 = info.smoothness) !== null && _a2 !== void 0 ? _a2 : 1) * 4096);
-      for (var _i = 0, _d = info.colorStops || []; _i < _d.length; _i++) {
-        var s = _d[_i];
-        (0, psdWriter_1.writeUint32)(writer, Math.round(s.location * interpolation));
+      const interpolation = Math.round((0, helpers_1.clamp)((_a2 = info.smoothness) !== null && _a2 !== void 0 ? _a2 : 1, 0, 1) * 4096);
+      for (const s of info.colorStops || []) {
+        (0, psdWriter_1.writeUint32)(writer, Math.round((0, helpers_1.clamp)(s.location, 0, 1) * 4096));
         (0, psdWriter_1.writeUint32)(writer, Math.round(s.midpoint * 100));
         (0, psdWriter_1.writeColor)(writer, s.color);
         (0, psdWriter_1.writeZeros)(writer, 2);
       }
       (0, psdWriter_1.writeUint16)(writer, info.opacityStops && info.opacityStops.length || 0);
-      for (var _e = 0, _f = info.opacityStops || []; _e < _f.length; _e++) {
-        var s = _f[_e];
-        (0, psdWriter_1.writeUint32)(writer, Math.round(s.location * interpolation));
+      for (const s of info.opacityStops || []) {
+        (0, psdWriter_1.writeUint32)(writer, Math.round((0, helpers_1.clamp)(s.location, 0, 1) * 4096));
         (0, psdWriter_1.writeUint32)(writer, Math.round(s.midpoint * 100));
-        (0, psdWriter_1.writeUint16)(writer, Math.round(s.opacity * 255));
+        (0, psdWriter_1.writeUint16)(writer, Math.round((0, helpers_1.clamp)(s.opacity, 0, 1) * 255));
       }
       (0, psdWriter_1.writeUint16)(writer, 2);
       (0, psdWriter_1.writeUint16)(writer, interpolation);
@@ -14006,11 +18092,11 @@ var require_additionalInfo = __commonJS({
       (0, psdWriter_1.writeUint16)(writer, info.addTransparency ? 1 : 0);
       (0, psdWriter_1.writeUint16)(writer, info.restrictColors ? 1 : 0);
       (0, psdWriter_1.writeUint32)(writer, Math.round(((_b2 = info.roughness) !== null && _b2 !== void 0 ? _b2 : 1) * 4096));
-      var colorModel = grdmColorModels.indexOf((_c = info.colorModel) !== null && _c !== void 0 ? _c : "rgb");
+      const colorModel = grdmColorModels.indexOf((_c = info.colorModel) !== null && _c !== void 0 ? _c : "rgb");
       (0, psdWriter_1.writeUint16)(writer, colorModel === -1 ? 3 : colorModel);
-      for (var i = 0; i < 4; i++)
+      for (let i = 0; i < 4; i++)
         (0, psdWriter_1.writeUint16)(writer, Math.round((info.min && info.min[i] || 0) * 32768));
-      for (var i = 0; i < 4; i++)
+      for (let i = 0; i < 4; i++)
         (0, psdWriter_1.writeUint16)(writer, Math.round((info.max && info.max[i] || 0) * 32768));
       (0, psdWriter_1.writeZeros)(writer, 4);
     });
@@ -14023,16 +18109,16 @@ var require_additionalInfo = __commonJS({
       };
     }
     function writeSelectiveColors(writer, cmyk) {
-      var c = cmyk || {};
+      const c = cmyk || {};
       (0, psdWriter_1.writeInt16)(writer, c.c);
       (0, psdWriter_1.writeInt16)(writer, c.m);
       (0, psdWriter_1.writeInt16)(writer, c.y);
       (0, psdWriter_1.writeInt16)(writer, c.k);
     }
-    addHandler("selc", adjustmentType("selective color"), function(reader, target) {
+    addHandler("selc", adjustmentType("selective color"), (reader, target) => {
       if ((0, psdReader_1.readUint16)(reader) !== 1)
         throw new Error("Invalid selc version");
-      var mode = (0, psdReader_1.readUint16)(reader) ? "absolute" : "relative";
+      const mode = (0, psdReader_1.readUint16)(reader) ? "absolute" : "relative";
       (0, psdReader_1.skipBytes)(reader, 8);
       target.adjustment = {
         type: "selective color",
@@ -14047,8 +18133,8 @@ var require_additionalInfo = __commonJS({
         neutrals: readSelectiveColors(reader),
         blacks: readSelectiveColors(reader)
       };
-    }, function(writer, target) {
-      var info = target.adjustment;
+    }, (writer, target) => {
+      const info = target.adjustment;
       (0, psdWriter_1.writeUint16)(writer, 1);
       (0, psdWriter_1.writeUint16)(writer, info.mode === "absolute" ? 1 : 0);
       (0, psdWriter_1.writeZeros)(writer, 8);
@@ -14062,21 +18148,21 @@ var require_additionalInfo = __commonJS({
       writeSelectiveColors(writer, info.neutrals);
       writeSelectiveColors(writer, info.blacks);
     });
-    addHandler("CgEd", function(target) {
-      var a = target.adjustment;
+    addHandler("CgEd", (target) => {
+      const a = target.adjustment;
       if (!a)
         return false;
       return a.type === "brightness/contrast" && !a.useLegacy || (a.type === "levels" || a.type === "curves" || a.type === "exposure" || a.type === "channel mixer" || a.type === "hue/saturation") && a.presetFileName !== void 0;
-    }, function(reader, target, left) {
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+    }, (reader, target, left) => {
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
       if (desc.Vrsn !== 1)
         throw new Error("Invalid CgEd version");
       if ("presetFileName" in desc) {
-        target.adjustment = __assign(__assign({}, target.adjustment), { presetKind: desc.presetKind, presetFileName: desc.presetFileName });
+        target.adjustment = Object.assign(Object.assign({}, target.adjustment), { presetKind: desc.presetKind, presetFileName: desc.presetFileName });
       } else if ("curvesPresetFileName" in desc) {
-        target.adjustment = __assign(__assign({}, target.adjustment), { presetKind: desc.curvesPresetKind, presetFileName: desc.curvesPresetFileName });
+        target.adjustment = Object.assign(Object.assign({}, target.adjustment), { presetKind: desc.curvesPresetKind, presetFileName: desc.curvesPresetFileName });
       } else if ("mixerPresetFileName" in desc) {
-        target.adjustment = __assign(__assign({}, target.adjustment), { presetKind: desc.mixerPresetKind, presetFileName: desc.mixerPresetFileName });
+        target.adjustment = Object.assign(Object.assign({}, target.adjustment), { presetKind: desc.mixerPresetKind, presetFileName: desc.mixerPresetFileName });
       } else {
         target.adjustment = {
           type: "brightness/contrast",
@@ -14089,32 +18175,32 @@ var require_additionalInfo = __commonJS({
         };
       }
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
+    }, (writer, target) => {
       var _a2, _b2, _c, _d;
-      var info = target.adjustment;
+      const info = target.adjustment;
       if (info.type === "levels" || info.type === "exposure" || info.type === "hue/saturation") {
-        var desc = {
+        const desc = {
           Vrsn: 1,
           presetKind: (_a2 = info.presetKind) !== null && _a2 !== void 0 ? _a2 : 1,
           presetFileName: info.presetFileName || ""
         };
         (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
       } else if (info.type === "curves") {
-        var desc = {
+        const desc = {
           Vrsn: 1,
           curvesPresetKind: (_b2 = info.presetKind) !== null && _b2 !== void 0 ? _b2 : 1,
           curvesPresetFileName: info.presetFileName || ""
         };
         (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
       } else if (info.type === "channel mixer") {
-        var desc = {
+        const desc = {
           Vrsn: 1,
           mixerPresetKind: (_c = info.presetKind) !== null && _c !== void 0 ? _c : 1,
           mixerPresetFileName: info.presetFileName || ""
         };
         (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
       } else if (info.type === "brightness/contrast") {
-        var desc = {
+        const desc = {
           Vrsn: 1,
           Brgh: info.brightness || 0,
           Cntr: info.contrast || 0,
@@ -14128,94 +18214,124 @@ var require_additionalInfo = __commonJS({
         throw new Error("Unhandled CgEd case");
       }
     });
-    addHandler("Txt2", hasKey("engineData"), function(reader, target, left) {
-      var data = (0, psdReader_1.readBytes)(reader, left());
+    function getTextLayersSortedByIndex(psd) {
+      const layers = [];
+      function collect(layer) {
+        var _a2;
+        if (layer.children) {
+          for (const child of layer.children) {
+            if (((_a2 = child.text) === null || _a2 === void 0 ? void 0 : _a2.index) !== void 0) {
+              layers[child.text.index] = child;
+            }
+            collect(child);
+          }
+        }
+      }
+      collect(psd);
+      return layers;
+    }
+    addHandler("Txt2", hasKey("engineData"), (reader, target, left, psd) => {
+      const data = (0, psdReader_1.readBytes)(reader, left());
       target.engineData = (0, base64_js_1.fromByteArray)(data);
-    }, function(writer, target) {
-      var buffer = (0, base64_js_1.toByteArray)(target.engineData);
+      const layersByIndex = getTextLayersSortedByIndex(psd);
+      const engineData = (0, engineData_1.parseEngineData)(data, reader);
+      const engineData2 = (0, engineData2_1.decodeEngineData2)(engineData);
+      const TextFrameSet = engineData2.ResourceDict.TextFrameSet;
+      if (TextFrameSet) {
+        for (let i = 0; i < TextFrameSet.length; i++) {
+          const layer = layersByIndex[i];
+          if (TextFrameSet[i].path && (layer === null || layer === void 0 ? void 0 : layer.text)) {
+            layer.text.textPath = TextFrameSet[i].path;
+          }
+        }
+      }
+    }, (writer, target) => {
+      const buffer = (0, base64_js_1.toByteArray)(target.engineData);
       (0, psdWriter_1.writeBytes)(writer, buffer);
     });
-    addHandler("FEid", hasKey("filterEffectsMasks"), function(reader, target, leftBytes) {
-      var version = (0, psdReader_1.readInt32)(reader);
+    addHandler("FEid", hasKey("filterEffectsMasks"), (reader, target, leftBytes, psd) => {
+      const version = (0, psdReader_1.readInt32)(reader);
       if (version < 1 || version > 3)
-        throw new Error("Invalid filterEffects version ".concat(version));
+        throw new Error(`Invalid filterEffects version ${version}`);
       target.filterEffectsMasks = [];
       while (leftBytes() > 8) {
         if ((0, psdReader_1.readUint32)(reader))
           throw new Error("filterEffects: 64 bit length is not supported");
-        var length_2 = (0, psdReader_1.readUint32)(reader);
-        var end = reader.offset + length_2;
-        var id = (0, psdReader_1.readPascalString)(reader, 1);
-        var effectVersion = (0, psdReader_1.readInt32)(reader);
+        const length = (0, psdReader_1.readUint32)(reader);
+        const end = reader.offset + length;
+        const id = (0, psdReader_1.readPascalString)(reader, 1);
+        const effectVersion = (0, psdReader_1.readInt32)(reader);
         if (effectVersion !== 1)
-          throw new Error("Invalid filterEffect version ".concat(effectVersion));
+          throw new Error(`Invalid filterEffect version ${effectVersion}`);
         if ((0, psdReader_1.readUint32)(reader))
           throw new Error("filterEffect: 64 bit length is not supported");
         (0, psdReader_1.readUint32)(reader);
-        var top_2 = (0, psdReader_1.readInt32)(reader);
-        var left = (0, psdReader_1.readInt32)(reader);
-        var bottom = (0, psdReader_1.readInt32)(reader);
-        var right = (0, psdReader_1.readInt32)(reader);
-        var depth = (0, psdReader_1.readInt32)(reader);
-        var maxChannels = (0, psdReader_1.readInt32)(reader);
-        var channels = [];
-        for (var i = 0; i < maxChannels + 2; i++) {
-          var exists = (0, psdReader_1.readInt32)(reader);
+        const top = (0, psdReader_1.readInt32)(reader);
+        const left = (0, psdReader_1.readInt32)(reader);
+        const bottom = (0, psdReader_1.readInt32)(reader);
+        const right = (0, psdReader_1.readInt32)(reader);
+        const depth = (0, psdReader_1.readInt32)(reader);
+        const maxChannels = (0, psdReader_1.readInt32)(reader);
+        const channels = [];
+        for (let i = 0; i < maxChannels + 2; i++) {
+          const exists = (0, psdReader_1.readInt32)(reader);
           if (exists) {
             if ((0, psdReader_1.readUint32)(reader))
               throw new Error("filterEffect: 64 bit length is not supported");
-            var channelLength = (0, psdReader_1.readUint32)(reader);
+            const channelLength = (0, psdReader_1.readUint32)(reader);
             if (!channelLength)
               throw new Error("filterEffect: Empty channel");
-            var compressionMode = (0, psdReader_1.readUint16)(reader);
-            var data = (0, psdReader_1.readBytes)(reader, channelLength - 2);
+            const compressionMode = (0, psdReader_1.readUint16)(reader);
+            if (channelLength - 2 > leftBytes())
+              throw new Error("filterEffect: Invalid channel length");
+            const data = (0, psdReader_1.readBytes)(reader, channelLength - 2);
             channels.push({ compressionMode, data });
           } else {
             channels.push(void 0);
           }
         }
-        target.filterEffectsMasks.push({ id, top: top_2, left, bottom, right, depth, channels });
+        target.filterEffectsMasks.push({ id, top, left, bottom, right, depth, colorMode: psd.colorMode, channels });
         if (reader.offset < end && (0, psdReader_1.readUint8)(reader)) {
-          var top_3 = (0, psdReader_1.readInt32)(reader);
-          var left_1 = (0, psdReader_1.readInt32)(reader);
-          var bottom_1 = (0, psdReader_1.readInt32)(reader);
-          var right_1 = (0, psdReader_1.readInt32)(reader);
+          const top2 = (0, psdReader_1.readInt32)(reader);
+          const left2 = (0, psdReader_1.readInt32)(reader);
+          const bottom2 = (0, psdReader_1.readInt32)(reader);
+          const right2 = (0, psdReader_1.readInt32)(reader);
           if ((0, psdReader_1.readUint32)(reader))
             throw new Error("filterEffect: 64 bit length is not supported");
-          var extraLength = (0, psdReader_1.readUint32)(reader);
-          var compressionMode = (0, psdReader_1.readUint16)(reader);
-          var data = (0, psdReader_1.readBytes)(reader, extraLength - 2);
-          target.filterEffectsMasks[target.filterEffectsMasks.length - 1].extra = { top: top_3, left: left_1, bottom: bottom_1, right: right_1, compressionMode, data };
+          const extraLength = (0, psdReader_1.readUint32)(reader);
+          const compressionMode = (0, psdReader_1.readUint16)(reader);
+          if (extraLength - 2 > leftBytes())
+            throw new Error("filterEffect: Invalid extra channel length");
+          const data = (0, psdReader_1.readBytes)(reader, extraLength - 2);
+          target.filterEffectsMasks[target.filterEffectsMasks.length - 1].extra = { top: top2, left: left2, bottom: bottom2, right: right2, compressionMode, data };
         }
         reader.offset = end;
-        var len = length_2;
+        let len = length;
         while (len % 4) {
           reader.offset++;
           len++;
         }
       }
-    }, function(writer, target) {
-      var _a2;
+    }, (writer, target) => {
       (0, psdWriter_1.writeInt32)(writer, 3);
-      for (var _i = 0, _b2 = target.filterEffectsMasks; _i < _b2.length; _i++) {
-        var mask = _b2[_i];
+      for (const mask of target.filterEffectsMasks) {
         (0, psdWriter_1.writeUint32)(writer, 0);
         (0, psdWriter_1.writeUint32)(writer, 0);
-        var lengthOffset = writer.offset;
+        const lengthOffset = writer.offset;
         (0, psdWriter_1.writePascalString)(writer, mask.id, 1);
         (0, psdWriter_1.writeInt32)(writer, 1);
         (0, psdWriter_1.writeUint32)(writer, 0);
         (0, psdWriter_1.writeUint32)(writer, 0);
-        var length2Offset = writer.offset;
+        const length2Offset = writer.offset;
         (0, psdWriter_1.writeInt32)(writer, mask.top);
         (0, psdWriter_1.writeInt32)(writer, mask.left);
         (0, psdWriter_1.writeInt32)(writer, mask.bottom);
         (0, psdWriter_1.writeInt32)(writer, mask.right);
         (0, psdWriter_1.writeInt32)(writer, mask.depth);
-        var maxChannels = Math.max(0, mask.channels.length - 2);
+        const maxChannels = Math.max(0, mask.channels.length - 2);
         (0, psdWriter_1.writeInt32)(writer, maxChannels);
-        for (var i = 0; i < maxChannels + 2; i++) {
-          var channel = mask.channels[i];
+        for (let i = 0; i < maxChannels + 2; i++) {
+          const channel = mask.channels[i];
           (0, psdWriter_1.writeInt32)(writer, channel ? 1 : 0);
           if (channel) {
             (0, psdWriter_1.writeUint32)(writer, 0);
@@ -14225,7 +18341,7 @@ var require_additionalInfo = __commonJS({
           }
         }
         writer.view.setUint32(length2Offset - 4, writer.offset - length2Offset, false);
-        var extra = (_a2 = target.filterEffectsMasks[target.filterEffectsMasks.length - 1]) === null || _a2 === void 0 ? void 0 : _a2.extra;
+        const extra = mask.extra;
         if (extra) {
           (0, psdWriter_1.writeUint8)(writer, 1);
           (0, psdWriter_1.writeInt32)(writer, extra.top);
@@ -14237,50 +18353,58 @@ var require_additionalInfo = __commonJS({
           (0, psdWriter_1.writeUint16)(writer, extra.compressionMode);
           (0, psdWriter_1.writeBytes)(writer, extra.data);
         }
-        var length_3 = writer.offset - lengthOffset;
-        writer.view.setUint32(lengthOffset - 4, length_3, false);
-        while (length_3 % 4) {
+        let length = writer.offset - lengthOffset;
+        writer.view.setUint32(lengthOffset - 4, length, false);
+        while (length % 4) {
           (0, psdWriter_1.writeZeros)(writer, 1);
-          length_3++;
+          length++;
         }
       }
     });
     addHandlerAlias("FXid", "FEid");
-    addHandler("FMsk", hasKey("filterMask"), function(reader, target) {
+    addHandlerAlias("FELS", "FEid");
+    addHandlerAlias("hue ", "hue2");
+    addHandlerAlias("plLd", "PlLd");
+    addHandlerAlias("abdd", "artb");
+    addHandler("FMsk", hasKey("filterMask"), (reader, target) => {
       target.filterMask = {
         colorSpace: (0, psdReader_1.readColor)(reader),
-        opacity: (0, psdReader_1.readUint16)(reader) / 255
+        opacity: (0, psdReader_1.readUint16)(reader) / 100
       };
-    }, function(writer, target) {
+    }, (writer, target) => {
       var _a2;
       (0, psdWriter_1.writeColor)(writer, target.filterMask.colorSpace);
-      (0, psdWriter_1.writeUint16)(writer, (0, helpers_1.clamp)((_a2 = target.filterMask.opacity) !== null && _a2 !== void 0 ? _a2 : 1, 0, 1) * 255);
+      (0, psdWriter_1.writeUint16)(writer, Math.round((0, helpers_1.clamp)((_a2 = target.filterMask.opacity) !== null && _a2 !== void 0 ? _a2 : 1, 0, 1) * 100));
     });
     addHandler(
       "artd",
       // document-wide artboard info
-      function(target) {
-        return target.artboards !== void 0;
-      },
-      function(reader, target, left) {
-        var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-        target.artboards = {
-          count: desc["Cnt "],
-          autoExpandOffset: { horizontal: desc.autoExpandOffset.Hrzn, vertical: desc.autoExpandOffset.Vrtc },
-          origin: { horizontal: desc.origin.Hrzn, vertical: desc.origin.Vrtc },
-          autoExpandEnabled: desc.autoExpandEnabled,
-          autoNestEnabled: desc.autoNestEnabled,
-          autoPositionEnabled: desc.autoPositionEnabled,
-          shrinkwrapOnSaveEnabled: !!desc.shrinkwrapOnSaveEnabled,
-          docDefaultNewArtboardBackgroundColor: (0, descriptor_1.parseColor)(desc.docDefaultNewArtboardBackgroundColor),
-          docDefaultNewArtboardBackgroundType: desc.docDefaultNewArtboardBackgroundType
-        };
+      // document-wide artboard info
+      (target) => target.artboards !== void 0,
+      (reader, target, left) => {
+        const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+        const artboards = target.artboards = { count: desc["Cnt "] };
+        if (desc.autoExpandOffset)
+          artboards.autoExpandOffset = { horizontal: desc.autoExpandOffset.Hrzn, vertical: desc.autoExpandOffset.Vrtc };
+        if (desc.origin)
+          artboards.origin = { horizontal: desc.origin.Hrzn, vertical: desc.origin.Vrtc };
+        if (desc.autoExpandEnabled !== void 0)
+          artboards.autoExpandEnabled = desc.autoExpandEnabled;
+        if (desc.autoNestEnabled !== void 0)
+          artboards.autoNestEnabled = desc.autoNestEnabled;
+        if (desc.autoPositionEnabled !== void 0)
+          artboards.autoPositionEnabled = desc.autoPositionEnabled;
+        artboards.shrinkwrapOnSaveEnabled = !!desc.shrinkwrapOnSaveEnabled;
+        if (desc.docDefaultNewArtboardBackgroundColor)
+          artboards.docDefaultNewArtboardBackgroundColor = (0, descriptor_1.parseColor)(desc.docDefaultNewArtboardBackgroundColor);
+        if (desc.docDefaultNewArtboardBackgroundType !== void 0)
+          artboards.docDefaultNewArtboardBackgroundType = desc.docDefaultNewArtboardBackgroundType;
         (0, psdReader_1.skipBytes)(reader, left());
       },
-      function(writer, target) {
+      (writer, target) => {
         var _a2, _b2, _c, _d, _e;
-        var artb = target.artboards;
-        var desc = {
+        const artb = target.artboards;
+        const desc = {
           "Cnt ": artb.count,
           autoExpandOffset: artb.autoExpandOffset ? { Hrzn: artb.autoExpandOffset.horizontal, Vrtc: artb.autoExpandOffset.vertical } : { Hrzn: 0, Vrtc: 0 },
           origin: artb.origin ? { Hrzn: artb.origin.horizontal, Vrtc: artb.origin.vertical } : { Hrzn: 0, Vrtc: 0 },
@@ -14294,30 +18418,26 @@ var require_additionalInfo = __commonJS({
         (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc, "artd");
       }
     );
-    function hasMultiEffects(effects) {
-      return Object.keys(effects).map(function(key) {
-        return effects[key];
-      }).some(function(v) {
-        return Array.isArray(v) && v.length > 1;
-      });
+    function isGroupLayer(target) {
+      return !!target.children;
     }
-    exports.hasMultiEffects = hasMultiEffects;
-    addHandler("lfx2", function(target) {
-      return target.effects !== void 0 && !hasMultiEffects(target.effects);
-    }, function(reader, target, left) {
-      var version = (0, psdReader_1.readUint32)(reader);
+    function hasMultiEffects(effects) {
+      return Object.keys(effects).map((key) => effects[key]).some((v) => Array.isArray(v) && v.length > 1);
+    }
+    addHandler("lfx2", (target) => target.effects !== void 0 && !isGroupLayer(target) && !hasMultiEffects(target.effects), (reader, target, left) => {
+      const version = (0, psdReader_1.readUint32)(reader);
       if (version !== 0)
-        throw new Error("Invalid lfx2 version");
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-      target.effects = (0, descriptor_1.parseEffects)(desc, !!reader.logMissingFeatures);
+        throw new Error(`Invalid lfx2 version`);
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+      target.effects = (0, descriptor_1.parseEffects)(desc, reader);
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target, _, options) {
-      var desc = (0, descriptor_1.serializeEffects)(target.effects, !!options.logMissingFeatures, true);
+    }, (writer, target) => {
+      const desc = (0, descriptor_1.serializeEffects)(target.effects, writer, true);
       (0, psdWriter_1.writeUint32)(writer, 0);
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
     });
-    addHandler("cinf", hasKey("compositorUsed"), function(reader, target, left) {
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+    addHandler("cinf", hasKey("compositorUsed"), (reader, target, left) => {
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
       function enumValue(desc2) {
         return desc2.split(".")[1];
       }
@@ -14341,60 +18461,127 @@ var require_additionalInfo = __commonJS({
       if (desc.compCoreGPUSupport)
         target.compositorUsed.compCoreGPUSupport = enumValue(desc.compCoreGPUSupport);
       (0, psdReader_1.skipBytes)(reader, left());
-    }, function(writer, target) {
-      var cinf = target.compositorUsed;
-      var desc = {
+    }, (writer, target) => {
+      const cinf = target.compositorUsed;
+      const desc = {
         Vrsn: cinf.version || { major: 1, minor: 0, fix: 0 }
       };
       if (cinf.photoshopVersion)
         desc.psVersion = cinf.photoshopVersion;
       desc.description = cinf.description;
       desc.reason = cinf.reason;
-      desc.Engn = "Engn.".concat(cinf.engine);
+      desc.Engn = `Engn.${cinf.engine}`;
       if (cinf.enableCompCore)
-        desc.enableCompCore = "enable.".concat(cinf.enableCompCore);
+        desc.enableCompCore = `enable.${cinf.enableCompCore}`;
       if (cinf.enableCompCoreGPU)
-        desc.enableCompCoreGPU = "enable.".concat(cinf.enableCompCoreGPU);
+        desc.enableCompCoreGPU = `enable.${cinf.enableCompCoreGPU}`;
       if (cinf.enableCompCoreThreads)
-        desc.enableCompCoreThreads = "enable.".concat(cinf.enableCompCoreThreads);
+        desc.enableCompCoreThreads = `enable.${cinf.enableCompCoreThreads}`;
       if (cinf.compCoreSupport)
-        desc.compCoreSupport = "reason.".concat(cinf.compCoreSupport);
+        desc.compCoreSupport = `reason.${cinf.compCoreSupport}`;
       if (cinf.compCoreGPUSupport)
-        desc.compCoreGPUSupport = "reason.".concat(cinf.compCoreGPUSupport);
+        desc.compCoreGPUSupport = `reason.${cinf.compCoreGPUSupport}`;
       (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", desc);
     });
-    addHandler("extn", function(target) {
-      return target._extn !== void 0;
-    }, function(reader, target) {
-      var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-      if (helpers_1.MOCK_HANDLERS)
-        target._extn = desc;
-    }, function(writer, target) {
-      if (helpers_1.MOCK_HANDLERS)
-        (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", target._extn);
+    addHandler("extn", (target) => target.generatorSettings !== void 0 && isDocument(target), (reader, target, left) => {
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+      if (desc.generatorSettings)
+        target.generatorSettings = parseGeneratorSettings(desc.generatorSettings);
+      (0, psdReader_1.skipBytes)(reader, left());
+    }, (writer, target) => {
+      (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "null", serializeGeneratorSettings(target.generatorSettings));
     });
-    addHandler("iOpa", hasKey("fillOpacity"), function(reader, target) {
+    addHandler("extd", () => false, (reader, target, left) => {
+      const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+      if (desc.generatorSettings && target.generatorSettings === void 0) {
+        target.generatorSettings = parseGeneratorSettings(desc.generatorSettings);
+      }
+      (0, psdReader_1.skipBytes)(reader, left());
+    }, () => {
+    });
+    addHandler(
+      "frgb",
+      // frame tool group
+      hasKey("framedGroup"),
+      (reader, target, left) => {
+        const desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
+        const rect = desc.framedGroupRect;
+        target.framedGroup = {
+          rect: { top: rect["Top "], left: rect.Left, bottom: rect.Btom, right: rect.Rght },
+          type: desc.framedGroupType
+        };
+        if (desc.LockPPI !== void 0)
+          target.framedGroup.lockPPI = desc.LockPPI;
+        if (desc.PreferredResolution !== void 0)
+          target.framedGroup.preferredResolution = desc.PreferredResolution;
+        if (desc.SavedIteratedName !== void 0)
+          target.framedGroup.savedIteratedName = desc.SavedIteratedName;
+        (0, psdReader_1.skipBytes)(reader, left());
+      },
+      (writer, target) => {
+        const group = target.framedGroup;
+        const rect = group.rect;
+        const desc = {
+          framedGroupRect: { _name: "", _classID: "classFloatRect", "Top ": rect.top, Left: rect.left, Btom: rect.bottom, Rght: rect.right },
+          framedGroupType: group.type
+        };
+        if (group.lockPPI !== void 0)
+          desc.LockPPI = group.lockPPI;
+        if (group.preferredResolution !== void 0)
+          desc.PreferredResolution = group.preferredResolution;
+        if (group.savedIteratedName !== void 0)
+          desc.SavedIteratedName = group.savedIteratedName;
+        (0, descriptor_1.writeVersionAndDescriptor)(writer, "", "framedGroup", desc);
+      }
+    );
+    addHandler("anFX", hasKey("animationEffects"), (reader, target, left) => {
+      target.animationEffects = (0, psdReader_1.readBytes)(reader, left());
+    }, (writer, target) => {
+      (0, psdWriter_1.writeBytes)(writer, target.animationEffects);
+    });
+    addHandler(
+      "PxSD",
+      // pixel source data 2 (video layer frames)
+      hasKey("pixelSourceData"),
+      (reader, target, left) => {
+        target.pixelSourceData = [];
+        while (left() >= 8) {
+          const length = readLength64(reader);
+          if (length > left())
+            throw new Error("Invalid PxSD data length");
+          target.pixelSourceData.push((0, psdReader_1.readBytes)(reader, length));
+        }
+        (0, psdReader_1.skipBytes)(reader, left());
+      },
+      (writer, target) => {
+        for (const data of target.pixelSourceData) {
+          (0, psdWriter_1.writeUint32)(writer, 0);
+          (0, psdWriter_1.writeUint32)(writer, data.byteLength);
+          (0, psdWriter_1.writeBytes)(writer, data);
+        }
+      }
+    );
+    addHandler("iOpa", hasKey("fillOpacity"), (reader, target) => {
       target.fillOpacity = (0, psdReader_1.readUint8)(reader) / 255;
       (0, psdReader_1.skipBytes)(reader, 3);
-    }, function(writer, target) {
-      (0, psdWriter_1.writeUint8)(writer, target.fillOpacity * 255);
+    }, (writer, target) => {
+      (0, psdWriter_1.writeUint8)(writer, Math.round((0, helpers_1.clamp)(target.fillOpacity, 0, 1) * 255));
       (0, psdWriter_1.writeZeros)(writer, 3);
     });
-    addHandler("brst", hasKey("channelBlendingRestrictions"), function(reader, target, left) {
+    addHandler("brst", hasKey("channelBlendingRestrictions"), (reader, target, left) => {
       target.channelBlendingRestrictions = [];
-      while (left() > 4) {
+      while (left() >= 4) {
         target.channelBlendingRestrictions.push((0, psdReader_1.readInt32)(reader));
       }
-    }, function(writer, target) {
-      for (var _i = 0, _a2 = target.channelBlendingRestrictions; _i < _a2.length; _i++) {
-        var channel = _a2[_i];
+    }, (writer, target) => {
+      for (const channel of target.channelBlendingRestrictions) {
         (0, psdWriter_1.writeInt32)(writer, channel);
       }
     });
-    addHandler("tsly", hasKey("transparencyShapesLayer"), function(reader, target) {
+    addHandler("tsly", hasKey("transparencyShapesLayer"), (reader, target) => {
       target.transparencyShapesLayer = !!(0, psdReader_1.readUint8)(reader);
       (0, psdReader_1.skipBytes)(reader, 3);
-    }, function(writer, target) {
+    }, (writer, target) => {
       (0, psdWriter_1.writeUint8)(writer, target.transparencyShapesLayer ? 1 : 0);
       (0, psdWriter_1.writeZeros)(writer, 3);
     });
@@ -14405,414 +18592,809 @@ var require_additionalInfo = __commonJS({
 var require_psdWriter = __commonJS({
   "node_modules/ag-psd/dist/psdWriter.js"(exports) {
     "use strict";
-    var __assign = exports && exports.__assign || function() {
-      __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-          s = arguments[i];
-          for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-        }
-        return t;
-      };
-      return __assign.apply(this, arguments);
-    };
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.writeColor = exports.writePsd = exports.writeSection = exports.writeUnicodeStringWithPadding = exports.writeUnicodeString = exports.writeUnicodeStringWithoutLengthLE = exports.writeUnicodeStringWithoutLength = exports.writePascalString = exports.writeSignature = exports.writeZeros = exports.writeBytes = exports.writeFixedPointPath32 = exports.writeFixedPoint32 = exports.writeFloat64 = exports.writeFloat32 = exports.writeUint32 = exports.writeInt32LE = exports.writeInt32 = exports.writeUint16LE = exports.writeUint16 = exports.writeInt16 = exports.writeUint8 = exports.getWriterBufferNoCopy = exports.getWriterBuffer = exports.createWriter = void 0;
+    exports.createWriter = createWriter;
+    exports.getWriterBuffer = getWriterBuffer;
+    exports.getWriterBufferNoCopy = getWriterBufferNoCopy;
+    exports.writeUint8 = writeUint8;
+    exports.writeInt16 = writeInt16;
+    exports.writeUint16 = writeUint16;
+    exports.writeUint16LE = writeUint16LE;
+    exports.writeInt32 = writeInt32;
+    exports.writeInt32LE = writeInt32LE;
+    exports.writeUint32 = writeUint32;
+    exports.writeFloat32 = writeFloat32;
+    exports.writeFloat64 = writeFloat64;
+    exports.writeFixedPoint32 = writeFixedPoint32;
+    exports.writeFixedPointPath32 = writeFixedPointPath32;
+    exports.writeBytes = writeBytes;
+    exports.writeZeros = writeZeros;
+    exports.writeSignature = writeSignature;
+    exports.writeAsciiString = writeAsciiString;
+    exports.writePascalString = writePascalString;
+    exports.writeUnicodeStringWithoutLength = writeUnicodeStringWithoutLength;
+    exports.writeUnicodeStringWithoutLengthLE = writeUnicodeStringWithoutLengthLE;
+    exports.writeUnicodeString = writeUnicodeString;
+    exports.writeUnicodeStringWithPadding = writeUnicodeStringWithPadding;
+    exports.getRLEChannelBound = getRLEChannelBound;
+    exports.writeUint64 = writeUint64;
+    exports.writeSection = writeSection;
+    exports.writePsd = writePsd;
+    exports.writeColor = writeColor;
+    exports.writePattern = writePattern;
     var helpers_1 = require_helpers();
+    var pako_1 = require_pako();
     var additionalInfo_1 = require_additionalInfo();
     var imageResources_1 = require_imageResources();
-    function createWriter(size) {
-      if (size === void 0) {
-        size = 4096;
-      }
-      var buffer = new ArrayBuffer(size);
-      var view = new DataView(buffer);
-      var offset = 0;
-      return { buffer, view, offset, tempBuffer: void 0 };
+    var psdReader_1 = require_psdReader();
+    function createWriter(size = 4096) {
+      const buffer = new ArrayBuffer(size);
+      const view = new DataView(buffer);
+      const offset = 0;
+      return { buffer, view, offset, tempBuffer: void 0, log: console.log };
     }
-    exports.createWriter = createWriter;
     function getWriterBuffer(writer) {
       return writer.buffer.slice(0, writer.offset);
     }
-    exports.getWriterBuffer = getWriterBuffer;
     function getWriterBufferNoCopy(writer) {
       return new Uint8Array(writer.buffer, 0, writer.offset);
     }
-    exports.getWriterBufferNoCopy = getWriterBufferNoCopy;
     function writeUint8(writer, value) {
-      var offset = addSize(writer, 1);
+      const offset = addSize(writer, 1);
       writer.view.setUint8(offset, value);
     }
-    exports.writeUint8 = writeUint8;
     function writeInt16(writer, value) {
-      var offset = addSize(writer, 2);
+      const offset = addSize(writer, 2);
       writer.view.setInt16(offset, value, false);
     }
-    exports.writeInt16 = writeInt16;
     function writeUint16(writer, value) {
-      var offset = addSize(writer, 2);
+      const offset = addSize(writer, 2);
       writer.view.setUint16(offset, value, false);
     }
-    exports.writeUint16 = writeUint16;
     function writeUint16LE(writer, value) {
-      var offset = addSize(writer, 2);
+      const offset = addSize(writer, 2);
       writer.view.setUint16(offset, value, true);
     }
-    exports.writeUint16LE = writeUint16LE;
     function writeInt32(writer, value) {
-      var offset = addSize(writer, 4);
+      const offset = addSize(writer, 4);
       writer.view.setInt32(offset, value, false);
     }
-    exports.writeInt32 = writeInt32;
     function writeInt32LE(writer, value) {
-      var offset = addSize(writer, 4);
+      const offset = addSize(writer, 4);
       writer.view.setInt32(offset, value, true);
     }
-    exports.writeInt32LE = writeInt32LE;
     function writeUint32(writer, value) {
-      var offset = addSize(writer, 4);
+      const offset = addSize(writer, 4);
       writer.view.setUint32(offset, value, false);
     }
-    exports.writeUint32 = writeUint32;
     function writeFloat32(writer, value) {
-      var offset = addSize(writer, 4);
+      const offset = addSize(writer, 4);
       writer.view.setFloat32(offset, value, false);
     }
-    exports.writeFloat32 = writeFloat32;
     function writeFloat64(writer, value) {
-      var offset = addSize(writer, 8);
+      const offset = addSize(writer, 8);
       writer.view.setFloat64(offset, value, false);
     }
-    exports.writeFloat64 = writeFloat64;
     function writeFixedPoint32(writer, value) {
       writeInt32(writer, value * (1 << 16));
     }
-    exports.writeFixedPoint32 = writeFixedPoint32;
     function writeFixedPointPath32(writer, value) {
       writeInt32(writer, value * (1 << 24));
     }
-    exports.writeFixedPointPath32 = writeFixedPointPath32;
     function writeBytes(writer, buffer) {
       if (buffer) {
         ensureSize(writer, writer.offset + buffer.length);
-        var bytes = new Uint8Array(writer.buffer);
+        const bytes = new Uint8Array(writer.buffer);
         bytes.set(buffer, writer.offset);
         writer.offset += buffer.length;
       }
     }
-    exports.writeBytes = writeBytes;
     function writeZeros(writer, count) {
-      for (var i = 0; i < count; i++) {
+      for (let i = 0; i < count; i++) {
         writeUint8(writer, 0);
       }
     }
-    exports.writeZeros = writeZeros;
     function writeSignature(writer, signature) {
       if (signature.length !== 4)
-        throw new Error("Invalid signature: '".concat(signature, "'"));
-      for (var i = 0; i < 4; i++) {
+        throw new Error(`Invalid signature: '${signature}'`);
+      for (let i = 0; i < 4; i++) {
         writeUint8(writer, signature.charCodeAt(i));
       }
     }
-    exports.writeSignature = writeSignature;
+    function writeAsciiString(writer, text) {
+      for (let i = 0; i < text.length; i++) {
+        writeUint8(writer, text.charCodeAt(i));
+      }
+    }
     function writePascalString(writer, text, padTo) {
-      var length = text.length;
+      let length = text.length;
       if (length > 255)
-        throw new Error("String too long");
+        throw new Error(`String too long`);
       writeUint8(writer, length);
-      for (var i = 0; i < length; i++) {
-        var code = text.charCodeAt(i);
+      for (let i = 0; i < length; i++) {
+        const code = text.charCodeAt(i);
         writeUint8(writer, code < 128 ? code : "?".charCodeAt(0));
       }
       while (++length % padTo) {
         writeUint8(writer, 0);
       }
     }
-    exports.writePascalString = writePascalString;
     function writeUnicodeStringWithoutLength(writer, text) {
-      for (var i = 0; i < text.length; i++) {
+      for (let i = 0; i < text.length; i++) {
         writeUint16(writer, text.charCodeAt(i));
       }
     }
-    exports.writeUnicodeStringWithoutLength = writeUnicodeStringWithoutLength;
     function writeUnicodeStringWithoutLengthLE(writer, text) {
-      for (var i = 0; i < text.length; i++) {
+      for (let i = 0; i < text.length; i++) {
         writeUint16LE(writer, text.charCodeAt(i));
       }
     }
-    exports.writeUnicodeStringWithoutLengthLE = writeUnicodeStringWithoutLengthLE;
     function writeUnicodeString(writer, text) {
       writeUint32(writer, text.length);
       writeUnicodeStringWithoutLength(writer, text);
     }
-    exports.writeUnicodeString = writeUnicodeString;
     function writeUnicodeStringWithPadding(writer, text) {
       writeUint32(writer, text.length + 1);
-      for (var i = 0; i < text.length; i++) {
+      for (let i = 0; i < text.length; i++) {
         writeUint16(writer, text.charCodeAt(i));
       }
       writeUint16(writer, 0);
     }
-    exports.writeUnicodeStringWithPadding = writeUnicodeStringWithPadding;
-    function getLargestLayerSize(layers) {
-      if (layers === void 0) {
-        layers = [];
-      }
-      var max = 0;
-      for (var _i = 0, layers_1 = layers; _i < layers_1.length; _i++) {
-        var layer = layers_1[_i];
-        if (layer.canvas || layer.imageData) {
-          var _a2 = getLayerDimentions(layer), width = _a2.width, height = _a2.height;
-          max = Math.max(max, 2 * height + 2 * width * height);
+    function getRLEChannelBound(width, height, large) {
+      return height * ((large ? 4 : 2) + width + Math.ceil(width / 128));
+    }
+    function getLargestLayerSize(layers = [], large) {
+      let max = 0;
+      for (const layer of layers) {
+        for (const target of [layer, layer.mask, layer.realMask]) {
+          if (target) {
+            const { width, height } = getLayerDimentions(target);
+            max = Math.max(max, getRLEChannelBound(width, height, large));
+          }
         }
         if (layer.children) {
-          max = Math.max(max, getLargestLayerSize(layer.children));
+          max = Math.max(max, getLargestLayerSize(layer.children, large));
         }
       }
       return max;
     }
-    function writeSection(writer, round, func, writeTotalLength, large) {
-      if (writeTotalLength === void 0) {
-        writeTotalLength = false;
-      }
-      if (large === void 0) {
-        large = false;
-      }
+    function writeUint64(writer, value) {
+      writeUint32(writer, Math.floor(value / 4294967296));
+      writeUint32(writer, value >>> 0);
+    }
+    function writeSection(writer, round, func, writeTotalLength = false, large = false) {
+      const offset = writer.offset;
       if (large)
         writeUint32(writer, 0);
-      var offset = writer.offset;
       writeUint32(writer, 0);
+      const start = writer.offset;
       func();
-      var length = writer.offset - offset - 4;
-      var len = length;
-      while (len % round !== 0) {
+      let length = writer.offset - start;
+      let len = length;
+      while (len % round) {
         writeUint8(writer, 0);
         len++;
       }
       if (writeTotalLength) {
         length = len;
       }
-      writer.view.setUint32(offset, length, false);
+      if (large) {
+        writer.view.setUint32(offset, Math.floor(length / 4294967296), false);
+        writer.view.setUint32(offset + 4, length >>> 0, false);
+      } else {
+        if (length > 4294967295)
+          throw new Error("Section too large, use PSB format instead");
+        writer.view.setUint32(offset, length, false);
+      }
     }
-    exports.writeSection = writeSection;
+    function verifyPixelData(data, name) {
+      const bytesPerElement = data && data.data.BYTES_PER_ELEMENT;
+      if (bytesPerElement !== void 0 && bytesPerElement !== 1 && bytesPerElement !== 2 && !(data.data instanceof Float32Array)) {
+        throw new Error(`${name} has incorrect bitDepth (only Uint8Array, Uint8ClampedArray, Uint16Array and Float32Array data is supported for writing)`);
+      }
+    }
+    var writeBitDepths = {
+      [
+        0
+        /* ColorMode.Bitmap */
+      ]: [1],
+      [
+        1
+        /* ColorMode.Grayscale */
+      ]: [8, 16, 32],
+      [
+        2
+        /* ColorMode.Indexed */
+      ]: [8],
+      [
+        3
+        /* ColorMode.RGB */
+      ]: [8, 16, 32],
+      [
+        4
+        /* ColorMode.CMYK */
+      ]: [8, 16]
+    };
+    var colorModeNames = {
+      [
+        0
+        /* ColorMode.Bitmap */
+      ]: "Bitmap",
+      [
+        1
+        /* ColorMode.Grayscale */
+      ]: "Grayscale",
+      [
+        2
+        /* ColorMode.Indexed */
+      ]: "Indexed",
+      [
+        3
+        /* ColorMode.RGB */
+      ]: "RGB",
+      [
+        4
+        /* ColorMode.CMYK */
+      ]: "CMYK",
+      [
+        7
+        /* ColorMode.Multichannel */
+      ]: "Multichannel",
+      [
+        8
+        /* ColorMode.Duotone */
+      ]: "Duotone",
+      [
+        9
+        /* ColorMode.Lab */
+      ]: "Lab"
+    };
+    function colorChannelsCount(colorMode) {
+      return colorMode === 3 ? 3 : colorMode === 4 ? 4 : 1;
+    }
+    var hdrToningData = [
+      104,
+      100,
+      114,
+      116,
+      0,
+      0,
+      0,
+      3,
+      62,
+      107,
+      133,
+      31,
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      7,
+      0,
+      76,
+      0,
+      105,
+      0,
+      110,
+      0,
+      101,
+      0,
+      97,
+      0,
+      114,
+      0,
+      0,
+      0,
+      2,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      255,
+      0,
+      255,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      65,
+      128,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      63,
+      128,
+      0,
+      0,
+      104,
+      100,
+      114,
+      97,
+      0,
+      0,
+      0,
+      6,
+      0,
+      0,
+      0,
+      0,
+      65,
+      160,
+      0,
+      0,
+      65,
+      240,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      63,
+      128,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ];
     function verifyBitCount(target) {
-      var _a2;
+      var _a2, _b2, _c;
       (_a2 = target.children) === null || _a2 === void 0 ? void 0 : _a2.forEach(verifyBitCount);
-      var data = target.imageData;
-      if (data && (data.data instanceof Uint32Array || data.data instanceof Uint16Array)) {
-        throw new Error("imageData has incorrect bitDepth");
-      }
-      if ("mask" in target && target.mask) {
-        var data_1 = target.mask.imageData;
-        if (data_1 && (data_1.data instanceof Uint32Array || data_1.data instanceof Uint16Array)) {
-          throw new Error("mask imageData has incorrect bitDepth");
-        }
-      }
+      verifyPixelData(target.imageData, "imageData");
+      if ("mask" in target)
+        verifyPixelData((_b2 = target.mask) === null || _b2 === void 0 ? void 0 : _b2.imageData, "mask imageData");
+      if ("realMask" in target)
+        verifyPixelData((_c = target.realMask) === null || _c === void 0 ? void 0 : _c.imageData, "realMask imageData");
     }
-    function writePsd(writer, psd, options) {
-      var _a2;
-      if (options === void 0) {
-        options = {};
-      }
+    function writePsd(writer, psd, options = {}) {
+      var _a2, _b2, _c, _d;
       if (!(+psd.width > 0 && +psd.height > 0))
         throw new Error("Invalid document size");
       if ((psd.width > 3e4 || psd.height > 3e4) && !options.psb)
         throw new Error("Document size is too large (max is 30000x30000, use PSB format instead)");
-      var bitsPerChannel = (_a2 = psd.bitsPerChannel) !== null && _a2 !== void 0 ? _a2 : 8;
-      if (bitsPerChannel !== 8)
-        throw new Error("bitsPerChannel other than 8 are not supported for writing");
+      const colorMode = (_a2 = psd.colorMode) !== null && _a2 !== void 0 ? _a2 : 3;
+      const bitsPerChannel = (_b2 = psd.bitsPerChannel) !== null && _b2 !== void 0 ? _b2 : colorMode === 0 ? 1 : 8;
+      const bitDepths = writeBitDepths[colorMode];
+      if (!bitDepths)
+        throw new Error(`${(_c = colorModeNames[colorMode]) !== null && _c !== void 0 ? _c : colorMode} color mode is not supported for writing`);
+      if (bitDepths.indexOf(bitsPerChannel) === -1)
+        throw new Error(`bitsPerChannel ${bitsPerChannel} is not supported for writing in ${colorModeNames[colorMode]} color mode`);
+      const layersAllowed = colorMode !== 0 && colorMode !== 2;
+      if (!layersAllowed && ((_d = psd.children) === null || _d === void 0 ? void 0 : _d.length))
+        throw new Error(`Layers are not supported in ${colorModeNames[colorMode]} color mode`);
+      if (colorMode === 2 && !psd.palette)
+        throw new Error("Missing color palette for Indexed color mode");
+      if (options.log)
+        writer.log = options.log;
+      if (options.logMissingFeatures)
+        writer.logMissingFeatures = true;
+      const layers = [];
+      addChildren(layers, psd.children);
+      if (!layers.length && layersAllowed)
+        layers.push({});
       verifyBitCount(psd);
-      var imageResources = psd.imageResources || {};
-      var opt = __assign(__assign({}, options), { layerIds: /* @__PURE__ */ new Set(), layerToId: /* @__PURE__ */ new Map() });
+      const imageResources = Object.assign({}, psd.imageResources);
+      const opt = Object.assign(Object.assign({}, options), { layerIds: /* @__PURE__ */ new Set(), layerToId: /* @__PURE__ */ new Map(), colorMode, bitsPerChannel });
+      const layersInGlobalInfo = bitsPerChannel === 16 || bitsPerChannel === 32;
       if (opt.generateThumbnail) {
-        imageResources = __assign(__assign({}, imageResources), { thumbnail: createThumbnail(psd) });
+        imageResources.thumbnail = createThumbnail(psd);
       }
-      var imageData = psd.imageData;
+      let imageData = psd.imageData;
       if (!imageData && psd.canvas) {
         imageData = psd.canvas.getContext("2d").getImageData(0, 0, psd.canvas.width, psd.canvas.height);
       }
+      if (!imageData && psd.rawCompositeData) {
+        imageData = (0, psdReader_1.getCompositeImageData)(psd);
+      }
       if (imageData && (psd.width !== imageData.width || psd.height !== imageData.height))
         throw new Error("Document canvas must have the same size as document");
-      var globalAlpha = !!imageData && (0, helpers_1.hasAlpha)(imageData);
-      var maxBufferSize = Math.max(getLargestLayerSize(psd.children), 4 * 2 * psd.width * psd.height + 2 * psd.height);
-      writer.tempBuffer = new Uint8Array(maxBufferSize);
+      const globalAlpha = !!imageData && layersAllowed && (0, helpers_1.hasAlpha)(imageData);
+      writer.tempBuffer = new Uint8Array(getLargestLayerSize(psd.children, !!options.psb));
       writeSignature(writer, "8BPS");
       writeUint16(writer, options.psb ? 2 : 1);
       writeZeros(writer, 6);
-      writeUint16(writer, globalAlpha ? 4 : 3);
+      writeUint16(writer, colorChannelsCount(colorMode) + (globalAlpha ? 1 : 0));
       writeUint32(writer, psd.height);
       writeUint32(writer, psd.width);
       writeUint16(writer, bitsPerChannel);
-      writeUint16(
-        writer,
-        3
-        /* ColorMode.RGB */
-      );
-      writeSection(writer, 1, function() {
-        var _a3, _b2, _c;
-        if (psd.palette) {
-          for (var i2 = 0; i2 < 256; i2++)
-            writeUint8(writer, ((_a3 = psd.palette[i2]) === null || _a3 === void 0 ? void 0 : _a3.r) || 0);
-          for (var i2 = 0; i2 < 256; i2++)
-            writeUint8(writer, ((_b2 = psd.palette[i2]) === null || _b2 === void 0 ? void 0 : _b2.g) || 0);
-          for (var i2 = 0; i2 < 256; i2++)
-            writeUint8(writer, ((_c = psd.palette[i2]) === null || _c === void 0 ? void 0 : _c.b) || 0);
+      writeUint16(writer, colorMode);
+      writeSection(writer, 1, () => {
+        var _a3, _b3, _c2, _d2, _e, _f;
+        if (colorMode === 2) {
+          const palette = psd.palette;
+          for (let i = 0; i < 256; i++)
+            writeUint8(writer, (_b3 = (_a3 = palette[i]) === null || _a3 === void 0 ? void 0 : _a3.r) !== null && _b3 !== void 0 ? _b3 : 0);
+          for (let i = 0; i < 256; i++)
+            writeUint8(writer, (_d2 = (_c2 = palette[i]) === null || _c2 === void 0 ? void 0 : _c2.g) !== null && _d2 !== void 0 ? _d2 : 0);
+          for (let i = 0; i < 256; i++)
+            writeUint8(writer, (_f = (_e = palette[i]) === null || _e === void 0 ? void 0 : _e.b) !== null && _f !== void 0 ? _f : 0);
+        } else if (bitsPerChannel === 32) {
+          writeBytes(writer, new Uint8Array(hdrToningData));
         }
       });
-      writeSection(writer, 1, function() {
-        var _loop_1 = function(handler2) {
-          var has = handler2.has(imageResources);
-          var count = has === false ? 0 : has === true ? 1 : has;
-          var _loop_2 = function(i3) {
+      imageResources.layersGroup = layers.map((l) => l.linkGroup || 0);
+      imageResources.layerGroupsEnabledId = layers.map((l) => l.linkGroupEnabled == false ? 0 : 1);
+      writeSection(writer, 1, () => {
+        for (const handler of imageResources_1.resourceHandlers) {
+          const has = handler.has(imageResources);
+          const count = has === false ? 0 : has === true ? 1 : has;
+          for (let i = 0; i < count; i++) {
+            const id = handler.keyCount > 1 ? handler.key + i : handler.key;
+            const name = handler.name ? handler.name(imageResources, i) : "";
             writeSignature(writer, "8BIM");
-            writeUint16(writer, handler2.key);
-            writePascalString(writer, "", 2);
-            writeSection(writer, 2, function() {
-              return handler2.write(writer, imageResources, i3);
-            });
-          };
-          for (var i2 = 0; i2 < count; i2++) {
-            _loop_2(i2);
+            writeUint16(writer, id);
+            writePascalString(writer, name, 2);
+            writeSection(writer, 2, () => handler.write(writer, imageResources, i, psd));
           }
-        };
-        for (var _i = 0, resourceHandlers_1 = imageResources_1.resourceHandlers; _i < resourceHandlers_1.length; _i++) {
-          var handler = resourceHandlers_1[_i];
-          _loop_1(handler);
         }
       });
-      writeSection(writer, 2, function() {
-        writeLayerInfo(writer, psd, globalAlpha, opt);
+      writeSection(writer, 2, () => {
+        if (layersInGlobalInfo || !layersAllowed) {
+          writeSection(writer, 4, () => {
+          }, true, opt.psb);
+        } else {
+          writeLayerInfo(writer, layers, psd, globalAlpha, opt);
+        }
         writeGlobalLayerMaskInfo(writer, psd.globalLayerMaskInfo);
+        if (layersInGlobalInfo) {
+          if (globalAlpha)
+            writeGlobalInfoSection(writer, bitsPerChannel === 16 ? "Mt16" : "Mt32", !!opt.psb, () => {
+            });
+          writeGlobalInfoSection(writer, bitsPerChannel === 16 ? "Lr16" : "Lr32", !!opt.psb, () => {
+            writeLayerInfoData(writer, layers, psd, globalAlpha, opt);
+          });
+        }
         writeAdditionalLayerInfo(writer, psd, psd, opt);
       }, void 0, !!opt.psb);
-      var channels = globalAlpha ? [0, 1, 2, 3] : [0, 1, 2];
-      var width = imageData ? imageData.width : psd.width;
-      var height = imageData ? imageData.height : psd.height;
-      var data = { data: new Uint8Array(width * height * 4), width, height };
-      writeUint16(
-        writer,
-        1
-        /* Compression.RleCompressed */
-      );
-      if (helpers_1.RAW_IMAGE_DATA && psd.imageDataRaw) {
-        console.log("writing raw image data");
-        writeBytes(writer, psd.imageDataRaw);
+      writer.tempBuffer = void 0;
+      if (colorMode === 3 && bitsPerChannel === 8 && (!imageData || is8bit(imageData))) {
+        writeUint16(
+          writer,
+          1
+          /* Compression.RleCompressed */
+        );
+        const channels = globalAlpha ? [0, 1, 2, 3] : [0, 1, 2];
+        const data = getCompositeData(imageData, psd.width, psd.height, globalAlpha);
+        const maxSize = channels.length * getRLEChannelBound(data.width, data.height, !!options.psb);
+        ensureSize(writer, writer.offset + maxSize);
+        const buffer = new Uint8Array(writer.buffer, writer.offset, maxSize);
+        writer.offset += (0, helpers_1.writeDataRLE)(buffer, data, channels, !!options.psb).length;
       } else {
-        if (imageData)
-          data.data.set(new Uint8Array(imageData.data.buffer, imageData.data.byteOffset, imageData.data.byteLength));
-        if (globalAlpha) {
-          var size = data.width * data.height * 4;
-          var p = data.data;
-          for (var i = 0; i < size; i += 4) {
-            var pa = p[i + 3];
-            if (pa != 0 && pa != 255) {
-              var a = pa / 255;
-              var ra = 255 * (1 - a);
-              p[i + 0] = p[i + 0] * a + ra;
-              p[i + 1] = p[i + 1] * a + ra;
-              p[i + 2] = p[i + 2] * a + ra;
-            }
-          }
-        }
-        writeBytes(writer, (0, helpers_1.writeDataRLE)(writer.tempBuffer, data, channels, !!options.psb));
+        writeCompositeImageData(writer, psd, imageData, colorMode, bitsPerChannel, globalAlpha, !!options.psb);
       }
     }
-    exports.writePsd = writePsd;
-    function writeLayerInfo(writer, psd, globalAlpha, options) {
-      writeSection(writer, 4, function() {
-        var _a2;
-        var layers = [];
-        addChildren(layers, psd.children);
-        if (!layers.length)
-          layers.push({});
-        writeInt16(writer, globalAlpha ? -layers.length : layers.length);
-        var layersData = layers.map(function(l, i) {
-          return getChannels(writer.tempBuffer, l, i === 0, options);
-        });
-        var _loop_3 = function(layerData2) {
-          var layer = layerData2.layer, top_1 = layerData2.top, left = layerData2.left, bottom = layerData2.bottom, right = layerData2.right, channels = layerData2.channels;
-          writeInt32(writer, top_1);
-          writeInt32(writer, left);
-          writeInt32(writer, bottom);
-          writeInt32(writer, right);
-          writeUint16(writer, channels.length);
-          for (var _e = 0, channels_1 = channels; _e < channels_1.length; _e++) {
-            var c = channels_1[_e];
-            writeInt16(writer, c.channelId);
-            if (options.psb)
-              writeUint32(writer, 0);
-            writeUint32(writer, c.length);
+    function writeGlobalInfoSection(writer, key, psb, func) {
+      writeSignature(writer, psb ? "8B64" : "8BIM");
+      writeSignature(writer, key);
+      writeSection(writer, 4, func, false, psb);
+    }
+    function is8bit(data) {
+      return data.data.BYTES_PER_ELEMENT === 1;
+    }
+    function getPlanarChannels(imageData, colorMode, bitsPerChannel, matte) {
+      const { data, width, height } = imageData;
+      const size = width * height;
+      const srcFloat = data instanceof Float32Array;
+      const srcMax = srcFloat ? 1 : data instanceof Uint16Array ? 65535 : 255;
+      const dstFloat = bitsPerChannel === 32;
+      const dstMax = dstFloat ? 1 : bitsPerChannel === 16 ? 65535 : 255;
+      const colorCount = colorChannelsCount(colorMode);
+      const create = () => dstFloat ? new Float32Array(size) : bitsPerChannel === 16 ? new Uint16Array(size) : new Uint8Array(size);
+      const colors = [];
+      for (let i = 0; i < colorCount; i++)
+        colors.push(create());
+      const alpha = create();
+      const toNormalized = (v) => srcFloat ? Math.pow((0, helpers_1.clamp)(v, 0, 1), 1 / 2.2) : v / srcMax;
+      const fromNormalized = (v) => dstFloat ? Math.pow(v, 2.2) : Math.round((0, helpers_1.clamp)(v, 0, 1) * dstMax);
+      const sameType = srcFloat === dstFloat && srcMax === dstMax;
+      const convertColor = (v) => sameType ? dstFloat ? v : Math.round(v) : fromNormalized(toNormalized(v));
+      const convertAlpha = (v) => sameType ? v : dstFloat ? v / srcMax : Math.round((0, helpers_1.clamp)(v / srcMax, 0, 1) * dstMax);
+      const cmyk = [0, 0, 0, 0];
+      for (let i = 0, p = 0; i < size; i++, p += 4) {
+        const a = data[p + 3];
+        const alphaValue = convertAlpha(a);
+        alpha[i] = alphaValue;
+        const blend = matte && a !== srcMax && a > 0 ? (0, helpers_1.clamp)(a / srcMax, 0, 1) : 1;
+        if (colorMode === 4) {
+          (0, helpers_1.rgbToCmykValues)(toNormalized(data[p]), toNormalized(data[p + 1]), toNormalized(data[p + 2]), cmyk);
+          for (let j = 0; j < 4; j++) {
+            colors[j][i] = Math.round((1 - (0, helpers_1.clamp)(cmyk[j] * blend, 0, 1)) * dstMax);
           }
-          writeSignature(writer, "8BIM");
-          writeSignature(writer, helpers_1.fromBlendMode[layer.blendMode] || "norm");
-          writeUint8(writer, Math.round((0, helpers_1.clamp)((_a2 = layer.opacity) !== null && _a2 !== void 0 ? _a2 : 1, 0, 1) * 255));
-          writeUint8(writer, layer.clipping ? 1 : 0);
-          var flags = 8;
-          if (layer.transparencyProtected)
-            flags |= 1;
-          if (layer.hidden)
-            flags |= 2;
-          if (layer.vectorMask || layer.sectionDivider && layer.sectionDivider.type !== 0) {
-            flags |= 16;
+        } else {
+          for (let j = 0; j < colorCount; j++) {
+            let value;
+            if (colorMode === 3) {
+              value = convertColor(data[p + j]);
+            } else {
+              const r = data[p], g = data[p + 1], b = data[p + 2];
+              value = convertColor(r === g && g === b ? r : 0.299 * r + 0.587 * g + 0.114 * b);
+            }
+            if (blend !== 1)
+              value = dstFloat ? value * blend + 1 - blend : Math.round(value * blend + dstMax * (1 - blend));
+            colors[j][i] = value;
           }
-          if (layer.effectsOpen)
-            flags |= 32;
-          writeUint8(writer, flags);
-          writeUint8(writer, 0);
-          writeSection(writer, 1, function() {
-            writeLayerMaskData(writer, layer, layerData2);
-            writeLayerBlendingRanges(writer, layer);
-            writePascalString(writer, (layer.name || "").substring(0, 255), 4);
-            writeAdditionalLayerInfo(writer, layer, psd, options);
-          });
-        };
-        for (var _i = 0, layersData_1 = layersData; _i < layersData_1.length; _i++) {
-          var layerData = layersData_1[_i];
-          _loop_3(layerData);
         }
-        for (var _b2 = 0, layersData_2 = layersData; _b2 < layersData_2.length; _b2++) {
-          var layerData = layersData_2[_b2];
-          for (var _c = 0, _d = layerData.channels; _c < _d.length; _c++) {
-            var channel = _d[_c];
-            writeUint16(writer, channel.compression);
-            if (channel.buffer) {
-              writeBytes(writer, channel.buffer);
+      }
+      return { colors, alpha };
+    }
+    function encodeChannel(values, width, height, options) {
+      if (!(values instanceof Uint8Array)) {
+        return {
+          data: (0, helpers_1.writeDataZipWithPrediction)(values, width, height),
+          compression: 3
+          /* Compression.ZipWithPrediction */
+        };
+      } else if (options.compress) {
+        return {
+          data: (0, pako_1.deflate)(values),
+          compression: 2
+          /* Compression.ZipWithoutPrediction */
+        };
+      } else {
+        return {
+          data: (0, helpers_1.writeDataRLEBytes)(values, width, height, !!options.psb),
+          compression: 1
+          /* Compression.RleCompressed */
+        };
+      }
+    }
+    function writeCompositeImageData(writer, psd, imageData, colorMode, bitsPerChannel, globalAlpha, psb) {
+      var _a2;
+      const { width, height } = psd;
+      const data = imageData !== null && imageData !== void 0 ? imageData : { data: new Uint8Array(width * height * 4), width, height };
+      const parts = [];
+      if (colorMode === 0 || colorMode === 2) {
+        const values = colorMode === 0 ? getBitmapData(data) : getIndexedData(data, psd.palette, (_a2 = psd.imageResources) === null || _a2 === void 0 ? void 0 : _a2.transparencyIndex);
+        const rowBytes = colorMode === 0 ? Math.ceil(width / 8) : width;
+        if (colorMode === 0) {
+          writeUint16(
+            writer,
+            0
+            /* Compression.RawData */
+          );
+          parts.push(values);
+        } else {
+          writeUint16(
+            writer,
+            1
+            /* Compression.RleCompressed */
+          );
+          parts.push((0, helpers_1.writeDataRLEBytes)(values, rowBytes, height, psb));
+        }
+      } else {
+        const { colors, alpha } = getPlanarChannels(data, colorMode, bitsPerChannel, globalAlpha);
+        const channels = globalAlpha ? [...colors, alpha] : colors;
+        if (bitsPerChannel === 8) {
+          const encoded = channels.map((c) => (0, helpers_1.writeDataRLEBytes)(c, width, height, psb));
+          const countsSize = height * (psb ? 4 : 2);
+          writeUint16(
+            writer,
+            1
+            /* Compression.RleCompressed */
+          );
+          for (const e of encoded)
+            parts.push(e.subarray(0, countsSize));
+          for (const e of encoded)
+            parts.push(e.subarray(countsSize));
+        } else {
+          writeUint16(
+            writer,
+            0
+            /* Compression.RawData */
+          );
+          for (const c of channels)
+            parts.push((0, helpers_1.planarToBytes)(c));
+        }
+      }
+      for (const part of parts)
+        writeBytes(writer, part);
+    }
+    function getBitmapData({ data, width, height }) {
+      const rowBytes = Math.ceil(width / 8);
+      const result = new Uint8Array(rowBytes * height);
+      const max = data instanceof Float32Array ? 1 : data instanceof Uint16Array ? 65535 : 255;
+      for (let y = 0, p = 0; y < height; y++) {
+        for (let x = 0; x < width; x++, p += 4) {
+          const a = data[p + 3] / max;
+          const value = (0.299 * data[p] + 0.587 * data[p + 1] + 0.114 * data[p + 2]) / max * a + (1 - a);
+          if (value < 0.5)
+            result[y * rowBytes + (x >> 3)] |= 128 >> (x & 7);
+        }
+      }
+      return result;
+    }
+    function getIndexedData({ data, width, height }, palette, transparencyIndex) {
+      const size = width * height;
+      const result = new Uint8Array(size);
+      const shift = data instanceof Uint16Array ? 8 : 0;
+      const cache = /* @__PURE__ */ new Map();
+      for (let i = 0; i < palette.length && i < 256; i++) {
+        const key = palette[i].r << 16 | palette[i].g << 8 | palette[i].b;
+        if (i !== transparencyIndex && !cache.has(key))
+          cache.set(key, i);
+      }
+      for (let i = 0, p = 0; i < size; i++, p += 4) {
+        const read = (v) => data instanceof Float32Array ? Math.round(Math.pow((0, helpers_1.clamp)(v, 0, 1), 1 / 2.2) * 255) : v >>> shift;
+        const a = data instanceof Float32Array ? data[p + 3] * 255 : data[p + 3] >>> shift;
+        if (transparencyIndex !== void 0 && transparencyIndex >= 0 && a < 128) {
+          result[i] = transparencyIndex;
+          continue;
+        }
+        const r = read(data[p]), g = read(data[p + 1]), b = read(data[p + 2]);
+        const key = r << 16 | g << 8 | b;
+        let index = cache.get(key);
+        if (index === void 0) {
+          let best = Infinity;
+          index = 0;
+          for (let j = 0; j < palette.length && j < 256; j++) {
+            if (j === transparencyIndex)
+              continue;
+            const dr = palette[j].r - r, dg = palette[j].g - g, db = palette[j].b - b;
+            const distance = dr * dr + dg * dg + db * db;
+            if (distance < best) {
+              best = distance;
+              index = j;
             }
           }
+          cache.set(key, index);
         }
-      }, true, options.psb);
+        result[i] = index;
+      }
+      return result;
     }
-    function writeLayerMaskData(writer, _a2, layerData) {
-      var mask = _a2.mask;
-      writeSection(writer, 1, function() {
-        if (!mask)
+    function getCompositeData(imageData, width, height, globalAlpha) {
+      if (!imageData)
+        return { data: new Uint8Array(width * height * 4), width, height };
+      const size = width * height * 4;
+      const src = imageData.data;
+      let dst = void 0;
+      if (globalAlpha) {
+        for (let i = 0; i < size; i += 4) {
+          const pa = src[i + 3];
+          if (pa != 0 && pa != 255) {
+            if (!dst)
+              dst = new Uint8Array(src.buffer, src.byteOffset, size).slice();
+            const a = pa / 255;
+            const ra = 255 * (1 - a);
+            dst[i + 0] = src[i + 0] * a + ra;
+            dst[i + 1] = src[i + 1] * a + ra;
+            dst[i + 2] = src[i + 2] * a + ra;
+          }
+        }
+      }
+      return dst ? { data: dst, width, height } : imageData;
+    }
+    function writeLayerInfo(writer, layers, psd, globalAlpha, options) {
+      writeSection(writer, 4, () => writeLayerInfoData(writer, layers, psd, globalAlpha, options), true, options.psb);
+    }
+    function writeLayerInfoData(writer, layers, psd, globalAlpha, options) {
+      var _a2;
+      writeInt16(writer, globalAlpha ? -layers.length : layers.length);
+      const layersData = layers.map((l, i) => getChannels(writer, l, i === 0, options));
+      for (const layerData of layersData) {
+        const { layer, top, left, bottom, right, channels } = layerData;
+        writeInt32(writer, top);
+        writeInt32(writer, left);
+        writeInt32(writer, bottom);
+        writeInt32(writer, right);
+        writeUint16(writer, channels.length);
+        for (const c of channels) {
+          writeInt16(writer, c.id);
+          if (options.psb) {
+            writeUint64(writer, c.length);
+          } else {
+            writeUint32(writer, c.length);
+          }
+        }
+        writeSignature(writer, "8BIM");
+        writeSignature(writer, helpers_1.fromBlendMode[layer.blendMode] || "norm");
+        writeUint8(writer, Math.round((0, helpers_1.clamp)((_a2 = layer.opacity) !== null && _a2 !== void 0 ? _a2 : 1, 0, 1) * 255));
+        writeUint8(writer, layer.clipping ? 1 : 0);
+        let flags = 8;
+        if (layer.transparencyProtected)
+          flags |= 1;
+        if (layer.hidden)
+          flags |= 2;
+        if (layer.vectorMask || layer.sectionDivider && layer.sectionDivider.type !== 0 || layer.adjustment) {
+          flags |= 16;
+        }
+        if (layer.effectsOpen)
+          flags |= 32;
+        writeUint8(writer, flags);
+        writeUint8(writer, 0);
+        writeSection(writer, 1, () => {
+          writeLayerMaskData(writer, layer, layerData);
+          writeLayerBlendingRanges(writer, layer);
+          writePascalString(writer, (layer.name || "").substring(0, 255), 4);
+          writeAdditionalLayerInfo(writer, layer, psd, options);
+        });
+      }
+      for (const layerData of layersData) {
+        for (const channel of layerData.channels) {
+          writeUint16(writer, channel.compression);
+          if (channel.data) {
+            writeBytes(writer, channel.data);
+          }
+        }
+      }
+    }
+    function getMasks(layer) {
+      return layer.mask ? { mask: layer.mask, realMask: layer.realMask } : { mask: layer.realMask, realMask: void 0 };
+    }
+    function writeLayerMaskData(writer, layer, layerData) {
+      const { mask, realMask } = getMasks(layer);
+      writeSection(writer, 4, () => {
+        if (!mask && !realMask)
           return;
-        var m = layerData.mask || {};
+        let params = 0, flags = 0, realFlags = 0;
+        if (mask) {
+          if (mask.userMaskDensity !== void 0)
+            params |= 1;
+          if (mask.userMaskFeather !== void 0)
+            params |= 2;
+          if (mask.vectorMaskDensity !== void 0)
+            params |= 4;
+          if (mask.vectorMaskFeather !== void 0)
+            params |= 8;
+          if (mask.disabled)
+            flags |= 2;
+          if (mask.positionRelativeToLayer)
+            flags |= 1;
+          if (mask.fromVectorData)
+            flags |= 8;
+          if (params)
+            flags |= 16;
+        }
+        const m = layerData.mask || {};
         writeInt32(writer, m.top || 0);
         writeInt32(writer, m.left || 0);
         writeInt32(writer, m.bottom || 0);
         writeInt32(writer, m.right || 0);
-        writeUint8(writer, mask.defaultColor || 0);
-        var params = 0;
-        if (mask.userMaskDensity !== void 0)
-          params |= 1;
-        if (mask.userMaskFeather !== void 0)
-          params |= 2;
-        if (mask.vectorMaskDensity !== void 0)
-          params |= 4;
-        if (mask.vectorMaskFeather !== void 0)
-          params |= 8;
-        var flags = 0;
-        if (mask.disabled)
-          flags |= 2;
-        if (mask.positionRelativeToLayer)
-          flags |= 1;
-        if (mask.fromVectorData)
-          flags |= 8;
-        if (params)
-          flags |= 16;
+        writeUint8(writer, mask && mask.defaultColor || 0);
         writeUint8(writer, flags);
-        if (params) {
+        if (realMask) {
+          if (realMask.disabled)
+            realFlags |= 2;
+          if (realMask.positionRelativeToLayer)
+            realFlags |= 1;
+          if (realMask.fromVectorData)
+            realFlags |= 8;
+          const r = layerData.realMask || {};
+          writeUint8(writer, realFlags);
+          writeUint8(writer, realMask.defaultColor || 0);
+          writeInt32(writer, r.top || 0);
+          writeInt32(writer, r.left || 0);
+          writeInt32(writer, r.bottom || 0);
+          writeInt32(writer, r.right || 0);
+        }
+        if (params && mask) {
           writeUint8(writer, params);
           if (mask.userMaskDensity !== void 0)
             writeUint8(writer, Math.round(mask.userMaskDensity * 255));
@@ -14823,8 +19405,7 @@ var require_psdWriter = __commonJS({
           if (mask.vectorMaskFeather !== void 0)
             writeFloat64(writer, mask.vectorMaskFeather);
         }
-        writeZeros(writer, 2);
-      });
+      }, true);
     }
     function writerBlendingRange(writer, range) {
       writeUint8(writer, range[0]);
@@ -14833,13 +19414,12 @@ var require_psdWriter = __commonJS({
       writeUint8(writer, range[3]);
     }
     function writeLayerBlendingRanges(writer, layer) {
-      writeSection(writer, 1, function() {
-        var ranges = layer.blendingRanges;
+      writeSection(writer, 1, () => {
+        const ranges = layer.blendingRanges;
         if (ranges) {
           writerBlendingRange(writer, ranges.compositeGrayBlendSource);
           writerBlendingRange(writer, ranges.compositeGraphBlendDestinationRange);
-          for (var _i = 0, _a2 = ranges.ranges; _i < _a2.length; _i++) {
-            var r = _a2[_i];
+          for (const r of ranges.ranges) {
             writerBlendingRange(writer, r.sourceRange);
             writerBlendingRange(writer, r.destRange);
           }
@@ -14847,57 +19427,53 @@ var require_psdWriter = __commonJS({
       });
     }
     function writeGlobalLayerMaskInfo(writer, info) {
-      writeSection(writer, 1, function() {
+      writeSection(writer, 1, () => {
         if (info) {
           writeUint16(writer, info.overlayColorSpace);
           writeUint16(writer, info.colorSpace1);
           writeUint16(writer, info.colorSpace2);
           writeUint16(writer, info.colorSpace3);
           writeUint16(writer, info.colorSpace4);
-          writeUint16(writer, info.opacity * 255);
+          writeUint16(writer, Math.round((0, helpers_1.clamp)(info.opacity, 0, 1) * 100));
           writeUint8(writer, info.kind);
           writeZeros(writer, 3);
         }
       });
     }
     function writeAdditionalLayerInfo(writer, target, psd, options) {
-      var _loop_4 = function(handler2) {
-        var key = handler2.key;
+      for (const handler of additionalInfo_1.infoHandlers) {
+        let key = handler.key;
         if (key === "Txt2" && options.invalidateTextLayers)
-          return "continue";
-        if (key === "vmsk" && options.psb)
+          continue;
+        if (key === "vmsk" && additionalInfo_1.infoHandlersMap["vscg"].has(target))
           key = "vsms";
-        if (handler2.has(target)) {
-          var large = options.psb && helpers_1.largeAdditionalInfoKeys.indexOf(key) !== -1;
-          var writeTotalLength = key !== "Txt2" && key !== "cinf" && key !== "extn" && key !== "CAI " && key !== "OCIO";
-          var fourBytes = key === "Txt2" || key === "luni" || key === "vmsk" || key === "artb" || key === "artd" || key === "vogk" || key === "SoLd" || key === "lnk2" || key === "vscg" || key === "vsms" || key === "GdFl" || key === "lmfx" || key === "lrFX" || key === "cinf" || key === "PlLd" || key === "Anno" || key === "CAI " || key === "OCIO" || key === "GenI" || key === "FEid";
+        if (handler.has(target)) {
+          const large = options.psb && helpers_1.largeAdditionalInfoKeys.indexOf(key) !== -1;
+          const writeTotalLength = key !== "Txt2" && key !== "cinf" && key !== "extn" && key !== "CAI " && key !== "OCIO";
+          const fourBytes = key === "levl" || key === "Txt2" || key === "luni" || key === "vmsk" || key === "artb" || key === "artd" || key === "vogk" || key === "SoLd" || key === "SoLE" || key === "lnk2" || key === "vscg" || key === "vsms" || key === "GdFl" || key === "lmfx" || key === "lrFX" || key === "cinf" || key === "PlLd" || key === "Anno" || key === "CAI " || key === "OCIO" || key === "GenI" || key === "FEid" || key === "curv" || key === "CgEd" || key === "vibA" || key === "blwh" || key === "grdm";
           writeSignature(writer, large ? "8B64" : "8BIM");
           writeSignature(writer, key);
-          writeSection(writer, fourBytes ? 4 : 2, function() {
-            handler2.write(writer, target, psd, options);
+          writeSection(writer, fourBytes ? 4 : 2, () => {
+            handler.write(writer, target, psd, options);
           }, writeTotalLength, large);
         }
-      };
-      for (var _i = 0, infoHandlers_1 = additionalInfo_1.infoHandlers; _i < infoHandlers_1.length; _i++) {
-        var handler = infoHandlers_1[_i];
-        _loop_4(handler);
       }
     }
     function addChildren(layers, children) {
       if (!children)
         return;
-      for (var _i = 0, children_1 = children; _i < children_1.length; _i++) {
-        var c = children_1[_i];
+      for (const c of children) {
         if (c.children && c.canvas)
-          throw new Error("Invalid layer, cannot have both 'canvas' and 'children' properties");
+          throw new Error(`Invalid layer, cannot have both 'canvas' and 'children' properties`);
         if (c.children && c.imageData)
-          throw new Error("Invalid layer, cannot have both 'imageData' and 'children' properties");
+          throw new Error(`Invalid layer, cannot have both 'imageData' and 'children' properties`);
         if (c.children) {
           layers.push({
             name: "</Layer group>",
             sectionDivider: {
               type: 3
             }
+            // blendingRanges: children[0].blendingRanges,
             // nameSource: 'lset',
             // id: layerIds.shift(),
             // protected: {
@@ -14905,32 +19481,26 @@ var require_psdWriter = __commonJS({
             // 	composite: false,
             // 	position: false,
             // },
-            // layerColor: 'none',
+            // layerColor: 'red',
             // timestamp: timestamps.shift(),
-            // referencePoint: {
-            // 	x: 0,
-            // 	y: 0,
-            // },
+            // referencePoint: { x: 0, y: 0 },
           });
           addChildren(layers, c.children);
-          layers.push(__assign(__assign({}, c), { blendMode: c.blendMode === "pass through" ? "normal" : c.blendMode, sectionDivider: {
+          layers.push(Object.assign(Object.assign({}, c), { blendMode: c.blendMode === "pass through" ? "normal" : c.blendMode, sectionDivider: {
             type: c.opened === false ? 2 : 1,
             key: helpers_1.fromBlendMode[c.blendMode] || "pass",
             subType: 0
           } }));
         } else {
-          layers.push(__assign({}, c));
+          layers.push(Object.assign({}, c));
         }
       }
     }
     function resizeBuffer(writer, size) {
-      var newLength = writer.buffer.byteLength;
-      do {
-        newLength *= 2;
-      } while (size > newLength);
-      var newBuffer = new ArrayBuffer(newLength);
-      var newBytes = new Uint8Array(newBuffer);
-      var oldBytes = new Uint8Array(writer.buffer);
+      const newLength = Math.max(writer.buffer.byteLength * 2, size);
+      const newBuffer = new ArrayBuffer(newLength);
+      const newBytes = new Uint8Array(newBuffer);
+      const oldBytes = new Uint8Array(writer.buffer);
       newBytes.set(oldBytes);
       writer.buffer = newBuffer;
       writer.view = new DataView(writer.buffer);
@@ -14941,23 +19511,23 @@ var require_psdWriter = __commonJS({
       }
     }
     function addSize(writer, size) {
-      var offset = writer.offset;
+      const offset = writer.offset;
       ensureSize(writer, writer.offset += size);
       return offset;
     }
     function createThumbnail(psd) {
-      var canvas = (0, helpers_1.createCanvas)(10, 10);
-      var scale = 1;
+      const canvas = (0, helpers_1.createCanvas)(10, 10);
+      let scale = 1;
       if (psd.width > psd.height) {
         canvas.width = 160;
-        canvas.height = Math.floor(psd.height * (canvas.width / psd.width));
+        canvas.height = Math.max(1, Math.floor(psd.height * (canvas.width / psd.width)));
         scale = canvas.width / psd.width;
       } else {
         canvas.height = 160;
-        canvas.width = Math.floor(psd.width * (canvas.height / psd.height));
+        canvas.width = Math.max(1, Math.floor(psd.width * (canvas.height / psd.height)));
         scale = canvas.height / psd.height;
       }
-      var context = canvas.getContext("2d");
+      const context = canvas.getContext("2d");
       context.scale(scale, scale);
       if (psd.imageData) {
         context.drawImage((0, helpers_1.imageDataToCanvas)(psd.imageData), 0, 0);
@@ -14966,60 +19536,91 @@ var require_psdWriter = __commonJS({
       }
       return canvas;
     }
-    function getChannels(tempBuffer, layer, background, options) {
-      var layerData = getLayerChannels(tempBuffer, layer, background, options);
-      var mask = layer.mask;
-      if (mask) {
-        var top_2 = mask.top | 0;
-        var left = mask.left | 0;
-        var right = mask.right | 0;
-        var bottom = mask.bottom | 0;
-        var _a2 = getLayerDimentions(mask), width = _a2.width, height = _a2.height;
-        var imageData = mask.imageData;
-        if (!imageData && mask.canvas && width && height) {
-          imageData = mask.canvas.getContext("2d").getImageData(0, 0, width, height);
-        }
-        if (width && height && imageData) {
-          right = left + width;
-          bottom = top_2 + height;
-          if (imageData.width !== width || imageData.height !== height) {
-            throw new Error("Invalid imageData dimentions");
-          }
-          var buffer = void 0;
-          var compression = void 0;
-          if (helpers_1.RAW_IMAGE_DATA && layer.maskDataRaw) {
-            buffer = layer.maskDataRaw;
-            compression = layer.maskDataRawCompression;
-          } else if (options.compress) {
-            buffer = (0, helpers_1.writeDataZipWithoutPrediction)(imageData, [0]);
-            compression = 2;
-          } else {
-            buffer = (0, helpers_1.writeDataRLE)(tempBuffer, imageData, [0], !!options.psb);
-            compression = 1;
-          }
-          layerData.mask = { top: top_2, left, right, bottom };
-          layerData.channels.push({ channelId: -2, compression, buffer, length: 2 + buffer.length });
-        } else {
-          layerData.mask = { top: 0, left: 0, right: 0, bottom: 0 };
-        }
+    function getMaskChannels(tempBuffer, layerData, mask, options, realMask) {
+      var _a2;
+      let top = mask.top | 0;
+      let left = mask.left | 0;
+      let right = mask.right | 0;
+      let bottom = mask.bottom | 0;
+      let { width, height } = getLayerDimentions(mask);
+      let imageData = mask.imageData;
+      if (!imageData && mask.canvas && width && height) {
+        imageData = mask.canvas.getContext("2d").getImageData(0, 0, width, height);
       }
+      if (imageData && (imageData.width !== width || imageData.height !== height)) {
+        throw new Error("Invalid imageData dimentions");
+      }
+      right = left + width;
+      bottom = top + height;
+      let buffer;
+      let compression;
+      const bitsPerChannel = (_a2 = options.bitsPerChannel) !== null && _a2 !== void 0 ? _a2 : 8;
+      if (!imageData) {
+        buffer = new Uint8Array(0);
+        compression = 1;
+      } else if (bitsPerChannel !== 8 || !is8bit(imageData)) {
+        const { colors } = getPlanarChannels(imageData, 3, bitsPerChannel, false);
+        ({ data: buffer, compression } = encodeChannel(colors[0], width, height, options));
+      } else if (options.compress) {
+        buffer = (0, helpers_1.writeDataZipWithoutPrediction)(imageData, [0]);
+        compression = 2;
+      } else {
+        buffer = (0, helpers_1.writeDataRLE)(tempBuffer, imageData, [0], !!options.psb).slice();
+        compression = 1;
+      }
+      layerData.channels.push({ id: realMask ? -3 : -2, compression, data: buffer, length: 2 + buffer.length });
+      layerData[realMask ? "realMask" : "mask"] = { top, left, right, bottom };
+    }
+    function bounds(obj) {
+      return obj ? {
+        top: obj.top || 0,
+        left: obj.left || 0,
+        right: obj.right || 0,
+        bottom: obj.bottom || 0
+      } : void 0;
+    }
+    function getChannels(writer, layer, background, options) {
+      var _a2, _b2;
+      let source = layer;
+      if (layer.rawData) {
+        const { colorMode, bitsPerChannel, large } = layer.rawData;
+        const opt = options;
+        if (large === !!options.psb && colorMode === ((_a2 = opt.colorMode) !== null && _a2 !== void 0 ? _a2 : 3) && bitsPerChannel === ((_b2 = opt.bitsPerChannel) !== null && _b2 !== void 0 ? _b2 : 8)) {
+          const { mask: mask2, realMask: realMask2 } = getMasks(layer);
+          return Object.assign(Object.assign({ layer, channels: layer.rawData.channels.map((c) => {
+            var _a3, _b3;
+            return Object.assign(Object.assign({}, c), { length: 2 + ((_b3 = (_a3 = c.data) === null || _a3 === void 0 ? void 0 : _a3.byteLength) !== null && _b3 !== void 0 ? _b3 : 0) });
+          }) }, bounds(layer)), { mask: bounds(mask2), realMask: bounds(realMask2) });
+        }
+        source = Object.assign(Object.assign({}, layer), { rawData: void 0, canvas: void 0, imageData: (0, psdReader_1.getLayerImageData)(layer), mask: layer.mask && Object.assign(Object.assign({}, layer.mask), { canvas: void 0, imageData: (0, psdReader_1.getLayerMaskImageData)(layer) }), realMask: layer.realMask && Object.assign(Object.assign({}, layer.realMask), { canvas: void 0, imageData: (0, psdReader_1.getLayerRealMaskImageData)(layer) }) });
+        const size = getLargestLayerSize([Object.assign(Object.assign({}, source), { children: void 0 })], !!options.psb);
+        if (writer.tempBuffer.byteLength < size)
+          writer.tempBuffer = new Uint8Array(size);
+      }
+      const tempBuffer = writer.tempBuffer;
+      const { mask, realMask } = getMasks(source);
+      const layerData = getLayerChannels(tempBuffer, source, background, options);
+      if (mask)
+        getMaskChannels(tempBuffer, layerData, mask, options, false);
+      if (realMask)
+        getMaskChannels(tempBuffer, layerData, realMask, options, true);
+      layerData.layer = layer;
       return layerData;
     }
-    function getLayerDimentions(_a2) {
-      var canvas = _a2.canvas, imageData = _a2.imageData;
-      return imageData || canvas || { width: 0, height: 0 };
+    function getLayerDimentions({ canvas, imageData }) {
+      var _a2, _b2, _c, _d;
+      const width = (_b2 = (_a2 = imageData === null || imageData === void 0 ? void 0 : imageData.width) !== null && _a2 !== void 0 ? _a2 : canvas === null || canvas === void 0 ? void 0 : canvas.width) !== null && _b2 !== void 0 ? _b2 : 0;
+      const height = (_d = (_c = imageData === null || imageData === void 0 ? void 0 : imageData.height) !== null && _c !== void 0 ? _c : canvas === null || canvas === void 0 ? void 0 : canvas.height) !== null && _d !== void 0 ? _d : 0;
+      return { width, height };
     }
     function cropImageData(data, left, top, width, height) {
-      if (data.data instanceof Uint32Array || data.data instanceof Uint16Array) {
-        throw new Error("imageData has incorrect bit depth");
-      }
-      var croppedData = (0, helpers_1.createImageData)(width, height);
-      var srcData = data.data;
-      var dstData = croppedData.data;
-      for (var y = 0; y < height; y++) {
-        for (var x = 0; x < width; x++) {
-          var src = (x + left + (y + top) * data.width) * 4;
-          var dst = (x + y * width) * 4;
+      const croppedData = is8bit(data) ? (0, helpers_1.createImageData)(width, height) : { width, height, data: new data.data.constructor(width * height * 4) };
+      const srcData = data.data;
+      const dstData = croppedData.data;
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          let src = (x + left + (y + top) * data.width) * 4;
+          let dst = (x + y * width) * 4;
           dstData[dst] = srcData[src];
           dstData[dst + 1] = srcData[src + 1];
           dstData[dst + 2] = srcData[src + 2];
@@ -15029,85 +19630,98 @@ var require_psdWriter = __commonJS({
       return croppedData;
     }
     function getLayerChannels(tempBuffer, layer, background, options) {
-      var _a2;
-      var top = layer.top | 0;
-      var left = layer.left | 0;
-      var right = layer.right | 0;
-      var bottom = layer.bottom | 0;
-      var channels = [
-        { channelId: -1, compression: 0, buffer: void 0, length: 2 },
-        { channelId: 0, compression: 0, buffer: void 0, length: 2 },
-        { channelId: 1, compression: 0, buffer: void 0, length: 2 },
-        { channelId: 2, compression: 0, buffer: void 0, length: 2 }
+      var _a2, _b2;
+      let top = layer.top | 0;
+      let left = layer.left | 0;
+      let right = layer.right | 0;
+      let bottom = layer.bottom | 0;
+      let channels = [
+        { id: -1, compression: 0, data: void 0, length: 2 },
+        { id: 0, compression: 0, data: void 0, length: 2 },
+        { id: 1, compression: 0, data: void 0, length: 2 },
+        { id: 2, compression: 0, data: void 0, length: 2 }
       ];
-      var _b2 = getLayerDimentions(layer), width = _b2.width, height = _b2.height;
+      let { width, height } = getLayerDimentions(layer);
       if (!(layer.canvas || layer.imageData) || !width || !height) {
-        right = left;
-        bottom = top;
+        if (layer.right === void 0 || right > left)
+          right = left;
+        if (layer.bottom === void 0 || bottom > top)
+          bottom = top;
         return { layer, top, left, right, bottom, channels };
       }
       right = left + width;
       bottom = top + height;
-      var data = layer.imageData || layer.canvas.getContext("2d").getImageData(0, 0, width, height);
+      let imageData = layer.imageData || layer.canvas.getContext("2d").getImageData(0, 0, width, height);
       if (options.trimImageData) {
-        var trimmed = trimData(data);
-        if (trimmed.left !== 0 || trimmed.top !== 0 || trimmed.right !== data.width || trimmed.bottom !== data.height) {
+        const trimmed = trimData(imageData);
+        if (trimmed.left !== 0 || trimmed.top !== 0 || trimmed.right !== imageData.width || trimmed.bottom !== imageData.height) {
           left += trimmed.left;
           top += trimmed.top;
-          right -= data.width - trimmed.right;
-          bottom -= data.height - trimmed.bottom;
+          right -= imageData.width - trimmed.right;
+          bottom -= imageData.height - trimmed.bottom;
           width = right - left;
           height = bottom - top;
           if (!width || !height)
             return { layer, top, left, right, bottom, channels };
-          data = cropImageData(data, trimmed.left, trimmed.top, width, height);
+          imageData = cropImageData(imageData, trimmed.left, trimmed.top, width, height);
         }
       }
-      var channelIds = [
+      const channelIds = [
         0,
         1,
         2
       ];
-      if (!background || options.noBackground || layer.mask || (0, helpers_1.hasAlpha)(data) || helpers_1.RAW_IMAGE_DATA && ((_a2 = layer.imageDataRaw) === null || _a2 === void 0 ? void 0 : _a2["-1"])) {
+      if (!background || options.noBackground || layer.mask || (0, helpers_1.hasAlpha)(imageData)) {
         channelIds.unshift(
           -1
           /* ChannelID.Transparency */
         );
       }
-      channels = channelIds.map(function(channelId) {
-        var offset = (0, helpers_1.offsetForChannel)(channelId, false);
-        var buffer;
-        var compression;
-        if (helpers_1.RAW_IMAGE_DATA && layer.imageDataRaw) {
-          buffer = layer.imageDataRaw[channelId];
-          compression = layer.imageDataRawCompression[channelId];
-        } else if (options.compress) {
-          buffer = (0, helpers_1.writeDataZipWithoutPrediction)(data, [offset]);
+      const colorMode = (_a2 = options.colorMode) !== null && _a2 !== void 0 ? _a2 : 3;
+      const bitsPerChannel = (_b2 = options.bitsPerChannel) !== null && _b2 !== void 0 ? _b2 : 8;
+      if (colorMode !== 3 || bitsPerChannel !== 8 || !is8bit(imageData)) {
+        const { colors, alpha } = getPlanarChannels(imageData, colorMode, bitsPerChannel, false);
+        const ids = channelIds[0] === -1 ? [
+          -1
+          /* ChannelID.Transparency */
+        ] : [];
+        for (let i = 0; i < colors.length; i++)
+          ids.push(i);
+        channels = ids.map((id) => {
+          const { data, compression } = encodeChannel(id === -1 ? alpha : colors[id], width, height, options);
+          return { id, compression, data, length: 2 + data.length };
+        });
+        return { layer, top, left, right, bottom, channels };
+      }
+      channels = channelIds.map((id) => {
+        const offset = (0, helpers_1.offsetForChannel)(id, false);
+        let data;
+        let compression;
+        if (options.compress) {
+          data = (0, helpers_1.writeDataZipWithoutPrediction)(imageData, [offset]);
           compression = 2;
         } else {
-          buffer = (0, helpers_1.writeDataRLE)(tempBuffer, data, [offset], !!options.psb);
+          data = (0, helpers_1.writeDataRLE)(tempBuffer, imageData, [offset], !!options.psb).slice();
           compression = 1;
         }
-        return { channelId, compression, buffer, length: 2 + buffer.length };
+        return { id, compression, data, length: 2 + data.length };
       });
       return { layer, top, left, right, bottom, channels };
     }
-    function isRowEmpty(_a2, y, left, right) {
-      var data = _a2.data, width = _a2.width;
-      var start = (y * width + left) * 4 + 3 | 0;
-      var end = start + (right - left) * 4 | 0;
-      for (var i = start; i < end; i = i + 4 | 0) {
+    function isRowEmpty({ data, width }, y, left, right) {
+      const start = (y * width + left) * 4 + 3 | 0;
+      const end = start + (right - left) * 4 | 0;
+      for (let i = start; i < end; i = i + 4 | 0) {
         if (data[i] !== 0) {
           return false;
         }
       }
       return true;
     }
-    function isColEmpty(_a2, x, top, bottom) {
-      var data = _a2.data, width = _a2.width;
-      var stride = width * 4 | 0;
-      var start = top * stride + x * 4 + 3 | 0;
-      for (var y = top, i = start; y < bottom; y++, i = i + stride | 0) {
+    function isColEmpty({ data, width }, x, top, bottom) {
+      const stride = width * 4 | 0;
+      const start = top * stride + x * 4 + 3 | 0;
+      for (let y = top, i = start; y < bottom; y++, i = i + stride | 0) {
         if (data[i] !== 0) {
           return false;
         }
@@ -15115,10 +19729,10 @@ var require_psdWriter = __commonJS({
       return true;
     }
     function trimData(data) {
-      var top = 0;
-      var left = 0;
-      var right = data.width;
-      var bottom = data.height;
+      let top = 0;
+      let left = 0;
+      let right = data.width;
+      let bottom = data.height;
       while (top < bottom && isRowEmpty(data, top, left, right))
         top++;
       while (bottom > top && isRowEmpty(data, bottom - 1, left, right))
@@ -15164,8 +19778,8 @@ var require_psdWriter = __commonJS({
           /* ColorSpace.Lab */
         );
         writeInt16(writer, Math.round(color.l * 1e4));
-        writeInt16(writer, Math.round(color.a < 0 ? color.a * 12800 : color.a * 12700));
-        writeInt16(writer, Math.round(color.b < 0 ? color.b * 12800 : color.b * 12700));
+        writeInt16(writer, Math.round((0, helpers_1.denormalizeLabAB)(color.a, 100)));
+        writeInt16(writer, Math.round((0, helpers_1.denormalizeLabAB)(color.b, 100)));
         writeUint16(writer, 0);
       } else if ("h" in color) {
         writeUint16(
@@ -15183,10 +19797,10 @@ var require_psdWriter = __commonJS({
           2
           /* ColorSpace.CMYK */
         );
-        writeUint16(writer, Math.round(color.c * 257));
-        writeUint16(writer, Math.round(color.m * 257));
-        writeUint16(writer, Math.round(color.y * 257));
-        writeUint16(writer, Math.round(color.k * 257));
+        writeUint16(writer, 65535 - Math.round((0, helpers_1.clamp)(color.c, 0, 255) * 257));
+        writeUint16(writer, 65535 - Math.round((0, helpers_1.clamp)(color.m, 0, 255) * 257));
+        writeUint16(writer, 65535 - Math.round((0, helpers_1.clamp)(color.y, 0, 255) * 257));
+        writeUint16(writer, 65535 - Math.round((0, helpers_1.clamp)(color.k, 0, 255) * 257));
       } else {
         writeUint16(
           writer,
@@ -15197,7 +19811,62 @@ var require_psdWriter = __commonJS({
         writeZeros(writer, 6);
       }
     }
-    exports.writeColor = writeColor;
+    function writePattern(writer, pattern) {
+      const width = pattern.bounds.w;
+      const height = pattern.bounds.h;
+      const pixelData = { width, height, data: pattern.data };
+      writeUint32(writer, 0);
+      const pattsOffset = writer.offset;
+      writeUint32(writer, 1);
+      writeUint32(
+        writer,
+        3
+        /* ColorMode.RGB */
+      );
+      writeInt16(writer, pattern.x);
+      writeInt16(writer, pattern.y);
+      writeUnicodeString(writer, pattern.name + "\0");
+      writePascalString(writer, pattern.id, 1);
+      writeUint32(writer, 3);
+      writeUint32(writer, 0);
+      const vlOffset = writer.offset;
+      const top = pattern.bounds.y;
+      const left = pattern.bounds.x;
+      const bottom = top + height;
+      const right = left + width;
+      writeUint32(writer, top);
+      writeUint32(writer, left);
+      writeUint32(writer, bottom);
+      writeUint32(writer, right);
+      writeUint32(writer, 24);
+      const buffer = new Uint8Array(getRLEChannelBound(width, height, false));
+      for (let i = 0; i < 24 + 2; i++) {
+        const offset = i < 3 ? i : i === 25 ? 3 : -1;
+        if (offset < 0) {
+          writeUint32(writer, 0);
+          continue;
+        }
+        const data = (0, helpers_1.writeDataRLE)(buffer, pixelData, [offset], false);
+        writeUint32(writer, 1);
+        writeUint32(writer, data.length + 4 + 16 + 2 + 1);
+        writeUint32(writer, 8);
+        writeUint32(writer, top);
+        writeUint32(writer, left);
+        writeUint32(writer, bottom);
+        writeUint32(writer, right);
+        writeUint16(writer, 8);
+        writeUint8(writer, 1);
+        writeBytes(writer, data);
+      }
+      const vlLength = writer.offset - vlOffset;
+      let pattsLength = writer.offset - pattsOffset;
+      while (pattsLength % 4) {
+        writeZeros(writer, 1);
+        pattsLength++;
+      }
+      writer.view.setUint32(vlOffset - 4, vlLength, false);
+      writer.view.setUint32(pattsOffset - 4, pattsLength, false);
+    }
   }
 });
 
@@ -15206,10 +19875,13 @@ var require_abr = __commonJS({
   "node_modules/ag-psd/dist/abr.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.readAbr = void 0;
+    exports.readAbr = readAbr;
     var descriptor_1 = require_descriptor();
     var psdReader_1 = require_psdReader();
     var dynamicsControl = ["off", "fade", "pen pressure", "pen tilt", "stylus wheel", "initial direction", "direction", "initial rotation", "rotation"];
+    var dynamicBrushShapeShapes = ["round point", "round blunt", "round curve", "round angle", "round fan", "flat point", "flat blunt", "flat curve", "flat angle", "flat fan"];
+    var tipsBrushShapeShapes = ["erodible point", "erodible flat", "erodible round", "erodible square", "erodible triangle", "custom"];
+    var MAX_BRUSH_SIZE = 1e4;
     var toBrushType = {
       _: "brush",
       MixB: "mixer brush",
@@ -15226,272 +19898,467 @@ var require_abr = __commonJS({
       };
     }
     function parseBrushShape(desc) {
-      var shape = {
-        size: (0, descriptor_1.parseUnitsToNumber)(desc.Dmtr, "Pixels"),
-        angle: (0, descriptor_1.parseAngle)(desc.Angl),
-        roundness: (0, descriptor_1.parsePercent)(desc.Rndn),
-        spacingOn: desc.Intr,
-        spacing: (0, descriptor_1.parsePercent)(desc.Spcn),
-        flipX: desc.flipX,
-        flipY: desc.flipY
-      };
-      if (desc["Nm  "])
-        shape.name = desc["Nm  "];
-      if (desc.Hrdn)
-        shape.hardness = (0, descriptor_1.parsePercent)(desc.Hrdn);
-      if (desc.sampledData)
-        shape.sampledData = desc.sampledData;
-      return shape;
-    }
-    function readAbr(buffer, options) {
-      var _a2, _b2, _c, _d;
-      if (options === void 0) {
-        options = {};
+      switch (desc._classID) {
+        case "computedBrush": {
+          return {
+            type: "computed",
+            size: (0, descriptor_1.parseUnitsToNumber)(desc.Dmtr, "Pixels"),
+            angle: (0, descriptor_1.parseAngle)(desc.Angl),
+            roundness: (0, descriptor_1.parsePercent)(desc.Rndn),
+            spacingOn: desc.Intr,
+            spacing: (0, descriptor_1.parsePercent)(desc.Spcn),
+            flipX: desc.flipX,
+            flipY: desc.flipY,
+            hardness: (0, descriptor_1.parsePercent)(desc.Hrdn)
+          };
+        }
+        case "sampledBrush": {
+          return {
+            type: "sampled",
+            size: (0, descriptor_1.parseUnitsToNumber)(desc.Dmtr, "Pixels"),
+            angle: (0, descriptor_1.parseAngle)(desc.Angl),
+            roundness: (0, descriptor_1.parsePercent)(desc.Rndn),
+            spacingOn: desc.Intr,
+            spacing: (0, descriptor_1.parsePercent)(desc.Spcn),
+            flipX: desc.flipX,
+            flipY: desc.flipY,
+            name: desc["Nm  "],
+            sampledData: desc.sampledData
+          };
+        }
+        case "dBrush":
+          return {
+            type: "dynamic",
+            shape: dynamicBrushShapeShapes[desc["Shp "]],
+            angle: (0, descriptor_1.parseAngle)(desc.Angl),
+            size: (0, descriptor_1.parseUnitsToNumber)(desc.Dmtr, "Pixels"),
+            density: (0, descriptor_1.parsePercent)(desc.Dnst),
+            length: (0, descriptor_1.parsePercent)(desc.Lngt),
+            clumping: (0, descriptor_1.parsePercent)(desc.clumping),
+            thickness: (0, descriptor_1.parsePercent)(desc.thickness),
+            stiffness: (0, descriptor_1.parsePercent)(desc.stiffness),
+            physics: desc.physics,
+            spacing: (0, descriptor_1.parsePercent)(desc.Spcn),
+            spacingOn: desc.Intr,
+            flipX: desc.flipX,
+            flipY: desc.flipY
+          };
+        case "dTips": {
+          return Object.assign(Object.assign({
+            type: "tips",
+            angle: (0, descriptor_1.parseAngle)(desc.Angl),
+            size: (0, descriptor_1.parseUnitsToNumber)(desc.Dmtr, "Pixels"),
+            shape: dynamicBrushShapeShapes[desc["Shp "]],
+            physics: desc.physics,
+            spacing: (0, descriptor_1.parsePercent)(desc.Spcn),
+            spacingOn: desc.Intr,
+            flipX: desc.flipX,
+            flipY: desc.flipY,
+            // tips:
+            tipsType: tipsBrushShapeShapes[desc.dtipsType],
+            tipsLengthRatio: (0, descriptor_1.parsePercent)(desc.dtipsLengthRatio),
+            tipsHardness: (0, descriptor_1.parsePercent)(desc.dtipsHardness)
+          }, desc.dtipsGridSize && desc.dtipsErodibleTipHeightMap ? {
+            tipsGridSize: desc.dtipsGridSize,
+            tipsErodibleTipHeightMap: parseHeightmap(desc.dtipsErodibleTipHeightMap)
+          } : {}), {
+            // airbrush
+            tipsAirbrushCutoffAngle: desc.dtipsAirbrushCutoffAngle,
+            tipsAirbrushGranularity: (0, descriptor_1.parsePercent)(desc.dtipsAirbrushGranularity),
+            tipsAirbrushStreakiness: (0, descriptor_1.parsePercent)(desc.dtipsAirbrushStreakiness),
+            tipsAirbrushSplatSize: (0, descriptor_1.parsePercent)(desc.dtipsAirbrushSplatSize),
+            tipsAirbrushSplatCount: desc.dtipsAirbrushSplatCount
+          });
+        }
+        default:
+          throw new Error(`Unknown brush classId: ${desc._classID}`);
       }
-      var reader = (0, psdReader_1.createReader)(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-      var version = (0, psdReader_1.readInt16)(reader);
-      var samples = [];
-      var brushes = [];
-      var patterns = [];
+    }
+    function parseHeightmap(array) {
+      const result = [];
+      for (let i = 0; i < array.byteLength; i++) {
+        result.push(array[i]);
+      }
+      return result;
+    }
+    function readSectionDescriptor(reader, end) {
+      const sectionReader = (0, psdReader_1.createReader)(reader.view.buffer, reader.view.byteOffset + reader.offset, end - reader.offset);
+      return (0, descriptor_1.readVersionAndDescriptor)(sectionReader, true);
+    }
+    function readAbr(buffer, options = {}) {
+      const reader = (0, psdReader_1.createReader)(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+      reader.logMissingFeatures = options.logMissingFeatures;
+      reader.throwForMissingFeatures = options.throwForMissingFeatures;
+      reader.totalMemoryLimit = "totalMemoryLimit" in options ? options.totalMemoryLimit : 2 * 1024 * 1024 * 1024;
+      const skip = (e, what) => {
+        if (options.throwForMissingFeatures)
+          throw e;
+        options.logMissingFeatures && reader.log(`Skipped ${what}: ${e.message}`);
+      };
+      if (reader.view.byteLength < 4)
+        throw new Error("Invalid ABR file");
+      const version = (0, psdReader_1.readInt16)(reader);
+      const samples = [];
+      const brushes = [];
+      const patterns = [];
+      const brushByPreset = [];
+      let hierarchy;
       if (version === 1 || version === 2) {
-        throw new Error("Unsupported ABR version (".concat(version, ")"));
+        readLegacyBrushes(reader, version, samples, brushes, skip);
       } else if (version === 6 || version === 7 || version === 9 || version === 10) {
-        var minorVersion = (0, psdReader_1.readInt16)(reader);
+        const minorVersion = (0, psdReader_1.readInt16)(reader);
         if (minorVersion !== 1 && minorVersion !== 2)
           throw new Error("Unsupported ABR minor version");
-        while (reader.offset < reader.view.byteLength) {
+        while (reader.offset + 12 <= reader.view.byteLength) {
           (0, psdReader_1.checkSignature)(reader, "8BIM");
-          var type = (0, psdReader_1.readSignature)(reader);
-          var size = (0, psdReader_1.readUint32)(reader);
-          var end = reader.offset + size;
-          switch (type) {
-            case "samp": {
-              while (reader.offset < end) {
-                var brushLength = (0, psdReader_1.readUint32)(reader);
-                while (brushLength & 3)
-                  brushLength++;
-                var brushEnd = reader.offset + brushLength;
-                var id = (0, psdReader_1.readPascalString)(reader, 1);
-                (0, psdReader_1.skipBytes)(reader, minorVersion === 1 ? 10 : 264);
-                var y = (0, psdReader_1.readInt32)(reader);
-                var x = (0, psdReader_1.readInt32)(reader);
-                var h = (0, psdReader_1.readInt32)(reader) - y;
-                var w = (0, psdReader_1.readInt32)(reader) - x;
-                if (w <= 0 || h <= 0)
-                  throw new Error("Invalid bounds");
-                var bithDepth = (0, psdReader_1.readInt16)(reader);
-                var compression = (0, psdReader_1.readUint8)(reader);
-                var alpha = new Uint8Array(w * h);
-                if (bithDepth === 8) {
-                  if (compression === 0) {
-                    alpha.set((0, psdReader_1.readBytes)(reader, alpha.byteLength));
-                  } else if (compression === 1) {
-                    (0, psdReader_1.readDataRLE)(reader, { width: w, height: h, data: alpha }, w, h, bithDepth, 1, [0], false);
-                  } else {
-                    throw new Error("Invalid compression");
+          const type = (0, psdReader_1.readSignature)(reader);
+          const size = (0, psdReader_1.readUint32)(reader);
+          const end = Math.min(reader.offset + size, reader.view.byteLength);
+          try {
+            switch (type) {
+              case "samp": {
+                while (reader.offset + 4 <= end) {
+                  let brushLength = (0, psdReader_1.readUint32)(reader);
+                  while (brushLength & 3)
+                    brushLength++;
+                  const brushEnd = Math.min(reader.offset + brushLength, end);
+                  try {
+                    const sample = readSample(reader, brushEnd, minorVersion);
+                    samples.push(sample);
+                  } catch (e) {
+                    skip(e, "brush sample");
                   }
-                } else if (bithDepth === 16) {
-                  if (compression === 0) {
-                    for (var i = 0; i < alpha.byteLength; i++) {
-                      alpha[i] = (0, psdReader_1.readUint16)(reader) >> 8;
-                    }
-                  } else if (compression === 1) {
-                    throw new Error("not implemented (16bit RLE)");
-                  } else {
-                    throw new Error("Invalid compression");
+                  reader.offset = brushEnd;
+                }
+                break;
+              }
+              case "desc": {
+                const desc = readSectionDescriptor(reader, end);
+                for (const [index, brush] of (desc.Brsh || []).entries()) {
+                  try {
+                    const parsed = parseBrush(brush);
+                    brushes.push(parsed);
+                    brushByPreset[index] = parsed;
+                  } catch (e) {
+                    skip(e, `brush "${brush["Nm  "]}"`);
                   }
-                } else {
-                  throw new Error("Invalid depth");
                 }
-                samples.push({ id, bounds: { x, y, w, h }, alpha });
-                reader.offset = brushEnd;
+                break;
               }
-              break;
-            }
-            case "desc": {
-              var desc = (0, descriptor_1.readVersionAndDescriptor)(reader, true);
-              for (var _i = 0, _e = desc.Brsh; _i < _e.length; _i++) {
-                var brush = _e[_i];
-                var b = {
-                  name: brush["Nm  "],
-                  shape: parseBrushShape(brush.Brsh),
-                  spacing: (0, descriptor_1.parsePercent)(brush.Spcn),
-                  // TODO: brushGroup ???
-                  wetEdges: brush.Wtdg,
-                  noise: brush.Nose,
-                  // TODO: TxtC ??? smoothing / build-up ?
-                  // TODO: 'Rpt ' ???
-                  useBrushSize: brush.useBrushSize
-                  // ???
-                };
-                if (brush.interpretation != null)
-                  b.interpretation = brush.interpretation;
-                if (brush.protectTexture != null)
-                  b.protectTexture = brush.protectTexture;
-                if (brush.useTipDynamics) {
-                  b.shapeDynamics = {
-                    tiltScale: (0, descriptor_1.parsePercent)(brush.tiltScale),
-                    sizeDynamics: parseDynamics(brush.szVr),
-                    angleDynamics: parseDynamics(brush.angleDynamics),
-                    roundnessDynamics: parseDynamics(brush.roundnessDynamics),
-                    flipX: brush.flipX,
-                    flipY: brush.flipY,
-                    brushProjection: brush.brushProjection,
-                    minimumDiameter: (0, descriptor_1.parsePercent)(brush.minimumDiameter),
-                    minimumRoundness: (0, descriptor_1.parsePercent)(brush.minimumRoundness)
-                  };
+              case "patt": {
+                while (reader.offset + 4 <= end) {
+                  const pattern = (0, psdReader_1.readPatternSafe)(reader);
+                  if (pattern)
+                    patterns.push(pattern);
                 }
-                if (brush.useScatter) {
-                  b.scatter = {
-                    count: brush["Cnt "],
-                    bothAxes: brush.bothAxes,
-                    countDynamics: parseDynamics(brush.countDynamics),
-                    scatterDynamics: parseDynamics(brush.scatterDynamics)
-                  };
-                }
-                if (brush.useTexture && brush.Txtr) {
-                  b.texture = {
-                    id: brush.Txtr.Idnt,
-                    name: brush.Txtr["Nm  "],
-                    blendMode: descriptor_1.BlnM.decode(brush.textureBlendMode),
-                    depth: (0, descriptor_1.parsePercent)(brush.textureDepth),
-                    depthMinimum: (0, descriptor_1.parsePercent)(brush.minimumDepth),
-                    depthDynamics: parseDynamics(brush.textureDepthDynamics),
-                    scale: (0, descriptor_1.parsePercent)(brush.textureScale),
-                    invert: brush.InvT,
-                    brightness: brush.textureBrightness,
-                    contrast: brush.textureContrast
-                  };
-                }
-                var db = brush.dualBrush;
-                if (db && db.useDualBrush) {
-                  b.dualBrush = {
-                    flip: db.Flip,
-                    shape: parseBrushShape(db.Brsh),
-                    blendMode: descriptor_1.BlnM.decode(db.BlnM),
-                    useScatter: db.useScatter,
-                    spacing: (0, descriptor_1.parsePercent)(db.Spcn),
-                    count: db["Cnt "],
-                    bothAxes: db.bothAxes,
-                    countDynamics: parseDynamics(db.countDynamics),
-                    scatterDynamics: parseDynamics(db.scatterDynamics)
-                  };
-                }
-                if (brush.useColorDynamics) {
-                  b.colorDynamics = {
-                    foregroundBackground: parseDynamics(brush.clVr),
-                    hue: (0, descriptor_1.parsePercent)(brush["H   "]),
-                    saturation: (0, descriptor_1.parsePercent)(brush.Strt),
-                    brightness: (0, descriptor_1.parsePercent)(brush.Brgh),
-                    purity: (0, descriptor_1.parsePercent)(brush.purity),
-                    perTip: brush.colorDynamicsPerTip
-                  };
-                }
-                if (brush.usePaintDynamics) {
-                  b.transfer = {
-                    flowDynamics: parseDynamics(brush.prVr),
-                    opacityDynamics: parseDynamics(brush.opVr),
-                    wetnessDynamics: parseDynamics(brush.wtVr),
-                    mixDynamics: parseDynamics(brush.mxVr)
-                  };
-                }
-                if (brush.useBrushPose) {
-                  b.brushPose = {
-                    overrideAngle: brush.overridePoseAngle,
-                    overrideTiltX: brush.overridePoseTiltX,
-                    overrideTiltY: brush.overridePoseTiltY,
-                    overridePressure: brush.overridePosePressure,
-                    pressure: (0, descriptor_1.parsePercent)(brush.brushPosePressure),
-                    tiltX: brush.brushPoseTiltX,
-                    tiltY: brush.brushPoseTiltY,
-                    angle: brush.brushPoseAngle
-                  };
-                }
-                var to = brush.toolOptions;
-                if (to) {
-                  b.toolOptions = {
-                    type: toBrushType[to._classID] || "brush",
-                    brushPreset: to.brushPreset,
-                    flow: (_a2 = to.flow) !== null && _a2 !== void 0 ? _a2 : 100,
-                    smooth: (_b2 = to.Smoo) !== null && _b2 !== void 0 ? _b2 : 0,
-                    mode: descriptor_1.BlnM.decode(to["Md  "] || "BlnM.Nrml"),
-                    opacity: (_c = to.Opct) !== null && _c !== void 0 ? _c : 100,
-                    smoothing: !!to.smoothing,
-                    smoothingValue: to.smoothingValue || 0,
-                    smoothingRadiusMode: !!to.smoothingRadiusMode,
-                    smoothingCatchup: !!to.smoothingCatchup,
-                    smoothingCatchupAtEnd: !!to.smoothingCatchupAtEnd,
-                    smoothingZoomCompensation: !!to.smoothingZoomCompensation,
-                    pressureSmoothing: !!to.pressureSmoothing,
-                    usePressureOverridesSize: !!to.usePressureOverridesSize,
-                    usePressureOverridesOpacity: !!to.usePressureOverridesOpacity,
-                    useLegacy: !!to.useLegacy
-                  };
-                  if (to.prVr)
-                    b.toolOptions.flowDynamics = parseDynamics(to.prVr);
-                  if (to.opVr)
-                    b.toolOptions.opacityDynamics = parseDynamics(to.opVr);
-                  if (to.szVr)
-                    b.toolOptions.sizeDynamics = parseDynamics(to.szVr);
-                  if ("wetness" in to)
-                    b.toolOptions.wetness = to.wetness;
-                  if ("dryness" in to)
-                    b.toolOptions.dryness = to.dryness;
-                  if ("mix" in to)
-                    b.toolOptions.mix = to.mix;
-                  if ("autoFill" in to)
-                    b.toolOptions.autoFill = to.autoFill;
-                  if ("autoClean" in to)
-                    b.toolOptions.autoClean = to.autoClean;
-                  if ("loadSolidColorOnly" in to)
-                    b.toolOptions.loadSolidColorOnly = to.loadSolidColorOnly;
-                  if ("sampleAllLayers" in to)
-                    b.toolOptions.sampleAllLayers = to.sampleAllLayers;
-                  if ("SmdF" in to)
-                    b.toolOptions.smudgeFingerPainting = to.SmdF;
-                  if ("SmdS" in to)
-                    b.toolOptions.smudgeSampleAllLayers = to.SmdS;
-                  if ("Prs " in to)
-                    b.toolOptions.strength = to["Prs "];
-                  if ("SmdF" in to)
-                    b.toolOptions.smudgeFingerPainting = to.SmdF;
-                  if ("SmdS" in to)
-                    b.toolOptions.smudgeSampleAllLayers = to.SmdS;
-                }
-                brushes.push(b);
+                break;
               }
-              break;
-            }
-            case "patt": {
-              if (reader.offset < end) {
-                patterns.push((0, psdReader_1.readPattern)(reader));
-                reader.offset = end;
+              case "phry": {
+                const desc = readSectionDescriptor(reader, end);
+                hierarchy = desc.hierarchy;
+                break;
               }
-              break;
+              default:
+                options.logMissingFeatures && reader.log(`Unhandled brush section: ${type}`);
+                break;
             }
-            case "phry": {
-              var desc = (0, descriptor_1.readVersionAndDescriptor)(reader);
-              if (options.logMissingFeatures) {
-                if ((_d = desc.hierarchy) === null || _d === void 0 ? void 0 : _d.length) {
-                  console.log("unhandled phry section", desc);
-                }
-              }
-              break;
-            }
-            default:
-              throw new Error("Invalid brush type: ".concat(type));
+          } catch (e) {
+            skip(e, `brush section ${type}`);
           }
-          while (size % 4) {
+          reader.offset = end;
+          while (reader.offset % 4)
             reader.offset++;
-            size++;
-          }
         }
       } else {
-        throw new Error("Unsupported ABR version (".concat(version, ")"));
+        throw new Error(`Unsupported ABR version (${version})`);
+      }
+      if (hierarchy) {
+        const groups = [];
+        let presetIndex = 0;
+        for (const item of hierarchy) {
+          if (item._classID === "Grup") {
+            groups.push(item["Nm  "]);
+          } else if (item._classID === "groupEnd") {
+            groups.pop();
+          } else if (item._classID === "preset") {
+            const brush = brushByPreset[presetIndex];
+            if (brush && groups.length)
+              brush.group = groups.slice();
+            presetIndex++;
+          }
+        }
       }
       return { samples, patterns, brushes };
     }
-    exports.readAbr = readAbr;
+    function readSample(reader, brushEnd, minorVersion) {
+      const id = (0, psdReader_1.readPascalString)(reader, 1);
+      (0, psdReader_1.skipBytes)(reader, minorVersion === 1 ? 10 : 264);
+      return readSampleBitmap(reader, brushEnd, id);
+    }
+    function readSampleBitmap(reader, brushEnd, id) {
+      const y = (0, psdReader_1.readInt32)(reader);
+      const x = (0, psdReader_1.readInt32)(reader);
+      const h = (0, psdReader_1.readInt32)(reader) - y;
+      const w = (0, psdReader_1.readInt32)(reader) - x;
+      if (w <= 0 || h <= 0)
+        throw new Error("Invalid bounds");
+      if (w > MAX_BRUSH_SIZE || h > MAX_BRUSH_SIZE) {
+        throw new Error(`Brush sample too large (${w}x${h})`);
+      }
+      const bithDepth = (0, psdReader_1.readInt16)(reader);
+      const compression = (0, psdReader_1.readUint8)(reader);
+      if (bithDepth !== 8 && bithDepth !== 16)
+        throw new Error("Invalid depth");
+      if (compression !== 0 && compression !== 1)
+        throw new Error("Invalid compression");
+      const rowSize = w * (bithDepth === 16 ? 2 : 1);
+      const minDataSize = compression === 0 ? h * rowSize : h * (2 + Math.ceil(rowSize / 128) * 2);
+      if (minDataSize > brushEnd - reader.offset) {
+        throw new Error("Brush sample data out of bounds");
+      }
+      (0, psdReader_1.consumeMemory)(reader, w * h * (bithDepth === 16 ? 3 : 1));
+      const alpha = new Uint8Array(w * h);
+      if (bithDepth === 8) {
+        if (compression === 0) {
+          alpha.set((0, psdReader_1.readBytes)(reader, alpha.byteLength));
+        } else if (compression === 1) {
+          (0, psdReader_1.readDataRLE)(reader, { width: w, height: h, data: alpha }, w, h, bithDepth, 1, [0], false);
+        } else {
+          throw new Error("Invalid compression");
+        }
+      } else if (bithDepth === 16) {
+        const data = new Uint16Array(w * h);
+        if (compression === 0) {
+          for (let i = 0; i < data.length; i++) {
+            data[i] = (0, psdReader_1.readUint16)(reader);
+          }
+        } else if (compression === 1) {
+          (0, psdReader_1.readDataRLE)(reader, { width: w, height: h, data }, w, h, bithDepth, 1, [0], false);
+        } else {
+          throw new Error("Invalid compression");
+        }
+        let max = 0;
+        for (let i = 0; i < data.length; i++)
+          max = Math.max(max, data[i]);
+        const scale = max > 32768 ? 255 / 65535 : 255 / 32768;
+        for (let i = 0; i < alpha.byteLength; i++) {
+          alpha[i] = Math.round(data[i] * scale);
+        }
+      } else {
+        throw new Error("Invalid depth");
+      }
+      return { id, bounds: { x, y, w, h }, alpha };
+    }
+    function readLegacyBrushes(reader, version, samples, brushes, skip) {
+      const count = (0, psdReader_1.readUint16)(reader);
+      for (let i = 0; i < count; i++) {
+        const type = (0, psdReader_1.readUint16)(reader);
+        const size = (0, psdReader_1.readUint32)(reader);
+        const end = reader.offset + size;
+        if (end > reader.view.byteLength) {
+          skip(new Error("Brush data out of bounds"), `brush ${i + 1}`);
+          break;
+        }
+        try {
+          if (type === 1) {
+            (0, psdReader_1.skipBytes)(reader, 4);
+            const spacing = (0, psdReader_1.readUint16)(reader);
+            const diameter = (0, psdReader_1.readUint16)(reader);
+            const roundness = (0, psdReader_1.readUint16)(reader);
+            const angle = (0, psdReader_1.readInt16)(reader);
+            const hardness = (0, psdReader_1.readUint16)(reader);
+            if (reader.offset > end)
+              throw new Error("Brush data out of bounds");
+            brushes.push(createLegacyBrush("", {
+              type: "computed",
+              size: diameter,
+              angle,
+              roundness: roundness / 100,
+              spacingOn: spacing !== 0,
+              spacing: spacing / 100,
+              flipX: false,
+              flipY: false,
+              hardness: hardness / 100
+            }));
+          } else if (type === 2) {
+            (0, psdReader_1.skipBytes)(reader, 4);
+            const spacing = (0, psdReader_1.readUint16)(reader);
+            const name = version === 2 ? (0, psdReader_1.readUnicodeString)(reader) : "";
+            (0, psdReader_1.skipBytes)(reader, 1 + 8);
+            const sample = readSampleBitmap(reader, end, `brush-${i + 1}`);
+            samples.push(sample);
+            brushes.push(createLegacyBrush(name, {
+              type: "sampled",
+              size: Math.max(sample.bounds.w, sample.bounds.h),
+              angle: 0,
+              roundness: 1,
+              spacingOn: spacing !== 0,
+              spacing: spacing / 100,
+              flipX: false,
+              flipY: false,
+              name,
+              sampledData: sample.id
+            }));
+          } else {
+            throw new Error(`Unknown brush type: ${type}`);
+          }
+        } catch (e) {
+          skip(e, `brush ${i + 1}`);
+        }
+        reader.offset = end;
+      }
+    }
+    function createLegacyBrush(name, shape) {
+      return { name, shape, spacing: 1, wetEdges: false, noise: false, buildUp: false, useBrushSize: true };
+    }
+    function parseBrush(brush) {
+      var _a2, _b2, _c;
+      const b = {
+        name: brush["Nm  "],
+        shape: parseBrushShape(brush.Brsh),
+        spacing: (0, descriptor_1.parsePercent)(brush.Spcn),
+        wetEdges: brush.Wtdg,
+        noise: brush.Nose,
+        buildUp: !!brush["Rpt "],
+        useBrushSize: brush.useBrushSize
+        // ???
+      };
+      if (brush.interpretation != null)
+        b.interpretation = brush.interpretation;
+      if (brush.protectTexture != null)
+        b.protectTexture = brush.protectTexture;
+      if (brush.useTipDynamics) {
+        b.shapeDynamics = {
+          tiltScale: (0, descriptor_1.parsePercent)(brush.tiltScale),
+          sizeDynamics: parseDynamics(brush.szVr),
+          angleDynamics: parseDynamics(brush.angleDynamics),
+          roundnessDynamics: parseDynamics(brush.roundnessDynamics),
+          flipX: brush.flipX,
+          flipY: brush.flipY,
+          brushProjection: brush.brushProjection,
+          minimumDiameter: (0, descriptor_1.parsePercent)(brush.minimumDiameter),
+          minimumRoundness: (0, descriptor_1.parsePercent)(brush.minimumRoundness)
+        };
+      }
+      if (brush.useScatter) {
+        b.scatter = {
+          count: brush["Cnt "],
+          bothAxes: brush.bothAxes,
+          countDynamics: parseDynamics(brush.countDynamics),
+          scatterDynamics: parseDynamics(brush.scatterDynamics)
+        };
+      }
+      if (brush.useTexture && brush.Txtr) {
+        b.texture = {
+          id: brush.Txtr.Idnt,
+          name: brush.Txtr["Nm  "],
+          blendMode: descriptor_1.BlnM.decode(brush.textureBlendMode),
+          depth: (0, descriptor_1.parsePercent)(brush.textureDepth),
+          depthMinimum: (0, descriptor_1.parsePercent)(brush.minimumDepth),
+          depthDynamics: parseDynamics(brush.textureDepthDynamics),
+          scale: (0, descriptor_1.parsePercent)(brush.textureScale),
+          invert: brush.InvT,
+          brightness: brush.textureBrightness,
+          contrast: brush.textureContrast,
+          textureEachTip: !!brush.TxtC
+        };
+      }
+      const db = brush.dualBrush;
+      if (db && db.useDualBrush) {
+        b.dualBrush = {
+          flip: db.Flip,
+          shape: parseBrushShape(db.Brsh),
+          blendMode: descriptor_1.BlnM.decode(db.BlnM),
+          useScatter: db.useScatter,
+          spacing: (0, descriptor_1.parsePercent)(db.Spcn),
+          count: db["Cnt "],
+          bothAxes: db.bothAxes,
+          countDynamics: parseDynamics(db.countDynamics),
+          scatterDynamics: parseDynamics(db.scatterDynamics)
+        };
+      }
+      if (brush.useColorDynamics) {
+        b.colorDynamics = {
+          foregroundBackground: parseDynamics(brush.clVr),
+          hue: (0, descriptor_1.parsePercent)(brush["H   "]),
+          saturation: (0, descriptor_1.parsePercent)(brush.Strt),
+          brightness: (0, descriptor_1.parsePercent)(brush.Brgh),
+          purity: (0, descriptor_1.parsePercent)(brush.purity),
+          perTip: brush.colorDynamicsPerTip
+        };
+      }
+      if (brush.usePaintDynamics) {
+        b.transfer = {
+          flowDynamics: parseDynamics(brush.prVr),
+          opacityDynamics: parseDynamics(brush.opVr)
+        };
+        if (brush.wtVr)
+          b.transfer.wetnessDynamics = parseDynamics(brush.wtVr);
+        if (brush.mxVr)
+          b.transfer.mixDynamics = parseDynamics(brush.mxVr);
+      }
+      if (brush.useBrushPose) {
+        b.brushPose = {
+          overrideAngle: brush.overridePoseAngle,
+          overrideTiltX: brush.overridePoseTiltX,
+          overrideTiltY: brush.overridePoseTiltY,
+          overridePressure: brush.overridePosePressure,
+          pressure: (0, descriptor_1.parsePercent)(brush.brushPosePressure),
+          tiltX: brush.brushPoseTiltX,
+          tiltY: brush.brushPoseTiltY,
+          angle: brush.brushPoseAngle
+        };
+      }
+      const to = brush.toolOptions;
+      if (to) {
+        b.toolOptions = {
+          type: toBrushType[to._classID] || "brush",
+          brushPreset: to.brushPreset,
+          flow: (_a2 = to.flow) !== null && _a2 !== void 0 ? _a2 : 100,
+          smooth: (_b2 = to.Smoo) !== null && _b2 !== void 0 ? _b2 : 0,
+          mode: descriptor_1.BlnM.decode(to["Md  "] || "BlnM.Nrml"),
+          // sometimes mode is missing
+          opacity: (_c = to.Opct) !== null && _c !== void 0 ? _c : 100,
+          smoothing: !!to.smoothing,
+          smoothingValue: to.smoothingValue || 0,
+          smoothingRadiusMode: !!to.smoothingRadiusMode,
+          smoothingCatchup: !!to.smoothingCatchup,
+          smoothingCatchupAtEnd: !!to.smoothingCatchupAtEnd,
+          smoothingZoomCompensation: !!to.smoothingZoomCompensation,
+          pressureSmoothing: !!to.pressureSmoothing,
+          usePressureOverridesSize: !!to.usePressureOverridesSize,
+          usePressureOverridesOpacity: !!to.usePressureOverridesOpacity,
+          useLegacy: !!to.useLegacy
+        };
+        if (to.prVr)
+          b.toolOptions.flowDynamics = parseDynamics(to.prVr);
+        if (to.opVr)
+          b.toolOptions.opacityDynamics = parseDynamics(to.opVr);
+        if (to.szVr)
+          b.toolOptions.sizeDynamics = parseDynamics(to.szVr);
+        if ("wetness" in to)
+          b.toolOptions.wetness = to.wetness;
+        if ("dryness" in to)
+          b.toolOptions.dryness = to.dryness;
+        if ("mix" in to)
+          b.toolOptions.mix = to.mix;
+        if ("autoFill" in to)
+          b.toolOptions.autoFill = to.autoFill;
+        if ("autoClean" in to)
+          b.toolOptions.autoClean = to.autoClean;
+        if ("loadSolidColorOnly" in to)
+          b.toolOptions.loadSolidColorOnly = to.loadSolidColorOnly;
+        if ("sampleAllLayers" in to)
+          b.toolOptions.sampleAllLayers = to.sampleAllLayers;
+        if ("SmdF" in to)
+          b.toolOptions.smudgeFingerPainting = to.SmdF;
+        if ("SmdS" in to)
+          b.toolOptions.smudgeSampleAllLayers = to.SmdS;
+        if ("Prs " in to)
+          b.toolOptions.strength = to["Prs "];
+      }
+      return b;
+    }
   }
 });
 
@@ -15499,51 +20366,132 @@ var require_abr = __commonJS({
 var require_csh = __commonJS({
   "node_modules/ag-psd/dist/csh.js"(exports) {
     "use strict";
-    var __assign = exports && exports.__assign || function() {
-      __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-          s = arguments[i];
-          for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-        }
-        return t;
-      };
-      return __assign.apply(this, arguments);
-    };
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.readCsh = void 0;
+    exports.readCsh = readCsh;
     var additionalInfo_1 = require_additionalInfo();
     var psdReader_1 = require_psdReader();
-    function readCsh(buffer) {
-      var reader = (0, psdReader_1.createReader)(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-      var csh = { shapes: [] };
+    function readCsh(buffer, options = {}) {
+      const reader = (0, psdReader_1.createReader)(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+      reader.totalMemoryLimit = "totalMemoryLimit" in options ? options.totalMemoryLimit : 2 * 1024 * 1024 * 1024;
+      const csh = { shapes: [] };
       (0, psdReader_1.checkSignature)(reader, "cush");
       if ((0, psdReader_1.readUint32)(reader) !== 2)
         throw new Error("Invalid version");
-      var count = (0, psdReader_1.readUint32)(reader);
-      for (var i = 0; i < count; i++) {
-        var name_1 = (0, psdReader_1.readUnicodeString)(reader);
+      const count = (0, psdReader_1.readUint32)(reader);
+      for (let i = 0; i < count; i++) {
+        const name = (0, psdReader_1.readUnicodeString)(reader);
         while (reader.offset % 4)
           reader.offset++;
         if ((0, psdReader_1.readUint32)(reader) !== 1)
           throw new Error("Invalid shape version");
-        var size = (0, psdReader_1.readUint32)(reader);
-        var end = reader.offset + size;
-        var id = (0, psdReader_1.readPascalString)(reader, 1);
-        var y1 = (0, psdReader_1.readUint32)(reader);
-        var x1 = (0, psdReader_1.readUint32)(reader);
-        var y2 = (0, psdReader_1.readUint32)(reader);
-        var x2 = (0, psdReader_1.readUint32)(reader);
-        var width = x2 - x1;
-        var height = y2 - y1;
-        var mask = { paths: [] };
+        const size = (0, psdReader_1.readUint32)(reader);
+        const end = reader.offset + size;
+        const id = (0, psdReader_1.readPascalString)(reader, 1);
+        const y1 = (0, psdReader_1.readUint32)(reader);
+        const x1 = (0, psdReader_1.readUint32)(reader);
+        const y2 = (0, psdReader_1.readUint32)(reader);
+        const x2 = (0, psdReader_1.readUint32)(reader);
+        const width = x2 - x1;
+        const height = y2 - y1;
+        const mask = { paths: [] };
         (0, additionalInfo_1.readVectorMask)(reader, mask, width, height, end - reader.offset);
-        csh.shapes.push(__assign({ name: name_1, id, width, height }, mask));
+        csh.shapes.push(Object.assign({ name, id, width, height }, mask));
         reader.offset = end;
       }
       return csh;
     }
-    exports.readCsh = readCsh;
+  }
+});
+
+// node_modules/ag-psd/dist/ase.js
+var require_ase = __commonJS({
+  "node_modules/ag-psd/dist/ase.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.readAse = readAse;
+    var psdReader_1 = require_psdReader();
+    function readAse(buffer, options = {}) {
+      const reader = (0, psdReader_1.createReader)(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+      reader.totalMemoryLimit = "totalMemoryLimit" in options ? options.totalMemoryLimit : 2 * 1024 * 1024 * 1024;
+      const signature = (0, psdReader_1.readSignature)(reader);
+      if (signature !== "ASEF")
+        throw new Error("Invalid signature");
+      const versionMajor = (0, psdReader_1.readUint16)(reader);
+      (0, psdReader_1.readUint16)(reader);
+      if (versionMajor !== 1)
+        throw new Error("Invalid version");
+      const blocksCount = (0, psdReader_1.readUint32)(reader);
+      const ase = { colors: [] };
+      let group = ase;
+      for (let i = 0; i < blocksCount && reader.offset + 6 <= reader.view.byteLength; i++) {
+        const type = (0, psdReader_1.readUint16)(reader);
+        const length = (0, psdReader_1.readUint32)(reader);
+        const end = Math.min(reader.offset + length, reader.view.byteLength);
+        const block = (0, psdReader_1.createReader)(reader.view.buffer, reader.view.byteOffset + reader.offset, end - reader.offset);
+        block.totalMemoryLimit = reader.totalMemoryLimit;
+        try {
+          switch (type) {
+            case 1: {
+              const color = readAseColor(block);
+              if (color) {
+                group.colors.push(color);
+              } else {
+                if (options.throwForMissingFeatures)
+                  throw new Error("Unsupported color mode");
+                options.logMissingFeatures && reader.log("Skipped color with unsupported color mode");
+              }
+              break;
+            }
+            case 49153: {
+              const nameLength = (0, psdReader_1.readUint16)(block);
+              const name = (0, psdReader_1.readUnicodeStringWithLength)(block, nameLength);
+              ase.colors.push(group = { name, colors: [] });
+              break;
+            }
+            case 49154:
+              group = ase;
+              break;
+            default:
+              if (options.throwForMissingFeatures)
+                throw new Error(`Invalid block type: ${type}`);
+              options.logMissingFeatures && reader.log(`Skipped unknown block type: ${type}`);
+          }
+        } catch (e) {
+          if (options.throwForMissingFeatures)
+            throw e;
+          options.logMissingFeatures && reader.log(`Skipped invalid block: ${e.message}`);
+        }
+        reader.totalMemoryLimit = block.totalMemoryLimit;
+        reader.offset = end;
+      }
+      return ase;
+    }
+    function readAseColor(reader) {
+      const nameLength = (0, psdReader_1.readUint16)(reader);
+      const name = (0, psdReader_1.readUnicodeStringWithLength)(reader, nameLength);
+      const colorMode = (0, psdReader_1.readSignature)(reader);
+      const value = () => {
+        const v = (0, psdReader_1.readFloat32)(reader);
+        return isFinite(v) ? v : 0;
+      };
+      const colorType = () => {
+        const index = reader.offset + 2 <= reader.view.byteLength ? (0, psdReader_1.readUint16)(reader) : 2;
+        return colorTypes[index] || "normal";
+      };
+      switch (colorMode) {
+        case "RGB ":
+          return { name, color: { r: value(), g: value(), b: value(), type: colorType() } };
+        case "CMYK":
+          return { name, color: { c: value(), m: value(), y: value(), k: value(), type: colorType() } };
+        case "Gray":
+          return { name, color: { k: value(), type: colorType() } };
+        case "LAB ":
+          return { name, color: { l: value(), a: value(), b: value(), type: colorType() } };
+        default:
+          return void 0;
+      }
+    }
+    var colorTypes = ["global", "spot", "normal"];
   }
 });
 
@@ -15552,7 +20500,7 @@ var require_psd = __commonJS({
   "node_modules/ag-psd/dist/psd.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.LayerCompCapturedInfo = exports.SectionDividerType = exports.ColorMode = void 0;
+    exports.Compression = exports.ChannelID = exports.LayerCompCapturedInfo = exports.SectionDividerType = exports.ColorMode = void 0;
     var ColorMode;
     (function(ColorMode2) {
       ColorMode2[ColorMode2["Bitmap"] = 0] = "Bitmap";
@@ -15563,21 +20511,38 @@ var require_psd = __commonJS({
       ColorMode2[ColorMode2["Multichannel"] = 7] = "Multichannel";
       ColorMode2[ColorMode2["Duotone"] = 8] = "Duotone";
       ColorMode2[ColorMode2["Lab"] = 9] = "Lab";
-    })(ColorMode = exports.ColorMode || (exports.ColorMode = {}));
+    })(ColorMode || (exports.ColorMode = ColorMode = {}));
     var SectionDividerType;
     (function(SectionDividerType2) {
       SectionDividerType2[SectionDividerType2["Other"] = 0] = "Other";
       SectionDividerType2[SectionDividerType2["OpenFolder"] = 1] = "OpenFolder";
       SectionDividerType2[SectionDividerType2["ClosedFolder"] = 2] = "ClosedFolder";
       SectionDividerType2[SectionDividerType2["BoundingSectionDivider"] = 3] = "BoundingSectionDivider";
-    })(SectionDividerType = exports.SectionDividerType || (exports.SectionDividerType = {}));
+    })(SectionDividerType || (exports.SectionDividerType = SectionDividerType = {}));
     var LayerCompCapturedInfo;
     (function(LayerCompCapturedInfo2) {
       LayerCompCapturedInfo2[LayerCompCapturedInfo2["None"] = 0] = "None";
       LayerCompCapturedInfo2[LayerCompCapturedInfo2["Visibility"] = 1] = "Visibility";
       LayerCompCapturedInfo2[LayerCompCapturedInfo2["Position"] = 2] = "Position";
       LayerCompCapturedInfo2[LayerCompCapturedInfo2["Appearance"] = 4] = "Appearance";
-    })(LayerCompCapturedInfo = exports.LayerCompCapturedInfo || (exports.LayerCompCapturedInfo = {}));
+    })(LayerCompCapturedInfo || (exports.LayerCompCapturedInfo = LayerCompCapturedInfo = {}));
+    var ChannelID;
+    (function(ChannelID2) {
+      ChannelID2[ChannelID2["Color0"] = 0] = "Color0";
+      ChannelID2[ChannelID2["Color1"] = 1] = "Color1";
+      ChannelID2[ChannelID2["Color2"] = 2] = "Color2";
+      ChannelID2[ChannelID2["Color3"] = 3] = "Color3";
+      ChannelID2[ChannelID2["Transparency"] = -1] = "Transparency";
+      ChannelID2[ChannelID2["UserMask"] = -2] = "UserMask";
+      ChannelID2[ChannelID2["RealUserMask"] = -3] = "RealUserMask";
+    })(ChannelID || (exports.ChannelID = ChannelID = {}));
+    var Compression;
+    (function(Compression2) {
+      Compression2[Compression2["RawData"] = 0] = "RawData";
+      Compression2[Compression2["RleCompressed"] = 1] = "RleCompressed";
+      Compression2[Compression2["ZipWithoutPrediction"] = 2] = "ZipWithoutPrediction";
+      Compression2[Compression2["ZipWithPrediction"] = 3] = "ZipWithPrediction";
+    })(Compression || (exports.Compression = Compression = {}));
   }
 });
 
@@ -15602,12 +20567,56 @@ var require_dist = __commonJS({
       for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports2, p)) __createBinding(exports2, m, p);
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.writePsdBuffer = exports.writePsdUint8Array = exports.writePsd = exports.readPsd = exports.byteArrayToBase64 = exports.initializeCanvas = void 0;
+    exports.getFilterEffectsMaskExtraCanvas = exports.getFilterEffectsMaskCanvas = exports.getFilterEffectsMaskExtraImageData = exports.getFilterEffectsMaskImageData = exports.getCompositeCanvas = exports.getCompositeImageData = exports.getLayerRealMaskCanvas = exports.getLayerMaskCanvas = exports.getLayerCanvas = exports.getLayerRealMaskImageData = exports.getLayerMaskImageData = exports.getLayerImageData = exports.decodeLayerPixels = exports.byteArrayToBase64 = exports.initializeCanvas = void 0;
+    exports.readPsd = readPsd2;
+    exports.writePsd = writePsd;
+    exports.writePsdUint8Array = writePsdUint8Array;
+    exports.writePsdBuffer = writePsdBuffer;
     var psdWriter_1 = require_psdWriter();
     var psdReader_1 = require_psdReader();
+    Object.defineProperty(exports, "decodeLayerPixels", { enumerable: true, get: function() {
+      return psdReader_1.decodeLayerPixels;
+    } });
+    Object.defineProperty(exports, "getLayerImageData", { enumerable: true, get: function() {
+      return psdReader_1.getLayerImageData;
+    } });
+    Object.defineProperty(exports, "getLayerMaskImageData", { enumerable: true, get: function() {
+      return psdReader_1.getLayerMaskImageData;
+    } });
+    Object.defineProperty(exports, "getLayerRealMaskImageData", { enumerable: true, get: function() {
+      return psdReader_1.getLayerRealMaskImageData;
+    } });
+    Object.defineProperty(exports, "getLayerCanvas", { enumerable: true, get: function() {
+      return psdReader_1.getLayerCanvas;
+    } });
+    Object.defineProperty(exports, "getLayerMaskCanvas", { enumerable: true, get: function() {
+      return psdReader_1.getLayerMaskCanvas;
+    } });
+    Object.defineProperty(exports, "getLayerRealMaskCanvas", { enumerable: true, get: function() {
+      return psdReader_1.getLayerRealMaskCanvas;
+    } });
+    Object.defineProperty(exports, "getCompositeImageData", { enumerable: true, get: function() {
+      return psdReader_1.getCompositeImageData;
+    } });
+    Object.defineProperty(exports, "getCompositeCanvas", { enumerable: true, get: function() {
+      return psdReader_1.getCompositeCanvas;
+    } });
+    Object.defineProperty(exports, "getFilterEffectsMaskImageData", { enumerable: true, get: function() {
+      return psdReader_1.getFilterEffectsMaskImageData;
+    } });
+    Object.defineProperty(exports, "getFilterEffectsMaskExtraImageData", { enumerable: true, get: function() {
+      return psdReader_1.getFilterEffectsMaskExtraImageData;
+    } });
+    Object.defineProperty(exports, "getFilterEffectsMaskCanvas", { enumerable: true, get: function() {
+      return psdReader_1.getFilterEffectsMaskCanvas;
+    } });
+    Object.defineProperty(exports, "getFilterEffectsMaskExtraCanvas", { enumerable: true, get: function() {
+      return psdReader_1.getFilterEffectsMaskExtraCanvas;
+    } });
     var base64_js_1 = require_base64_js();
     __exportStar(require_abr(), exports);
     __exportStar(require_csh(), exports);
+    __exportStar(require_ase(), exports);
     var helpers_1 = require_helpers();
     Object.defineProperty(exports, "initializeCanvas", { enumerable: true, get: function() {
       return helpers_1.initializeCanvas;
@@ -15615,29 +20624,25 @@ var require_dist = __commonJS({
     __exportStar(require_psd(), exports);
     exports.byteArrayToBase64 = base64_js_1.fromByteArray;
     function readPsd2(buffer, options) {
-      var reader = "buffer" in buffer ? (0, psdReader_1.createReader)(buffer.buffer, buffer.byteOffset, buffer.byteLength) : (0, psdReader_1.createReader)(buffer);
+      const reader = "buffer" in buffer ? (0, psdReader_1.createReader)(buffer.buffer, buffer.byteOffset, buffer.byteLength) : (0, psdReader_1.createReader)(buffer);
       return (0, psdReader_1.readPsd)(reader, options);
     }
-    exports.readPsd = readPsd2;
     function writePsd(psd, options) {
-      var writer = (0, psdWriter_1.createWriter)();
+      const writer = (0, psdWriter_1.createWriter)();
       (0, psdWriter_1.writePsd)(writer, psd, options);
       return (0, psdWriter_1.getWriterBuffer)(writer);
     }
-    exports.writePsd = writePsd;
     function writePsdUint8Array(psd, options) {
-      var writer = (0, psdWriter_1.createWriter)();
+      const writer = (0, psdWriter_1.createWriter)();
       (0, psdWriter_1.writePsd)(writer, psd, options);
       return (0, psdWriter_1.getWriterBufferNoCopy)(writer);
     }
-    exports.writePsdUint8Array = writePsdUint8Array;
     function writePsdBuffer(psd, options) {
       if (typeof Buffer === "undefined") {
         throw new Error("Buffer not supported on this platform");
       }
       return Buffer.from(writePsdUint8Array(psd, options));
     }
-    exports.writePsdBuffer = writePsdBuffer;
   }
 });
 
